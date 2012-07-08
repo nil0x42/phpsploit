@@ -1,0 +1,2 @@
+Usage:   edit [file]
+Example: edit includes/mysql.php

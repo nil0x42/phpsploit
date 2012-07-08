@@ -1,0 +1,7 @@
+Usage:   upload [local file] [remote directory]
+
+Options:
+  -f     Force overwriting if desination exists
+
+Example: upload /data/backdoors/r75.php /var/www/images/
+         upload -f /data/winexe/nc.exe C:\Windows\System32\cmd.exe

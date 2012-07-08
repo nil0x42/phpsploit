@@ -1,0 +1,5 @@
+Usage:   search [pattern]
+         search [directory] [pattern]
+Example: search *.sql
+         search /tmp/ *.php
+         search ./admin *password*

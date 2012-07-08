@@ -1,0 +1,8 @@
+Usage:   mkdir [options] [directory]
+
+Options:
+  -p     No error if existing, creates
+         parent directories if necessary
+
+Example: mkdir /tmp/test
+         mkdir -p /that/is/a/recursive/mkdir/

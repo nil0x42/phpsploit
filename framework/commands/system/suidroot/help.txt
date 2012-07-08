@@ -1,0 +1,10 @@
+(it only works on UNIX platforms !)
+If u don't undertand what you do, please use the 'exit' command.
+
+Enabling suidroot exploit:
+    Usage:   suidroot generate [suidfile]
+    Example: suidroot generate /var/tmp/sess_a1zq7elvx19yzhhmpw7pkexk88
+
+Lauching root commands:
+    Usage:   suidroot [rootcmd]
+    Example: suidroot cat /etc/shadow

@@ -1,0 +1,67 @@
+#!/usr/bin/python2
+#-*- coding: iso-8859-15 -*-
+
+# dev started at: 2011-10-01
+softwareVersion = '2.0 Alpha1'
+coreVersion     = 2
+
+import sys, os, re
+
+scriptDir  = os.path.abspath(os.path.dirname(sys.argv[0]))
+pythonPath = os.path.join(scriptDir, 'core')
+
+# Adding ./core in python modules path list:
+sys.path.append(pythonPath)
+
+from functions import *
+
+CORE = dict()
+CORE['PHPSPLOITCOREVERSION'] = coreVersion
+
+import usr.settings
+CORE['SETTINGS'] = usr.settings.load()
+if not usr.settings.matchConditions(CORE['SETTINGS']):
+    print P_inf+"Please edit your configuration file at "+usr.settings.getConfigFile().name
+    sys.exit()
+
+if len(sys.argv) == 2:
+    domainParser = '^https?://(.+?)(?:$|/)'
+    try:    matchedDomain = re.findall(domainParser,sys.argv[1])[0]
+    except: matchedDomain = ''
+    if matchedDomain and len(sys.argv[1])>13:
+        CORE['SETTINGS']['TARGET'] = sys.argv[1]
+    else:
+        import usr.session
+        savedSession = usr.session.load(sys.argv[1])
+        if savedSession.exists:
+            CORE = savedSession.content
+            try: compatibility = int(CORE['PHPSPLOITCOREVERSION'])
+            except: compatibility = 0
+            if compatibility != coreVersion:
+                print P_inf+"This session is not compatible with this version of phpsploit !"
+                sys.exit()
+            CORE['SETTINGS']['SAVEFILE'] = os.path.abspath(sys.argv[1])
+
+
+if not 'TARGET' in CORE['SETTINGS']:
+    CORE['SETTINGS']['TARGET'] = 'None'
+
+if 'SAVEFILE' in CORE['SETTINGS'] or CORE['SETTINGS']['TARGET'] != 'None' or len(sys.argv) == 1:
+    import mainShell
+    interface = mainShell.Start()
+    interface.setConfig(CORE)
+    interface.cmdloop()
+
+    endMessage = getpath('misc/txt/end_messages.lst').randline()
+    print os.linesep+color(37)+endMessage.strip()+color(0)+os.linesep
+
+else:
+    if len(sys.argv) == 2 and sys.argv[1] in ['--help','-h']:
+        helpMessage = getpath('misc/txt/help.msg').read()
+        print os.linesep+helpMessage.strip()+os.linesep
+
+    elif len(sys.argv) == 2 and sys.argv[1] in ['--version','-v']:
+        print 'phpsploit version '+softwareVersion
+
+    else:
+        print 'Usage: phpsploit --help'

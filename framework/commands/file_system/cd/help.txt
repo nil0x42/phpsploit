@@ -1,0 +1,2 @@
+Usage:   cd [directory]
+Example: cd /var/www

@@ -1,0 +1,12 @@
+Usage:   mysql connect user@host
+         mysql connect user@host -p password
+         mysql show databases
+         mysql show tables
+         mysql use db_root
+         mysql [command]
+
+Column view:
+mysql SELECT table_name FROM information_schema.tables;
+
+Line view:
+mysql SELECT table_name FROM information_schema.tables\G

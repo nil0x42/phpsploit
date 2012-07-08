@@ -1,0 +1,7 @@
+Usage:   download [options] [remote file] [local dir]
+
+Options:
+  -f     Force overwriting if desination exists
+
+Example: download C:\boot.ini /tmp/pentest/
+         download -f /etc/passwd ./hacked-etcpasswd.txt

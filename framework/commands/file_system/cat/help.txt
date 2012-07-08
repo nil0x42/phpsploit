@@ -1,0 +1,2 @@
+Usage:   cat [file]
+Example: cat ../.htpasswd

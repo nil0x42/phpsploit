@@ -1,0 +1,3 @@
+Usage:   ls [directory]
+Example: ls D:\*.ini
+         ls ..

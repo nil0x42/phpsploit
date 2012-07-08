@@ -1,0 +1,2 @@
+Usage:   rm [file]
+Example: rm pdfs/r57.php

@@ -1,0 +1,153 @@
+#-*- coding: iso-8859-15 -*-
+import os, sys, random, tempfile
+
+TEMP_DIR   = tempfile.gettempdir()
+SCRIPT_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
+
+def write(seq):
+    sys.stdout.write(seq)
+    sys.stdout.flush()
+
+def sleep_or_press_enter(timeout):
+    from signal import signal, alarm, SIGALRM
+    def stop(signum, frame): pass
+    signal(SIGALRM, stop)
+    alarm(timeout)
+    try:
+        raw_input()
+    except KeyboardInterrupt:
+        print ''
+        raise KeyboardInterrupt
+    except:
+        print ''
+        pass
+    alarm(0)
+
+def clear():
+    clearCmd = ['clear','cls'][os.name == 'nt']
+    os.system(clearCmd)
+
+
+def color(*codes):
+    result = ''
+    if sys.platform.startswith('linux'):
+        for code in codes:
+            if type(code).__name__ == 'int':
+                result+='\033['+str(code)+'m'
+    return(result)
+
+
+def quot(string):
+    if sys.platform.startswith('linux'):
+        return('«'+string+'»')
+    return('"'+string+'"')
+
+
+def termlen():
+    try: width = int(os.popen('stty size','r').read().split()[1])
+    except: width = 79
+    return(width)
+
+# ('lol',2) -> ['lo','l']
+def split_len(seq, length):
+    return [seq[i:i+length] for i in range(0, len(seq), length)]
+
+def octets(value):
+    try:
+        x=int(value)
+        return(x)
+    except:
+        try: value = str(value).lower()
+        except: return(0)
+        value = value.replace('o','b')
+        tab = ['b','k','m','g','t']
+        try: i=[value.index(x) for x in value if x in tab][0]
+        except: return(0)
+        if not i: return(0)
+        l=value[i]
+        try: n=int(value[:i])
+        except: return(0)
+        m=1024**(tab.index(l))
+        return(n*m)
+
+def getinterval(seq):
+    seq = seq.strip().replace(' ','').replace(',','.')
+    try:
+        if not '-' in seq:
+            n1,n2 = float(seq),float(seq)
+        else:
+            n1,n2 = [float(x) for x in seq.split('-')]
+        return(random.uniform(n1,n2))
+    except:
+        return(None)
+
+class getpath:
+    def __init__(self, path, optionalPath=''):
+        if os.path.isabs(path) or optionalPath:
+            base = os.path.expanduser(path)
+            path = optionalPath
+        else:
+            base = SCRIPT_DIR
+        path = os.path.expanduser(path.replace('/',os.sep))
+        if path:
+            self.name = os.path.join(base, path)
+        else:
+            self.name = base
+
+    def access(self, permission):
+        if   permission == 'w': check = os.W_OK
+        elif permission == 'r': check = os.R_OK
+        elif permission == 'x': check = os.X_OK
+        status = os.access(self.name, check)
+        return(status)
+
+    def exists(self):
+        return(os.path.exists(self.name))
+
+    def isfile(self):
+        return(os.path.isfile(self.name))
+
+    def read(self):
+        lines = self.readlines()
+        data = os.linesep.join(lines)
+        return(data)
+
+    def phpcode(self):
+        data = self.read().strip()
+        if data.startswith('<?php'): data = data[5:]
+        elif data.startswith('<?'):  data = data[2:]
+        if data.endswith('?>'):      data = data[:-2]
+        data = data.strip()
+        return('\n'.join([x.strip() for x in data.splitlines() if x.strip() and not x.strip().startswith('//')]))
+        #return(data)
+
+    def write(self, data):
+        lines = data.splitlines()
+        data = os.linesep.join(lines)
+        open(self.name,'w').write(data)
+
+    def readlines(self):
+        data = open(self.name,'r').read()
+        lines = data.splitlines()
+        return(lines)
+
+    def randline(self):
+        lines = self.readlines()
+        lines = [x for x in lines if x]
+        if not lines:
+            lines = ['']
+        result = random.choice(lines)
+        return(result)
+
+def debug(path, data):
+    debugPath = 'phpsploit/debug'
+    path = debugPath+'/'+path.strip('/')
+    path = getpath(TEMP_DIR, path)
+    dirName = os.path.dirname(path.name)
+    try: os.makedirs(dirName)
+    except: pass
+    try: path.write(data)
+    except: pass
+
+P_err = color(31,01)+'[-]'+color(0)+' '
+P_inf = color(34,01)+'[*]'+color(0)+' '

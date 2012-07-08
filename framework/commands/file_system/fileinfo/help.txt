@@ -1,0 +1,2 @@
+Usage:   fileinfo [file]
+Example: fileinfo /tmp/
