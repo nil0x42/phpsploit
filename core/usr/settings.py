@@ -7,11 +7,16 @@ template = getpath('misc/conf/settings.tpl')
 
 def load():
     configFile = getConfigFile()
-    settings = getSettings(configFile)
-    for key,value in getSettings(defaultConf).items():
-        if not key in settings:
-            settings[key] = value
+    userSettings    = getSettings(configFile)
+    defaultSettings = getSettings(defaultConf)
+    settings = merge(userSettings, defaultSettings)
     return(settings)
+
+def merge(main, default):
+    for key,value in default.items():
+        if not key in main:
+            main[key] = value
+    return(main)
 
 def getConfigFile():
     if userFile.isfile():

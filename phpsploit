@@ -19,8 +19,8 @@ CORE = dict()
 CORE['PHPSPLOITCOREVERSION'] = coreVersion
 
 import usr.settings
-CORE['SETTINGS'] = usr.settings.load()
-if not usr.settings.matchConditions(CORE['SETTINGS']):
+SETTINGS = usr.settings.load()
+if not usr.settings.matchConditions(SETTINGS):
     print P_inf+"Please edit your configuration file at "+usr.settings.getConfigFile().name
     sys.exit()
 
@@ -29,19 +29,21 @@ if len(sys.argv) == 2:
     try:    matchedDomain = re.findall(domainParser,sys.argv[1])[0]
     except: matchedDomain = ''
     if matchedDomain and len(sys.argv[1])>13:
-        CORE['SETTINGS']['TARGET'] = sys.argv[1]
+        SETTINGS['TARGET'] = sys.argv[1]
     else:
         import usr.session
         savedSession = usr.session.load(sys.argv[1])
         if savedSession.exists:
             CORE = savedSession.content
+            SETTINGS = usr.settings.merge(SETTINGS, CORE['SETTINGS'])
             try: compatibility = int(CORE['PHPSPLOITCOREVERSION'])
             except: compatibility = 0
             if compatibility != coreVersion:
                 print P_inf+"This session is not compatible with this version of phpsploit !"
                 sys.exit()
-            CORE['SETTINGS']['SAVEFILE'] = os.path.abspath(sys.argv[1])
+            SETTINGS['SAVEFILE'] = os.path.abspath(sys.argv[1])
 
+CORE['SETTINGS'] = SETTINGS
 
 if not 'TARGET' in CORE['SETTINGS']:
     CORE['SETTINGS']['TARGET'] = 'None'
