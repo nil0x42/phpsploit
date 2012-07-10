@@ -8,6 +8,7 @@ def write(seq):
     sys.stdout.write(seq)
     sys.stdout.flush()
 
+
 def sleep_or_press_enter(timeout):
     from signal import signal, alarm, SIGALRM
     def stop(signum, frame): pass
@@ -23,11 +24,14 @@ def sleep_or_press_enter(timeout):
         pass
     alarm(0)
 
+
 def clear():
     clearCmd = ['clear','cls'][os.name == 'nt']
     os.system(clearCmd)
 
 
+# send bash colour sequences > color(0,4) == '\033[0,4m'
+# USE IT TO KEEP WINDOWS COMPATIBILITY !
 def color(*codes):
     result = ''
     if sys.platform.startswith('linux'):
@@ -37,21 +41,27 @@ def color(*codes):
     return(result)
 
 
+# enquote a string
+# USE IT TO KEEP WINDOWS COMPATIBILITY !
 def quot(string):
     if sys.platform.startswith('linux'):
         return('«'+string+'»')
     return('"'+string+'"')
 
 
+# get current terminal length
 def termlen():
     try: width = int(os.popen('stty size','r').read().split()[1])
     except: width = 79
     return(width)
 
-# ('lol',2) -> ['lo','l']
+
+# split_len('lol',2) -> ['lo','l']
 def split_len(seq, length):
     return [seq[i:i+length] for i in range(0, len(seq), length)]
 
+
+# get bytes number from octets string `octets('1kb') > 1024`
 def octets(value):
     try:
         x=int(value)
@@ -70,6 +80,8 @@ def octets(value):
         m=1024**(tab.index(l))
         return(n*m)
 
+
+# used for REQ_INTERVAL setting's syntax
 def getinterval(seq):
     seq = seq.strip().replace(' ','').replace(',','.')
     try:
@@ -81,6 +93,8 @@ def getinterval(seq):
     except:
         return(None)
 
+
+# get a custom object from a path
 class getpath:
     def __init__(self, path, optionalPath=''):
         if os.path.isabs(path) or optionalPath:
@@ -139,6 +153,8 @@ class getpath:
         result = random.choice(lines)
         return(result)
 
+
+# a stinking function for debugging
 def debug(path, data):
     debugPath = 'phpsploit/debug'
     path = debugPath+'/'+path.strip('/')
@@ -149,5 +165,7 @@ def debug(path, data):
     try: path.write(data)
     except: pass
 
+
+# GLOBALS:
 P_err = color(31,01)+'[-]'+color(0)+' '
 P_inf = color(34,01)+'[*]'+color(0)+' '

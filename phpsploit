@@ -25,11 +25,14 @@ if not usr.settings.matchConditions(SETTINGS):
     sys.exit()
 
 if len(sys.argv) == 2:
+    # The user as suplied a target as argument
     domainParser = '^https?://(.+?)(?:$|/)'
     try:    matchedDomain = re.findall(domainParser,sys.argv[1])[0]
     except: matchedDomain = ''
     if matchedDomain and len(sys.argv[1])>13:
         SETTINGS['TARGET'] = sys.argv[1]
+
+    # The user as suplied a session file as argument
     else:
         import usr.session
         savedSession = usr.session.load(sys.argv[1])
@@ -45,6 +48,7 @@ if len(sys.argv) == 2:
 
 CORE['SETTINGS'] = SETTINGS
 
+# if the target wasn't suplied as argument, set it to None by default
 if not 'TARGET' in CORE['SETTINGS']:
     CORE['SETTINGS']['TARGET'] = 'None'
 

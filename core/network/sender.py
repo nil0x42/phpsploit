@@ -133,20 +133,18 @@ class Load:
 
         if mode == 'multipart':
 
-            #BENCH_CHECKS = 0
-            #BENCH_LENGTH = os.popen('echo %s | int2bytes' % payload.length).read().strip()
-            #import time
-            #T = [] ; T.append(time.time())
-
             multipart_reader = self.multipart['reader'] % payload.decoder % "$x"
+
             compress  = 'auto'
             if payload.length > self.zlib_try_limit:
                 compress = 'nocompress'
+
             DATA      = payload.data
             REQUEST   = list()
             basenum   = int(self.maxsize[method])
             precision = max(100, self.maxsize[method]/100)
             minimum   = precision
+
             while True:
                 multipart = self.multipart[['starter','sender'][len(REQUEST) > 0]]
                 payload   = None
@@ -156,33 +154,27 @@ class Load:
                 checkN    = basenum
 
                 while not ok:
-                    #BENCH_CHECKS+=1
                     if maxN:
                         if maxN <= minN:
                             maxN = minN*2
                         checkN = int(minN+((maxN-minN)/2))
 
-                    #print minN, maxN, checkN
                     x_payload = phpcode.payload.Encode(multipart.replace('DATA',DATA[:checkN]), compress)
 
                     if x_payload.length > self.maxsize[method]:
                         if checkN <= minimum:
-                            print '\n1\n'
                             return([])
                         maxN = checkN
 
                     else:
-
                         if checkN-minN <= precision or (len(REQUEST) and checkN == basenum):
                             payload = x_payload
                             basenum = checkN
                             ok = True
-
                         minN = checkN
 
                 request = self.build_single_request(method, payload)
                 if not request:
-                    print '\n2\n'
                     return([])
                 REQUEST+= request
                 DATA = DATA[minN:]
@@ -190,12 +182,8 @@ class Load:
                 if payload.length <= self.maxsize[method]:
                     request = self.build_single_request(method, payload)
                     if not request:
-                        print '\n3\n'
                         return([])
 
-                    #T.append(time.time())
-                    #T = str(round(T[1]-T[0],3))
-                    #print '\nLENGTH: %s\nTIME:   %s\nCHECKS: %s\nMAX:    %s\n' % (BENCH_LENGTH, T, BENCH_CHECKS, self.maxsize[method])
                     return(REQUEST+request)
         return([])
 
@@ -236,7 +224,7 @@ class Load:
                 x = re.sub('<.*?>','',x)
                 x = x.replace(':  ',': ')
                 x = ' in '.join(x.split(' in ')[0:-1])
-                error+= P_err+'PHP Error: '+x+os.linesep
+                error+= 'PHP Error: '+x+os.linesep
         return(error.strip())
 
 
