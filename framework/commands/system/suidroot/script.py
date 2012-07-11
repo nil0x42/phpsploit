@@ -20,7 +20,7 @@ if self.argv[1] == 'generate':
     payload = payload.replace('%b',backdoor)
     payload = payload.replace('%f',suidFile)
     payload = payload.replace('%d',suidDir)
-    print os.linesep+color(34)+payload+color(0)+os.linesep
+    print P_NL+color(34)+payload+color(0)+P_NL
 
     if not reply.isyes('Was the payload executed ?'): api.exit(P_err+self.name+': Payload generation aborted')
     http.send({'BACKDOOR' : suidFile},'checker')
@@ -54,7 +54,7 @@ if http.error: api.exit(http.error)
 response = http.response.splitlines()
 if not response: api.exit('')
 newpwd = response[-1]
-response = os.linesep.join(response[:-1])
+response = P_NL.join(response[:-1])
 err = P_err+self.name+': Fatal error'
 if not newpwd.startswith('suid '): api.exit(err)
 if not newpwd.endswith('suid'): api.exit(err)

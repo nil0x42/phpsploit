@@ -224,7 +224,7 @@ class Load:
                 x = re.sub('<.*?>','',x)
                 x = x.replace(':  ',': ')
                 x = ' in '.join(x.split(' in ')[0:-1])
-                error+= 'PHP Error: '+x+os.linesep
+                error+= 'PHP Error: '+x+P_NL
         return(error.strip())
 
 
@@ -240,7 +240,7 @@ class Load:
             if prefix:
                 prefix+=' Error: '
             if type(obj).__name__ == 'str':
-                err = os.linesep.join(['\r'+P_err+prefix+x for x in obj.splitlines() if x])
+                err = P_NL.join(['\r'+P_err+prefix+x for x in obj.splitlines() if x])
                 if err:
                     print err
                 self.error = errtype

@@ -79,13 +79,13 @@ class Build:
             else:
                 libname = line[line.find('(')+1:line.find(')')]
                 if line.count('(') != 1 or line.count(')') != 1 or not libname:
-                    self.error+= 'Invalid php import: '+line.strip()+os.linesep
+                    self.error+= 'Invalid php import: '+line.strip()+P_NL
                     return('')
                 if libname not in self.loaded_phplibs:
                     try:
                         lib = getpath('framework/phplibs/%s.php' % libname).phpcode()
                     except:
-                        self.error+= 'Php lib not found: '+libname+os.linesep
+                        self.error+= 'Php lib not found: '+libname+P_NL
                         return('')
                     result+= self.loadphplibs(lib)+'\n'
                     self.loaded_phplibs.append(libname)

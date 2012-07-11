@@ -39,7 +39,7 @@ def tablify(vals):
             lines[n].append(elem[n])
     result = '';
     for n in lines:
-        result+= '| '+(' | '.join(lines[n]))+' |'+os.linesep
+        result+= '| '+(' | '.join(lines[n]))+' |'+P_NL
         footer = '+-'+('-+-'.join(['-'*len(x) for x in lines[n]]))+'-+'
     return(result+footer)
 

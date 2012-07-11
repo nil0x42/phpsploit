@@ -1,7 +1,8 @@
 #-*- coding: iso-8859-15 -*-
-import os, sys, random, tempfile
+import os, sys, random
+from tempfile import gettempdir
 
-TEMP_DIR   = tempfile.gettempdir()
+TEMP_DIR   = gettempdir()
 SCRIPT_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 def write(seq):
@@ -123,7 +124,7 @@ class getpath:
 
     def read(self):
         lines = self.readlines()
-        data = os.linesep.join(lines)
+        data = P_NL.join(lines)
         return(data)
 
     def phpcode(self):
@@ -137,7 +138,7 @@ class getpath:
 
     def write(self, data):
         lines = data.splitlines()
-        data = os.linesep.join(lines)
+        data = P_NL.join(lines)
         open(self.name,'w').write(data)
 
     def readlines(self):
@@ -169,3 +170,5 @@ def debug(path, data):
 # GLOBALS:
 P_err = color(31,01)+'[-]'+color(0)+' '
 P_inf = color(34,01)+'[*]'+color(0)+' '
+
+P_NL  = os.linesep

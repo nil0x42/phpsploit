@@ -106,9 +106,9 @@ class Start(interface.cmdlib.Cmd):
 
     def when_interrupt(self):
         if not self.CONF['CURRENT_SHELL']:
-            print os.linesep+self.interrupt
+            print P_NL+self.interrupt
         else:
-            print os.linesep+P_inf+self.CONF['CURRENT_SHELL']+' shell closed.'
+            print P_NL+P_inf+self.CONF['CURRENT_SHELL']+' shell closed.'
             self.CONF['CURRENT_SHELL'] = ''
             self.setPrompt()
 
@@ -234,7 +234,7 @@ class Start(interface.cmdlib.Cmd):
             elif var == 'view':
                 print data
             elif var == 'grep':
-                print os.linesep.join([x for x in data.splitlines() if val.lower() in x.lower()])
+                print P_NL.join([x for x in data.splitlines() if val.lower() in x.lower()])
             else:
                 self.help_lastcmd()
 
@@ -388,8 +388,8 @@ class Start(interface.cmdlib.Cmd):
                     try:
                         doc = getattr(self, 'do_'+arg).__doc__
                         if doc:
-                            self.stdout.write(("%s"+os.linesep)%str(doc))
+                            self.stdout.write(("%s"+P_NL)%str(doc))
                         else:
-                            self.stdout.write(("%s"+os.linesep)%str(self.nohelp % (arg,)))
+                            self.stdout.write(("%s"+P_NL)%str(self.nohelp % (arg,)))
                     except AttributeError:
-                        self.stdout.write(("%s"+os.linesep)%str(self.nocmd % (arg,)))
+                        self.stdout.write(("%s"+P_NL)%str(self.nocmd % (arg,)))

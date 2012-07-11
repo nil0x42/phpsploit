@@ -59,12 +59,12 @@ if 'SAVEFILE' in CORE['SETTINGS'] or CORE['SETTINGS']['TARGET'] != 'None' or len
     interface.cmdloop()
 
     endMessage = getpath('misc/txt/end_messages.lst').randline()
-    print os.linesep+color(37)+endMessage.strip()+color(0)+os.linesep
+    print P_NL+color(37)+endMessage.strip()+color(0)+P_NL
 
 else:
     if len(sys.argv) == 2 and sys.argv[1] in ['--help','-h']:
         helpMessage = getpath('misc/txt/help.msg').read()
-        print os.linesep+helpMessage.strip()+os.linesep
+        print P_NL+helpMessage.strip()+P_NL
 
     elif len(sys.argv) == 2 and sys.argv[1] in ['--version','-v']:
         print 'phpsploit version '+softwareVersion

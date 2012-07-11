@@ -82,7 +82,7 @@ http.send(query)
 if http.error:
     api.exit(P_err+http.error)
 
-clock  = '(%s sec)' % str(round(time.time()-clock,2))+os.linesep
+clock  = '(%s sec)' % str(round(time.time()-clock,2))+P_NL
 num    = str(http.response[1])
 plural = ['','s'][num!='1']
 

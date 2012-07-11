@@ -40,7 +40,7 @@ class Cmd:
         self.completekey = completekey
 
     def when_interrupt(self):
-        print os.linesep+self.interrupt
+        print P_NL+self.interrupt
 
     def setConfig(self, config):
         """Send a CONF variable to the framework.
@@ -73,7 +73,7 @@ class Cmd:
             if intro:
                 self.intro = intro
             if self.intro:
-                self.stdout.write(str(self.intro)+os.linesep)
+                self.stdout.write(str(self.intro)+P_NL)
             self.preloop()
             stop = None
             while not stop:
@@ -193,7 +193,7 @@ class Cmd:
             func = getattr(self, 'when_unknown')
             return func(line)
         except AttributeError:
-            self.stdout.write(("%s"+os.linesep)%str(self.nocmd % (line,)))
+            self.stdout.write(("%s"+P_NL)%str(self.nocmd % (line,)))
 
     def completedefault(self, *ignored):
         """Method called to complete an input line when no command-specific
@@ -263,11 +263,11 @@ class Cmd:
                 try:
                     doc=getattr(self, 'do_' + arg).__doc__
                     if doc:
-                        self.stdout.write(("%s"+os.linesep)%str(doc))
+                        self.stdout.write(("%s"+P_NL)%str(doc))
                         return
-                    self.stdout.write(("%s"+os.linesep)%str(self.nohelp % (arg,)))
+                    self.stdout.write(("%s"+P_NL)%str(self.nohelp % (arg,)))
                 except AttributeError:
-                    self.stdout.write(("%s"+os.linesep)%str(self.nocmd % (arg,)))
+                    self.stdout.write(("%s"+P_NL)%str(self.nocmd % (arg,)))
                 return
             func()
         else:
@@ -299,18 +299,18 @@ class Cmd:
                         cmds_doc.append(cmd)
                     else:
                         cmds_undoc.append(cmd)
-            self.stdout.write(("%s"+os.linesep)%str(self.doc_leader))
+            self.stdout.write(("%s"+P_NL)%str(self.doc_leader))
             self.print_topics(self.doc_header,   cmds_doc,   15,80)
             self.print_topics(self.misc_header,  help.keys(),15,80)
             self.print_topics(self.undoc_header, cmds_undoc, 15,80)
 
     def print_topics(self, header, cmds, cmdlen, maxcol):
         if cmds:
-            self.stdout.write(("%s"+os.linesep)%str(header))
+            self.stdout.write(("%s"+P_NL)%str(header))
             if self.ruler:
-                self.stdout.write(("%s"+os.linesep)%str(self.ruler * len(header)))
+                self.stdout.write(("%s"+P_NL)%str(self.ruler * len(header)))
             self.columnize(cmds, maxcol-1)
-            self.stdout.write(os.linesep)
+            self.stdout.write(P_NL)
 
     def columnize(self, list, displaywidth=80):
         """Display a list of strings as a compact set of columns.
@@ -321,7 +321,7 @@ class Cmd:
         try: displaywidth = int(os.popen('stty size','r').read().split()[1])
         except: pass
         if not list:
-            self.stdout.write("<empty>"+os.linesep)
+            self.stdout.write("<empty>"+P_NL)
             return
         nonstrings = [i for i in range(len(list))
                         if not isinstance(list[i], str)]
@@ -330,7 +330,7 @@ class Cmd:
                               ", ".join(map(str, nonstrings)))
         size = len(list)
         if size == 1:
-            self.stdout.write(("%s"+os.linesep)%str(list[0]))
+            self.stdout.write(("%s"+P_NL)%str(list[0]))
             return
         # Try every row count from 1 upwards
         for nrows in range(1, len(list)):
@@ -368,4 +368,4 @@ class Cmd:
                 del texts[-1]
             for col in range(len(texts)):
                 texts[col] = texts[col].ljust(colwidths[col])
-            self.stdout.write(("%s"+os.linesep)%str("  ".join(texts)))
+            self.stdout.write(("%s"+P_NL)%str("  ".join(texts)))

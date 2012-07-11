@@ -11,7 +11,7 @@ class Start(interface.cmdlib.Cmd):
         introduction  = getpath('misc/txt/intro.msg').read().strip()
         startMessage  = getpath('misc/txt/start_messages.lst').randline()
         mainShellHelp = getpath('misc/txt/mainShell_help.msg').read().strip()
-        self.help     = os.linesep+mainShellHelp+os.linesep
+        self.help     = P_NL+mainShellHelp+P_NL
 
         print softwareLogo
         print ''

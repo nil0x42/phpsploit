@@ -96,7 +96,7 @@ class Loader:
                 help+= '    '+cmd+(' '*(self.maxlen-len(cmd)+2))+groups[key][cmd]['description']+'\n'
 
         help = '\n'+help.strip()+'\n'
-        help.replace('\n',os.linesep)
+        help.replace('\n',P_NL)
         return(help)
 
 def Exec(core, cmd, path, name, line):
