@@ -1,73 +1,115 @@
 #!/usr/bin/python2
 #-*- coding: iso-8859-15 -*-
 
-# dev started at: 2011-10-01
-softwareVersion = '2.0 Alpha1'
-coreVersion     = 2
+softVer = '2.0 Alpha1'
+coreVer = 2
 
-import sys, os, re
 
-scriptDir  = os.path.abspath(os.path.dirname(sys.argv[0]))
-pythonPath = os.path.join(scriptDir, 'core')
+from os.path import abspath, dirname, join as joinpath
+import sys
+sys.argc = len(sys.argv)
 
 # Adding ./core in python modules path list:
+scriptDir  = abspath(dirname(sys.argv[0]))
+pythonPath = joinpath(scriptDir, './core')
 sys.path.append(pythonPath)
 
+# now, we can import local libs :)
 from functions import *
 
 CORE = dict()
-CORE['PHPSPLOITCOREVERSION'] = coreVersion
+CORE['PHPSPLOITCOREVERSION'] = coreVer
 
+# load user settings
 import usr.settings
 SETTINGS = usr.settings.load()
 if not usr.settings.matchConditions(SETTINGS):
-    print P_inf+"Please edit your configuration file at "+usr.settings.getConfigFile().name
-    sys.exit()
+    err = "Please edit your configuration file at %s"
+    configFile = usr.settings.getConfigFile().name
+    sys.exit(P_inf+err % configFile)
 
-if len(sys.argv) == 2:
-    # The user as suplied a target as argument
-    domainParser = '^https?://(.+?)(?:$|/)'
-    try:    matchedDomain = re.findall(domainParser,sys.argv[1])[0]
-    except: matchedDomain = ''
-    if matchedDomain and len(sys.argv[1])>13:
-        SETTINGS['TARGET'] = sys.argv[1]
 
-    # The user as suplied a session file as argument
+def is_target(arg):
+    from re import findall
+    urlCheck = '^https?://(.+?)(?:$|/)'
+    try: domain = findall(urlCheck, arg)[0]
+    except: domain = ''
+    if domain and len(arg)>13:
+        return(True)
+    return(False)
+
+
+def get_session(arg):
+    from usr.session import load
+    session = load(arg)
+    return(session)
+
+
+def is_incompatible(session):
+    core = session.content
+    try: version = int(core['PHPSPLOITCOREVERSION'])
+    except: version = 0
+    if version == coreVer:
+        return(False)
+    return(True)
+
+
+# defaultly consider arguments as invalid
+arg_error = True
+
+if sys.argc == 1:
+    arg_error = False
+
+elif sys.argc == 2:
+    arg = sys.argv[1]
+
+    if arg in ['-h', '--help']:
+        msg = getpath('misc/txt/help.msg').read()
+        sys.exit(P_NL+msg.strip()+P_NL)
+
+    elif arg in ['-v', '--version']:
+        msg = "phpsploit version %s"
+        sys.exit(msg % softVer)
+
+    elif is_target(arg):
+        SETTINGS['TARGET'] = arg
+
     else:
-        import usr.session
-        savedSession = usr.session.load(sys.argv[1])
-        if savedSession.exists:
-            CORE = savedSession.content
-            SETTINGS = usr.settings.merge(SETTINGS, CORE['SETTINGS'])
-            try: compatibility = int(CORE['PHPSPLOITCOREVERSION'])
-            except: compatibility = 0
-            if compatibility != coreVersion:
-                print P_inf+"This session is not compatible with this version of phpsploit !"
-                sys.exit()
-            SETTINGS['SAVEFILE'] = os.path.abspath(sys.argv[1])
+        # try to load argument as session
+        session = get_session(arg)
+        if is_incompatible(session):
+            err = "Session not compatible with phpsploit %s"
+            sys.exit(P_inf+err % softVer)
+        CORE = session.content
+        SETTINGS = usr.settings.merge(SETTINGS, CORE['SETTINGS'])
+        SETTINGS['SAVEFILE'] = abspath(arg)
+        arg_error = False
 
-CORE['SETTINGS'] = SETTINGS
 
-# if the target wasn't suplied as argument, set it to None by default
-if not 'TARGET' in CORE['SETTINGS']:
-    CORE['SETTINGS']['TARGET'] = 'None'
+# force TARGET to be an existing setting
+if not 'TARGET' in SETTINGS:
+    SETTINGS['TARGET'] = 'None'
 
-if 'SAVEFILE' in CORE['SETTINGS'] or CORE['SETTINGS']['TARGET'] != 'None' or len(sys.argv) == 1:
-    import mainShell
-    interface = mainShell.Start()
-    interface.setConfig(CORE)
-    interface.cmdloop()
+if SETTINGS['TARGET'] != 'None':
+    arg_error = False
 
-    endMessage = getpath('misc/txt/end_messages.lst').randline()
-    print P_NL+color(37)+endMessage.strip()+color(0)+P_NL
 
-else:
-    if len(sys.argv) == 2 and sys.argv[1] in ['--help','-h']:
-        helpMessage = getpath('misc/txt/help.msg').read()
-        print P_NL+helpMessage.strip()+P_NL
+if arg_error:
+    sys.exit('Usage: phpsploit --help')
 
-    elif len(sys.argv) == 2 and sys.argv[1] in ['--version','-v']:
-        print 'phpsploit version '+softwareVersion
 
-    else:
-        print 'Usage: phpsploit --help'
+######################################
+### now we can open the main interface
+
+import mainShell
+
+interface = mainShell.Start() # instantiate a shell interface
+CORE['SETTINGS'] = SETTINGS   # move settings into the core
+interface.setConfig(CORE)     # send CORE to the shell interface
+
+interface.cmdloop()           # open the shell interface
+
+
+# then we can leave with a random end message
+endMessage = getpath('misc/txt/end_messages.lst').randline()
+print P_NL+color(37)+endMessage.strip()+color(0)+P_NL
