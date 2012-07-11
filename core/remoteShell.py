@@ -21,11 +21,6 @@ class LogCmdData(object):
 
 class Start(interface.cmdlib.Cmd):
 
-
-    interrupt = P_err+"Interruption: use the 'exit' command to leave the shell"
-    nocmd     = P_err+'Unknown command: %s'
-    nohelp    = P_err+'No help for: %s'
-
     coreHelp = dict()
     coreHelp['clear']   = 'Clear the terminal screen'
     coreHelp['env']     = 'Change environment variables'
@@ -41,7 +36,7 @@ class Start(interface.cmdlib.Cmd):
 
     def preloop(self):
 
-        self.lastcmd_log = getpath(self.CONF['SETTINGS']['TMPPATH'],'phpsploit.log')
+        self.lastcmd_log = getpath(self.CONF['SETTINGS']['TMPPATH'],'.phpsploit.log')
 
         self.locked_env      = ['CWD']
         self.locked_settings = ['PASSKEY']

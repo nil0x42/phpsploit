@@ -1,8 +1,13 @@
 import sys, os, re, string
+from functions import *
 
 class Cmd:
-    prompt       = 'Cmd) '
-    interrupt    = '*** use exit command to quit shell'
+
+    prompt       = color(4)+'phpsploit'+color(0)+' > '
+    interrupt    = P_err+"Interruption: use the 'exit' command to leave the shell"
+    nocmd        = P_err+'Unknown command: %s'
+    nohelp       = P_err+'No help for: %s'
+
     identchars   = string.ascii_letters+string.digits+'_'
     ruler        = '='
     lastcmd      = ''
@@ -11,8 +16,6 @@ class Cmd:
     doc_header   = 'Documented commands (type help <topic>):'
     misc_header  = 'Miscellaneous help topics:'
     undoc_header = 'Undocumented commands:'
-    nohelp       = '*** No help on %s'
-    nocmd        = '*** Unknown syntax: %s'
 
     CONF         = None
     misc_cmds    = list()

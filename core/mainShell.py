@@ -5,11 +5,6 @@ import interface.cmdlib
 
 class Start(interface.cmdlib.Cmd):
 
-    prompt    = color(4)+'phpsploit'+color(0)+' > '
-    interrupt = P_err+"Interruption: use the 'exit' command to leave the shell"
-    nocmd     = P_err+'Unknown command: %s'
-    nohelp    = P_err+'No help for: %s'
-
     def preloop(self):
         clear()
         softwareLogo  = getpath('misc/txt/logo.ascii').read().rstrip()
