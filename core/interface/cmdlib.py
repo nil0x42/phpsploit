@@ -195,19 +195,24 @@ class Cmd:
         except AttributeError:
             self.stdout.write(("%s"+P_NL)%str(self.nocmd % (line,)))
 
-    def completedefault(self, *ignored):
+    def completedefault(self, text, line, *ignored):
         """Method called to complete an input line when no command-specific
         complete_*() method is available.
 
         By default, it returns an empty list.
 
         """
-        return []
+        try:
+            cmd = line[:line.find(' ')]
+            lst = getattr(self, 'complete_%s' % cmd)
+            return [x for x in lst if x.startswith(text)]
+        except:
+            return []
 
     def completenames(self, text, *ignored):
         dotext = 'do_'+text
-        result = [a for a in self.misc_cmds if a.startswith(text)]
-        return result+[a[3:] for a in self.get_names() if a.startswith(dotext)]
+        result = [a+" " for a in self.misc_cmds if a.startswith(text)]
+        return result+[a[3:]+" " for a in self.get_names() if a.startswith(dotext)]
 
     def complete(self, text, state):
         """Return the next possible completion for 'text'.
@@ -229,6 +234,8 @@ class Cmd:
                 else:
                     try:
                         compfunc = getattr(self, 'complete_' + cmd)
+                        if type(compfunc).__name__ == 'list':
+                            compfunc = self.completedefault
                     except AttributeError:
                         compfunc = self.completedefault
             else:

@@ -21,11 +21,11 @@ CNF = dict()
 CNF['PSCOREVER'] = coreVer
 
 # load user settings
-import usr.settings
-SET = usr.settings.load()
-if not usr.settings.matchConditions(SET):
+from usr import settings
+SET = settings.load()
+if not settings.comply(SET):
     err = "Please edit your configuration file at %s"
-    configFile = usr.settings.getConfigFile().name
+    configFile = settings.get_file().name
     sys.exit(P_inf+err % configFile)
 
 
@@ -81,7 +81,7 @@ elif sys.argc == 2:
             err = "Session not compatible with phpsploit %s"
             sys.exit(P_inf+err % softVer)
         CNF = session.content
-        SET = usr.settings.merge(SET, CNF['SET'])
+        SET = settings.merge(SET, CNF['SET'])
         SET['SAVEFILE'] = abspath(arg)
         arg_error = False
 

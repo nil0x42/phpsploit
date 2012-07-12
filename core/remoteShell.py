@@ -330,7 +330,7 @@ class Start(interface.cmdlib.Cmd):
                         oldValue = self.CNF['SET'][var]
                         self.CNF['SET'][var] = val
                         import usr.settings
-                        if usr.settings.matchConditions(self.CNF['SET']):
+                        if usr.settings.comply(self.CNF['SET']):
                             showStatus(var, self.CNF['SET'][var])
                             #self.updateOpener()
                         else:

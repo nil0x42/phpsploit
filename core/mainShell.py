@@ -31,7 +31,7 @@ class Start(interface.cmdlib.Cmd):
 
         # alert if no proxy
         if self.CNF['SET']['PROXY'].lower() in ['','none']:
-            err = 'No proxy gateway ! stay carrefull...'
+            err = 'No proxy gateway ! stay careful...'
             print P_err+err
 
         # add empty LNK if don't exist
@@ -67,8 +67,8 @@ class Start(interface.cmdlib.Cmd):
         try:    domain = re.findall(regex, target)[0]
         except: domain = ''
         if domain and len(target)>13:
-            self.CNF['LNK']['URL']     = target
-            self.CNF['LNK']['DOMAIN']  = domain
+            self.CNF['LNK']['URL']    = target
+            self.CNF['LNK']['DOMAIN'] = domain
         else:
             try: del self.CNF['LNK']['URL']
             except: pass
@@ -85,8 +85,6 @@ class Start(interface.cmdlib.Cmd):
     ### COMMAND: clear ###
     def do_clear(self, line):
         clear()
-        import pprint
-        pprint.pprint(self.CNF)
 
     #####################
     ### COMMAND: exit ###
@@ -106,16 +104,14 @@ class Start(interface.cmdlib.Cmd):
         print 'Example: set TEXTEDITOR /usr/bin/nano'
         print '         set PROXY None'
 
-    def complete_set(self, text, line, begidx, endidx):
-        completions = self.CNF['SET'].keys()
-        if text:
-            completions = [x+' ' for x in completions if x.startswith(text)]
-        return(completions)
+    def complete_set(self, text, *ignored):
+        keys = self.CNF['SET'].keys()
+        return([x+' ' for x in keys if x.startswith(text)])
 
     def do_set(self, line):
-        def showStatus(*nameAndVal):
-            template = '%s ==> '+color(1)+'%s'+color(0)
-            print template % nameAndVal
+        def show(*elem):
+            tpl = '%s ==> '+color(1)+'%s'+color(0)
+            print tpl % elem
 
         if line:
             args = line.strip().split(' ')
@@ -123,16 +119,16 @@ class Start(interface.cmdlib.Cmd):
             val  = ' '.join(args[1:])
             if var in self.CNF['SET']:
                 if val:
-                    oldValue = self.CNF['SET'][var]
+                    backup = self.CNF['SET'][var]
                     self.CNF['SET'][var] = val
-                    import usr.settings
-                    if usr.settings.matchConditions(self.CNF['SET']):
-                        showStatus(var, self.CNF['SET'][var])
+                    from usr.settings import comply
+                    if comply(self.CNF['SET']):
+                        show(var, self.CNF['SET'][var])
                         self.updateLNK()
                     else:
-                        self.CNF['SET'][var] = oldValue
+                        self.CNF['SET'][var] = backup
                 else:
-                    showStatus(var, self.CNF['SET'][var])
+                    show(var, self.CNF['SET'][var])
             else:
                 self.help_set()
         else:
@@ -145,7 +141,8 @@ class Start(interface.cmdlib.Cmd):
     #######################
     ### COMMAND: infect ###
     def do_infect(self, line):
-        if 'URL' in self.CNF['LNK'] or self.CNF['SET']['PASSKEY'] != '%%SRVHASH%%':
+        if 'URL' in self.CNF['LNK'] \
+        or self.CNF['SET']['PASSKEY'] != '%%SRVHASH%%':
             payload = self.CNF['LNK']['BACKDOOR']
             length  = len(payload)
             print ''
@@ -157,7 +154,9 @@ class Start(interface.cmdlib.Cmd):
             print ''+'='*length
             print ''
         else:
-            print P_err+"Undefined target, please enable it with 'set TARGET <backdoored-url>'"
+            cmd = 'set TARGET <backdoored-url>'
+            err = "Undefined target, please enable it with '%s'" % cmd
+            print P_err+err
 
     ########################
     ### COMMAND: exploit ###
@@ -173,7 +172,9 @@ class Start(interface.cmdlib.Cmd):
                 shell.cmdloop()
                 exploitation.close()
         else:
-            print P_err+"Undefined target, please enable it with 'set TARGET <backdoored-url>'"
+            cmd = 'set TARGET <backdoored-url>'
+            err = "Undefined target, please enable it with '%s'" % cmd
+            print P_err+err
 
     #####################
     ### COMMAND: save ###
