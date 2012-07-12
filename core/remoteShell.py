@@ -36,35 +36,35 @@ class Start(interface.cmdlib.Cmd):
 
     def preloop(self):
 
-        self.lastcmd_log = getpath(self.CONF['SETTINGS']['TMPPATH'],'.phpsploit.log')
+        self.lastcmd_log = getpath(self.CNF['SET']['TMPPATH'],'.phpsploit.log')
 
         self.locked_env      = ['CWD']
         self.locked_settings = ['PASSKEY']
 
-        self.CONF['CURRENT_SHELL'] = ''
+        self.CNF['CURRENT_SHELL'] = ''
 
-        if 'ENV' in self.CONF:
-            if self.CONF['ENV_HASH'] != self.CONF['OPENER']['HASH']:
-                del self.CONF['ENV_HASH']
-                del self.CONF['ENV']
+        if 'ENV' in self.CNF:
+            if self.CNF['ENV_HASH'] != self.CNF['LNK']['HASH']:
+                del self.CNF['ENV_HASH']
+                del self.CNF['ENV']
 
-        if not 'ENV' in self.CONF:
-            self.CONF['ENV'] = dict()
-            self.CONF['ENV_HASH'] = self.CONF['OPENER']['HASH']
+        if not 'ENV' in self.CNF:
+            self.CNF['ENV'] = dict()
+            self.CNF['ENV_HASH'] = self.CNF['LNK']['HASH']
 
-        self.setDefaultEnv('CWD',          self.CONF['SERVER']['home'])
-        self.setDefaultEnv('WEB_ROOT',     self.CONF['SERVER']['webroot'])
-        self.setDefaultEnv('WRITE_WEBDIR', self.CONF['SERVER']['write_webdir'])
-        self.setDefaultEnv('WRITE_TMPDIR', self.CONF['SERVER']['write_tmpdir'])
+        self.setDefaultEnv('CWD',          self.CNF['SRV']['home'])
+        self.setDefaultEnv('WEB_ROOT',     self.CNF['SRV']['webroot'])
+        self.setDefaultEnv('WRITE_WEBDIR', self.CNF['SRV']['write_webdir'])
+        self.setDefaultEnv('WRITE_TMPDIR', self.CNF['SRV']['write_tmpdir'])
 
-        print 'Connected to %s server %s' % (self.CONF['SERVER']['os'],     self.CONF['SERVER']['host'])
-        print 'running PHP %s with %s'    % (self.CONF['SERVER']['phpver'], self.CONF['SERVER']['soft'])
+        print 'Connected to %s server %s' % (self.CNF['SRV']['os'],     self.CNF['SRV']['host'])
+        print 'running PHP %s with %s'    % (self.CNF['SRV']['phpver'], self.CNF['SRV']['soft'])
 
-        if not self.CONF['ENV']['WRITE_WEBDIR']:
+        if not self.CNF['ENV']['WRITE_WEBDIR']:
             print P_err+"Env warning: No writeable web directory found."
             print P_err+"             Use 'env WRITE_WEBDIR /full/path/to/writeable/web/dir' to set it."
 
-        if not self.CONF['ENV']['WRITE_TMPDIR']:
+        if not self.CNF['ENV']['WRITE_TMPDIR']:
             print P_err+"Env warning: No writeable tmp directory found."
             print P_err+"             Use 'env WRITE_TMPDIR /full/path/to/writeable/tmp/dir' to set it."
 
@@ -76,8 +76,8 @@ class Start(interface.cmdlib.Cmd):
         self.setPrompt()
 
     def precmd(self, line):
-        if self.CONF['CURRENT_SHELL']:
-            line = self.CONF['CURRENT_SHELL']+' '+line
+        if self.CNF['CURRENT_SHELL']:
+            line = self.CNF['CURRENT_SHELL']+' '+line
         l = line.strip()
         if l and not l.startswith('lastcmd'):
             sys.stdout = LogCmdData(self.lastcmd_log.name,'w')
@@ -94,22 +94,22 @@ class Start(interface.cmdlib.Cmd):
 
     def setPrompt(self, string=''):
         if string: string+=' '
-        currentTarget = color(31,1)+self.CONF['OPENER']['DOMAIN']+color(0)
+        currentTarget = color(31,1)+self.CNF['LNK']['DOMAIN']+color(0)
         self.prompt = color(0,4)+'phpsploit'+color(0)
         self.prompt+= '(%s) %s> ' % (currentTarget, color(1)+string+color(0))
 
     def setDefaultEnv(self, key, value=''):
-        if not key in self.CONF['ENV']:
-            self.CONF['ENV'][key] = value
-        elif not self.CONF['ENV'][key]:
-            self.CONF['ENV'][key] = value
+        if not key in self.CNF['ENV']:
+            self.CNF['ENV'][key] = value
+        elif not self.CNF['ENV'][key]:
+            self.CNF['ENV'][key] = value
 
     def when_interrupt(self):
-        if not self.CONF['CURRENT_SHELL']:
+        if not self.CNF['CURRENT_SHELL']:
             print P_NL+self.interrupt
         else:
-            print P_NL+P_inf+self.CONF['CURRENT_SHELL']+' shell closed.'
-            self.CONF['CURRENT_SHELL'] = ''
+            print P_NL+P_inf+self.CNF['CURRENT_SHELL']+' shell closed.'
+            self.CNF['CURRENT_SHELL'] = ''
             self.setPrompt()
 
     ######################
@@ -132,9 +132,9 @@ class Start(interface.cmdlib.Cmd):
     ### COMMAND: save ###
     def do_save(self, line):
         import usr.session
-        savedFile = usr.session.save(self.CONF, line)
+        savedFile = usr.session.save(self.CNF, line)
         if savedFile:
-            self.CONF['SETTINGS']['SAVEFILE'] = savedFile
+            self.CNF['SET']['SAVEFILE'] = savedFile
 
     #####################
     ### COMMAND: lpwd ###
@@ -176,7 +176,7 @@ class Start(interface.cmdlib.Cmd):
         if line in self.commands.shells:
             xcmds = (color(37)+'Ctrl+C'+color(0), color(37)+'?'+color(0))
             print P_inf+line+' shell opened (use %s to leave it or %s to get help).' % xcmds
-            self.CONF['CURRENT_SHELL'] = line
+            self.CNF['CURRENT_SHELL'] = line
             self.setPrompt(line)
         else:
             self.help_shell()
@@ -212,7 +212,7 @@ class Start(interface.cmdlib.Cmd):
             val  = ' '.join(args[1:])
             if var == 'save':
                 defName = 'phpsploit-lastcmd.txt'
-                if not val: val= getpath(self.CONF['SETTINGS']['TMPPATH'], defName).name
+                if not val: val= getpath(self.CNF['SET']['TMPPATH'], defName).name
                 val = os.path.abspath(val)
                 if os.path.isdir(val): val = getpath(val, defName).name
                 data = re.sub('(\x1b\[\d+?m)','',data)
@@ -252,7 +252,7 @@ class Start(interface.cmdlib.Cmd):
         print '         env CWD'
 
     def complete_env(self, text, line, begidx, endidx):
-        completions = self.CONF['ENV'].keys()
+        completions = self.CNF['ENV'].keys()
         if text:
             completions = [x+' ' for x in completions if x.startswith(text)]
         return(completions)
@@ -266,18 +266,18 @@ class Start(interface.cmdlib.Cmd):
             args = line.strip().split(' ')
             var  = args[0].upper()
             val  = ' '.join(args[1:])
-            if var in self.CONF['ENV']:
+            if var in self.CNF['ENV']:
                 if val:
                     if var in self.locked_env:
                         print P_err+'Locked environment variable: '+var
                     elif val.lower() == 'none':
-                        del self.CONF['ENV'][var]
+                        del self.CNF['ENV'][var]
                         print P_inf+'Environment variable deleted: '+var
                     else:
-                        self.CONF['ENV'][var] = val
+                        self.CNF['ENV'][var] = val
                         showStatus(var, val)
                 else:
-                    showStatus(var, self.CONF['ENV'][var])
+                    showStatus(var, self.CNF['ENV'][var])
             else:
                 if not val:
                     self.help_env()
@@ -285,10 +285,10 @@ class Start(interface.cmdlib.Cmd):
                     if var in self.locked_env:
                         print P_err+'Locked environment variable: '+var
                     else:
-                        self.CONF['ENV'][var] = val
+                        self.CNF['ENV'][var] = val
                         showStatus(var, val)
         else:
-            sortedEnv = dict([(x,y) for x,y in self.CONF['ENV'].items()])
+            sortedEnv = dict([(x,y) for x,y in self.CNF['ENV'].items()])
             import interface.columnizer
             title = "Environment variables"
             interface.columnizer.Make(title,sortedEnv).write()
@@ -308,7 +308,7 @@ class Start(interface.cmdlib.Cmd):
         print '         set PROXY None'
 
     def complete_set(self, text, line, begidx, endidx):
-        completions = self.CONF['SETTINGS'].keys()
+        completions = self.CNF['SET'].keys()
         if text:
             completions = [x for x in completions if x.startswith(text)]
         return(completions)
@@ -322,25 +322,25 @@ class Start(interface.cmdlib.Cmd):
             args = line.strip().split(' ')
             var  = args[0].upper()
             val  = ' '.join(args[1:])
-            if var in self.CONF['SETTINGS']:
+            if var in self.CNF['SET']:
                 if val:
                     if var in self.locked_settings:
                         print P_err+'Locked session setting: '+var
                     else:
-                        oldValue = self.CONF['SETTINGS'][var]
-                        self.CONF['SETTINGS'][var] = val
+                        oldValue = self.CNF['SET'][var]
+                        self.CNF['SET'][var] = val
                         import usr.settings
-                        if usr.settings.matchConditions(self.CONF['SETTINGS']):
-                            showStatus(var, self.CONF['SETTINGS'][var])
+                        if usr.settings.matchConditions(self.CNF['SET']):
+                            showStatus(var, self.CNF['SET'][var])
                             #self.updateOpener()
                         else:
-                            self.CONF['SETTINGS'][var] = oldValue
+                            self.CNF['SET'][var] = oldValue
                 else:
-                    showStatus(var, self.CONF['SETTINGS'][var])
+                    showStatus(var, self.CNF['SET'][var])
             else:
                 self.help_set()
         else:
-            items = self.CONF['SETTINGS'].items()
+            items = self.CNF['SET'].items()
             sortedSettings = dict([(x.upper(),y) for x,y in items])
             import interface.columnizer
             title = "Session settings"
@@ -367,7 +367,7 @@ class Start(interface.cmdlib.Cmd):
             else:
                 cmdData = self.commands.cmddata(cmdName)
                 cmdPath = self.commands.cmdpath(cmdName)
-                self.CONF['ENV'] = framework.cmdAPI.Exec(self.CONF,cmdData,cmdPath,cmdName,cmdArgs)
+                self.CNF['ENV'] = framework.cmdAPI.Exec(self.CNF,cmdData,cmdPath,cmdName,cmdArgs)
 
     ############
     ### HELP ###

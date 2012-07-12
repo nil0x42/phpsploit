@@ -4,8 +4,8 @@ class rpath:
     winPathRegex = '[a-zA-Z]:\\\\'
 
     def __init__(self, core):
-        self.separator = core['SERVER']['separator']
-        self.home      = core['SERVER']['home']
+        self.separator = core['SRV']['separator']
+        self.home      = core['SRV']['home']
         self.cwd       = core['ENV']['CWD']
 
     def _sanitize(self, path):

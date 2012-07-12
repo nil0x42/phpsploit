@@ -32,13 +32,13 @@ def save(session, filepath):
     print P_inf+'Saving current session...'
 
     if not filepath:
-        if 'SAVEFILE' in session['SETTINGS']:
-            filepath = session['SETTINGS']['SAVEFILE']
+        if 'SAVEFILE' in session['SET']:
+            filepath = session['SET']['SAVEFILE']
         else:
-            filepath = session['SETTINGS']['SAVEPATH']
+            filepath = session['SET']['SAVEPATH']
 
     if not os.sep in filepath:
-        filepath = getpath(session['SETTINGS']['SAVEPATH'], filepath).name
+        filepath = getpath(session['SET']['SAVEPATH'], filepath).name
 
     filepath = os.path.abspath(filepath)
 

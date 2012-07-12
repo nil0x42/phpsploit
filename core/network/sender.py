@@ -19,26 +19,26 @@ class Load:
 
     parser  = '<%SEP%>%s</%SEP%>'
 
-    def __init__(self, CONF):
-        self.target   = CONF['SETTINGS']['TARGET']
+    def __init__(self, CNF):
+        self.target   = CNF['SET']['TARGET']
 
-        self.passkey  = CONF['OPENER']['PASSKEY']
-        self.opener   = network.http.build_opener(CONF['SETTINGS']['PROXY'])
-        self.headers  = network.http.load_headers(CONF['SETTINGS'])
-        self.parser   = self.parser.replace('%SEP%', CONF['OPENER']['HASH'])
+        self.passkey  = CNF['LNK']['PASSKEY']
+        self.opener   = network.http.build_opener(CNF['SET']['PROXY'])
+        self.headers  = network.http.load_headers(CNF['SET'])
+        self.parser   = self.parser.replace('%SEP%', CNF['LNK']['HASH'])
         self.unparser = re.compile(self.parser % '(.+?)', re.S)
 
-        self.tmpfil = '/'+(CONF['OPENER']['HASH']*2)
-        try: self.tmpdir = phpcode.payload.py2phpVar(CONF['ENV']['WRITE_TMPDIR']+self.tmpfil)
+        self.tmpfil = '/'+(CNF['LNK']['HASH']*2)
+        try: self.tmpdir = phpcode.payload.py2phpVar(CNF['ENV']['WRITE_TMPDIR']+self.tmpfil)
         except: self.tmpdir = None
         self.multipart_file = None
 
-        self.default_method  = CONF['SETTINGS']['REQ_DEFAULT_METHOD'].upper()
-        self.max_headers     = int(CONF['SETTINGS']['REQ_MAX_HEADERS'])
-        self.max_header_size = octets(CONF['SETTINGS']['REQ_MAX_HEADER_SIZE'])
-        self.max_post_size   = octets(CONF['SETTINGS']['REQ_MAX_POST_SIZE'])
-        self.zlib_try_limit  = octets(CONF['SETTINGS']['REQ_ZLIB_TRY_LIMIT'])
-        self.interval        = CONF['SETTINGS']['REQ_INTERVAL']
+        self.default_method  = CNF['SET']['REQ_DEFAULT_METHOD'].upper()
+        self.max_headers     = int(CNF['SET']['REQ_MAX_HEADERS'])
+        self.max_header_size = octets(CNF['SET']['REQ_MAX_HEADER_SIZE'])
+        self.max_post_size   = octets(CNF['SET']['REQ_MAX_POST_SIZE'])
+        self.zlib_try_limit  = octets(CNF['SET']['REQ_ZLIB_TRY_LIMIT'])
+        self.interval        = CNF['SET']['REQ_INTERVAL']
 
         available_headers = self.max_headers-len(self.base_headers)-len(self.headers.keys())-1 # -1 for the forwarder
         self.available_headers = {'POST' : available_headers-len(self.post_headers),

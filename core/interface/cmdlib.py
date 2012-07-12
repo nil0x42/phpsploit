@@ -17,7 +17,7 @@ class Cmd:
     misc_header  = 'Miscellaneous help topics:'
     undoc_header = 'Undocumented commands:'
 
-    CONF         = None
+    CNF          = None
     misc_cmds    = list()
 
     def __init__(self, completekey='tab', stdin=None, stdout=None):
@@ -43,16 +43,16 @@ class Cmd:
         print P_NL+self.interrupt
 
     def setConfig(self, config):
-        """Send a CONF variable to the framework.
+        """Send a CNF variable to the framework.
 
         """
-        self.CONF = config
+        self.CNF = config
 
     def getConfig(self):
-        """Returns the current CONF variable
+        """Returns the current CNF variable
 
         """
-        return(self.CONF)
+        return(self.CNF)
 
 
     def cmdloop(self, intro=None):

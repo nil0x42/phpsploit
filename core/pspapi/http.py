@@ -9,8 +9,8 @@ class http:
     def __init__(self, core):
         self.core      = core
         self.cmdcwd    = core['cmd']['cwd']
-        self.separator = core['SERVER']['separator']
-        #self.compress  = core['SERVER']['compress']
+        self.separator = core['SRV']['separator']
+        #self.compress  = core['SRV']['compress']
 
     def send(self, query=dict(), payloadname='payload'):
         self.error    = None

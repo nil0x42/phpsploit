@@ -17,13 +17,13 @@ sys.path.append(pythonPath)
 # now, we can import local libs :)
 from functions import *
 
-CORE = dict()
-CORE['PHPSPLOITCOREVERSION'] = coreVer
+CNF = dict()
+CNF['PSCOREVER'] = coreVer
 
 # load user settings
 import usr.settings
-SETTINGS = usr.settings.load()
-if not usr.settings.matchConditions(SETTINGS):
+SET = usr.settings.load()
+if not usr.settings.matchConditions(SET):
     err = "Please edit your configuration file at %s"
     configFile = usr.settings.getConfigFile().name
     sys.exit(P_inf+err % configFile)
@@ -47,7 +47,7 @@ def get_session(arg):
 
 def is_incompatible(session):
     core = session.content
-    try: version = int(core['PHPSPLOITCOREVERSION'])
+    try: version = int(core['PSCOREVER'])
     except: version = 0
     if version == coreVer:
         return(False)
@@ -72,7 +72,7 @@ elif sys.argc == 2:
         sys.exit(msg % softVer)
 
     elif is_target(arg):
-        SETTINGS['TARGET'] = arg
+        SET['TARGET'] = arg
 
     else:
         # try to load argument as session
@@ -80,17 +80,17 @@ elif sys.argc == 2:
         if is_incompatible(session):
             err = "Session not compatible with phpsploit %s"
             sys.exit(P_inf+err % softVer)
-        CORE = session.content
-        SETTINGS = usr.settings.merge(SETTINGS, CORE['SETTINGS'])
-        SETTINGS['SAVEFILE'] = abspath(arg)
+        CNF = session.content
+        SET = usr.settings.merge(SET, CNF['SET'])
+        SET['SAVEFILE'] = abspath(arg)
         arg_error = False
 
 
 # force TARGET to be an existing setting
-if not 'TARGET' in SETTINGS:
-    SETTINGS['TARGET'] = 'None'
+if not 'TARGET' in SET:
+    SET['TARGET'] = 'None'
 
-if SETTINGS['TARGET'] != 'None':
+if SET['TARGET'] != 'None':
     arg_error = False
 
 
@@ -104,8 +104,8 @@ if arg_error:
 import mainShell
 
 interface = mainShell.Start() # instantiate a shell interface
-CORE['SETTINGS'] = SETTINGS   # move settings into the core
-interface.setConfig(CORE)     # send CORE to the shell interface
+CNF['SET'] = SET              # move settings into the core
+interface.setConfig(CNF)      # send config to the shell interface
 
 interface.cmdloop()           # open the shell interface
 

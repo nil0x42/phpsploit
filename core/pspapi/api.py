@@ -3,8 +3,8 @@ import sys, string, random
 
 class api:
     def __init__(self, core):
-        self.settings = core['SETTINGS']
-        self.server   = core['SERVER']
+        self.settings = core['SET']
+        self.server   = core['SRV']
         self.env      = core['ENV']
 
         self.cmdname  = core['cmd']['name']
