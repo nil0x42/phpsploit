@@ -65,11 +65,13 @@ elif sys.argc == 2:
 
     if arg in ['-h', '--help']:
         msg = getpath('misc/txt/help.msg').read()
-        sys.exit(P_NL+msg.strip()+P_NL)
+        print(P_NL+msg.strip()+P_NL)
+        sys.exit(0)
 
     elif arg in ['-v', '--version']:
         msg = "phpsploit version %s"
-        sys.exit(msg % softVer)
+        print(msg % softVer)
+        sys.exit(0)
 
     elif is_target(arg):
         SET['TARGET'] = arg
@@ -77,13 +79,14 @@ elif sys.argc == 2:
     else:
         # try to load argument as session
         session = get_session(arg)
-        if is_incompatible(session):
-            err = "Session not compatible with phpsploit %s"
-            sys.exit(P_inf+err % softVer)
-        CNF = session.content
-        SET = settings.merge(SET, CNF['SET'])
-        SET['SAVEFILE'] = abspath(arg)
-        arg_error = False
+        if session.exists:
+            if is_incompatible(session):
+                err = "Session not compatible with phpsploit %s"
+                sys.exit(P_inf+err % softVer)
+            CNF = session.content
+            SET = settings.merge(SET, CNF['SET'])
+            SET['SAVEFILE'] = abspath(arg)
+            arg_error = False
 
 
 # force TARGET to be an existing setting
