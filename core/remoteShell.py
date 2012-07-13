@@ -4,19 +4,7 @@ from functions import *
 import interface.cmdlib
 import framework.cmdAPI
 
-class LogCmdData(object):
-    def __init__(self, name, mode):
-        self.file = open(name, mode)
-        self.stdout = sys.stdout
-        sys.stdout = self
-    def __del__(self):
-        sys.stdout = self.stdout
-        self.file.close()
-    def write(self, data):
-        self.file.write(data)
-        self.stdout.write(data)
-    def flush(self):
-        self.stdout.flush()
+from StringIO import StringIO
 
 
 class Start(interface.cmdlib.Cmd):
@@ -36,22 +24,24 @@ class Start(interface.cmdlib.Cmd):
 
     def preloop(self):
 
-        self.lastcmd_log = getpath(self.CNF['SET']['TMPPATH'],'.phpsploit.log')
-
+        # read only variables
         self.locked_env      = ['CWD']
         self.locked_settings = ['PASSKEY']
 
         self.CNF['CURRENT_SHELL'] = ''
 
+        # if we changed target server, remove ENV
         if 'ENV' in self.CNF:
             if self.CNF['ENV_HASH'] != self.CNF['LNK']['HASH']:
                 del self.CNF['ENV_HASH']
                 del self.CNF['ENV']
 
+        # set ENV default values if empty
         if not 'ENV' in self.CNF:
             self.CNF['ENV'] = dict()
             self.CNF['ENV_HASH'] = self.CNF['LNK']['HASH']
 
+        # default environment variables
         self.setDefaultEnv('CWD',          self.CNF['SRV']['home'])
         self.setDefaultEnv('WEB_ROOT',     self.CNF['SRV']['webroot'])
         self.setDefaultEnv('WRITE_WEBDIR', self.CNF['SRV']['write_webdir'])
@@ -76,16 +66,21 @@ class Start(interface.cmdlib.Cmd):
         self.setPrompt()
 
     def precmd(self, line):
+        # auto prepend current shell string if exists
         if self.CNF['CURRENT_SHELL']:
             line = self.CNF['CURRENT_SHELL']+' '+line
+        # fork standard output for command logging
         l = line.strip()
         if l and not l.startswith('lastcmd'):
-            sys.stdout = LogCmdData(self.lastcmd_log.name,'w')
+            sys.stdout = fork_stdout(StringIO())
         return line
 
     def postcmd(self, stop, line):
-        try: sys.stdout.__del__()
-        except: pass
+        try:
+            self.lastcmd_data = sys.stdout.file.getvalue()
+            sys.stdout.__del__()
+        except:
+            pass
         return stop
 
     def updateCommands(self):
@@ -195,14 +190,12 @@ class Start(interface.cmdlib.Cmd):
         print 'Example: lastcmd save /tmp/log.txt'
         print '         lastcmd grep mysql_connect'
 
-    def complete_lastcmd(self, text, line, begidx, endidx):
-        completions = ['save','view','grep']
-        if text:
-            completions = [x+' ' for x in completions if x.startswith(text)]
-        return(completions)
+    def complete_lastcmd(self, text, *ignored):
+        keys = ['save','view','grep']
+        return([x+' ' for x in keys if x.startswith(text)])
 
     def do_lastcmd(self, line):
-        try: data = self.lastcmd_log.read()
+        try: data = self.lastcmd_data
         except: data = ''
         if not data:
             print P_inf+'Last command contents is empty'
