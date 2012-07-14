@@ -1,5 +1,7 @@
 import urllib, urllib2, base64, time, re
-import phpcode.payload
+from phpcode.payload import py2phpVar
+from phpcode.payload import Build     as build_payload
+from phpcode.payload import Encode    as encode_payload
 import network.http
 from functions import *
 
@@ -29,7 +31,7 @@ class Load:
         self.unparser = re.compile(self.parser % '(.+?)', re.S)
 
         self.tmpfil = '/'+(CNF['LNK']['HASH']*2)
-        try: self.tmpdir = phpcode.payload.py2phpVar(CNF['ENV']['WRITE_TMPDIR']+self.tmpfil)
+        try: self.tmpdir = CNF['ENV']['WRITE_TMPDIR']+self.tmpfil
         except: self.tmpdir = None
         self.multipart_file = None
 
@@ -79,9 +81,9 @@ class Load:
                 try: confirm = raw_input(P_inf+"Use "+quot(response)+" as writeable directory ? (y/n): ").lower()
                 except: print ''
             if confirm == 'y':
-                self.tmpdir = phpcode.payload.py2phpVar(response+self.tmpfil)
+                self.tmpdir = response+self.tmpfil
         if not self.multipart_file:
-            self.multipart_file = "$f=%s;" % self.tmpdir
+            self.multipart_file = "$f=%s;" % py2phpVar(self.tmpdir)
             self.multipart = dict([(k,self.multipart_file+v) for k,v in self.multipart.items()])
             self.multipart['starter'] = self.encapsulate(self.multipart['starter'])
             self.multipart['sender']  = self.encapsulate(self.multipart['sender'])
@@ -159,7 +161,7 @@ class Load:
                             maxN = minN*2
                         checkN = int(minN+((maxN-minN)/2))
 
-                    x_payload = phpcode.payload.Encode(multipart.replace('DATA',DATA[:checkN]), compress)
+                    x_payload = encode_payload(multipart.replace('DATA',DATA[:checkN]), compress)
 
                     if x_payload.length > self.maxsize[method]:
                         if checkN <= minimum:
@@ -178,7 +180,7 @@ class Load:
                     return([])
                 REQUEST+= request
                 DATA = DATA[minN:]
-                payload = phpcode.payload.Encode(multipart_reader.replace('DATA',DATA), compress)
+                payload = encode_payload(multipart_reader.replace('DATA',DATA), compress)
                 if payload.length <= self.maxsize[method]:
                     request = self.build_single_request(method, payload)
                     if not request:
@@ -265,7 +267,7 @@ class Load:
         if not self.can_add_headers(self.headers):
             return('An HTTP header is longer than the REQ_MAX_HEADER_SIZE setting')
 
-        payload = phpcode.payload.Build(payload, self.parser)
+        payload = build_payload(payload, self.parser)
         if payload.error:
             return(payload.error)
 
@@ -339,7 +341,8 @@ class Load:
     def Send(self, request):
         lastreq   = request[-1]
         request   = request[:-1]
-        interrupt = 'Send Error: Multipart transfer interrupted'
+        interrupt = 'Send Error: Multipart transfer interrupted\n'
+        interrupt+= 'The remote temporary payload %s must be manually removed.'
         msg       = color(37)+' (Press Enter or wait 1 minut for the next try)'+color(0)
 
         def show(n):
@@ -362,11 +365,11 @@ class Load:
                 if err:
                     write('\n'+P_err+err+msg)
                     try: sleep_or_press_enter(60)
-                    except: return(interrupt)
+                    except: return(interrupt % quot(self.tmpdir))
                 else:
                     sent = True
                     try: time.sleep(getinterval(self.interval))
-                    except: return(interrupt)
+                    except: return(interrupt % quot(self.tmpdir))
 
         if len(request):
             show(len(request)+1)
