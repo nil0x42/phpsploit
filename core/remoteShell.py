@@ -1,11 +1,11 @@
 import os, sys, re
 
+# local
 from functions import *
-import interface.cmdlib
-
+from interface import cmdlib
 from framework import cmdAPI
-
-from StringIO import StringIO
+# standard
+from StringIO  import StringIO
 
 
 class Start(interface.cmdlib.Cmd):
@@ -302,9 +302,9 @@ class Start(interface.cmdlib.Cmd):
                         show(var, val)
         else:
             sortedEnv = dict([(x,y) for x,y in self.CNF['ENV'].items()])
-            import interface.columnizer
+            from interface.columnizer import Make as print_column
             title = "Environment variables"
-            interface.columnizer.Make(title,sortedEnv).write()
+            print_column(title, sortedEnv).write()
 
 
     ####################
@@ -340,8 +340,8 @@ class Start(interface.cmdlib.Cmd):
                     else:
                         backup = self.CNF['SET'][var]
                         self.CNF['SET'][var] = val
-                        import usr.settings
-                        if usr.settings.comply(self.CNF['SET']):
+                        from usr.settings import comply
+                        if comply(self.CNF['SET']):
                             show(var, self.CNF['SET'][var])
                             #self.updateOpener()
                         else:
@@ -353,9 +353,9 @@ class Start(interface.cmdlib.Cmd):
         else:
             items = self.CNF['SET'].items()
             sortedSettings = dict([(x.upper(),y) for x,y in items])
-            import interface.columnizer
+            from interface.columnizer import Make as print_column
             title = "Session settings"
-            interface.columnizer.Make(title,sortedSettings).write()
+            print_column(title, sortedSettings).write()
 
 
     ###############
