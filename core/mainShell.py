@@ -39,10 +39,12 @@ class Start(interface.cmdlib.Cmd):
             self.CNF['LNK'] = dict()
 
         # update the LNK
-        self.updateLNK()
+        self.update_opener()
 
 
-    def updateLNK(self):
+    # for general code shortening, the opener CNF vars
+    # where renamed into LNK.
+    def update_opener(self):
         def gen_srvhash():
             domain  = self.CNF['LNK']['DOMAIN']
             md5     = hashlib.md5(domain)
@@ -124,7 +126,7 @@ class Start(interface.cmdlib.Cmd):
                     from usr.settings import comply
                     if comply(self.CNF['SET']):
                         show(var, self.CNF['SET'][var])
-                        self.updateLNK()
+                        self.update_opener()
                     else:
                         self.CNF['SET'][var] = backup
                 else:
