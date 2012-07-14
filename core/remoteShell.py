@@ -12,6 +12,7 @@ class Start(cmdlib.Cmd):
 
     coreHelp = dict()
     coreHelp['clear']   = 'Clear the terminal screen'
+    coreHelp['debug']   = 'For tool debugging purpose'
     coreHelp['env']     = 'Change environment variables'
     coreHelp['exit']    = 'Disconnect from remote server'
     coreHelp['help']    = 'Show this help message'
@@ -125,6 +126,12 @@ class Start(cmdlib.Cmd):
     ### COMMAND: clear ###
     def do_clear(self, line):
         clear()
+
+    ######################
+    ### COMMAND: debug ###
+    def do_debug(self, line):
+        from pprint import pprint
+        pprint(self.CNF)
 
     #####################
     ### COMMAND: exit ###
