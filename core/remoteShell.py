@@ -8,7 +8,7 @@ from framework import cmdAPI
 from StringIO  import StringIO
 
 
-class Start(interface.cmdlib.Cmd):
+class Start(cmdlib.Cmd):
 
     coreHelp = dict()
     coreHelp['clear']   = 'Clear the terminal screen'
@@ -80,7 +80,7 @@ class Start(interface.cmdlib.Cmd):
         # fork standard output for command logging
         l = line.strip()
         if l and not l.startswith('lastcmd'):
-            sys.stdout = fork_stdout(StringIO())
+            sys.stdout = cmdlib.fork_stdout(StringIO())
         return line
 
 

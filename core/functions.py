@@ -6,27 +6,6 @@ TEMP_DIR   = gettempdir()
 SCRIPT_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 
-class fork_stdout(object):
-    """this class can replace sys.stdout and writes
-    simultaneously to standard output AND specified file
-    usage: fork_stdout(altFile)"""
-    def __init__(self, file):
-        self.file = file
-        self.stdout = sys.stdout
-        sys.stdout = self
-
-    def __del__(self):
-        sys.stdout = self.stdout
-        self.file.close()
-
-    def write(self, data):
-        self.file.write(data)
-        self.stdout.write(data)
-
-    def flush(self):
-        self.stdout.flush()
-
-
 def write(seq):
     sys.stdout.write(seq)
     sys.stdout.flush()
