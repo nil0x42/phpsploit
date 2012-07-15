@@ -87,11 +87,19 @@ def comply(settings):
                                 'user-agent','content-type','content-length']
             if not value:
                 setError(name,'Is empty')
-            if value != '%%SRVHASH%%':
+
+            # condition disabled, SRVHASH is no more supported
+            # because it troubles changing target during a running session
+            # (if the passkey is SRVHASH, and target on same server use another
+            # hostname, the domain hashkey will change, making impossible to know
+            # what real backdoor we have to use with the "infect" command.
+            ### if value != '%%SRVHASH%%':
+            if True:
                 value = value.lower()
                 if not re.match('^[a-z0-9_]+$',value):
-                    err = 'Only alphanumeric chars and underscore'
-                    err+= ' OR %%SRVHASH%% are accepted'
+                    #err = 'Only alphanumeric chars and underscore'
+                    #err+= ' OR %%SRVHASH%% are accepted'
+                    err = 'Accepted chars: a-zA-Z_'
                     setError(name,err)
                 if re.match('^zz[a-z]{2}$',value) \
                 or value.replace('_','-') in reserved_headers:

@@ -1,11 +1,11 @@
 import os, sys, re
+from StringIO  import StringIO
 
-# local
-from functions import *
+from functions       import *
+from framework.shell import *
+
 from interface import cmdlib
 from framework import cmdAPI
-# standard
-from StringIO  import StringIO
 
 
 class Start(cmdlib.Cmd):
@@ -16,6 +16,7 @@ class Start(cmdlib.Cmd):
     coreHelp['env']     = 'Change environment variables'
     coreHelp['exit']    = 'Disconnect from remote server'
     coreHelp['help']    = 'Show this help message'
+    coreHelp['infect']  = 'Generate a backdoor for targeted URL'
     coreHelp['lastcmd'] = 'Save or view the last command output'
     coreHelp['lcd']     = 'Change local working directory'
     coreHelp['lpwd']    = 'Print local working directory'
@@ -34,7 +35,8 @@ class Start(cmdlib.Cmd):
 
         # if we changed target server, remove ENV
         if 'ENV' in self.CNF:
-            if self.CNF['ENV_HASH'] != self.CNF['LNK']['HASH']:
+            if  self.CNF['ENV_HASH'] != self.CNF['LNK']['HASH'] \
+            and self.CNF['SRV_HASH'] != self.CNF['SRV']['signature']:
                 del self.CNF['ENV_HASH']
                 del self.CNF['ENV']
 
@@ -42,6 +44,7 @@ class Start(cmdlib.Cmd):
         if not 'ENV' in self.CNF:
             self.CNF['ENV'] = dict()
             self.CNF['ENV_HASH'] = self.CNF['LNK']['HASH']
+            self.CNF['SRV_HASH'] = self.CNF['SRV']['signature']
 
         # default env values if not already set
         self.default_env('CWD',          self.CNF['SRV']['home'])
@@ -49,8 +52,11 @@ class Start(cmdlib.Cmd):
         self.default_env('WRITE_WEBDIR', self.CNF['SRV']['write_webdir'])
         self.default_env('WRITE_TMPDIR', self.CNF['SRV']['write_tmpdir'])
 
-        print 'Connected to %s server %s' \
-            % (self.CNF['SRV']['os'],     self.CNF['SRV']['host'])
+        print P_inf+'Shell obtained by PHP (%s -> %s:%s)' \
+            % (self.CNF['SRV']['client_addr'], self.CNF['SRV']['addr'], self.CNF['SRV']['port'])
+
+        print P_NL+'Connected to %s server %s' \
+            % (self.CNF['SRV']['os'], self.CNF['SRV']['host'])
 
         print 'running PHP %s with %s' \
             % (self.CNF['SRV']['phpver'], self.CNF['SRV']['soft'])
@@ -151,6 +157,11 @@ class Start(cmdlib.Cmd):
         savedFile = usr.session.save(self.CNF, line)
         if savedFile:
             self.CNF['SET']['SAVEFILE'] = savedFile
+
+    #######################
+    ### COMMAND: infect ###
+    def do_infect(self, line):
+        cmd_infect(self.CNF['LNK']['BACKDOOR'])
 
     #####################
     ### COMMAND: lpwd ###
@@ -332,9 +343,30 @@ class Start(cmdlib.Cmd):
         return([x+' ' for x in keys if x.startswith(text)])
 
     def do_set(self, line):
+
         def show(*elem):
             tpl = '%s ==> '+color(1)+'%s'+color(0)
             print tpl % elem
+
+        def set_var(var):
+            backup = self.CNF['SET'][var]
+            self.CNF['SET'][var] = val
+            from usr.settings import comply
+            if comply(self.CNF['SET']):
+                lnk_backup = self.CNF['LNK']
+                self.CNF['LNK'] = update_opener(self.CNF)
+                # if changed TARGET url:
+                if var == 'TARGET':
+                    import network.server
+                    if network.server.Link(self.CNF).check():
+                        self.CNF['ENV_HASH'] = self.CNF['LNK']['HASH']
+                    else:
+                        self.CNF['LNK']      = lnk_backup
+                        self.CNF['SET'][var] = backup
+                else:
+                    show(var, self.CNF['SET'][var])
+            else:
+                self.CNF['SET'][var] = backup
 
         if line:
             args = line.strip().split(' ')
@@ -345,14 +377,7 @@ class Start(cmdlib.Cmd):
                     if var in self.locked_settings:
                         print P_err+'Locked session setting: '+var
                     else:
-                        backup = self.CNF['SET'][var]
-                        self.CNF['SET'][var] = val
-                        from usr.settings import comply
-                        if comply(self.CNF['SET']):
-                            show(var, self.CNF['SET'][var])
-                            #self.updateOpener()
-                        else:
-                            self.CNF['SET'][var] = backup
+                        set_var(var)
                 else:
                     show(var, self.CNF['SET'][var])
             else:
@@ -385,8 +410,9 @@ class Start(cmdlib.Cmd):
             else:
                 cmdData = self.commands.cmddata(cmdName)
                 cmdPath = self.commands.cmdpath(cmdName)
-                args = (self.CNF,cmdData,cmdPath,cmdName,cmdArgs)
-                self.CNF['ENV'] = cmdAPI.Exec(*args)
+                plugin  = (self.CNF, cmdData, cmdPath, cmdName, cmdArgs)
+                self.CNF['ENV'] = cmdAPI.Exec(*plugin)
+                del self.CNF['cmd']
 
     ############
     ### HELP ###

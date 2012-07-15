@@ -19,11 +19,9 @@ TMPPATH=%%TEMPDIR%%
 PROXY=None
 
 ########## PASSKEY ###########
-### $_POST variable to use for backdoor tunelling:
-### Example: PASSKEY=%%SRVHASH%%
-### -Q: What is "%%SRVHASH%%" ?
-### -R: Its the value of a target domain based hash,
-###     use it to generate dynamic backdoors.
+### Payload main variable to use
+### for backdoor tunelling:
+### Example: PASSKEY=my_passkey
 PASSKEY=phpSpl01t
 
 ########## BACKDOOR ##########
@@ -78,7 +76,7 @@ REQ_MAX_POST_SIZE=8Mb
 ###       to send a multipart payload but drastically slow down
 ###       the computing time of the payload builder
 ### Example: REQ_ZLIB_TRY_LIMIT=1mb
-REQ_ZLIB_TRY_LIMIT=3mb
+REQ_ZLIB_TRY_LIMIT=5mb
 
 ######## REQ_INTERVAL #######
 ### interval between two requests

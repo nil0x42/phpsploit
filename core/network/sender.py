@@ -246,8 +246,8 @@ class Load:
                 if err:
                     print err
                 self.error = errtype
-                return(1)
-            return(0)
+                return(True)
+            return(False)
 
         request = self.Build(payload)
         if gotError(request, 'building', 'Build'): return
@@ -292,6 +292,7 @@ class Load:
                 print ''
                 return('Payload construction aborted')
 
+        print P_inf+'Large payload: %s bytes' % payload.length
         request = dict()
         for m in self.methods:
             write('\rBuilding '+m+' method...\r')
@@ -374,7 +375,11 @@ class Load:
         if len(request):
             show(len(request)+1)
             print ''
-        return(self.send_single_request(lastreq))
+
+        response = self.send_single_request(lastreq)
+        if response['error']:
+            return(response['error'])
+        return(response)
 
 
 
@@ -383,7 +388,6 @@ class Load:
             if response['error']:
                 return(response['error'])
             return('Execution Error: Failed to unparse the response')
-
         response = response['data']
 
         try: response = response.decode('zlib')
