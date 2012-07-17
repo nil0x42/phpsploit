@@ -360,6 +360,7 @@ class Start(cmdlib.Cmd):
                     import network.server
                     if network.server.Link(self.CNF).check():
                         self.CNF['ENV_HASH'] = self.CNF['LNK']['HASH']
+                        self.set_prompt()
                     else:
                         self.CNF['LNK']      = lnk_backup
                         self.CNF['SET'][var] = backup

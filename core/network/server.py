@@ -6,20 +6,30 @@ class Link:
 
     def __init__(self, CNF):
         self.CNF  = CNF
+        self.is_first_payload = False
+        self.req_err = 'Error connecting to the target'
+        self.exc_err = 'The target does not semm to be infected'
 
 
-    def open(self, payload='open'):
-        payload = 'framework/phpfiles/server_link/%s.php' % payload
-        payload = getpath(payload).phpcode()
-        return(self._send(payload))
+    def open(self):
+        self.is_first_payload = True
+        return(self._link('open'))
 
 
     def check(self):
-        signature = self.CNF['SRV']['signature']
-        if not self.open():
+        err_tpl = 'Settings error: %s: ' % quot('TARGET')
+        self.req_err = err_tpl+'Communication impossible'
+        self.exc_err = err_tpl+'Needs to be a backdoored URL'
+
+        if not self._link('open'):
             return(False)
-        if self.signature != signature:
+
+        old_srv = self.CNF['SRV']['signature']
+        new_srv = self.srv_vars['signature']
+        if new_srv != old_srv:
+            self._error(err_tpl+'Is not owned by the same server')
             return(False)
+
         return(True)
 
 
@@ -27,16 +37,15 @@ class Link:
         print P_inf+'Connection to %s closed.' % self.CNF['LNK']['DOMAIN']
         return(True)
 
+    def _link(self, _type='open'):
+        payload = 'framework/phpfiles/server_link/%s.php' % _type
+        payload = getpath(payload).phpcode()
+        return(self._send(payload))
 
     def _send(self, payload):
         link = network.sender.Load(self.CNF)
         link.open(payload)
-        err = link.error
-        if err:
-            if err == 'request':
-                print P_err+'Error connecting to the target'
-            if err == 'execution':
-                print P_err+'The target does not seem to be infected'
+        if self._error(link):
             return(False)
         self.success = True
         env = self._get_env(link.read())
@@ -46,6 +55,17 @@ class Link:
         self.signature = srv['signature']
         return(True)
 
+    def _error(self, obj):
+        err = ''
+        try: err = obj.error
+        except: print P_err+obj
+        if not err:
+            return(False)
+        if err == 'request':
+            print P_err+self.req_err
+        if err == 'execution':
+            print P_err+self.exc_err
+        return(True)
 
     def _get_env(self, env):
         result = list()
