@@ -40,7 +40,7 @@ class Load:
         self.max_header_size = octets(CNF['SET']['REQ_MAX_HEADER_SIZE'])
         self.max_post_size   = octets(CNF['SET']['REQ_MAX_POST_SIZE'])
         self.zlib_try_limit  = octets(CNF['SET']['REQ_ZLIB_TRY_LIMIT'])
-        self.b64_forwarder   = CNF['SET']['REQ_B64_FORWARDER'].replace('%%PAYLOAD%%', '%s')
+        self.header_payload  = CNF['SET']['REQ_HEADER_PAYLOAD'].replace('%%BASE64%%', '%s')
         self.interval        = CNF['SET']['REQ_INTERVAL']
 
         available_headers = self.max_headers-len(self.base_headers)-len(self.headers.keys())-1 # -1 for the forwarder
@@ -70,10 +70,9 @@ class Load:
 
     def decapsulate(self, response):
         response = response.read()
-        errors   = self.get_php_errors(response)
-        #if 'unexpected $end' in errors:
-        if errors:
-            return(response)
+        #errors   = self.get_php_errors(response)
+        #if errors:
+        #    return(response)
         try: return(re.findall(self.unparser, response)[0])
         except: return(None)
 
@@ -108,7 +107,7 @@ class Load:
         # eg: "eval(base64_decode(89jjLKJnj))"
         b64Forwarder = b64Forwarder.rstrip('=')
 
-        return(self.b64_forwarder % b64Forwarder)
+        return(self.header_payload % b64Forwarder)
 
     def build_get_headers(self, payload):
         def get_header_names(num):
