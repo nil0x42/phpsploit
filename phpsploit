@@ -84,7 +84,7 @@ elif sys.argc == 2:
                 err = "Session not compatible with phpsploit %s"
                 sys.exit(P_inf+err % softVer)
             CNF = session.content
-            SET = settings.merge(SET, CNF['SET'])
+            SET = settings.merge(CNF['SET'], SET)
             SET['SAVEFILE'] = abspath(arg)
             arg_error = False
 

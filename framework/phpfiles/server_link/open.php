@@ -9,11 +9,11 @@ function getTmpDir(){
         elseif(!empty($_ENV['TMPDIR']))$t=$_ENV['TMPDIR'];
         elseif(!empty($_ENV['TEMP']))$t=$_ENV['TEMP'];
         else{
-            $t=tempnam(":\n\\/?><","dkdk");
+            $t=@tempnam(":\n\\/?><","dkdk");
             if(@file_exists($t))@unlink($t);
-            $t=dirname($t);}}
-    else $t=sys_get_temp_dir();
-    return(realpath($t));}
+            $t=@dirname($t);}}
+    else $t=@sys_get_temp_dir();
+    return($t);}
 
 
 $R = $_SERVER;
@@ -42,7 +42,7 @@ if(!$R['WEBROOT']){
             $len=strlen($tmp);
             if($tmp==substr($abs,-$len)){
                 $R['WEBROOT']=substr($abs,0,-$len);}}}}
-$R['WEBROOT'] = realpath($R['WEBROOT']);
+$R['WEBROOT'] = @realpath($R['WEBROOT']);
 
 
 // GET A WRITABLE DIR FROM WEB PATH
@@ -52,7 +52,7 @@ $R['W_WEBDIR']='';
 for ($recLvl=1;$recLvl<=$MAX_RECURSION;$recLvl++){
     foreach($DIRS as $dir){
         if (dirAccess($dir,'w')){
-            $R['W_WEBDIR'] = realpath($dir);
+            $R['W_WEBDIR'] = @realpath($dir);
             break(2);}}
     if ($recLvl==$MAX_RECURSION) break;
     $oldDIRS = $DIRS;

@@ -161,6 +161,10 @@ def comply(settings):
             if value.upper() not in ['GET','POST']:
                 setError(name, "Accepted values are GET or POST")
 
+        elif name == 'REQ_B64_FORWARDER':
+            if not '%%PAYLOAD%%' in value:
+                setError(name,'Have to contain %%PAYLOAD%%')
+
         elif name == 'REQ_MAX_HEADERS':
             try:
                 value = int(value)

