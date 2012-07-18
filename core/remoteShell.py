@@ -16,7 +16,7 @@ class Start(cmdlib.Cmd):
     coreHelp['env']     = 'Change environment variables'
     coreHelp['exit']    = 'Disconnect from remote server'
     coreHelp['help']    = 'Show this help message'
-    coreHelp['infect']  = 'Generate a backdoor for targeted URL'
+    coreHelp['infect']  = 'Print the working backdoor'
     coreHelp['lastcmd'] = 'Save or view the last command output'
     coreHelp['lcd']     = 'Change local working directory'
     coreHelp['lpwd']    = 'Print local working directory'

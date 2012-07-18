@@ -5,8 +5,8 @@ Basic commands
     -------        -----------
     clear          Clear the terminal screen
     exit           Leave the phpsploit framework
-    exploit        Get a shell from target server
+    exploit        Drop a shell from target server
     help           Show this help message
-    infect         Generate a backdoor for targeted URL
+    infect         Print the working backdoor
     save           Save the current session in file
     set            View and edit settings
