@@ -39,7 +39,7 @@ def color(*codes):
     if sys.platform.startswith('linux'):
         for code in codes:
             if type(code).__name__ == 'int':
-                result+='\033['+str(code)+'m'
+                result+='\x01\x1b['+str(code)+'m\x02'
     return(result)
 
 
@@ -61,6 +61,27 @@ def termlen():
 # split_len('lol',2) -> ['lo','l']
 def split_len(seq, length):
     return [seq[i:i+length] for i in range(0, len(seq), length)]
+
+def split_len_color(string, length):
+    result  = list()
+    pot     = ''
+    potLen  = 0
+    visible = True
+    for char in string:
+        if potLen == length:
+            result.append(pot)
+            pot = ''
+            potLen = 0
+        if char == '\x01':
+            visible = False
+        pot+=char
+        if visible:
+            potLen+=1
+        if char == '\x02':
+            visible = True
+    if pot:
+        result.append(pot)
+    return(result)
 
 
 # get bytes number from octets string `octets('1kb') > 1024`
