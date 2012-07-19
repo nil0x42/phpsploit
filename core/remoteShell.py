@@ -28,7 +28,7 @@ class Start(cmdlib.Cmd):
     def preloop(self):
 
         # read only variables
-        self.locked_env      = ['CWD']
+        self.locked_env      = [] #['CWD']
         self.locked_settings = ['PASSKEY']
 
         self.CNF['CURRENT_SHELL'] = ''
