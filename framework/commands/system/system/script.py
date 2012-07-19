@@ -8,7 +8,7 @@ cmdSep = ";"
 if api.server['platform'] == 'win':
     cmdSep = "&"
 
-cmdSep = " "+cmdSep+" "
+cmdSep = " %s " % cmdSep
 
 commands = list()
 
@@ -22,10 +22,21 @@ commands+= ['cd '+rpath.cwd]
 # get request cmd
 commands+= [' '.join([x.replace(' ','\\ ') for x in self.argv[1:]])]
 
+
 CMD = cmdSep.join(commands)
+
+# patch to take care of new CWD if changed (part1)
+if api.server['platform'] == 'nix':
+    CMD+= cmdSep+'pwd'
 
 http.send({'CMD' : CMD})
 
-print http.response
+response = http.response.splitlines()
 
+# patch to take care of new CWD if changed (part2)
+if response[-1].startswith('/'):
+    api.env['CWD'] = response[-1].strip()
+    response = response[:-1]
 
+if response:
+    print P_NL.join(response)
