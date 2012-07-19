@@ -122,6 +122,8 @@ def Exec(core, cmd, path, name, line):
 
     try: exec(cmd['script'])
 
+    except KeyboardInterrupt:
+        raise KeyboardInterrupt
     except:
         etype = str(sys.exc_info()[0])
         etype = etype[etype.find('.')+1:-2]

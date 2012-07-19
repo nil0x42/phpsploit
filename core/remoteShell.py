@@ -412,8 +412,11 @@ class Start(cmdlib.Cmd):
                 cmdData = self.commands.cmddata(cmdName)
                 cmdPath = self.commands.cmdpath(cmdName)
                 plugin  = (self.CNF, cmdData, cmdPath, cmdName, cmdArgs)
-                self.CNF['ENV'] = cmdAPI.Exec(*plugin)
-                del self.CNF['cmd']
+                try:
+                    self.CNF['ENV'] = cmdAPI.Exec(*plugin)
+                    del self.CNF['cmd']
+                except KeyboardInterrupt:
+                    self.when_interrupt()
 
     ############
     ### HELP ###

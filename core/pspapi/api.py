@@ -27,8 +27,11 @@ class api:
             if self.cmdargc == 1:
                 self.exit()
             elif self.cmdargc == 2:
-                if ''.join(self.cmdargv[1:]) == '?':
+                args = ' '.join(self.cmdargv[1:])
+                if args == '?':
                     self.exit(self.cmdhelp)
+                if args == 'exit':
+                    raise KeyboardInterrupt
 
     def needsenv(self, name):
         name = name.upper()
