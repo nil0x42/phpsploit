@@ -24,6 +24,10 @@ class Load:
     def __init__(self, CNF):
         self.target   = CNF['SET']['TARGET']
 
+        self.is_first_payload = False
+        self.is_first_request = True
+        self.payload_forwarder_error = None
+
         self.passkey  = CNF['LNK']['PASSKEY']
         self.opener   = network.http.build_opener(CNF['SET']['PROXY'])
         self.headers  = network.http.load_headers(CNF['SET'])
@@ -107,7 +111,20 @@ class Load:
         # eg: "eval(base64_decode(89jjLKJnj))"
         b64Forwarder = b64Forwarder.rstrip('=')
 
-        return(self.header_payload % b64Forwarder)
+        forwarder = self.header_payload % b64Forwarder
+
+        err = None
+        if  (not '"%s"' in self.header_payload and not "'%s'" in self.header_payload) \
+        and ("+" in b64Forwarder or "/" in b64Forwarder):
+            pass
+        elif 1:
+            err = P_inf+'don\'t enquotes the payload who contains "+" or "/", blocking execution:'
+            err+= (P_NL+P_inf+color(36)).join(['']+split_len(forwarder, 76))
+        elif '"' in self.header_payload or "'" in self.header_payload:
+            err = P_inf+'contains quotes, and some servers escape them in request headers.'
+        self.payload_forwarder_error = err
+
+        return(forwarder)
 
     def build_get_headers(self, payload):
         def get_header_names(num):
@@ -213,6 +230,7 @@ class Load:
         try:
             resp = self.opener.open(request)
             response['data'] = self.decapsulate(resp)
+            self.is_first_request = False
         except urllib2.HTTPError, e:
             response['data'] = self.decapsulate(e)
             if response['data'] is None:
@@ -401,7 +419,12 @@ class Load:
         if response['data'] is None:
             if response['error']:
                 return(response['error'])
-            return('Execution Error: Failed to unparse the response')
+            print P_err+'Execution Error: Failed to unparse the response'
+            if self.payload_forwarder_error:
+                msg = 'If the target is infected, error can occur '
+                msg+= 'because the REQ_HEADER_PAYLOAD'+P_NL
+                print P_inf+msg+self.payload_forwarder_error
+            return('')
         response = response['data']
 
         try: response = response.decode('zlib')

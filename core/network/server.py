@@ -8,7 +8,7 @@ class Link:
         self.CNF  = CNF
         self.is_first_payload = False
         self.req_err = 'Error connecting to the target'
-        self.exc_err = 'The target does not semm to be infected'
+        self.exc_err = 'The target does not seem to be infected'
 
 
     def open(self):
@@ -44,6 +44,7 @@ class Link:
 
     def _send(self, payload):
         link = network.sender.Load(self.CNF)
+        link.is_first_payload = self.is_first_payload
         link.open(payload)
         if self._error(link):
             return(False)
