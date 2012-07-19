@@ -113,13 +113,15 @@ class Load:
 
         forwarder = self.header_payload % b64Forwarder
 
+        if not self.is_first_payload:
+            return(forwarder)
+
         err = None
         if  (not '"%s"' in self.header_payload and not "'%s'" in self.header_payload) \
         and ("+" in b64Forwarder or "/" in b64Forwarder):
-            pass
-        elif 1:
+            divBy3 = int(round((float(len(forwarder))/3)+0.5))
             err = P_inf+'don\'t enquotes the payload who contains "+" or "/", blocking execution:'
-            err+= (P_NL+P_inf+color(36)).join(['']+split_len(forwarder, 76))
+            err+= (P_NL+P_inf+color(36)).join(['']+split_len(forwarder, divBy3))
         elif '"' in self.header_payload or "'" in self.header_payload:
             err = P_inf+'contains quotes, and some servers escape them in request headers.'
         self.payload_forwarder_error = err
