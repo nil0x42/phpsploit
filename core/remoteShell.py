@@ -30,28 +30,9 @@ class Start(cmdlib.Cmd):
         # read only variables
         self.locked_env      = [] #['CWD']
         self.locked_settings = ['PASSKEY']
-
         self.CNF['CURRENT_SHELL'] = ''
 
-        # if we changed target server, remove ENV
-        if 'ENV' in self.CNF:
-            if  self.CNF['ENV_HASH'] != self.CNF['LNK']['HASH'] \
-            and self.CNF['SRV_HASH'] != self.CNF['SRV']['signature']:
-                del self.CNF['ENV_HASH']
-                del self.CNF['ENV']
-
-        # set ENV default values if empty
-        if not 'ENV' in self.CNF:
-            self.CNF['ENV'] = dict()
-            self.CNF['ENV_HASH'] = self.CNF['LNK']['HASH']
-            self.CNF['SRV_HASH'] = self.CNF['SRV']['signature']
-
-        # default env values if not already set
-        self.default_env('CWD',          self.CNF['SRV']['home'])
-        self.default_env('WEB_ROOT',     self.CNF['SRV']['webroot'])
-        self.default_env('WRITE_WEBDIR', self.CNF['SRV']['write_webdir'])
-        self.default_env('WRITE_TMPDIR', self.CNF['SRV']['write_tmpdir'])
-
+        # print exploit info
         print P_inf+'Shell obtained by PHP (%s -> %s:%s)' \
             % (self.CNF['SRV']['client_addr'], self.CNF['SRV']['addr'], self.CNF['SRV']['port'])
 
@@ -60,6 +41,41 @@ class Start(cmdlib.Cmd):
 
         print 'running PHP %s with %s' \
             % (self.CNF['SRV']['phpver'], self.CNF['SRV']['soft'])
+
+        servUpdate = False
+
+        # if we changed target server, ask to remove ENV
+        if 'ENV' in self.CNF:
+            if self.CNF['SRV_HASH'] != self.CNF['SRV']['signature']:
+                response = ''
+                query = 'The server signature has changed, reset environment variables ? (Y/n) : '
+                print ''
+                while response not in ['y','n']:
+                    try: response = raw_input(P_inf+query).lower()
+                    except KeyboardInterrupt: print ''
+                    except: pass
+                if response == 'y':
+                    print P_inf+'Reset environment'+P_NL
+                    del self.CNF['ENV_HASH']
+                    del self.CNF['ENV']
+                else:
+                    print P_inf+'Keeping environment'+P_NL
+                    servUpdate = True
+
+        # set ENV default values if empty
+        if not 'ENV' in self.CNF:
+            self.CNF['ENV'] = dict()
+            servUpdate = True
+
+        if servUpdate:
+            self.CNF['ENV_HASH'] = self.CNF['LNK']['HASH']
+            self.CNF['SRV_HASH'] = self.CNF['SRV']['signature']
+
+        # default env values if not already set
+        self.default_env('CWD',          self.CNF['SRV']['home'])
+        self.default_env('WEB_ROOT',     self.CNF['SRV']['webroot'])
+        self.default_env('WRITE_WEBDIR', self.CNF['SRV']['write_webdir'])
+        self.default_env('WRITE_TMPDIR', self.CNF['SRV']['write_tmpdir'])
 
         # alert for recomended ENV vars if not defined
         if not self.CNF['ENV']['WRITE_WEBDIR']:
@@ -72,7 +88,7 @@ class Start(cmdlib.Cmd):
             print P_err+"Env warning: No writeable tmp directory found."
             print P_err+"             Use '%s' to set it." % cmd
 
-        # load pliugins as commands
+        # load plugins as commands
         self.commands = cmdAPI.Loader()
         self.commands.setCore(self.coreHelp)
         self.update_commands()
