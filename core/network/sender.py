@@ -45,6 +45,7 @@ class Load:
         self.max_post_size   = octets(CNF['SET']['REQ_MAX_POST_SIZE'])
         self.zlib_try_limit  = octets(CNF['SET']['REQ_ZLIB_TRY_LIMIT'])
         self.header_payload  = CNF['SET']['REQ_HEADER_PAYLOAD'].replace('%%BASE64%%', '%s')
+        self.header_payload  = self.header_payload.rstrip(';')+';'
         self.interval        = CNF['SET']['REQ_INTERVAL']
 
         available_headers = self.max_headers-len(self.base_headers)-len(self.headers.keys())-1 # -1 for the forwarder
@@ -117,11 +118,13 @@ class Load:
             return(forwarder)
 
         err = None
+
         if  (not '"%s"' in self.header_payload and not "'%s'" in self.header_payload) \
         and ("+" in b64Forwarder or "/" in b64Forwarder):
             divBy3 = int(round((float(len(forwarder))/3)+0.5))
             err = P_inf+'don\'t enquotes the payload who contains "+" or "/", blocking execution:'
             err+= (P_NL+P_inf+color(36)).join(['']+split_len(forwarder, divBy3))
+
         elif '"' in self.header_payload or "'" in self.header_payload:
             err = P_inf+'contains quotes, and some servers escape them in request headers.'
         self.payload_forwarder_error = err
