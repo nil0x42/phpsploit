@@ -35,12 +35,11 @@ def clear():
 # send bash colour sequences > color(0,4) == '\033[0,4m'
 # USE IT TO KEEP WINDOWS COMPATIBILITY !
 def color(*codes):
-    #tpl = '\x01\x1b[%sm\x02'
-    tpl = '\x1b[%sm'
-    codes = ';'.join([str(int(x)) for x in list(codes)])
+    color = ''
     if sys.platform.startswith('linux'):
-        return(tpl % codes)
-    return('')
+        for c in codes:
+            color+= '\x1b[%sm' % c
+    return(color)
 
 
 # enquote a string
@@ -116,6 +115,25 @@ def getinterval(seq):
         return(random.uniform(n1,n2))
     except:
         return(None)
+
+
+# ask a question
+class ask:
+    bool_tpl = '[y/n]'
+
+    def __init__(self, question):
+        self.question = P_inf+question
+
+    def _bool(default='y'):
+        hilight = color(1)+default.upper()+color(0)
+        tpl = self.bool_tpl.replace(default, hilight)
+
+
+    def agree():
+        pass
+
+    def reject():
+        pass
 
 
 # get a custom object from a path
