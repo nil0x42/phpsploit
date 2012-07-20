@@ -237,12 +237,13 @@ class Start(cmdlib.Cmd):
         print '         lastcmd save'
         print '         lastcmd save [file]'
         print '         lastcmd grep [string]'
+        print '         lastcmd hilight [regex]'
         print ''
         print 'Example: lastcmd save /tmp/log.txt'
         print '         lastcmd grep mysql_connect'
 
     def complete_lastcmd(self, text, *ignored):
-        keys = ['save','view','grep']
+        keys = ['save','view','grep','hilight']
         return([x+' ' for x in keys if x.startswith(text)])
 
     def do_lastcmd(self, line):
@@ -256,7 +257,7 @@ class Start(cmdlib.Cmd):
             val  = ' '.join(args[1:])
             if var == 'save':
                 fileName = ''
-                data = re.sub('(\x1b\[\d+?m)', '', data)
+                data = decolorize(data)
 
                 if not val:
                     val = self.CNF['SET']['TMPPATH']
@@ -286,6 +287,11 @@ class Start(cmdlib.Cmd):
             elif var == 'grep':
                 lines = data.splitlines()
                 print P_NL.join([x for x in lines if val.lower() in x.lower()])
+            elif var == 'hilight':
+                data = decolorize(data)
+                tpl = '%s\\1%s' % (color(31,1), color(0))
+                print re.sub('(%s)' % val, tpl, data)
+
             else:
                 self.help_lastcmd()
 

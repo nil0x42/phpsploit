@@ -41,6 +41,10 @@ def color(*codes):
             color+= '\x1b[%sm' % c
     return(color)
 
+def decolorize(string):
+    from re import sub
+    regex = '(\x1b\[\d+?m)'
+    return(sub(regex, '', string))
 
 # enquote a string
 # USE IT TO KEEP WINDOWS COMPATIBILITY !
