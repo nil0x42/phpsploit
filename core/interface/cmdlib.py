@@ -98,9 +98,9 @@ class Cmd:
             self.preloop()
             stop = None
             while not stop:
-                #self.prompt = re.sub('(\x1b\[\d+?m)','\x01\\1\x02',self.prompt)
-                #self.prompt = self.prompt.replace('\x01\x01','\x01')
-                #self.prompt = self.prompt.replace('\x02\x02','\x02')
+                self.prompt = re.sub('(\x1b\[\d+?m)','\x01\\1\x02',self.prompt)
+                self.prompt = self.prompt.replace('\x01\x01','\x01')
+                self.prompt = self.prompt.replace('\x02\x02','\x02')
                 if self.cmdqueue:
                     line = self.cmdqueue.pop(0)
                 else:

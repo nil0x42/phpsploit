@@ -35,7 +35,8 @@ def clear():
 # send bash colour sequences > color(0,4) == '\033[0,4m'
 # USE IT TO KEEP WINDOWS COMPATIBILITY !
 def color(*codes):
-    tpl = '\x01\x1b[%sm\x02'
+    #tpl = '\x01\x1b[%sm\x02'
+    tpl = '\x1b[%sm'
     codes = ';'.join([str(int(x)) for x in list(codes)])
     if sys.platform.startswith('linux'):
         return(tpl % codes)
