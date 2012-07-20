@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 #-*- coding: iso-8859-15 -*-
 
-softVer = '2.0 Alpha1'
+softVer = '2.0.1 Alpha'
 coreVer = 2
 
 
