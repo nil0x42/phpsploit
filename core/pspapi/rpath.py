@@ -47,7 +47,7 @@ class rpath:
             slash    = '\\'
             path     = root+path.lstrip('\\')
         else:
-            print 'unknow path ID on rpath.py !!!'
+            print 'unknow path ID on rpath.py please contact dev'
         dirname  = slash.join(path.split(slash)[:-1])+slash
         basename = path.split(slash)[-1]
         elems = path[len(root):].split(slash)
@@ -61,7 +61,9 @@ class rpath:
 
 
     def isabs(self, path):
-        if path.startswith('/') or re.match(self.winPathRegex,path) or path.startswith('\\'):
+        if path.startswith('/') \
+        or re.match(self.winPathRegex,path) \
+        or path.startswith('\\'):
             return(True)
         return(False)
 

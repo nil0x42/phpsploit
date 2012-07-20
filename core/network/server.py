@@ -37,10 +37,12 @@ class Link:
         print P_inf+'Connection to %s closed.' % self.CNF['LNK']['DOMAIN']
         return(True)
 
+
     def _link(self, _type='open'):
         payload = 'framework/phpfiles/server_link/%s.php' % _type
         payload = getpath(payload).phpcode()
         return(self._send(payload))
+
 
     def _send(self, payload):
         link = network.sender.Load(self.CNF)
@@ -56,6 +58,7 @@ class Link:
         self.signature = srv['signature']
         return(True)
 
+
     def _error(self, obj):
         err = ''
         try: err = obj.error
@@ -67,6 +70,7 @@ class Link:
         if err == 'execution':
             print P_err+self.exc_err
         return(True)
+
 
     def _get_env(self, env):
         result = list()
