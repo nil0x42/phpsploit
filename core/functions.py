@@ -35,12 +35,11 @@ def clear():
 # send bash colour sequences > color(0,4) == '\033[0,4m'
 # USE IT TO KEEP WINDOWS COMPATIBILITY !
 def color(*codes):
-    result = ''
+    tpl = '\x01\x1b[%sm\x02'
+    codes = ';'.join([str(int(x)) for x in list(codes)])
     if sys.platform.startswith('linux'):
-        for code in codes:
-            if type(code).__name__ == 'int':
-                result+='\x01\x1b['+str(code)+'m\x02'
-    return(result)
+        return(tpl % codes)
+    return('')
 
 
 # enquote a string
@@ -61,6 +60,7 @@ def termlen():
 # split_len('lol',2) -> ['lo','l']
 def split_len(seq, length):
     return [seq[i:i+length] for i in range(0, len(seq), length)]
+
 
 def split_len_color(string, length):
     result  = list()
