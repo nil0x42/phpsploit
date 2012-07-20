@@ -102,7 +102,9 @@ class Start(cmdlib.Cmd):
             line = self.CNF['CURRENT_SHELL']+' '+line
         # fork standard output for command logging
         l = line.strip()
-        if l and not l.startswith('lastcmd'):
+        if l \
+        and not l.startswith('lastcmd') \
+        and l != self.CNF['CURRENT_SHELL']+' exit':
             sys.stdout = cmdlib.fork_stdout(StringIO())
         return line
 
