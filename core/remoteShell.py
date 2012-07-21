@@ -56,7 +56,7 @@ class Start(cmdlib.Cmd):
                     except: pass
                 if response == 'y':
                     print P_inf+'Reset environment'+P_NL
-                    del self.CNF['ENV_HASH']
+                    del self.CNF['LNK_HASH']
                     del self.CNF['ENV']
                 else:
                     print P_inf+'Keeping environment'+P_NL
@@ -68,7 +68,7 @@ class Start(cmdlib.Cmd):
             servUpdate = True
 
         if servUpdate:
-            self.CNF['ENV_HASH'] = self.CNF['LNK']['HASH']
+            self.CNF['LNK_HASH'] = self.CNF['LNK']['HASH']
             self.CNF['SRV_HASH'] = self.CNF['SRV']['signature']
 
         # default env values if not already set
@@ -383,7 +383,7 @@ class Start(cmdlib.Cmd):
                 if var == 'TARGET':
                     import network.server
                     if network.server.Link(self.CNF).check():
-                        self.CNF['ENV_HASH'] = self.CNF['LNK']['HASH']
+                        self.CNF['LNK_HASH'] = self.CNF['LNK']['HASH']
                         self.set_prompt()
                     else:
                         self.CNF['LNK']      = lnk_backup
