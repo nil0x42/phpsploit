@@ -248,8 +248,13 @@ class Load:
                     err = err[err.find(']')+2:]
                 err = 'Request error: '+err
             response['error'] = err
-        except:
+        except KeyboardInterrupt:
             response['error'] = 'HTTP Request interrupted'
+        except:
+            etype = str(sys.exc_info()[0])
+            etype = etype[etype.find("'")+1:-2]
+            evalue = str(sys.exc_info()[1])
+            response['error'] = 'Unexpected error %s : %s' % (etype, evalue)
 
         return(response)
 
