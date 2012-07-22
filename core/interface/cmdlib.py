@@ -108,6 +108,7 @@ class Cmd:
                         line = raw_input(self.prompt)
                         if not len(line): line=''
                     except EOFError:
+                        print ''
                         line = 'exit'
                     except KeyboardInterrupt:
                         func = getattr(self, 'when_interrupt')
