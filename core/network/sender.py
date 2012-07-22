@@ -84,13 +84,11 @@ class Load:
     def load_multipart(self):
         query = "Writeable remote directory required to send a multipart payload (ex: '/tmp')"
         while not self.tmpdir:
-            response,confirm = ['','']
+            response = ''
             while not response:
                 response = raw_input(P_inf+query+": ")
-            while confirm not in ['y','n']:
-                try: confirm = raw_input(P_inf+"Use "+quot(response)+" as writeable directory ? (y/n): ").lower()
-                except: print ''
-            if confirm == 'y':
+            question = "Use %s as writeable directory ?" % quot(response)
+            if ask(question).agree():
                 self.tmpdir = response+self.tmpfil
         if not self.multipart_file:
             self.multipart_file = "$f=%s;" % py2phpVar(self.tmpdir)
@@ -378,6 +376,8 @@ class Load:
                 return(request[m2])
             if choosed == self.choices[1]:
                 return('Request construction aborted')
+            else:
+                return('Bad choice')
 
 
 
