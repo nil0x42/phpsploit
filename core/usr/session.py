@@ -46,12 +46,8 @@ def save(session, filepath):
         filepath = getpath(filepath, 'phpsploit.session').name
 
     if os.path.exists(filepath):
-        query = 'File %s already exists, overwrite it ? [y/n] : ' % quot(filepath)
-        response = ''
-        while response not in ['y','n']:
-            try: response = raw_input(P_inf+query)
-            except: pass
-        if response == 'n':
+        query = 'File %s already exists, overwrite it ?' % quot(filepath)
+        if ask(query).reject():
             print P_err+'The session was not saved'
             return(0)
 

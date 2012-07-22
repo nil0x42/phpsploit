@@ -47,19 +47,13 @@ class Start(cmdlib.Cmd):
         # if we changed target server, ask to remove ENV
         if 'ENV' in self.CNF:
             if self.CNF['SRV_HASH'] != self.CNF['SRV']['signature']:
-                response = ''
-                query = 'The server signature has changed, reset environment variables ? (Y/n) : '
-                print ''
-                while response not in ['y','n']:
-                    try: response = raw_input(P_inf+query).lower()
-                    except KeyboardInterrupt: print ''
-                    except: pass
-                if response == 'y':
+                question = 'Server signature has changed, reset environment ?'
+                if ask(question).agree():
                     print P_inf+'Reset environment'+P_NL
                     del self.CNF['LNK_HASH']
                     del self.CNF['ENV']
                 else:
-                    print P_inf+'Keeping environment'+P_NL
+                    print P_inf+'Kept environment'+P_NL
                     servUpdate = True
 
         # set ENV default values if empty
@@ -267,16 +261,13 @@ class Start(cmdlib.Cmd):
 
                 file = getpath(val, fileName)
 
-                response = 'y'
+                writeIn = True
                 if file.exists():
-                    query = 'File %s already exists, overwrite it ? [y/n] : '
-                    response = ''
-                    while response not in ['y','n']:
-                        try: response = raw_input(P_inf+query % quot(file.name))
-                        except: pass
-                    if response == 'n':
+                    question = 'File %s already exists, overwrite it ?' % quot(file.name)
+                    if ask(question).reject():
+                        writeIn = False
                         print P_err+'The last command was not saved'
-                if response == 'y':
+                if writeIn:
                     try:
                         file.write(data)
                         print P_inf+'Last command saved in '+file.name

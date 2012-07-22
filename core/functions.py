@@ -123,21 +123,36 @@ def getinterval(seq):
 
 # ask a question
 class ask:
-    bool_tpl = '[y/n]'
+    bool_tpl = ' [y/n] : '
 
     def __init__(self, question):
         self.question = P_inf+question
 
-    def _bool(default='y'):
+    def _getresponse(self, choices):
+        choices = [x.lower() for x in choices]
+        response = None
+        while response not in choices:
+            try: response = raw_input(self.question).lower()
+            except (EOFError, KeyboardInterrupt): print ''
+            except: pass
+        return(response)
+
+    def _bool_ask(self, default='y'):
         hilight = color(1)+default.upper()+color(0)
         tpl = self.bool_tpl.replace(default, hilight)
+        self.question+=tpl
+        response = self._getresponse(['y','n',''])
+        if response == '':
+            response = default
+        if response == default:
+            return(True)
+        return(False)
 
+    def agree(self):
+        return(self._bool_ask('y'))
 
-    def agree():
-        pass
-
-    def reject():
-        pass
+    def reject(self):
+        return(self._bool_ask('n'))
 
 
 # get a custom object from a path
