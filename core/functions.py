@@ -182,6 +182,9 @@ class getpath:
     def isfile(self):
         return(os.path.isfile(self.name))
 
+    def isdir(self)
+        return(os.path.isdir(self.name))
+
     def read(self):
         lines = self.readlines()
         data = P_NL.join(lines)
