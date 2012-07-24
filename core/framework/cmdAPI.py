@@ -104,6 +104,7 @@ def Exec(core, cmd, path, name, line):
     core['cmd']['cwd']  = path
     core['cmd']['help'] = cmd['help']
     core['cmd']['name'] = name
+    core['cmd']['line'] = line
     core['cmd']['argv'] = loadArgs(name+' '+line)
     core['cmd']['argc'] = len(core['cmd']['argv'])
 

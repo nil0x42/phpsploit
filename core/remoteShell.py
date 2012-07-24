@@ -412,21 +412,21 @@ class Start(cmdlib.Cmd):
         line = line.strip()
         if not ' ' in line:
             cmdName  = line
-            cmdArgs = ''
+            Line = ''
         else:
             sep  = line.find(' ')
             cmdName = line[:sep].strip()
-            cmdArgs = line[sep:].strip()
+            cmdLine = line[sep:].strip()
 
         if cmdName not in self.misc_cmds:
             print P_err+'Unknown command: '+line
         else:
-            if cmdArgs in ['--help','-h']:
+            if cmdLine in ['--help','-h']:
                 self.do_help(cmdName)
             else:
                 cmdData = self.commands.cmddata(cmdName)
                 cmdPath = self.commands.cmdpath(cmdName)
-                plugin  = (self.CNF, cmdData, cmdPath, cmdName, cmdArgs)
+                plugin  = (self.CNF, cmdData, cmdPath, cmdName, cmdLine)
                 try:
                     self.CNF['ENV'] = cmdAPI.Exec(*plugin)
                     del self.CNF['cmd']
