@@ -20,7 +20,8 @@ if api.server['platform'] == 'nix':
 commands+= ['cd '+rpath.cwd]
 
 # get request cmd
-commands+= [' '.join([x.replace(' ','\\ ') for x in self.argv[1:]])]
+#commands+= [' '.join([x.replace(' ','\\ ') for x in self.argv[1:]])]
+commands+= [self.line]
 
 
 CMD = cmdSep.join(commands)
