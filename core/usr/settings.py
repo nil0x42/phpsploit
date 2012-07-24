@@ -1,9 +1,17 @@
 import os, re, string
 from functions import *
 
-userFile = getpath('~/.phpsploitrc')
+
+userDir = getpath('~/.config/phpsploit/')
+if not userDir.isdir():
+    userDir = getpath('~/.phpsploit/')
+    try: os.mkdir(userDir.name)
+    except: pass
+
+userFile = getpath(userDir.name, 'config')
 softFile = getpath('phpsploit.conf')
 template = getpath('misc/conf/settings.tpl')
+
 
 def load():
     configFile = get_file()
