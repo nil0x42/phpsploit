@@ -182,8 +182,11 @@ class getpath:
     def isfile(self):
         return(os.path.isfile(self.name))
 
-    def isdir(self)
+    def isdir(self):
         return(os.path.isdir(self.name))
+
+    def dirname(self):
+        return(os.path.dirname(self.name))
 
     def read(self):
         lines = self.readlines()
