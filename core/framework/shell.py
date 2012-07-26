@@ -52,4 +52,3 @@ def cmd_infect(backdoor):
     print ''+color(34)+backdoor+color(0)
     print ''+'='*length
     print ''
-

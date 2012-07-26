@@ -57,6 +57,11 @@ class Start(cmdlib.Cmd):
     def do_exit(self, line):
         return True
 
+    #####################
+    ### COMMAND: rtfm ###
+    def do_rtfm(self, line):
+        rtfm()
+
     ####################
     ### COMMAND: set ###
     def help_set(self):

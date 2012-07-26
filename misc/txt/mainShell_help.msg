@@ -8,5 +8,6 @@ Basic commands
     exploit        Drop a shell from target server
     help           Show this help message
     infect         Print the working backdoor
+    rtfm           Read the fine manual
     save           Save the current session in file
     set            View and edit settings

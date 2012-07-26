@@ -21,6 +21,7 @@ class Start(cmdlib.Cmd):
     coreHelp['lcd']     = 'Change local working directory'
     coreHelp['lpwd']    = 'Print local working directory'
     coreHelp['reload']  = 'Reload the plugins list'
+    coreHelp['rtfm']    = 'Read the fine manual'
     coreHelp['save']    = 'Save the current session in file'
     coreHelp['shell']   = 'Spanws a shell plugin as prompt'
     coreHelp['set']     = 'View and edit settings'
@@ -144,6 +145,11 @@ class Start(cmdlib.Cmd):
     ### COMMAND: clear ###
     def do_clear(self, line):
         clear()
+
+    #####################
+    ### COMMAND: rtfm ###
+    def do_rtfm(self, line):
+        rtfm()
 
     ######################
     ### COMMAND: debug ###
@@ -411,8 +417,8 @@ class Start(cmdlib.Cmd):
     def when_unknown(self, line):
         line = line.strip()
         if not ' ' in line:
-            cmdName  = line
-            Line = ''
+            cmdName = line
+            cmdLine = ''
         else:
             sep  = line.find(' ')
             cmdName = line[:sep].strip()
