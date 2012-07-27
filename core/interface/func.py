@@ -1,5 +1,27 @@
 from functions import *
 
+class fork_stdout(object):
+    """this class can replace sys.stdout and writes
+    simultaneously to standard output AND specified file
+    usage: fork_stdout(altFile)"""
+    def __init__(self, file):
+        self.file = file
+        self.stdout = sys.stdout
+        sys.stdout = self
+
+    def __del__(self):
+        sys.stdout = self.stdout
+        self.file.close()
+
+    def write(self, data):
+        self.file.write(data)
+        self.stdout.write(data)
+
+    def flush(self):
+        self.stdout.flush()
+
+
+# this class is used to format and print env vars or settings output.
 class columnize_vars:
     def __init__(self, title, dic):
         self.title     = title
@@ -51,3 +73,46 @@ class columnize_vars:
         print "    Variable"+" "*(maxNameLen-6)+"Value"
         print "    --------"+" "*(maxNameLen-6)+"-----"
         print printvars+color(0)
+
+
+
+# this function updates the self.CNF['LNK'] dict.
+def update_opener(CNF):
+    from re      import findall
+    from hashlib import md5
+    from base64  import b64encode
+
+    # an ugly line to shorten the function
+    CNF['LNK']['DOMAIN'] = 'x'
+
+    target = CNF['SET']['TARGET']
+    regex  = '^https?://(.+?)(?:$|/)'
+    try:    domain = findall(regex, target)[0]
+    except: domain = ''
+    if domain and len(target)>13:
+        CNF['LNK']['URL']    = target
+        CNF['LNK']['DOMAIN'] = domain
+    else:
+        try: del CNF['LNK']['URL']
+        except: pass
+
+    # domain hash building
+    domain  = CNF['LNK']['DOMAIN']
+    md5Val  = md5(domain).hexdigest()
+    b64Val  = b64encode(md5Val)
+    CNF['LNK']['HASH'] = b64Val[:8]
+
+    # payload generation
+    srvhash  = CNF['LNK']['HASH']
+    backdoor = CNF['SET']['BACKDOOR']
+    passkey  = CNF['SET']['PASSKEY'].upper().replace('-','_')
+    rawPayload = backdoor.replace('%%PASSKEY%%',passkey)
+    payload    = rawPayload.replace('%%SRVHASH%%',srvhash)
+    CNF['LNK']['BACKDOOR'] = payload
+
+    # passkey generation
+    CNF['LNK']['PASSKEY'] = CNF['SET']['PASSKEY']
+    if CNF['LNK']['PASSKEY'] == "%%SRVHASH%%":
+        CNF['LNK']['PASSKEY'] = CNF['LNK']['HASH']
+
+    return(CNF['LNK'])

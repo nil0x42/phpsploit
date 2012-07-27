@@ -1,14 +1,14 @@
 import os, sys, re
 from StringIO  import StringIO
 
-from functions       import *
-from framework.shell import *
+from functions      import *
+from interface      import core
+from interface.func import *
 
-from interface import cmdlib
-from framework import cmdAPI
+from framework      import cmdAPI
 
 
-class Start(cmdlib.Cmd):
+class Start(core.Shell):
 
     coreHelp = dict()
     coreHelp['clear']   = 'Clear the terminal screen'
@@ -100,7 +100,7 @@ class Start(cmdlib.Cmd):
         if l \
         and not l.startswith('lastcmd') \
         and l != self.CNF['CURRENT_SHELL']+' exit':
-            sys.stdout = cmdlib.fork_stdout(StringIO())
+            sys.stdout = fork_stdout(StringIO())
         return line
 
 
@@ -140,64 +140,12 @@ class Start(cmdlib.Cmd):
             self.CNF['CURRENT_SHELL'] = ''
             self.set_prompt()
 
-
-    ######################
-    ### COMMAND: clear ###
-    def do_clear(self, line):
-        clear()
-
-    #####################
-    ### COMMAND: rtfm ###
-    def do_rtfm(self, line):
-        rtfm()
-
-    ######################
-    ### COMMAND: debug ###
-    def do_debug(self, line):
-        from pprint import pprint
-        pprint(self.CNF)
-
-    #####################
-    ### COMMAND: exit ###
-    def do_exit(self, line):
-        return True
-
     #######################
     ### COMMAND: reload ###
     def do_reload(self, line):
         self.update_commands()
         print P_inf+'Plugins list reloaded'
 
-    #####################
-    ### COMMAND: save ###
-    def do_save(self, line):
-        import usr.session
-        savedFile = usr.session.save(self.CNF, line)
-        if savedFile:
-            self.CNF['SET']['SAVEFILE'] = savedFile
-
-    #######################
-    ### COMMAND: infect ###
-    def do_infect(self, line):
-        cmd_infect(self.CNF['LNK']['BACKDOOR'])
-
-    #####################
-    ### COMMAND: lpwd ###
-    def do_lpwd(self, line):
-        print os.getcwd()
-
-    ####################
-    ### COMMAND: lcd ###
-    def help_lcd(self):
-        print 'Usage: lcd [directory]'
-
-    def do_lcd(self, line):
-        if not line:
-            self.help_lcd()
-        else:
-            newDir = os.path.expanduser(line)
-            try: os.chdir(newDir)
-            except OSError, e: print P_err+str(e)[str(e).find(']')+2:]
 
     ######################
     ### COMMAND: shell ###
@@ -340,10 +288,9 @@ class Start(cmdlib.Cmd):
                         self.CNF['ENV'][var] = val
                         show(var, val)
         else:
-            sortedEnv = dict([(x,y) for x,y in self.CNF['ENV'].items()])
-            from interface.columnizer import Make as print_column
             title = "Environment variables"
-            print_column(title, sortedEnv).write()
+            elems = dict([(x,y) for x,y in self.CNF['ENV'].items()])
+            columnize_vars(title, elems).write()
 
 
     ####################
@@ -405,11 +352,10 @@ class Start(cmdlib.Cmd):
             else:
                 self.help_set()
         else:
-            items = self.CNF['SET'].items()
-            sortedSettings = dict([(x.upper(),y) for x,y in items])
-            from interface.columnizer import Make as print_column
             title = "Session settings"
-            print_column(title, sortedSettings).write()
+            items = self.CNF['SET'].items()
+            elems = dict([(x.upper(),y) for x,y in items])
+            columnize_vars(title, elems).write()
 
 
     ###############

@@ -2,32 +2,7 @@ import sys, os, re, string
 from functions import *
 
 
-class fork_stdout(object):
-    """this class can replace sys.stdout and writes
-    simultaneously to standard output AND specified file
-    usage: fork_stdout(altFile)"""
-    def __init__(self, file):
-        self.file = file
-        self.stdout = sys.stdout
-        sys.stdout = self
-
-    def __del__(self):
-        sys.stdout = self.stdout
-        self.file.close()
-
-    def write(self, data):
-        self.file.write(data)
-        self.stdout.write(data)
-
-    def flush(self):
-        self.stdout.flush()
-
-
 class Cmd:
-
-    from interface.func   import *
-    from interface.shared import *
-
     prompt       = color(4)+'phpsploit'+color(0)+' > '
     interrupt    = P_err+"Interruption: use the 'exit' command to leave the shell"
     nocmd        = P_err+'Unknown command: %s'
@@ -45,24 +20,12 @@ class Cmd:
     CNF          = None
     misc_cmds    = list()
 
-    def __init__(self, completekey='tab', stdin=None, stdout=None):
-        self.LAST_CMD_DATA = ''
-        """Instantiate a line-oriented interpreter framework.
 
-        The optional argument 'completekey' is the readline name of a
-        completion key; it defaults to the Tab key. If completekey is
-        not None and the readline module is available, command completion
-        is done automatically. The optional arguments stdin and stdout
-        specify alternate input and output file objects; if not specified,
-        sys.stdin and sys.stdout are used.
-
-        """
-        if stdin is not None:  self.stdin  = stdin
-        else:                  self.stdin  = sys.stdin
-        if stdout is not None: self.stdout = stdout
-        else:                  self.stdout = sys.stdout
-        self.cmdqueue    = list()
-        self.completekey = completekey
+    # before, these variables were in __init__()
+    stdin        = sys.stdin
+    stdout       = sys.stdout
+    cmdqueue     = list()
+    completekey  = 'tab'
 
     def when_interrupt(self):
         print P_NL+self.interrupt

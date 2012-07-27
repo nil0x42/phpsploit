@@ -1,12 +1,12 @@
+
 from functions       import *
-from framework.shell import *
+from interface       import core
+from interface.func  import *
 
-from interface import cmdlib
-
-class Start(cmdlib.Cmd):
+class Start(core.Shell):
 
     def preloop(self):
-        clear()
+        self.do_clear('')
         softwareLogo  = getpath('misc/txt/logo.ascii').read().rstrip()
         introduction  = getpath('misc/txt/intro.msg').read().strip()
         startMessage  = getpath('misc/txt/start_messages.lst').randline()
@@ -41,26 +41,6 @@ class Start(cmdlib.Cmd):
         # update the LNK
         self.CNF['LNK'] = update_opener(self.CNF)
 
-    ######################
-    ### COMMAND: clear ###
-    def do_clear(self, line):
-        clear()
-
-    ######################
-    ### COMMAND: clear ###
-    def do_debug(self, line):
-        from pprint import pprint
-        pprint(self.CNF)
-
-    #####################
-    ### COMMAND: exit ###
-    def do_exit(self, line):
-        return True
-
-    #####################
-    ### COMMAND: rtfm ###
-    def do_rtfm(self, line):
-        rtfm()
 
     ####################
     ### COMMAND: set ###
@@ -103,16 +83,11 @@ class Start(cmdlib.Cmd):
             else:
                 self.help_set()
         else:
-            items = self.CNF['SET'].items()
-            sortedSettings = dict([(x.upper(),y) for x,y in items])
-            import interface.columnizer
             title = "Session settings"
-            interface.columnizer.Make(title,sortedSettings).write()
+            items = self.CNF['SET'].items()
+            elems = dict([(x.upper(),y) for x,y in items])
+            columnize_vars(title, elems).write()
 
-    #######################
-    ### COMMAND: infect ###
-    def do_infect(self, line):
-        cmd_infect(self.CNF['LNK']['BACKDOOR'])
 
     ########################
     ### COMMAND: exploit ###
@@ -131,11 +106,3 @@ class Start(cmdlib.Cmd):
         else:
             err = "Undefined target, please enable it with '%s'"
             print P_err+err % 'set TARGET <backdoored-url>'
-
-    #####################
-    ### COMMAND: save ###
-    def do_save(self, line):
-        import usr.session
-        savedFile = usr.session.save(self.CNF, line)
-        if savedFile:
-            self.CNF['SET']['SAVEFILE'] = savedFile

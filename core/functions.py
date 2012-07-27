@@ -27,19 +27,6 @@ def sleep_or_press_enter(timeout):
     alarm(0)
 
 
-def clear():
-    clearCmd = ['clear','cls'][os.name == 'nt']
-    os.system(clearCmd)
-
-def rtfm():
-    def _printit():
-        print getpath('readme/README').read()
-    if os.name == 'nt':
-        _printit()
-    else:
-        if os.system('man %s' % getpath('readme/MANUAL').name):
-            _printit()
-
 
 # send bash colour sequences > color(0,4) == '\033[0,4m'
 # USE IT TO KEEP WINDOWS COMPATIBILITY !
