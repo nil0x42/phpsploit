@@ -1,6 +1,6 @@
 from functions import *
 
-class Make:
+class columnize_vars:
     def __init__(self, title, dic):
         self.title     = title
         self.dic       = dic

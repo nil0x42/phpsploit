@@ -1,6 +1,7 @@
 import sys, os, re, string
 from functions import *
 
+
 class fork_stdout(object):
     """this class can replace sys.stdout and writes
     simultaneously to standard output AND specified file
@@ -23,6 +24,9 @@ class fork_stdout(object):
 
 
 class Cmd:
+
+    from interface.func   import *
+    from interface.shared import *
 
     prompt       = color(4)+'phpsploit'+color(0)+' > '
     interrupt    = P_err+"Interruption: use the 'exit' command to leave the shell"
