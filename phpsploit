@@ -104,9 +104,9 @@ if arg_error:
 ######################################
 ### now we can open the main interface
 
-import mainShell
+from interface import mainshell
 
-interface = mainShell.Start() # instantiate a shell interface
+interface = mainshell.Start() # instantiate a shell interface
 CNF['SET'] = SET              # move settings into the core
 interface.setConfig(CNF)      # send config to the shell interface
 

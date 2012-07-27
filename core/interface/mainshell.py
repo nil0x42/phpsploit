@@ -123,8 +123,8 @@ class Start(cmdlib.Cmd):
             link = server.Link(self.CNF)
             if link.open():
                 self.CNF['SRV'] = link.srv_vars
-                import remoteShell
-                shell = remoteShell.Start()
+                from interface import remoteshell
+                shell = remoteshell.Start()
                 shell.setConfig(self.CNF)
                 shell.cmdloop()
                 link.close()
