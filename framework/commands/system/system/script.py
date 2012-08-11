@@ -21,7 +21,7 @@ commands+= ['cd '+rpath.cwd]
 
 # here i use self.args that is all the raw line arguments string
 # because ' '.join(self.argv) is an altered string that was parsed by phpsploit
-commands+= [self.self.args]
+commands+= [self.args]
 
 
 CMD = cmdSep.join(commands)

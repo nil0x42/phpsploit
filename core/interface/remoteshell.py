@@ -152,12 +152,12 @@ class Start(core.CoreShell):
         print 'Usage:   shell [cmdshell]'
         print ''
         print 'Available cmdshells:'
-        for x in self.commands.shells:
+        for x in self.plugins.shells():
             print '  '+x
         print ''
 
     def complete_shell(self, text, *ignored):
-        keys = self.commands.shells
+        keys = self.plugins.shells()
         return([x+' ' for x in keys if x.startswith(text)])
 
     def do_shell(self, cmd):
@@ -239,7 +239,7 @@ class Start(core.CoreShell):
             print re.sub('(%s)' % val, tpl, data)
 
         else:
-            self.help_lastcmd()
+            self.run('help lastcmd')
 
 
 
@@ -280,7 +280,7 @@ class Start(core.CoreShell):
                 show(var, self.CNF['ENV'][var])
         elif var:
             if not val:
-                self.help_env()
+                self.run('help env')
             elif val.lower() != 'none':
                 if var in self.locked_env:
                     print P_err+'Locked environment variable: '+var

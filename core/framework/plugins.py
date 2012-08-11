@@ -53,6 +53,7 @@ class Load:
         for name, item in self.items.items():
             if item['category'] == category:
                 items.append(name)
+        items.sort
         return items
 
 
@@ -65,6 +66,7 @@ class Load:
             data = self.items[name]['script']
             if 'api.isshell(' in data:
                 result.append(name)
+        result.sort()
         return(result)
 
 
