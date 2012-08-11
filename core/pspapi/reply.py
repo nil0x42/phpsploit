@@ -2,8 +2,8 @@ import sys
 from functions import *
 
 class reply:
-    def __init__(self, core):
-        self.cmdname = core['cmd']['name']
+    def __init__(self, core, cmd):
+        self.cmdname = cmd['name']
 
     def getLineReply(self, query):
         sys.stdout.write(query)

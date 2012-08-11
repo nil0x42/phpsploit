@@ -2,15 +2,11 @@ from functions import *
 import sys, string, random
 
 class api:
-    def __init__(self, core):
+    def __init__(self, core, cmd):
         self.settings = core['SET']
         self.server   = core['SRV']
         self.env      = core['ENV']
-
-        self.cmdname  = core['cmd']['name']
-        self.cmdhelp  = core['cmd']['help']
-        self.cmdargc  = core['cmd']['argc']
-        self.cmdargv  = core['cmd']['argv']
+        self.cmd      = cmd
 
         self.currentShell = core['CURRENT_SHELL']
 
@@ -24,12 +20,12 @@ class api:
 
     def isshell(self):
         if self.currentShell:
-            if self.cmdargc == 1:
+            if self.cmd['argc'] == 1:
                 self.exit()
-            elif self.cmdargc == 2:
-                args = ' '.join(self.cmdargv[1:])
+            elif self.cmd['argc'] == 2:
+                args = ' '.join(self.cmd['argv'][1:])
                 if args == '?':
-                    self.exit(self.cmdhelp)
+                    self.exit(self.cmd['help'])
                 if args == 'exit':
                     raise KeyboardInterrupt
 

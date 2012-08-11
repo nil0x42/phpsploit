@@ -3,7 +3,7 @@ import re
 class rpath:
     winPathRegex = '[a-zA-Z]:\\\\'
 
-    def __init__(self, core):
+    def __init__(self, core, cmd):
         self.separator = core['SRV']['separator']
         self.home      = core['SRV']['home']
         self.cwd       = core['ENV']['CWD']

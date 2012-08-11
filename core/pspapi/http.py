@@ -6,16 +6,16 @@ from functions import *
 class http:
     queryEncode = 'global $Q,$R;$Q=%s;\n'
 
-    def __init__(self, core):
-        self.core      = core
-        self.cmdcwd    = core['cmd']['cwd']
-        self.separator = core['SRV']['separator']
-        #self.compress  = core['SRV']['compress']
+    def __init__(self, core, cmd):
+        self.core        = core
+        self.separator   = core['SRV']['separator']
+        self.plugin_path = cmd['path']
+        #self.compress   = core['SRV']['compress']
 
     def send(self, query=dict(), payloadname='payload'):
         self.error    = None
         self.response = None
-        payload = getpath(self.cmdcwd, payloadname+'.php').phpcode()
+        payload = getpath(self.plugin_path, payloadname+'.php').phpcode()
 
         query['SEPARATOR'] = self.separator
 
