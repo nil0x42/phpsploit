@@ -17,13 +17,13 @@
 \fBphpsploit\fR is a furtive tunnel \fIbased\fR php webshell: it was designed in order to help privilege escalation through a really small php backdoor, while remaining the most stealth, efficient, and adjustable as possible.
 
 .P
-It innovates by settling for a remotely stored micro backdoor that forwards to dynamic encoded HTTP headers, which act as dynamic payload. This feature is usefull to bypass admins searching for suspicious lines in the server logs, because GET requests without arguments, are not as suspect as POST requests, or GET requests with suspicious arguments (eg: "?cmd=cat&edit=/etc/passwd")
+It innovates by settling for a remotely stored micro backdoor that forwards to dynamic encoded HTTP headers, which act as dynamic payload. This feature is usefull to bypass admins searching for suspicious lines in the server logs, because GET requests without arguments, are not as suspect as POST requests, or GET requests with suspicious arguments (eg: "?cmd=cat&edit=/etc/passwd").
 
 .P
-The \fBphpsploit\fR framework is plugin based, so users can easily make their own python/php based plugin, or edit the built\-in ones, with the \fIpspapi\fR (phpsploit API) that interracts with the target server through the framework.
+The \fBphpsploit\fR framework is plugin based, so users can easily make their own plugins, or edit the built\-in ones, with the \fIpspapi\fR (phpsploit API) that interracts with the target server through the framework.
 
 .P
-He's structure allows him to evolve and be easily adapted to all types of web exploitation scenarios, because every setting can be edited \fIglobally\fR (through user configuration file), or \fIlocally\fR, using the \fBset\fR command.
+Its structure allows him to evolve and be easily adapted to all types of web exploitation scenarios, because every setting can be edited \fIglobally\fR (through user configuration file), or \fIlocally\fR, using the \fBset\fR command.
 
 .P
 A backdoor to bring them all... \- https://bitbucket.org/nil0x42/phpsploit
@@ -69,7 +69,7 @@ Just type "\fBexploit\fR", and enjoy your remote shell access :)
 
 .RS
 .IP 1. 3
-\fBHTTP Error 400: Bad request\fR \- Generally, this error accurs because one or some \fBREQ_*\fR settings are too big for the server. So you need to settle their values.
+\fBHTTP Error 400: Bad request\fR \- Generally, this error occurs because one or some \fBREQ_*\fR settings are too big for the server. So you need to settle their values.
 .IP 2. 3
 \fBRequest error: Connection refused\fR \- If you are sure that the specified \fBTARGET\fR is accessible from your computer (or from the \fBPROXY\fR if defined), this error can occur because the \fBPROXY\fR is invalid
 .IP 3. 3
@@ -80,38 +80,73 @@ Other issues can occur because one of your \fBSETTINGS\fR where modified without
 If the encountered issue is not in the list, you can also post an issue with all details here: https://bitbucket.org/nil0x42/phpsploit/issues or contact the Author (see the \fBAUTHOR\fR section)
 .RE
 
-.SH MAIN SHELL
+.SH INTERFACE
 
 .P
-When entering \fBphpsploit\fR, the main shell is spawned, it helps you to locally edit your settings (\fBset\fR command), get the working backdoor (\fBinfect\fR command), and then start the \fIremote shell\fR (\fBexploit\fR command)
+The \fBphpsploit\fR framework includes two shell interfaces.
+
+.RS
+.IP \(bu 3
+The \fBMAIN SHELL\fR is the first shell interface, spawned when the framework starts. It is used to prepare a target exploitation. Through it, you can locally adjust the \fBSETTINGS\fR with the "\fBset\fR" command, and use the "\fBinfect\fR" command to get the micro\-backdoor that needs to be injected on the target.
+.IP \(bu 3
+The \fBREMOTE SHELL\fR interface starts when a target server was exploited. Its is used to interract with the backdoored URL.
+.RE
 
 .P
 \fBTO GET HELP\fR on a phpsploit command, you can use "\fBhelp <command>\fR", "\fB<command> \-\-help\fR" or "\fB<command> \-h\fR". If there is no specific help for a command, such as \fBinfect\fR, a short description of each command's purpose is available typing \fBhelp\fR without arguments.
 
 .P
-\fICommands:\fR
+The commands are auto\-completed on unix clients, and try to use \fBreadline\fR if available.
+They are divided into groups when shown whith the "\fBhelp\fR" command:
+
+.RS
+.IP \(bu 3
+The \fBCORE COMMANDS\fR contains all commands available through every interface.
+.IP \(bu 3
+The Shell Commands contains the commands specific to the current interface.
+.IP \(bu 3
+In the remote shell, plugin commands are grouped by categories.
+.RE
+
+.P
+\fICore Commands:\fR
 
 .TP
 \fBclear\fR
 Clear the terminal screen
 .TP
 \fBexit\fR
-Leave the phpsploit framework
+Leave the current shell interface
 .TP
 \fBhelp\fR
 Shows help for all available commands
 .TP
-\fBrtfm\fR
-Read this manual page
-.TP
 \fBinfect\fR
 Prints a working backdoor to inject in the target
+.TP
+\fBlcd\fR
+Change local working directory
+.TP
+\fBlpwd\fR
+Print local working directory
+.TP
+\fBrtfm\fR
+Read this manual page
 .TP
 \fBsave\fR
 Save the current session in a file, for future usage
 .TP
 \fBset\fR
 View and edit phpsploit settings
+
+.SH MAIN SHELL
+
+.P
+When entering \fBphpsploit\fR, the main shell is spawned, it helps you to locally edit your settings (\fBset\fR command), get the working backdoor (\fBinfect\fR command), and then start the \fIremote shell\fR (\fBexploit\fR command).
+
+.P
+\fIShell Commands:\fR
+
 .TP
 \fBexploit\fR
 Drop a shell from target server
@@ -119,49 +154,43 @@ Drop a shell from target server
 .SH REMOTE SHELL
 
 .P
-When you run the \fBexploit\fR command, you enter the remote shell, an directly interracts with the remotely backdoored server.
+When you run the \fBexploit\fR command, you enter the remote shell, an directly interracts with the remotely backdoored server through the \fBphpsploit\fR plugins.
 Typing \fBhelp\fR will show the available commands.
 \fBCore Commands\fR are all the \fBphpsploit\fR remote shell built\-in commands.
 
 .P
-\fICore commands:\fR
+\fIShell Commands:\fR
 
 .TP
-\fBexit\fR
-Disconnects you and back to the main shell
+\fBenv\fR
+This command interracts with the environment variables, for more informations, please read the \fBREMOTE ENVIRONMENT\fR section.
 .TP
 \fBlastcmd\fR
 Allows user to show or save the last command output
-.TP
-\fBlcd\fR
-Change the client's current working directory
-.TP
-\fBlpwd\fR
-Show the client's current working directory
 .TP
 \fBreload\fR
 Reloads the commands list, usefull if you have edited one plugin during an exploitation session
 .TP
 \fBshell\fR
 Various command plugins, such as \fIsystem\fR, \fImysql\fR and \fIsuidroot\fR can be used as frontend shell. For example, "\fB> shell system\fR" will spawn the "\fBsystem\fR" command as default prompt, making all typed lines to be executed by this plugin.
-.TP
-\fBenv\fR
-This command interracts with the environment variables, for more informations, please read the \fBREMOTE ENVIRONMENT\fR section
 
 .P
 All the other remote shell commands are in reality dynamic plugins, built with the \fBPSPAPI\fR (phpsploit API).
 As with all commands, you can use "\fBhelp <command>\fR" to get help.
 
 .P
-The plugins are storred in the \fI./framework/commands/\fR directory, sorted by categories, you can edit a built\-in or make your own command, with the \fBPSPAPI\fR
+The built\-in plugins are storred in the \fI./framework/plugins/\fR directory, sorted by categories, you can edit a built\-in or make your own command, with the \fBPSPAPI\fR.
 
 .P
-If a command has been edited durring an exploitation session, use the "\fBreload\fR" command to reload the plugins list.
+If you want to make you own plugin, it is recommended to use the alternative plugin directory \fI./plugins/\fR from the phpsploit's user directory, this one works exactly like the buit\-in plugins directory.
+
+.P
+If a command has been edited during an exploitation session, use the "\fBreload\fR" command to reload the plugins list.
 
 .SH SETTINGS
 
 .P
-The \fBphpsploit\fR settings are available from the main interface, they can be viewed, and edited with the \fBset\fR command.
+The \fBphpsploit\fR settings are available from the interface, they can be viewed, and edited with the \fBset\fR command.
 
 .P
 When a new session is opened, all \fIsettings\fR are set to their default values, specified in the phpsploit's user configuration file. The configuration file is defaultly storred on \fB~/.phpsploit/config\fR, but you can also move it into \fB~/.config/phpsploit/config\fR. Editing this file allows you to specify your own default values, a very usefull feature for polymorphic backdoor, or custom HTTP headers.
@@ -176,8 +205,8 @@ This setting contains the remote backdoored URL in target server, for example, i
 
 .TP
 \fBBACKDOOR\fR
-This is the backdoor template, used to generate the effective micro\-payload to be written into a target web page, he needs to be valid php code, and it's preferable to make him non\-verbose, by prexifing it's main function with an \fI@\fR. For example, \fI@\fReval() instead of eval(). For more informations about how \fBphpsploit\fR builds request, please read the \fBREQUEST BUILDING\fR section.
-The only purpose of the \fBBACKDOOR\fR is to execute the \fBREQ_HEADER_PAYLOAD\fR's content so he need to contain the dynamic var %%PASSKEY%%.
+This is the backdoor template, used to generate the effective micro\-payload to be written into a target web page, it needs to be valid php code, and it's preferable to make him non\-verbose, by prexifing it's main function with an \fI@\fR. For example, \fI@\fReval() instead of eval(). For more informations about how \fBphpsploit\fR builds request, please read the \fBREQUEST BUILDING\fR section.
+The only purpose of the \fBBACKDOOR\fR is to execute the \fBREQ_HEADER_PAYLOAD\fR's content so it need to contain the dynamic var %%PASSKEY%%.
 
 .RS
 \fBDefault value: <?php @eval($_SERVER['HTTP_%%PASSKEY%%']);?>\fR
@@ -185,7 +214,7 @@ The only purpose of the \fBBACKDOOR\fR is to execute the \fBREQ_HEADER_PAYLOAD\f
 
 .TP
 \fBPASSKEY\fR
-This var is interesting for customisation, assuming it is used as main header forwarder's name, changing is default value will act as a \fIpassword\fR, making another \fBphpsploit\fR user unable to use your \fIbackdoor\fR if he does not own the \fBPASSKEY\fR.
+This var is interesting for customisation, assuming it is used as main header forwarder's name, changing is default value will act as a \fIpassword\fR, making another \fBphpsploit\fR user unable to use your \fIbackdoor\fR if it does not own the \fBPASSKEY\fR.
 
 .RS
 \fBDefault value: phpSpl01t\fR
@@ -289,7 +318,7 @@ Note that the \fBHTTP_USER_AGENT\fR setting is included by default, but it is po
 
 .P
 The remote environment variables are available from the \fBREMOTE SHELL\fR.
-They are usefull to store server related informations, and \fBPSPAPI\fR plugins have read and write access to them.
+They are usefull to store server related informations, and \fBPSPAPI\fR plugins have write access to them.
 
 .P
 User can show, edit or delete them with the "\fBenv\fR" command, through the \fBREMOTE SHELL\fR instance.
@@ -310,11 +339,11 @@ This variable contains the absolute path to the remote web root directory.
 
 .TP
 \fBWRITE_TMPDIR\fR
-This variable imperatively needs to conatain the absolute path to a writeable remote directory. He is essential for multirequest payloads execution, that stores full payload parts into this path.
+This variable imperatively needs to conatain the absolute path to a writeable remote directory. It is essential for multirequest payloads execution, that stores full payload parts into this path.
 
 .TP
 \fBWRITE_WEBDIR\fR
-This environment variable contains the absolute path to a writeable remote directory \fIimperatively accessible from the web\fR. He can be used for evasion \fBMODULES\fR.
+This environment variable contains the absolute path to a writeable remote directory \fIimperatively accessible from the web\fR. It can be used for evasion \fBMODULES\fR.
 
 .SH REQUEST BUILDING
 
@@ -399,6 +428,9 @@ Alternative \fBphpsploit\fR configuration directory.
 .P
 The "./config" file is used as \fBphpsploit\fR configuration file, on root user's configuration directory.
 It allows to reconfigure the default \fBSETTINGS\fR (see the \fBSETTINGS\fR section for more informations)
+
+.P
+The "./plugins/" directory can be used to make your own \fBphpsploit\fR plugins.
 
 .SH ISSUES
 

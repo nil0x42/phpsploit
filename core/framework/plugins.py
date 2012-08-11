@@ -2,7 +2,7 @@ import os
 from functions import *
 
 class Load:
-    soft_dir = getpath('framework/commands')
+    soft_dir = getpath('framework/plugins')
 
     def __init__(self):
         self.roots = [self.soft_dir]
