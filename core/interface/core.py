@@ -240,7 +240,7 @@ class CoreShell(cmdlib.Cmd):
             else:
                 show(var, self.CNF['SET'][var])
         elif var:
-            self.help_set()
+            self.run('help set')
         else:
             title = "Session settings"
             items = self.CNF['SET'].items()
