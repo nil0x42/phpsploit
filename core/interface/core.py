@@ -162,7 +162,7 @@ class CoreShell(cmdlib.Cmd):
         Example: lcd ~
                  lcd /tmp/ram
         """
-        if not line:
+        if not cmd['args']:
             self.run('help lcd')
         else:
             newDir = os.path.expanduser(cmd['args'])
