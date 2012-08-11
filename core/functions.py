@@ -195,8 +195,12 @@ class getpath:
         elif data.startswith('<?'):  data = data[2:]
         if data.endswith('?>'):      data = data[:-2]
         data = data.strip()
-        return('\n'.join([x.strip() for x in data.splitlines() if x.strip() and not x.strip().startswith('//')]))
-        #return(data)
+        result = list()
+        for line in data.splitlines():
+            line = line.strip()
+            if not line.startswith('//'):
+                result.append(line)
+        return('\n'.join(result))
 
     def write(self, data):
         lines = data.splitlines()
