@@ -1,1 +1,1 @@
-Usage: info
+Print remote server informations

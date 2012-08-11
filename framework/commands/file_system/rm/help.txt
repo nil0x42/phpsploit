@@ -1,2 +1,4 @@
+Remove a file
+
 Usage:   rm [file]
 Example: rm pdfs/r57.php

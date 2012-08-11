@@ -1,2 +1,4 @@
+Execute a command on the server
+
 Usage:   system [command]
 Example: system uname -a

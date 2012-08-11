@@ -1,3 +1,5 @@
+Copy a file between two server paths
+
 Usage:   cp [remote file] [remote destination]
 
 Options:

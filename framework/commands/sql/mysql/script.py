@@ -55,6 +55,8 @@ self.argc = len(self.argv)
 
 # USE
 if self.argv[1].lower() == 'use':
+    if self.argc != 3:
+        api.exit(self.help)
     query['BASE'] = self.argv[2]
     http.send(query, 'setdb')
 

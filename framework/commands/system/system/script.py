@@ -19,9 +19,9 @@ if api.server['platform'] == 'nix':
 # go to pwd
 commands+= ['cd '+rpath.cwd]
 
-# get request cmd
-#commands+= [' '.join([x.replace(' ','\\ ') for x in self.argv[1:]])]
-commands+= [self.line]
+# here i use self.args that is all the raw line arguments string
+# because ' '.join(self.argv) is an altered string that was parsed by phpsploit
+commands+= [self.self.args]
 
 
 CMD = cmdSep.join(commands)

@@ -1,3 +1,5 @@
+Upload a file
+
 Usage:   upload [local file] [remote directory]
 
 Options:

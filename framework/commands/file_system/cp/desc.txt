@@ -1,2 +1,0 @@
-Copy a file between two server paths
-

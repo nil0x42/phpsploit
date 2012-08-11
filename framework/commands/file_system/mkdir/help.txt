@@ -1,3 +1,5 @@
+Create directory
+
 Usage:   mkdir [options] [directory]
 
 Options:

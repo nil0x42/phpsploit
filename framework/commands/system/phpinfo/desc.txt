@@ -1,1 +1,0 @@
-Dump the server's phpinfo

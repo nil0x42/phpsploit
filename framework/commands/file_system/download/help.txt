@@ -1,3 +1,5 @@
+Download a file
+
 Usage:   download [options] [remote file] [local dir]
 
 Options:

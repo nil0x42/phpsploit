@@ -1,3 +1,5 @@
+Recursively search for files matching pattern
+
 Usage:   search [pattern]
          search [directory] [pattern]
 Example: search *.sql
