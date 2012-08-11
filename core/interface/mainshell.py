@@ -3,15 +3,17 @@ from functions       import *
 from interface       import core
 from interface.func  import *
 
-class Start(core.Shell):
+class Start(core.CoreShell):
+    shell_name = 'main'
+
+    def __init__(self):
+        core.CoreShell.__init__(self)
 
     def preloop(self):
         self.do_clear('')
         softwareLogo  = getpath('misc/txt/logo.ascii').read().rstrip()
         introduction  = getpath('misc/txt/intro.msg').read().strip()
         startMessage  = getpath('misc/txt/start_messages.lst').randline()
-        mainShellHelp = getpath('misc/txt/mainShell_help.msg').read().strip()
-        self.help     = P_NL+mainShellHelp+P_NL
 
         # print intro and help
         print softwareLogo
@@ -19,10 +21,8 @@ class Start(core.Shell):
         print color(1)
         print introduction
         print color(0,37)
-        print startMessage
-        print color(0)
-        print mainShellHelp
-        print ''
+        print startMessage+color(0)
+        self.run('help')
 
         # inform if using session
         if 'SAVEFILE' in self.CNF['SET']:
@@ -42,56 +42,17 @@ class Start(core.Shell):
         self.CNF['LNK'] = update_opener(self.CNF)
 
 
-    ####################
-    ### COMMAND: set ###
-    def help_set(self):
-        print 'set'
-        print 'View and edit settings.'
-        print ''
-        print 'Usage:   set'
-        print '         set [variable]'
-        print '         set [variable] [value]'
-        print ''
-        print 'Example: set TEXTEDITOR /usr/bin/nano'
-        print '         set PROXY None'
-
-    def complete_set(self, text, *ignored):
-        keys = self.CNF['SET'].keys()
-        return([x+' ' for x in keys if x.startswith(text)])
-
-    def do_set(self, line):
-        def show(*elem):
-            tpl = '%s ==> '+color(1)+'%s'+color(0)
-            print tpl % elem
-
-        if line:
-            args = line.strip().split(' ')
-            var  = args[0].upper()
-            val  = ' '.join(args[1:])
-            if var in self.CNF['SET']:
-                if val:
-                    backup = self.CNF['SET'][var]
-                    self.CNF['SET'][var] = val
-                    from usr.settings import comply
-                    if comply(self.CNF['SET']):
-                        show(var, self.CNF['SET'][var])
-                        self.CNF['LNK'] = update_opener(self.CNF)
-                    else:
-                        self.CNF['SET'][var] = backup
-                else:
-                    show(var, self.CNF['SET'][var])
-            else:
-                self.help_set()
-        else:
-            title = "Session settings"
-            items = self.CNF['SET'].items()
-            elems = dict([(x.upper(),y) for x,y in items])
-            columnize_vars(title, elems).write()
-
 
     ########################
     ### COMMAND: exploit ###
-    def do_exploit(self, line):
+    def do_exploit(self, cmd):
+        """Drop a shell from target server
+
+        This command opens the remote shell.
+        He sends an http request to the focused url (the one
+        defined by the "TARGET" setting), and opens the
+        remote shell if the dynamic payload ran.
+        """
         if 'URL' in self.CNF['LNK']:
             print P_inf+'Sending http payload...'
             from network import server

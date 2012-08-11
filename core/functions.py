@@ -234,3 +234,7 @@ P_err = color(31,01)+'[-]'+color(0)+' '
 P_inf = color(34,01)+'[*]'+color(0)+' '
 
 P_NL  = os.linesep
+
+from string import ascii_letters, digits
+P_ALNUM = ascii_letters+digits
+P_CHARS = P_ALNUM+'_'

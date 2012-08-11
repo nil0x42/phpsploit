@@ -5,26 +5,13 @@ from functions      import *
 from interface      import core
 from interface.func import *
 
-from framework      import cmdAPI
+from framework import plugins
 
+class Start(core.CoreShell):
+    shell_name = 'remote'
 
-class Start(core.Shell):
-
-    coreHelp = dict()
-    coreHelp['clear']   = 'Clear the terminal screen'
-    coreHelp['debug']   = 'For tool debugging purpose'
-    coreHelp['env']     = 'Change environment variables'
-    coreHelp['exit']    = 'Disconnect from remote server'
-    coreHelp['help']    = 'Show this help message'
-    coreHelp['infect']  = 'Print the working backdoor'
-    coreHelp['lastcmd'] = 'Save or view the last command output'
-    coreHelp['lcd']     = 'Change local working directory'
-    coreHelp['lpwd']    = 'Print local working directory'
-    coreHelp['reload']  = 'Reload the plugins list'
-    coreHelp['rtfm']    = 'Read the fine manual'
-    coreHelp['save']    = 'Save the current session in file'
-    coreHelp['shell']   = 'Spanws a shell plugin as prompt'
-    coreHelp['set']     = 'View and edit settings'
+    def __init__(self):
+        core.CoreShell.__init__(self)
 
     def preloop(self):
 
@@ -84,9 +71,10 @@ class Start(core.Shell):
             print P_err+"             Use '%s' to set it." % cmd
 
         # load plugins as commands
-        self.commands = cmdAPI.Loader()
-        self.commands.setCore(self.coreHelp)
-        self.update_commands()
+        self.plugins = plugins.Load()
+        # here we blacklist the reserved commands
+        self.plugins.blacklist(self.get_commands(self))
+        self.plugins.update()
 
         self.set_prompt()
 
@@ -113,11 +101,6 @@ class Start(core.Shell):
         return stop
 
 
-    def update_commands(self):
-        self.commands.update()
-        self.misc_cmds = self.commands.items
-
-
     def set_prompt(self, string=''):
         if string: string+=' '
         currentTarget = color(31,1)+self.CNF['LNK']['DOMAIN']+color(0)
@@ -140,18 +123,31 @@ class Start(core.Shell):
             self.CNF['CURRENT_SHELL'] = ''
             self.set_prompt()
 
+
+
     #######################
     ### COMMAND: reload ###
-    def do_reload(self, line):
-        self.update_commands()
+    def do_reload(self, cmd):
+        """Reload the plugins list
+
+        If you change a plugin when a phpsploit instance is already
+        running, this command allows you to reload the plugins list.
+        """
+        self.plugins.update()
         print P_inf+'Plugins list reloaded'
+
 
 
     ######################
     ### COMMAND: shell ###
     def help_shell(self):
-        print 'shell'
-        print 'Spawns a shell plugin as current prompt'
+        print 'This command is used to define a shell command as default'
+        print 'prompt. For example, running the "shell system" command'
+        print 'will pass the next typed lines to the "system" plugin'
+        print 'as arguments.'
+        print ''
+        print 'For example, running "ls" from a "shell system" instance'
+        print 'is the same than typing "system ls" from the remote shell.'
         print ''
         print 'Usage:   shell [cmdshell]'
         print ''
@@ -164,8 +160,11 @@ class Start(core.Shell):
         keys = self.commands.shells
         return([x+' ' for x in keys if x.startswith(text)])
 
-    def do_shell(self, shell):
-        if shell in self.commands.shells:
+    def do_shell(self, cmd):
+        """Spanws a shell plugin as prompt
+        """
+        shell = cmd['args']
+        if shell in self.plugins.shells():
             quit = color(37)+'Ctrl+C'+color(0)
             help = color(37)+'?'+color(0)
             msg = '%s shell opened (use %s to leave it or %s to get help).'
@@ -175,237 +174,137 @@ class Start(core.Shell):
         else:
             self.help_shell()
 
+
+
     ########################
     ### COMMAND: lastcmd ###
-    def help_lastcmd(self):
-        print 'lastcmd'
-        print 'Save or view the last command output'
-        print ''
-        print 'Usage:   lastcmd view'
-        print '         lastcmd save'
-        print '         lastcmd save [file]'
-        print '         lastcmd grep [string]'
-        print '         lastcmd hilight [regex]'
-        print ''
-        print 'Example: lastcmd save /tmp/log.txt'
-        print '         lastcmd grep mysql_connect'
-
     def complete_lastcmd(self, text, *ignored):
         keys = ['save','view','grep','hilight']
         return([x+' ' for x in keys if x.startswith(text)])
 
-    def do_lastcmd(self, line):
+    def do_lastcmd(self, cmd):
+        """Save or view the last command output'
+
+        Usage:   lastcmd view'
+                 lastcmd save'
+                 lastcmd save [file]'
+                 lastcmd grep [string]'
+                 lastcmd hilight [regex]'
+
+        Example: lastcmd save /tmp/log.txt'
+                 lastcmd grep mysql_connect'
+        """
         try: data = self.lastcmd_data
         except: data = ''
         if not data:
             print P_inf+'Last command contents is empty'
+            return
+
+        var, val = ['','']
+        if cmd['argc'] > 1: var = cmd['argv'][1]
+        if cmd['argc'] > 2: val = ' '.join(cmd['argv'][2:])
+        if var == 'save':
+            fileName = ''
+            data = decolorize(data)
+
+            if not val:
+                val = self.CNF['SET']['TMPPATH']
+            val = os.path.abspath(val)
+            if os.path.isdir(val):
+                fileName = 'phpsploit-lastcmd.txt'
+
+            file = getpath(val, fileName)
+
+            writeIn = True
+            if file.exists():
+                question = 'File %s already exists, overwrite it ?'\
+                           % quot(file.name)
+                if ask(question).reject():
+                    writeIn = False
+                    print P_err+'The last command was not saved'
+            if writeIn:
+                try:
+                    file.write(data)
+                    print P_inf+'Last command saved in '+file.name
+                except:
+                    print P_err+'Writting error on '+file.name
+        elif var == 'view':
+            print data
+        elif var == 'grep':
+            lines = data.splitlines()
+            print P_NL.join([x for x in lines if val.lower() in x.lower()])
+        elif var == 'hilight':
+            data = decolorize(data)
+            tpl = '%s\\1%s' % (color(31,1), color(0))
+            print re.sub('(%s)' % val, tpl, data)
+
         else:
-            args = line.strip().split(' ')
-            var  = args[0].lower()
-            val  = ' '.join(args[1:])
-            if var == 'save':
-                fileName = ''
-                data = decolorize(data)
+            self.help_lastcmd()
 
-                if not val:
-                    val = self.CNF['SET']['TMPPATH']
-                val = os.path.abspath(val)
-                if os.path.isdir(val):
-                    fileName = 'phpsploit-lastcmd.txt'
 
-                file = getpath(val, fileName)
-
-                writeIn = True
-                if file.exists():
-                    question = 'File %s already exists, overwrite it ?' % quot(file.name)
-                    if ask(question).reject():
-                        writeIn = False
-                        print P_err+'The last command was not saved'
-                if writeIn:
-                    try:
-                        file.write(data)
-                        print P_inf+'Last command saved in '+file.name
-                    except:
-                        print P_err+'Writting error on '+file.name
-            elif var == 'view':
-                print data
-            elif var == 'grep':
-                lines = data.splitlines()
-                print P_NL.join([x for x in lines if val.lower() in x.lower()])
-            elif var == 'hilight':
-                data = decolorize(data)
-                tpl = '%s\\1%s' % (color(31,1), color(0))
-                print re.sub('(%s)' % val, tpl, data)
-
-            else:
-                self.help_lastcmd()
 
     ####################
     ### COMMAND: env ###
-    def help_env(self):
-        print 'env'
-        print 'View and change environment variables.'
-        print ''
-        print 'Usage:   env'
-        print '         env [variable]'
-        print '         env [variable] [value]'
-        print ''
-        print 'Example: env MYSQL_BASE information_schema'
-        print '         env CWD'
-
     def complete_env(self, text, *ignored):
         keys = self.CNF['ENV'].keys()
         return([x+' ' for x in keys if x.startswith(text)])
 
-    def do_env(self, line):
+    def do_env(self, cmd):
+        """View and change environment variables.
+
+        Usage:   env
+                 env [variable]
+                 env [variable] [value]
+
+        Example: env MYSQL_BASE information_schema
+                 env CWD
+        """
         def show(*elem):
             tpl = '%s ==> '+color(1)+'%s'+color(0)
             print tpl % elem
 
-        if line:
-            args = line.strip().split(' ')
-            var  = args[0].upper()
-            val  = ' '.join(args[1:])
-            if var in self.CNF['ENV']:
-                if val:
-                    if var in self.locked_env:
-                        print P_err+'Locked environment variable: '+var
-                    elif val.lower() == 'none':
-                        del self.CNF['ENV'][var]
-                        print P_inf+'Environment variable deleted: '+var
-                    else:
-                        self.CNF['ENV'][var] = val
-                        show(var, val)
+        var, val = ['','']
+        if cmd['argc'] > 1: var = cmd['argv'][1]
+        if cmd['argc'] > 2: val = ' '.join(cmd['argv'][2:])
+        if var in self.CNF['ENV']:
+            if val:
+                if var in self.locked_env:
+                    print P_err+'Locked environment variable: '+var
+                elif val.lower() == 'none':
+                    del self.CNF['ENV'][var]
+                    print P_inf+'Environment variable deleted: '+var
                 else:
-                    show(var, self.CNF['ENV'][var])
+                    self.CNF['ENV'][var] = val
+                    show(var, val)
             else:
-                if not val:
-                    self.help_env()
-                elif val.lower() != 'none':
-                    if var in self.locked_env:
-                        print P_err+'Locked environment variable: '+var
-                    else:
-                        self.CNF['ENV'][var] = val
-                        show(var, val)
+                show(var, self.CNF['ENV'][var])
+        elif var:
+            if not val:
+                self.help_env()
+            elif val.lower() != 'none':
+                if var in self.locked_env:
+                    print P_err+'Locked environment variable: '+var
+                else:
+                    self.CNF['ENV'][var] = val
+                    show(var, val)
         else:
             title = "Environment variables"
             elems = dict([(x,y) for x,y in self.CNF['ENV'].items()])
             columnize_vars(title, elems).write()
 
 
-    ####################
-    ### COMMAND: set ###
-    def help_set(self):
-        print 'set'
-        print 'View and edit settings.'
-        print ''
-        print 'Usage:   set'
-        print '         set [variable]'
-        print '         set [variable] [value]'
-        print ''
-        print 'Example: set TEXTEDITOR /usr/bin/nano'
-        print '         set PROXY None'
-
-    def complete_set(self, text, *ignored):
-        keys = self.CNF['SET'].keys()
-        return([x+' ' for x in keys if x.startswith(text)])
-
-    def do_set(self, line):
-
-        def show(*elem):
-            tpl = '%s ==> '+color(1)+'%s'+color(0)
-            print tpl % elem
-
-        def set_var(var):
-            backup = self.CNF['SET'][var]
-            self.CNF['SET'][var] = val
-            from usr.settings import comply
-            if comply(self.CNF['SET']):
-                lnk_backup = self.CNF['LNK']
-                self.CNF['LNK'] = update_opener(self.CNF)
-                # if changed TARGET url:
-                if var == 'TARGET':
-                    import network.server
-                    if network.server.Link(self.CNF).check():
-                        self.CNF['LNK_HASH'] = self.CNF['LNK']['HASH']
-                        self.set_prompt()
-                    else:
-                        self.CNF['LNK']      = lnk_backup
-                        self.CNF['SET'][var] = backup
-                else:
-                    show(var, self.CNF['SET'][var])
-            else:
-                self.CNF['SET'][var] = backup
-
-        if line:
-            args = line.strip().split(' ')
-            var  = args[0].upper()
-            val  = ' '.join(args[1:])
-            if var in self.CNF['SET']:
-                if val:
-                    if var in self.locked_settings:
-                        print P_err+'Locked session setting: '+var
-                    else:
-                        set_var(var)
-                else:
-                    show(var, self.CNF['SET'][var])
-            else:
-                self.help_set()
-        else:
-            title = "Session settings"
-            items = self.CNF['SET'].items()
-            elems = dict([(x.upper(),y) for x,y in items])
-            columnize_vars(title, elems).write()
-
 
     ###############
     ### PLUGINS ###
-    def when_unknown(self, line):
-        line = line.strip()
-        if not ' ' in line:
-            cmdName = line
-            cmdLine = ''
+    def when_unknown(self, cmd):
+        if cmd['name'] not in self.plugins.commands():
+            print P_err+'Unknown command: '+cmd['line']
         else:
-            sep  = line.find(' ')
-            cmdName = line[:sep].strip()
-            cmdLine = line[sep:].strip()
-
-        if cmdName not in self.misc_cmds:
-            print P_err+'Unknown command: '+line
-        else:
-            if cmdLine in ['--help','-h']:
-                self.do_help(cmdName)
+            if cmd['args'] in ['--help','-h']:
+                self.do_help(cmd['name'])
             else:
-                cmdData = self.commands.cmddata(cmdName)
-                cmdPath = self.commands.cmdpath(cmdName)
-                plugin  = (self.CNF, cmdData, cmdPath, cmdName, cmdLine)
                 try:
-                    self.CNF['ENV'] = cmdAPI.Exec(*plugin)
-                    del self.CNF['cmd']
+                    plugin = plugins.Run(cmd, self.plugins, self.CNF)
+                    self.CNF['ENV'] = plugin.env
                 except KeyboardInterrupt:
                     self.when_interrupt()
-
-    ############
-    ### HELP ###
-    def do_help(self, arg):
-        if not arg:
-            print self.commands.help
-        else:
-            try:
-                func = getattr(self, 'help_'+arg)
-                func()
-            except AttributeError:
-                if arg in self.misc_cmds:
-                    cmd = self.commands.cmddata(arg)
-                    print cmd['help']
-                    print ''
-                    print cmd['description']
-                else:
-                    try:
-                        doc = getattr(self, 'do_'+arg).__doc__
-                        if doc:
-                            self.stdout.write(("%s"+P_NL)%str(doc))
-                        else:
-                            self.stdout.write(("%s"+P_NL)%str(self.nohelp % (arg,)))
-                    except AttributeError:
-                        self.stdout.write(("%s"+P_NL)%str(self.nocmd % (arg,)))

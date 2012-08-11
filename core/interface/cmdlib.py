@@ -10,7 +10,6 @@ class Cmd:
 
     identchars   = string.ascii_letters+string.digits+'_'
     ruler        = '='
-    lastcmd      = ''
     intro        = ''
     doc_leader   = ''
     doc_header   = 'Documented commands (type help <topic>):'
@@ -20,25 +19,35 @@ class Cmd:
     CNF          = None
     misc_cmds    = list()
 
+    def __init__(self, completekey='tab', stdin=None, stdout=None):
+        self.LAST_CMD_DATA = ''
+        """Instantiate a line-oriented interpreter framework.
 
-    # before, these variables were in __init__()
-    stdin        = sys.stdin
-    stdout       = sys.stdout
-    cmdqueue     = list()
-    completekey  = 'tab'
+        The optional argument 'completekey' is the readline name of a
+        completion key; it defaults to the Tab key. If completekey is
+        not None and the readline module is available, command completion
+        is done automatically. The optional arguments stdin and stdout
+        specify alternate input and output file objects; if not specified,
+        sys.stdin and sys.stdout are used.
+
+        """
+        if stdin is not None:  self.stdin  = stdin
+        else:                  self.stdin  = sys.stdin
+        if stdout is not None: self.stdout = stdout
+        else:                  self.stdout = sys.stdout
+        self.cmdqueue    = list()
+        self.completekey = completekey
 
     def when_interrupt(self):
         print P_NL+self.interrupt
 
     def setConfig(self, config):
         """Send a CNF variable to the framework.
-
         """
         self.CNF = config
 
     def getConfig(self):
         """Returns the current CNF variable
-
         """
         return(self.CNF)
 
@@ -125,17 +134,30 @@ class Cmd:
         line = line.strip()
         if not line:
             return None, None, line
-        elif line[0] == '?':
-            line = 'help ' + line[1:]
-        elif line[0] == '!':
-            if hasattr(self, 'do_shell'):
-                line = 'shell ' + line[1:]
-            else:
-                return None, None, line
         i, n = 0, len(line)
         while i < n and line[i] in self.identchars: i = i+1
         cmd, arg = line[:i], line[i:].strip()
         return cmd, arg, line
+
+    def parseline(self, line):
+        cmd = dict()
+        line = line.strip()
+        cmd['line'] = line
+
+        if not ' ' in line:
+            cmd['name'] = line
+            cmd['args'] = ''
+        else:
+            sep  = line.find(' ')
+            cmd['name'] = line[:sep].strip()
+            cmd['args'] = line[sep:].strip()
+
+        import shlex
+        cmd['argv'] = shlex.split(line)
+        cmd['argc'] = len(cmd['argv'])
+
+        return(cmd)
+
 
     def onecmd(self, line):
         """Interpret the argument as though it had been typed in response
@@ -147,31 +169,26 @@ class Cmd:
         commands by the interpreter should stop.
 
         """
-        cmd, arg, line = self.parseline(line)
-        if not line:
+        cmd = self.parseline(line)
+        if not cmd['line']:
             return self.emptyline()
-        if cmd is None:
-            return self.default(line)
-        self.lastcmd = line
-        if cmd == '':
-            return self.default(line)
-        else:
-            try:
-                func = getattr(self, 'do_' + cmd)
-            except AttributeError:
-                return self.default(line)
-            return func(arg)
+        if not cmd['name']:
+            return self.default(cmd)
+        try:
+            func = getattr(self, 'do_' + cmd['name'])
+        except AttributeError:
+            return self.default(cmd)
+        return func(cmd)
 
     def emptyline(self):
         """Called when an empty line is entered in response to the prompt.
 
-        If this method is not overridden, it repeats the last nonempty
-        command entered.
+        If this method is not overridden, it re loops to the prompt
 
         """
-        return ''
+        return
 
-    def default(self, line):
+    def default(self, cmd):
         """Called on an input line when the command prefix is not recognized.
 
         If this method is not overridden, it prints an error message and
@@ -180,9 +197,9 @@ class Cmd:
         """
         try:
             func = getattr(self, 'when_unknown')
-            return func(line)
+            return func(cmd)
         except AttributeError:
-            self.stdout.write(("%s"+P_NL)%str(self.nocmd % (line,)))
+            self.stdout.write(("%s"+P_NL)%str(self.nocmd % (cmd['line'],)))
 
     def completedefault(self, text, line, *ignored):
         """Method called to complete an input line when no command-specific
@@ -199,9 +216,7 @@ class Cmd:
             return []
 
     def completenames(self, text, *ignored):
-        dotext = 'do_'+text
-        result = [a+" " for a in self.misc_cmds if a.startswith(text)]
-        return result+[a[3:]+" " for a in self.get_names() if a.startswith(dotext)]
+        return [a+" " for a in self.get_commands() if a.startswith(text)]
 
     def complete(self, text, state):
         """Return the next possible completion for 'text'.
@@ -217,12 +232,12 @@ class Cmd:
             begidx = readline.get_begidx() - stripped
             endidx = readline.get_endidx() - stripped
             if begidx>0:
-                cmd, args, foo = self.parseline(line)
-                if cmd == '':
+                name = self.parseline(line)['name']
+                if name == '':
                     compfunc = self.completedefault
                 else:
                     try:
-                        compfunc = getattr(self, 'complete_' + cmd)
+                        compfunc = getattr(self, 'complete_' + name)
                         if type(compfunc).__name__ == 'list':
                             compfunc = self.completedefault
                     except AttributeError:
@@ -246,6 +261,13 @@ class Cmd:
                 classes = classes + list(aclass.__bases__)
             names = names + dir(aclass)
         return names
+
+    def get_commands(self, obj=None):
+        commands = list()
+        for method in self.get_names():
+            if method.startswith('do_'):
+                commands.append(method[3:])
+        return commands
 
     def complete_help(self, *args):
         return self.completenames(*args)
