@@ -2,16 +2,19 @@ import os, sys, re
 from StringIO  import StringIO
 
 from functions      import *
-from interface      import core
+from interface import core
 from interface.func import *
 
 from framework import plugins
 
 class Start(core.CoreShell):
     shell_name = 'remote'
+    # we save the old "unknow_command" as "print_unknow_command"
+    print_unknow_command = core.CoreShell.unknow_command
 
     def __init__(self):
         core.CoreShell.__init__(self)
+
 
     def preloop(self):
 
@@ -296,9 +299,9 @@ class Start(core.CoreShell):
 
     ###############
     ### PLUGINS ###
-    def when_unknown(self, cmd):
+    def unknow_command(self, cmd):
         if cmd['name'] not in self.plugins.commands():
-            print P_err+'Unknown command: '+cmd['line']
+            self.print_unknow_command(cmd)
         else:
             if cmd['args'] in ['--help','-h']:
                 self.do_help(cmd['name'])

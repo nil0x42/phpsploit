@@ -162,10 +162,10 @@ class CoreShell(cmdlib.Cmd):
         Example: lcd ~
                  lcd /tmp/ram
         """
-        if not cmd['args']:
+        if cmd['argc'] != 2:
             self.run('help lcd')
         else:
-            newDir = os.path.expanduser(cmd['args'])
+            newDir = os.path.expanduser(cmd['argv'][1])
             try: os.chdir(newDir)
             except OSError, e: print P_err+str(e)[str(e).find(']')+2:]
 
@@ -258,10 +258,12 @@ class CoreShell(cmdlib.Cmd):
                  help [command]
         Example: help infect
         """
-        arg          = cmd['args']
+        if cmd['argc'] > 2:
+            self.run('help help')
+
         sys_commands = self.get_commands(self)
 
-        def get_doc(arg=arg):
+        def get_doc(arg):
             try: doc = self.plugins.get(arg, 'help')
             except: doc = None
             if arg in sys_commands:
@@ -287,10 +289,11 @@ class CoreShell(cmdlib.Cmd):
             print P_NL.join(doc)
 
         # command help
-        if arg:
+        if cmd['argc'] == 2:
+            arg = cmd['argv'][1]
             doc = get_doc(arg)
             if not doc:
-                print self.nocmd % (arg,)
+                print self.nocmd % arg
                 return
             print P_inf+arg
             print P_inf+get_description(doc)+P_NL

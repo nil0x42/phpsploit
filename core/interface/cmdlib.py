@@ -141,8 +141,31 @@ class Cmd:
 
     def parseline(self, line):
         cmd = dict()
-        line = line.strip()
+        line = line.lstrip()
+
+        import shlex
+        ok   = False
+        while not ok:
+            try:
+                argv = shlex.split(line)
+                ok = True
+            except ValueError, e:
+                if e.message == "No closing quotation":
+                    line+= P_NL
+                elif e.message == "No escaped character":
+                    line = line[:-1]
+                try:
+                    line+= raw_input('> ')
+                except KeyboardInterrupt:
+                    print P_NL+P_err+'Keyboard Interrupt'
+                    line = ''
+                except EOFError:
+                    print P_NL+P_err+'EOF Error'
+                    line = ''
+
         cmd['line'] = line
+        cmd['argv'] = argv
+        cmd['argc'] = len(cmd['argv'])
 
         if not ' ' in line:
             cmd['name'] = line
@@ -151,10 +174,6 @@ class Cmd:
             sep  = line.find(' ')
             cmd['name'] = line[:sep].strip()
             cmd['args'] = line[sep:].strip()
-
-        import shlex
-        cmd['argv'] = shlex.split(line)
-        cmd['argc'] = len(cmd['argv'])
 
         return(cmd)
 
@@ -172,12 +191,10 @@ class Cmd:
         cmd = self.parseline(line)
         if not cmd['line']:
             return self.emptyline()
-        if not cmd['name']:
-            return self.default(cmd)
         try:
-            func = getattr(self, 'do_' + cmd['name'])
+            func = getattr(self, 'do_' + cmd['argv'][0])
         except AttributeError:
-            return self.default(cmd)
+            return self.unknow_command(cmd)
         return func(cmd)
 
     def emptyline(self):
@@ -188,18 +205,18 @@ class Cmd:
         """
         return
 
-    def default(self, cmd):
+    def unknow_command(self, cmd):
         """Called on an input line when the command prefix is not recognized.
 
         If this method is not overridden, it prints an error message and
         returns.
 
         """
-        try:
-            func = getattr(self, 'when_unknown')
-            return func(cmd)
-        except AttributeError:
-            self.stdout.write(("%s"+P_NL)%str(self.nocmd % (cmd['line'],)))
+        cmd = cmd['argv'][0]
+        cmd_repr = repr(cmd)
+        if cmd != cmd_repr[1:-1]:
+            cmd = '$'+cmd_repr
+        print self.nocmd % cmd
 
     def completedefault(self, text, line, *ignored):
         """Method called to complete an input line when no command-specific
