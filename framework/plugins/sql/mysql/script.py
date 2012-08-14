@@ -71,7 +71,8 @@ if self.argv[1].lower() == 'use':
 if 'MYSQL_BASE' in api.env:
     query['BASE'] = api.env['MYSQL_BASE']
 
-query['QUERY'] = ' '.join([x.replace(' ','\\ ').replace("\\'",'\'').replace('\\"','\"') for x in self.argv[1:]])
+#query['QUERY'] = ' '.join([x.replace(' ','\\ ').replace("\\'",'\'').replace('\\"','\"') for x in self.argv[1:]])
+query['QUERY'] = self.args.strip().rstrip(';').strip()
 
 showtype = 'column'
 if query['QUERY'].endswith('\\G'):
