@@ -34,10 +34,15 @@ http.send({'CMD' : CMD})
 
 response = http.response.splitlines()
 
+
 # patch to take care of new CWD if changed (part2)
-if response[-1].startswith('/'):
-    api.env['CWD'] = response[-1].strip()
-    response = response[:-1]
+if api.server['platform'] == 'nix':
+    if len(response):
+        if response[-1].startswith('/'):
+            api.env['CWD'] = response[-1].strip()
+            response = response[:-1]
+    else:
+        response = []
 
 if response:
     print P_NL.join(response)
