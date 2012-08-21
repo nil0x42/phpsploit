@@ -269,6 +269,9 @@ class CoreShell(cmdlib.Cmd):
             if arg in sys_commands:
                 doc = getattr(self, 'do_'+arg).__doc__
             if doc is None:
+                try: doc = getattr(CoreShell, 'do_'+arg).__doc__
+                except: doc = None
+            if doc is None:
                 return('')
             return(doc.strip().splitlines())
 
