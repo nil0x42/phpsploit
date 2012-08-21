@@ -127,6 +127,28 @@ class Start(core.CoreShell):
             self.set_prompt()
 
 
+    def do_exit(self, cmd):
+        save_ask = None
+        if 'SAVEFILE' in self.CNF['SET']:
+            from usr.session import load
+            session = load(self.CNF['SET']['SAVEFILE'])
+            if session.exists:
+                session.content['SET']['SAVEFILE'] = self.CNF['SET']['SAVEFILE']
+                if session.content != self.CNF:
+                    import pprint
+                    open('/tmp/1','w').write(pprint.pformat(session.content))
+                    open('/tmp/2','w').write(pprint.pformat(self.CNF))
+                    save_ask = 'The current session has changed'
+        else:
+            save_ask = 'The current session was not saved'
+        if save_ask:
+            warning  = 'if you exit now, the session changes will be lost'
+            question = 'Do you really want to leave the remote shell ?'
+
+            print P_err+'%s, %s' % (save_ask, warning)
+            if ask(question).reject():
+                return
+        return True
 
     #######################
     ### COMMAND: reload ###
