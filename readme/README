@@ -12,7 +12,7 @@ SYNOPSIS
 
 DESCRIPTION
        phpsploit  is  a  furtive tunnel based php webshell: it was designed in
-       order to help privilege escalation through a really small php backdoor,
+       order to help privilege escalation through a very small  php  backdoor,
        while  remaining  the most stealth, efficient, and adjustable as possi‐
        ble.
 

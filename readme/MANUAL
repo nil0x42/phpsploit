@@ -14,7 +14,7 @@
 .SH DESCRIPTION
 
 .P
-\fBphpsploit\fR is a furtive tunnel \fIbased\fR php webshell: it was designed in order to help privilege escalation through a really small php backdoor, while remaining the most stealth, efficient, and adjustable as possible.
+\fBphpsploit\fR is a furtive tunnel \fIbased\fR php webshell: it was designed in order to help privilege escalation through a very small php backdoor, while remaining the most stealth, efficient, and adjustable as possible.
 
 .P
 It innovates by settling for a remotely stored micro backdoor that forwards to dynamic encoded HTTP headers, which act as dynamic payload. This feature is usefull to bypass admins searching for suspicious lines in the server logs, because GET requests without arguments, are not as suspect as POST requests, or GET requests with suspicious arguments (eg: "?cmd=cat&edit=/etc/passwd").
