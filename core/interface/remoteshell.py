@@ -135,9 +135,6 @@ class Start(core.CoreShell):
             if session.exists:
                 session.content['SET']['SAVEFILE'] = self.CNF['SET']['SAVEFILE']
                 if session.content != self.CNF:
-                    import pprint
-                    open('/tmp/1','w').write(pprint.pformat(session.content))
-                    open('/tmp/2','w').write(pprint.pformat(self.CNF))
                     save_ask = 'The current session has changed'
         else:
             save_ask = 'The current session was not saved'
