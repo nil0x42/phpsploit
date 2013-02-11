@@ -224,11 +224,11 @@ SETTINGS
 
 
        When a new session is opened, all settings are  set  to  their  default
-       values,  specified in the phpsploit's user configuration file. The con‐
-       figuration file is defaultly storred on  ~/.phpsploit/config,  but  you
-       can  also  move  it  into ~/.config/phpsploit/config. Editing this file
-       allows you to specify your own default values, a very  usefull  feature
-       for polymorphic backdoor, or custom HTTP headers.
+       values,  specified  in the phpsploit's user configuration file. Editing
+       this file allows you to specify your own default values, a very usefull
+       feature  for  polymorphic backdoor, or custom HTTP headers. To get more
+       informations about the configuration directory, please go to the  FILES
+       section.
 
 
        TARGET This  setting  contains  the  remote  backdoored  URL  in target
@@ -530,15 +530,19 @@ REQUEST BUILDING
 
 
 FILES
-       ~/.phpsploit/
-              Default phpsploit configuration directory.
-
-       ~/.config/phpsploit/
-              Alternative phpsploit configuration directory.
+       Configuration directory:
 
 
-       The "./config" file is used as phpsploit configuration  file,  on  root
-       user's  configuration  directory.  It allows to reconfigure the default
+       If the $XDG_CONFIG_HOME shell environment variable is set:
+              ${XDG_CONFIG_HOME}/phpsploit/  (a.k.a.   likely   ~/.config/php‐
+              sploit/)
+
+       Else the user home is used as base directory:
+              ~/.phpsploit/ (a.k.a. ${HOME}/.phpsploit/ on GNU/Linux)
+
+
+       The  "./config"  file  is used as phpsploit configuration file, on root
+       user's configuration directory.  It allows to reconfigure  the  default
        SETTINGS (see the SETTINGS section for more informations)
 
 
@@ -559,7 +563,7 @@ AUTHOR
 
 
 LICENCE
-       This software is under the GNU GENERAL PUBLIC  LICENSE  Version  3,  29
+       This  software  is  under  the GNU GENERAL PUBLIC LICENSE Version 3, 29
        June 2007
 
 

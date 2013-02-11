@@ -193,7 +193,7 @@ If a command has been edited during an exploitation session, use the "\fBreload\
 The \fBphpsploit\fR settings are available from the interface, they can be viewed, and edited with the \fBset\fR command.
 
 .P
-When a new session is opened, all \fIsettings\fR are set to their default values, specified in the phpsploit's user configuration file. The configuration file is defaultly storred on \fB~/.phpsploit/config\fR, but you can also move it into \fB~/.config/phpsploit/config\fR. Editing this file allows you to specify your own default values, a very usefull feature for polymorphic backdoor, or custom HTTP headers.
+When a new session is opened, all \fIsettings\fR are set to their default values, specified in the phpsploit's user configuration file. Editing this file allows you to specify your own default values, a very usefull feature for polymorphic backdoor, or custom HTTP headers. To get more informations about the configuration directory, please go to the \fBFILES\fR section.
 
 .TP
 \fBTARGET\fR
@@ -418,12 +418,15 @@ It also manages response compression with \fBZLIB\fR, to speed\-up server's resp
 
 .SH FILES
 
+.P
+\fBConfiguration directory:\fR
+
 .TP
-\fB~/.phpsploit/\fR
-Default \fBphpsploit\fR configuration directory.
+If the \fB$XDG_CONFIG_HOME\fR shell environment variable is set:
+\fB${XDG_CONFIG_HOME}/phpsploit/\fR (a.k.a. likely ~/.config/phpsploit/)
 .TP
-\fB~/.config/phpsploit/\fR
-Alternative \fBphpsploit\fR configuration directory.
+Else the user home is used as base directory:
+\fB~/.phpsploit/\fR (a.k.a. ${HOME}/.phpsploit/ on GNU/Linux)
 
 .P
 The "./config" file is used as \fBphpsploit\fR configuration file, on root user's configuration directory.

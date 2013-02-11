@@ -1,12 +1,30 @@
 import os, re, string
 from functions import *
 
-
-userDir = getpath('~/.config/phpsploit/')
+userDir = getpath('~/.phpsploit')
 if not userDir.isdir():
-    userDir = getpath('~/.phpsploit/')
-    try: os.mkdir(userDir.name)
-    except: pass
+    env_xdgConf = os.environ.get('XDG_CONFIG_HOME')
+    if env_xdgConf:
+        userDir = getpath(env_xdgConf, 'phpsploit')
+
+try: os.mkdir(userDir.name)
+except: pass
+
+err = None
+if not userDir.exists():
+    err = 'Creation denied'
+elif not userDir.isdir():
+    err = 'Not a directory'
+elif not userDir.access('r'):
+    err = 'Read permission denied'
+elif not userDir.access('w'):
+    err = 'Write permission denied'
+
+if err:
+    print P_err+"Settings error: %s: %s" % (userDir.name, err)
+    inf = "Please give correct privileges to your configuration directory"
+    sys.exit(P_inf+inf)
+
 
 userFile = getpath(userDir.name, 'config')
 softFile = getpath('phpsploit.conf')
@@ -96,23 +114,14 @@ def comply(settings):
             if not value:
                 setError(name,'Is empty')
 
-            # condition disabled, SRVHASH is no more supported
-            # because it troubles changing target during a running session
-            # (if the passkey is SRVHASH, and target on same server use another
-            # hostname, the domain hashkey will change, making impossible to know
-            # what real backdoor we have to use with the "infect" command.
-            ### if value != '%%SRVHASH%%':
-            if True:
-                value = value.lower()
-                if not re.match('^[a-z0-9_]+$',value):
-                    #err = 'Only alphanumeric chars and underscore'
-                    #err+= ' OR %%SRVHASH%% are accepted'
-                    err = 'Accepted chars: a-zA-Z_'
-                    setError(name,err)
-                if re.match('^zz[a-z]{2}$',value) \
-                or value.replace('_','-') in reserved_headers:
-                    err = 'The value %s is a reserved header name'
-                    setError(name, err % quot(value))
+            value = value.lower()
+            if not re.match('^[a-z0-9_]+$',value):
+                err = 'Accepted chars: a-zA-Z_'
+                setError(name,err)
+            if re.match('^zz[a-z]{2}$',value) \
+            or value.replace('_','-') in reserved_headers:
+                err = 'The value %s is a reserved header name'
+                setError(name, err % quot(value))
 
         elif name == 'BACKDOOR':
             if not '%%PASSKEY%%' in value:
