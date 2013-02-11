@@ -276,7 +276,7 @@ class Start(core.CoreShell):
 
         Usage:   env
                  env [variable]
-                 env [variable] [value]
+                 env [variable] [value|none]
 
         Example: env MYSQL_BASE information_schema
                  env CWD
@@ -285,34 +285,29 @@ class Start(core.CoreShell):
             tpl = '%s ==> '+color(1)+'%s'+color(0)
             print tpl % elem
 
-        var, val = ['','']
-        if cmd['argc'] > 1: var = cmd['argv'][1]
-        if cmd['argc'] > 2: val = ' '.join(cmd['argv'][2:])
-        if var in self.CNF['ENV']:
-            if val:
-                if var in self.locked_env:
-                    print P_err+'Locked environment variable: '+var
-                elif val.lower() == 'none':
+        if cmd['argc'] <= 2:
+            # list environ matching argv[1]
+            patern = cmd['argv'][1] if cmd['argc'] > 1 else ''
+            title = "Environment variables"
+            items = self.CNF['ENV'].items()
+            elems = dict([(x,y) for x,y in items if x.startswith(patern)])
+            columnize_vars(title, elems).write()
+        else:
+            var = cmd['argv'][1]
+            val = ' '.join(cmd['argv'][2:])
+
+            if var in self.locked_env:
+                print P_err+'Locked environment variable: '+var
+            elif val.lower() == 'none':
+                if var in self.CNF['ENV']:
                     del self.CNF['ENV'][var]
                     print P_inf+'Environment variable deleted: '+var
                 else:
-                    self.CNF['ENV'][var] = val
-                    show(var, val)
+                    self.run('help env')
+
             else:
-                show(var, self.CNF['ENV'][var])
-        elif var:
-            if not val:
-                self.run('help env')
-            elif val.lower() != 'none':
-                if var in self.locked_env:
-                    print P_err+'Locked environment variable: '+var
-                else:
-                    self.CNF['ENV'][var] = val
-                    show(var, val)
-        else:
-            title = "Environment variables"
-            elems = dict([(x,y) for x,y in self.CNF['ENV'].items()])
-            columnize_vars(title, elems).write()
+                self.CNF['ENV'][var] = val
+                show(var, val)
 
 
 

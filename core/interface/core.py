@@ -228,26 +228,23 @@ class CoreShell(cmdlib.Cmd):
             else:
                 self.CNF['SET'][var] = backup
 
-        var, val = ['','']
-        if cmd['argc'] > 1: var = cmd['argv'][1]
-        if cmd['argc'] > 2: val = ' '.join(cmd['argv'][2:])
-        if var in self.CNF['SET']:
-            if val:
+        if cmd['argc'] <= 2:
+            # list settings matching argv[1]
+            patern = cmd['argv'][1].upper() if cmd['argc'] > 1 else ''
+            title = "Session settings"
+            items = self.CNF['SET'].items()
+            elems = dict([(x.upper(),y) for x,y in items if x.upper().startswith(patern)])
+            columnize_vars(title, elems).write()
+        else:
+            var = cmd['argv'][1].upper()
+            val = ' '.join(cmd['argv'][2:])
+            if var in self.CNF['SET']:
                 if var in self.locked_settings:
                     print P_err+'Locked session setting: '+var
                 else:
                     set_var(var)
             else:
-                show(var, self.CNF['SET'][var])
-        elif var:
-            self.run('help set')
-        else:
-            title = "Session settings"
-            items = self.CNF['SET'].items()
-            elems = dict([(x.upper(),y) for x,y in items])
-            columnize_vars(title, elems).write()
-
-
+                self.run('help set')
 
     #####################
     ### COMMAND: help ###

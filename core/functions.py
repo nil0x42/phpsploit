@@ -57,7 +57,7 @@ def termlen():
     return(width)
 
 
-# split_len('lol',2) -> ['lo','l']
+# split_len('phpsploit', 2) -> ['ph', 'ps', 'pl', 'oi', 't']
 def split_len(seq, length):
     return [seq[i:i+length] for i in range(0, len(seq), length)]
 
