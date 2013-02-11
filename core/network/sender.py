@@ -1,4 +1,4 @@
-import urllib, urllib2, base64, time, re
+import urllib, urllib2, base64, time, re, math
 from phpcode.payload import py2phpVar
 from phpcode.payload import Build     as build_payload
 from phpcode.payload import Encode    as encode_payload
@@ -143,7 +143,11 @@ class Load:
                     l = letters[x-26]
                 result.append('zz'+letters[base]+l)
             return(result)
-        vals = split_len(payload, self.max_header_size-8)
+
+        # this equilibrates the risks we take on max_headers and those on max_headers_size.
+        # -8 on the max_header_size to keep space for the name and \r\n
+        per_hdr = int(math.ceil(math.sqrt((len(payload) * (self.max_header_size-8)) / self.available_headers['GET'])))
+        vals = split_len(payload, per_hdr)
         keys = get_header_names(len(vals))
         return(dict(zip(keys, vals)))
 
