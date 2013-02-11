@@ -237,7 +237,7 @@ class CoreShell(cmdlib.Cmd):
             columnize_vars(title, elems).write()
         else:
             var = cmd['argv'][1].upper()
-            val = ' '.join(cmd['argv'][2:])
+            val = cmd['args'][cmd['args'].find(' ')+1:].strip()
             if var in self.CNF['SET']:
                 if var in self.locked_settings:
                     print P_err+'Locked session setting: '+var

@@ -294,7 +294,7 @@ class Start(core.CoreShell):
             columnize_vars(title, elems).write()
         else:
             var = cmd['argv'][1]
-            val = ' '.join(cmd['argv'][2:])
+            val = cmd['args'][cmd['args'].find(' ')+1:].strip()
 
             if var in self.locked_env:
                 print P_err+'Locked environment variable: '+var
