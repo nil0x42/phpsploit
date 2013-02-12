@@ -1,5 +1,8 @@
-PHPSPLOIT(1)                                                      PHPSPLOIT(1)
+(1)                                                                        (1)
 
+
+
+       PHPSPLOIT
 
 
 NAME
@@ -378,7 +381,7 @@ SETTINGS
               pick a random user-agent from a wordlist on  each  request,  you
               can also use a file object as value.
 
-              Default value: file://misc/http/User-Agent.lst
+              Default value: file://framework/misc/http_user_agents.lst
 
 
 
@@ -556,10 +559,14 @@ ISSUES
               https://bitbucket.org/nil0x42/phpsploit/issues
 
 
-AUTHOR
-       nil0x42 (https://bitbucket.org/nil0x42)
+CONTRIBUTE
+       If you want to contribute to phpsploit, submit a plugin, patch, or any‐
+       thing else, take a look at the CONTRIBUTE file, from the  ./doc  direc‐
+       tory
 
-       contact: #phpsploit@irc.freenode.net // feel free to hilight me :)
+
+AUTHOR
+       nil0x42 (nil0x42@gmail.com)
 
 
 LICENCE
@@ -569,4 +576,4 @@ LICENCE
 
 
 
-                                                                  PHPSPLOIT(1)
+                                                                           (1)

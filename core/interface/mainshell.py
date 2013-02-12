@@ -11,9 +11,9 @@ class Start(core.CoreShell):
 
     def preloop(self):
         self.do_clear('')
-        softwareLogo  = getpath('misc/txt/logo.ascii').read().rstrip()
-        introduction  = getpath('misc/txt/intro.msg').read().strip()
-        startMessage  = getpath('misc/txt/start_messages.lst').randline()
+        softwareLogo  = getpath('framework/misc/logo.ascii').read().rstrip()
+        introduction  = getpath('framework/misc/intro.msg').read().strip()
+        startMessage  = getpath('framework/misc/start_messages.lst').randline()
 
         # print intro and help
         print softwareLogo

@@ -64,7 +64,7 @@ elif sys.argc == 2:
     arg = sys.argv[1]
 
     if arg in ['-h', '--help']:
-        msg = getpath('misc/txt/help.msg').read()
+        msg = getpath('framework/misc/help.msg').read()
         print(P_NL+msg.strip()+P_NL)
         sys.exit(0)
 
@@ -114,5 +114,5 @@ interface.cmdloop()           # open the shell interface
 
 
 # then we can leave with a random end message
-endMessage = getpath('misc/txt/end_messages.lst').randline()
+endMessage = getpath('framework/misc/end_messages.lst').randline()
 print P_NL+color(37)+endMessage.strip()+color(0)+P_NL

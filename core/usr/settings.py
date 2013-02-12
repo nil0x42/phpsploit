@@ -28,7 +28,7 @@ if err:
 
 userFile = getpath(userDir.name, 'config')
 softFile = getpath('phpsploit.conf')
-template = getpath('misc/conf/settings.tpl')
+template = getpath('framework/misc/settings.tpl')
 
 
 def load():
@@ -209,6 +209,17 @@ def comply(settings):
 
         elif name.startswith('HTTP_') and name[5:] \
         and  value.lower().startswith('file://'):
+
+            # FIX FOR OLD PHPSPLOIT VERSIONS USING THE OLDER DEFAULT
+            # USER AGENTS LIST:
+            if name == "HTTP_USER_AGENT" \
+            and value == "file://misc/http/User-Agent.lst":
+                msg = "The user agent list's default path has changed to "
+                print P_inf+msg+"file://framework/misc/http_user_agents.lst"
+                msg = "Please set this new value to your configuration file "
+                print P_inf+msg+"to prevent settings error."
+            # END OF FIX
+
             path = getpath(value[7:])
             if not path.isfile() or not path.access('r'):
                 setError(name, value+" is not a readable file")

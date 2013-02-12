@@ -77,11 +77,11 @@ class CoreShell(cmdlib.Cmd):
         to standard output.
         """
         def _printit():
-            print getpath('readme/README').read()
+            print getpath('README').read()
         if os.name == 'nt':
             _printit()
         else:
-            cmd = 'man %s' % getpath('readme/MANUAL').name
+            cmd = 'man %s' % getpath('doc/MANUAL').name
             if os.system(cmd):
                 _printit()
 

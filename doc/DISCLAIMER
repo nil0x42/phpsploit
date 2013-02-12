@@ -1,0 +1,16 @@
+phpsploit
+
+Written by nil0x42 (https://bitbucket.org/nil0x42)
+
+Please note that this software is not made to help cyber criminals to keep
+access on remote servers unlawfully.
+
+Phpsploit is first and foremost a proof of concept, designed for a better
+understanding of the intricacies of the HTTP protocol.
+
+It is also very useful for administrators monitoring their website through a
+shared host without ssh access. Because the framework, and especially it's
+PASSKEY feature, can easily simulate a shell access.
+
+Never use the phpsploit backdoor on a website without strict consent of it's
+official owner.

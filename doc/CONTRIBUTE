@@ -1,0 +1,41 @@
+---- PATCHING ----
+If you want to create a patch for the framework's core, enhance documentation,
+submit a plugin, or any other kind of phpsploit contribution, please take
+a look at the following lines, which explain the better way to contribute,
+keeping our both lives easier :)
+
+First, you should clone my repository:
+    $ git clone https://nil0x42@bitbucket.org/nil0x42/phpsploit.git
+
+Go to your local version of phpsploit:
+    $ cd phpsploit
+
+Now in your local repository, make all the changes you want, update code,
+etc...
+
+When you're satisfied with all you changes, it's time to create a single
+patch, which will contain all your commits:
+    $ git format-patch origin/master --stdout > bugfix.patch
+
+Send the patch to my email, a.k.a. nil0x42@gmail.com
+
+
+The above method is better than basic patches, because the git's format-patch
+feature defaultly includes extra data, like commit messages, and author
+informations.
+
+Or course, if you have a bitbucket account, the best way to send phpsploit
+enhancements would be to directly send a pull request:
+- https://bitbucket.org/nil0x42/phpsploit/pull-request/new
+
+
+If the above instructions appear complicated, you probably are not familiarized
+with git, so I suggest you visit this great tutorial:
+- https://github.com/bard/sameplace/wiki/Getting-started-with-git
+
+---- HELPING ON README/MANUAL ----
+If you want to edit the ./README && ./doc/MANUAL files, please edit this file
+instead:
+    ./framework/misc/user-manual.txt2tags
+
+And send me a patch :)
