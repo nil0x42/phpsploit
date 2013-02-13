@@ -17,7 +17,7 @@ When you're satisfied with all you changes, it's time to create a single
 patch, which will contain all your commits:
     $ git format-patch origin/master --stdout > bugfix.patch
 
-Send the patch to my email, a.k.a. nil0x42@gmail.com
+Send the patch to my email, (a.k.a. <nil0x42 at gmail dot com>)
 
 
 The above method is better than basic patches, because the git's format-patch

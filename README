@@ -178,7 +178,7 @@ MAIN SHELL
 
 
 REMOTE SHELL
-       When you run the exploit  command,  you  enter  the  remote  shell,  an
+       When you run the exploit command,  you  enter  the  remote  shell,  and
        directly  interracts  with  the  remotely backdoored server through the
        phpsploit plugins.  Typing help will show the available commands.  Core
        Commands are all the phpsploit remote shell built-in commands.
@@ -566,7 +566,7 @@ CONTRIBUTE
 
 
 AUTHOR
-       nil0x42 (nil0x42@gmail.com)
+       nil0x42 <nil0x42 at gmail dot com>
 
 
 LICENCE

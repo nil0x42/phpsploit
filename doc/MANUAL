@@ -157,7 +157,7 @@ Drop a shell from target server
 .SH REMOTE SHELL
 
 .P
-When you run the \fBexploit\fR command, you enter the remote shell, an directly interracts with the remotely backdoored server through the \fBphpsploit\fR plugins.
+When you run the \fBexploit\fR command, you enter the remote shell, and directly interracts with the remotely backdoored server through the \fBphpsploit\fR plugins.
 Typing \fBhelp\fR will show the available commands.
 \fBCore Commands\fR are all the \fBphpsploit\fR remote shell built\-in commands.
 
@@ -452,7 +452,7 @@ If you want to contribute to \fBphpsploit\fR, submit a plugin, patch, or anythin
 .SH AUTHOR
 
 .P
-\fBnil0x42\fR (nil0x42@gmail.com)
+\fBnil0x42\fR <nil0x42 at gmail dot com>
 
 .SH LICENCE
 
