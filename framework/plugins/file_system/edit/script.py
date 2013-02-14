@@ -38,7 +38,7 @@ else:
     except: api.exit(P_err+"Failed to create a local copy of the file at: "+lAbsPath)
     print P_inf+"Opening file: "+absPath
 
-if os.system(api.env['TEXTEDITOR']+' '+lAbsPath):
+if os.system(api.env['TEXTEDITOR']+' "'+lAbsPath+'"'):
     print P_err+"Invalid 'TEXTEDITOR' environment variable"
 
 try: newContent = open(lAbsPath,'r').read()
