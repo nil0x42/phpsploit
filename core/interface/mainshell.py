@@ -29,6 +29,12 @@ class Start(core.CoreShell):
             msg = P_inf+'Using session file %s'
             print msg % quot(self.CNF['SET']['SAVEFILE'])
 
+            # alert if saved session settings doesn't
+            # comply anymore with requirements:
+            from usr import settings
+            if not settings.comply(self.CNF['SET']):
+                print P_inf+"Please change your outdated settings with the 'set' command."
+
         # alert if no proxy
         if self.CNF['SET']['PROXY'].lower() in ['','none']:
             err = 'No proxy gateway ! stay careful...'

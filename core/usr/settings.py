@@ -218,6 +218,7 @@ def comply(settings):
                 print P_inf+msg+"file://framework/misc/http_user_agents.lst"
                 msg = "Please set this new value to your configuration file "
                 print P_inf+msg+"to prevent settings error."
+                print ""
             # END OF FIX
 
             path = getpath(value[7:])
