@@ -1,4 +1,6 @@
----- PATCHING ----
+Writing patches for phpsploit
+=============================
+
 If you want to create a patch for the framework's core, enhance documentation,
 submit a plugin, or any other kind of phpsploit contribution, please take
 a look at the following lines, which explain the better way to contribute,
@@ -33,9 +35,13 @@ If the above instructions appear complicated, you probably are not familiarized
 with git, so I suggest you visit this great tutorial:
 - https://github.com/bard/sameplace/wiki/Getting-started-with-git
 
----- HELPING ON README/MANUAL ----
-If you want to edit the ./README && ./doc/MANUAL files, please edit this file
-instead:
+
+Enhancing phpsploit's documentation
+===================================
+
+Please note that the <./README> and <./doc/MANUAL> are generated files, using
+as source the file below:
     ./framework/misc/user-manual.txt2tags
 
-And send me a patch :)
+So if you want to increase the documentation provided by one of these files,
+please edit the source template instead.
