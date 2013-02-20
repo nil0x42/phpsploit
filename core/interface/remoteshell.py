@@ -82,20 +82,20 @@ class Start(core.CoreShell):
         self.set_prompt()
 
 
-    def precmd(self, line):
+    def precmd(self, cmd_args):
         # auto prepend current shell string if exists
         if self.CNF['CURRENT_SHELL']:
-            line = self.CNF['CURRENT_SHELL']+' '+line
+            cmd_args.insert(0, self.CNF['CURRENT_SHELL']
         # fork standard output for command logging
-        l = line.strip()
-        if l \
-        and not l.startswith('lastcmd') \
-        and l != self.CNF['CURRENT_SHELL']+' exit':
-            sys.stdout = fork_stdout(StringIO())
-        return line
+        if cmd_args:
+            if cmd_args[0] not in ['', 'lastcmd'] \
+            and cmd_args != ['lastcmd', 'exit']:
+                sys.stdout = fork_stdout(StringIO())
+
+        return cmd_args
 
 
-    def postcmd(self, stop, line):
+    def postcmd(self, stop, cmd_args):
         try:
             self.lastcmd_data = sys.stdout.file.getvalue()
             sys.stdout.__del__()
@@ -276,25 +276,29 @@ class Start(core.CoreShell):
 
         Usage:   env
                  env [variable]
-                 env [variable] [value|none]
+                 env [variable] `[value|none]`
 
-        Example: env MYSQL_BASE information_schema
+        Example: env MYSQL_BASE `information_schema`
                  env CWD
         """
         def show(*elem):
             tpl = '%s ==> '+color(1)+'%s'+color(0)
             print tpl % elem
 
+
         if cmd['argc'] <= 2:
             # list environ matching argv[1]
             patern = cmd['argv'][1] if cmd['argc'] > 1 else ''
             title = "Environment variables"
             items = self.CNF['ENV'].items()
-            elems = dict([(x,y) for x,y in items if x.startswith(patern)])
-            columnize_vars(title, elems).write()
+            elems = [(x,y) for x,y in items if x.startswith(patern)]
+            if elems:
+                columnize_vars(title, dict(elems)).write()
+            else:
+                self.run('help env')
         else:
             var = cmd['argv'][1]
-            val = cmd['args'][cmd['args'].find(' ')+1:].strip()
+            val = ' '.join(cmd['argv'][2:])
 
             if var in self.locked_env:
                 print P_err+'Locked environment variable: '+var
@@ -304,7 +308,6 @@ class Start(core.CoreShell):
                     print P_inf+'Environment variable deleted: '+var
                 else:
                     self.run('help env')
-
             else:
                 self.CNF['ENV'][var] = val
                 show(var, val)
