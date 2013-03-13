@@ -37,12 +37,7 @@ This readme contains a brief description of each file on that directory.
     It contains the introduction message, written right below the ascii logo.
 
 
-./start_messages.lst
+./messages.lst
 
-    This file is a list of start messages, one line is randomly picked-up and
-    printed just before the prompt.
-
-
-./end_messages.lst
-
-    Like start_messages.lst, but used when leaving phpsploit.
+    This useless file just contains a list of quotes, randomly picked-up and
+    printed on framework start/end.

@@ -13,7 +13,7 @@ class Start(core.CoreShell):
         self.do_clear('')
         softwareLogo  = getpath('framework/misc/logo.ascii').read().rstrip()
         introduction  = getpath('framework/misc/intro.msg').read().strip()
-        startMessage  = getpath('framework/misc/start_messages.lst').randline()
+        startMessage  = getpath('framework/misc/messages.lst').randline()
 
         # print intro and help
         print softwareLogo
