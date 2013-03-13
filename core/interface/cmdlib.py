@@ -51,6 +51,11 @@ class Cmd:
         """
         return(self.CNF)
 
+    def get_prompt(self):
+        """Returns the prompt string as it needs to be displayed
+        """
+        return re.sub('(\x1b\[\d+?m)', '\x01\\1\x02', self.prompt)
+
 
     def cmdloop(self, intro=None):
         """Repeatedly issue a prompt, accept input, parse an initial prefix
@@ -74,15 +79,15 @@ class Cmd:
             self.preloop()
             stop = None
             while not stop:
-                self.prompt = re.sub('(\x1b\[\d+?m)','\x01\\1\x02',self.prompt)
-                self.prompt = self.prompt.replace('\x01\x01','\x01')
-                self.prompt = self.prompt.replace('\x02\x02','\x02')
                 if self.cmdqueue:
-                    line = self.cmdqueue.pop(0)
+                    cmd_args = self.cmdqueue.pop(0)
+                    cmd_args = self.precmd(cmd_args)
+                    stop = self.onecmd(cmd_args)
+                    stop = self.postcmd(stop, cmd_args)
                 else:
                     try:
-                        line = raw_input(self.prompt)
-                        if not len(line): line=''
+                        prompt = self.get_prompt()
+                        line = raw_input(prompt)
                     except EOFError:
                         print ''
                         line = 'exit'
@@ -90,26 +95,24 @@ class Cmd:
                         func = getattr(self, 'when_interrupt')
                         func()
                         line = ''
-                line = self.precmd(line)
-                stop = self.onecmd(line)
-                stop = self.postcmd(stop, line)
+                    self.cmdqueue = self.parse_input(line)
             self.postloop()
         finally:
             if self.completekey:
                 try:
                     import readline
                     readline.set_completer(self.old_completer)
-                except ImportError:
+                except:
                     pass
 
 
-    def precmd(self, line):
+    def precmd(self, cmd):
         """Hook method executed just before the command line is
         interpreted, but after the input prompt is generated and issued.
 
         """
 
-        return line
+        return cmd
 
     def postcmd(self, stop, line):
         """Hook method executed just after a command dispatch is finished."""
@@ -126,28 +129,45 @@ class Cmd:
         """
         pass
 
-    def parseline(self, line):
-        """Parse the line into a command name and a string containing
-        the arguments.  Returns a tuple containing (command, args, line).
-        'command' and 'args' may be None if the line couldn't be parsed.
-        """
-        line = line.strip()
-        if not line:
-            return None, None, line
-        i, n = 0, len(line)
-        while i < n and line[i] in self.identchars: i = i+1
-        cmd, arg = line[:i], line[i:].strip()
-        return cmd, arg, line
+    def parse_input(self, line):
 
-    def parseline(self, line):
-        cmd = dict()
+        def shlex_patch(cmd, reverse=False):
+            """
+            This is a patch that forces enquoted semicolons in argument list
+            to be interpreted as a string instead of a command separator.
+            """
+            def morph_str(string, action='encode'):
+                morph = ['hex','zlib','base64']
+                for m in morph+morph[::-1]:
+                    string = getattr(string, action)(m)
+                return string
+            patch_strings = ['\r\n', '\n', ';']
+            quote_chars   = ['"', "'", "`"]
+
+            patch_strings = [(s, morph_str(s)) for s in patch_strings]
+
+            if not reverse:
+                for s,m in patch_strings:
+                    for q in quote_chars:
+                        cmd = cmd.replace('%s%s%s' %(q, s, q),
+                                          '%s%s%s' %(q, m, q))
+            else:
+                for s,m in patch_strings:
+                    cmd = [e.replace(m, s) for e in cmd]
+            return(cmd)
+
         line = line.lstrip()
 
-        import shlex
-        ok   = False
+        ok = False
         while not ok:
             try:
-                argv = shlex.split(line)
+                from shlex import shlex
+                lex = shlex(instream=shlex_patch(line), posix=True)
+                lex.quotes += '`'
+                lex.wordchars += '$%&()*+,-./:<=>!?@[]^_{|}~'
+                lex.whitespace = ' \t'
+
+                argv = list(lex)
                 ok = True
             except ValueError, e:
                 if e.message == "No closing quotation":
@@ -163,22 +183,22 @@ class Cmd:
                     print P_NL+P_err+'EOF Error'
                     line = ''
 
-        cmd['line'] = line
-        cmd['argv'] = argv
-        cmd['argc'] = len(cmd['argv'])
+        commands  = list()
+        start = 0
+        for index in range(len(argv)):
+            if argv[index] in [';','\n','\r\n']:
+                newcmd = argv[start:index]
+                commands.append(newcmd)
+                start = index+1
+        commands.append(argv[start:])
 
-        if not ' ' in line:
-            cmd['name'] = line
-            cmd['args'] = ''
-        else:
-            sep  = line.find(' ')
-            cmd['name'] = line[:sep].strip()
-            cmd['args'] = line[sep:].strip()
+        for i in range(len(commands)): # reverse the patch morph
+            commands[i] = shlex_patch(commands[i], reverse=True)
 
-        return(cmd)
+        return(commands)
 
 
-    def onecmd(self, line):
+    def onecmd(self, cmd_args):
         """Interpret the argument as though it had been typed in response
         to the prompt.
 
@@ -188,9 +208,22 @@ class Cmd:
         commands by the interpreter should stop.
 
         """
-        cmd = self.parseline(line)
-        if not cmd['line']:
+        cmd = dict()
+
+        if not cmd_args:
             return self.emptyline()
+
+        cmd['name'] = cmd_args[0]
+        name_repr = '$%r' %(cmd['name'])
+        if cmd['name'] != name_repr[2:-1]:
+            cmd['name'] = name_repr
+
+        cmd['line'] = ' '.join(cmd_args)
+        cmd['args'] = ' '.join(cmd_args[1:])
+
+        cmd['argv'] = cmd_args
+        cmd['argc'] = len(cmd_args)
+
         try:
             func = getattr(self, 'do_' + cmd['argv'][0])
         except AttributeError:
@@ -212,11 +245,7 @@ class Cmd:
         returns.
 
         """
-        cmd = cmd['argv'][0]
-        cmd_repr = repr(cmd)
-        if cmd != cmd_repr[1:-1]:
-            cmd = '$'+cmd_repr
-        print self.nocmd % cmd
+        print self.nocmd % cmd['name']
 
     def completedefault(self, text, line, *ignored):
         """Method called to complete an input line when no command-specific
@@ -248,17 +277,15 @@ class Cmd:
             stripped = len(origline) - len(line)
             begidx = readline.get_begidx() - stripped
             endidx = readline.get_endidx() - stripped
-            if begidx>0:
-                name = self.parseline(line)['name']
-                if name == '':
+
+            try: name = self.parse_input(line)[-1][0]
+            except: name = None
+
+            if begidx>0 and name in self.get_commands():
+                try:
+                    compfunc = getattr(self, 'complete_' + name)
+                except AttributeError:
                     compfunc = self.completedefault
-                else:
-                    try:
-                        compfunc = getattr(self, 'complete_' + name)
-                        if type(compfunc).__name__ == 'list':
-                            compfunc = self.completedefault
-                    except AttributeError:
-                        compfunc = self.completedefault
             else:
                 compfunc = self.completenames
             self.completion_matches = compfunc(text, line, begidx, endidx)

