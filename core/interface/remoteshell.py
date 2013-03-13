@@ -85,7 +85,7 @@ class Start(core.CoreShell):
     def precmd(self, cmd_args):
         # auto prepend current shell string if exists
         if self.CNF['CURRENT_SHELL']:
-            cmd_args.insert(0, self.CNF['CURRENT_SHELL']
+            cmd_args.insert(0, self.CNF['CURRENT_SHELL'])
         # fork standard output for command logging
         if cmd_args:
             if cmd_args[0] not in ['', 'lastcmd'] \
