@@ -2,8 +2,11 @@ from functions import *
 
 class fork_stdout(object):
     """this class can replace sys.stdout and writes
-    simultaneously to standard output AND specified file
-    usage: fork_stdout(altFile)"""
+    simultaneously to standard output AND specified file.
+
+    usage: fork_stdout(altFile)
+
+    """
     def __init__(self, file):
         self.file = file
         self.stdout = sys.stdout
@@ -21,63 +24,86 @@ class fork_stdout(object):
         self.stdout.flush()
 
 
-# this class is used to format and print env vars or settings output.
 class columnize_vars:
-    def __init__(self, title, dic):
-        self.title     = title
-        self.dic       = dic
-        self.blacklist = ['']
-        self.width     = 0
-        self.colors    = 1
-        self.color1    = color(37)
-        self.color2    = color(0)
-        self.separator = '='
+    """this class is used to format environment and settings output
+    when printed to the interface.
 
-    def cutStr(self, string, sep, num):
-        if len(string) > num:
-            newstr='' ; x=0
-            while x != len(string):
-                newstr+=string[x] ; x+=1
-                if (x)%num == 0: newstr+=sep
-            string = newstr
-        return(string)
+    arguments: (!=required, *=optionnal)
+    ! title     str,  the output's title.
+    ! table     dict, the elements to output: {'key':'val'}.
+    * width     int,  the output's max width; dynamic if 0.
+    * color     list, a couple of colors to enhance visibility,
+                      it may be left empty to disable colors.
+
+    """
+    def __init__(self, title, table, width=0, color=[color(37), color(0)]):
+        self.title = title
+        self.table = table
+        self.width = width
+        self.color = color
 
     def write(self):
-        # don't treat empty elems
-        dic = dict([(x,str(y)) for x,y in self.dic.items() if str(y) not in self.blacklist])
-        dic = [(k,dic[k].strip()) for k in sorted(dic.keys())]
+        """print the formated output string"""
+        print(self.read())
 
-        # get longest name
-        maxNameLen = 8;
-        for name,value in dic:
-            if len(name) > maxNameLen: maxNameLen = len(name)
+    def read(self):
+        """return the formated output string"""
 
-        # get terminal size
-        termLen = self.width
-        if not termLen:
-            termLen = termlen()
+        # determine terminal width if not set
+        if not self.width:
+            self.width = termlen()
 
-        # format values to from dic to varsList
-        printvars='' ; x=0 ; _color = [self.color1,self.color2]
-        if not self.colors: _color = ['','']
-        while x!= len(dic):
-            printvars+=_color[x%2]+'    '+dic[x][0]
-            printvars+=' '*(maxNameLen-len(dic[x][0])+2)
-            printvars+=self.cutStr(dic[x][1],'\n'+(' '*(maxNameLen+6)),termLen-(maxNameLen+6))+'\n'
-            x+=1
+        # format self.colors value if disabled
+        if not self.color:
+            self.color = ['', '']
 
-        print color(0)
-        print self.title
-        print self.separator*len(self.title)
-        print ""
-        print "    Variable"+" "*(maxNameLen-6)+"Value"
-        print "    --------"+" "*(maxNameLen-6)+"-----"
-        print printvars+color(0)
+        # format the elements table
+        table = list()
+        maxKeyLen = 8
+        for key in sorted(self.table.keys()):
+            value = str(self.table[key]).strip()
+            if value:
+                key = str(key).strip()
+                table.append((key, value))
+                maxKeyLen = max(maxKeyLen, len(key))
+
+        # generate formated output lines
+        lines = str()
+        for i in range( len(table) ):
+            key = table[i][0]
+            value = table[i][1]
+
+            # cut overwidth values to prevent output corruption
+            maxValLen = self.width - (maxKeyLen+6)
+            if len(value) > maxValLen:
+                cutValue = str()
+                for x in range( len(value) ):
+                    cutValue += value[x]
+                    if not (x+1)%maxValLen:
+                        cutValue += P_NL + ( ' '*(maxKeyLen+6) )
+                value = cutValue
+
+            lines += '%s    %s' %(self.color[i%2], key)
+            lines += ' ' * ( 2+maxKeyLen-len(key) )
+            lines += value + P_NL
+
+        # generate the final output string
+        output = [ color(0) + P_NL + self.title,
+                   ( '='*len(self.title) ) + P_NL,
+                   '    Variable%sValue' %(' '*(maxKeyLen-6)),
+                   '    --------%s-----' %(' '*(maxKeyLen-6)),
+                   lines + color(0) ]
+
+        return P_NL.join(output)
 
 
 
 # this function updates the self.CNF['LNK'] dict.
 def update_opener(CNF):
+    """update the phpsploit's opener, which is stored on the
+    self.CNF['LNK'] object.
+
+    """
     from re      import findall
     from hashlib import md5
     from base64  import b64encode
