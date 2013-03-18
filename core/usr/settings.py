@@ -1,15 +1,18 @@
 import os, re, string
 from functions import *
 
+# determine the user's config directory
 userDir = getpath('~/.phpsploit')
 if not userDir.isdir():
     env_xdgConf = os.environ.get('XDG_CONFIG_HOME')
     if env_xdgConf:
         userDir = getpath(env_xdgConf, 'phpsploit')
 
+# silently try to create it
 try: os.mkdir(userDir.name)
 except: pass
 
+# die if the user's directory is not accessible
 err = None
 if not userDir.exists():
     err = 'Creation denied'
@@ -19,7 +22,6 @@ elif not userDir.access('r'):
     err = 'Read permission denied'
 elif not userDir.access('w'):
     err = 'Write permission denied'
-
 if err:
     print P_err+"Settings error: %s: %s" % (userDir.name, err)
     inf = "Please give correct privileges to your configuration directory"
@@ -32,19 +34,18 @@ template = getpath('framework/misc/settings.tpl')
 
 
 def load():
-    configFile = get_file()
-    userSettings    = get_settings(configFile)
-    defaultSettings = get_settings(defaultConf)
-    settings = merge(userSettings, defaultSettings)
+    """get the phpsploit base settings loading the default ones,
+    then updating it with the user's specific settings.
+    """
+    settings = get_settings(defaultConf)
+    userFile = get_file()
+    userSettings = get_settings(userFile)
+    settings.update(userSettings)
     return(settings)
 
-def merge(main, default):
-    for key,value in default.items():
-        if not key in main:
-            main[key] = value
-    return(main)
-
 def get_file():
+    """get the user's configuration file, and create it if don't exist
+    """
     if userFile.isfile():
         return(userFile)
     elif softFile.isfile():
@@ -54,9 +55,12 @@ def get_file():
         return(userFile)
 
 def gen_config():
+    """generate the default configuration file from the
+    settings template, and return it's content
+    """
     config = template.read()
 
-    # GET EXTERNAL APPLICATIONS
+    # get the user's applications
     externalApps = re.findall('%%WHICH/(.+?)%%',config)
     cmd = ['which','where'][os.name == 'nt']
     for apps in externalApps:
@@ -74,15 +78,18 @@ def gen_config():
             c+=1
         config = config.replace('%%WHICH/'+apps+'%%',appName.strip())
 
-    # GET LOCAL TEMPORARY DIR
+    # determine user's temporary directory
     import tempfile
     tempDir = tempfile.gettempdir()
     config  = config.replace('%%TEMPDIR%%',tempDir)
+
     return(config)
 
 defaultConf = gen_config()
 
 def get_settings(configFile):
+    """returns a settings dictionnary from a file() or getpath() object.
+    """
     try:    lines = configFile.readlines()
     except: lines = configFile.splitlines()
     settings = dict()
@@ -95,8 +102,10 @@ def get_settings(configFile):
             settings[name] = value
     return(settings)
 
-# check if all settings are conform
+
 def comply(settings):
+    """check all given settings for conformity with the requirements
+    """
     global status
     status = True
 
