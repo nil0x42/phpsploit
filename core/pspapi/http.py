@@ -19,7 +19,7 @@ class http:
 
         query['SEPARATOR'] = self.separator
 
-        phpQuery = self.queryEncode % phpcode.payload.py2phpVar(query)
+        phpQuery = self.queryEncode %phpcode.payload.py2phpVar(query)
         payload  = phpQuery+payload
 
         request = network.sender.Load(self.core)
