@@ -1,32 +1,28 @@
 #!/usr/bin/python2
 #-*- coding: iso-8859-15 -*-
 
-softVer = '2.1.3'
-coreVer = 2
-
-
 from os.path import abspath, dirname, join as joinpath
 import sys
-sys.argc = len(sys.argv)
 
-# Adding ./core in python modules path list:
+# adding ./core in python modules path list:
 scriptDir  = abspath(dirname(sys.argv[0]))
 pythonPath = joinpath(scriptDir, './core')
 sys.path.append(pythonPath)
 
-# now, we can import local libs :)
+# now, local libs can be imported
 from functions import *
 
 CNF = dict()
-CNF['PSCOREVER'] = coreVer
+CNF['PSVERSION'] = '2.1.3'
+CNF['PSCOREVER'] = 2
 
-# load user settings
+
+# load the settings as CNF['SET']
 from usr import settings
-SET = settings.load()
-if not settings.comply(SET):
-    err = "Please edit your configuration file at %s"
+CNF['SET'] = settings.load()
+if not settings.comply(CNF['SET']):
     configFile = settings.get_file().name
-    sys.exit(P_inf+err % configFile)
+    sys.exit( P_inf+"Please edit your configuration file at "+configFile )
 
 
 def is_target(arg):
@@ -34,85 +30,71 @@ def is_target(arg):
     urlCheck = '^https?://(.+?)(?:$|/)'
     try: domain = findall(urlCheck, arg)[0]
     except: domain = ''
-    if domain and len(arg)>13:
+    if domain and len(arg) > 13:
         return(True)
     return(False)
 
 
-def get_session(arg):
-    from usr.session import load
-    session = load(arg)
-    return(session)
-
-
-def is_incompatible(session):
-    core = session.content
-    try: version = int(core['PSCOREVER'])
-    except: version = 0
-    if version == coreVer:
-        return(False)
-    return(True)
-
-
-# defaultly consider arguments as invalid
+# arg_error implies invalid arguments
 arg_error = True
 
-if sys.argc == 1:
+if len(sys.argv) == 1:
     arg_error = False
 
-elif sys.argc == 2:
+elif len(sys.argv) == 2:
     arg = sys.argv[1]
 
     if arg in ['-h', '--help']:
         msg = getpath('framework/misc/help.msg').read()
-        print(P_NL+msg.strip()+P_NL)
+        print( P_NL+msg.strip()+P_NL )
         sys.exit(0)
 
     elif arg in ['-v', '--version']:
         msg = "phpsploit version %s"
-        print(msg % softVer)
+        print( msg %CNF['PSVERSION'] )
         sys.exit(0)
 
     elif is_target(arg):
-        SET['TARGET'] = arg
+        CNF['SET']['TARGET'] = arg
 
     else:
         # try to load argument as session
-        session = get_session(arg)
-        if session.exists:
-            if is_incompatible(session):
-                err = "Session not compatible with phpsploit %s"
-                sys.exit(P_inf+err % softVer)
-            CNF = session.content
-            SET = settings.merge(CNF['SET'], SET)
-            SET['SAVEFILE'] = abspath(arg)
-            arg_error = False
+        from usr.session import load
+        session = load(arg, CNF['PSCOREVER'])
+        if session.error:
+            sys.exit(session.error)
+
+        new = session.content
+        # update dict() objects only from new session
+        for dic in CNF:
+            try: self.CNF[dic].update(new[dic])
+            except: pass
+        CNF['SET']['SAVEFILE'] = os.path.abspath(arg)
 
 
-# force TARGET to be an existing setting
-if not 'TARGET' in SET:
-    SET['TARGET'] = 'None'
+        CNF = session.content
+        CNF['SET'].update(CNF['SET'])
+        CNF['SET']['SAVEFILE'] = abspath(arg)
+        arg_error = False
 
-if SET['TARGET'] != 'None':
+
+# the TARGET setting must exist anyway
+if not 'TARGET' in CNF['SET']:
+    CNF['SET']['TARGET'] = 'None'
+
+if CNF['SET']['TARGET'] != 'None':
     arg_error = False
-
 
 if arg_error:
     sys.exit('Usage: phpsploit --help')
 
 
-######################################
-### now we can open the main interface
-
+# start the main shell interface
 from interface import mainshell
+interface = mainshell.Start()
+interface.CNF = CNF
+interface.cmdloop()
 
-interface = mainshell.Start() # instantiate a shell interface
-CNF['SET'] = SET              # move settings into the core
-interface.setConfig(CNF)      # send config to the shell interface
-
-interface.cmdloop()           # open the shell interface
-
-
-# then we can leave with a random end message
+# print an useless message before leaving
 endMessage = getpath('framework/misc/messages.lst').randline()
-print P_NL+color(37)+endMessage.strip()+color(0)+P_NL
+print( P_NL+color(37)+endMessage.strip()+color(0)+P_NL )
