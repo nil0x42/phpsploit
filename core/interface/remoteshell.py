@@ -13,6 +13,7 @@ class Start(core.CoreShell):
     print_unknow_command = core.CoreShell.unknow_command
 
     def __init__(self):
+        """Explicitly load the CoreShell's __init__ method"""
         core.CoreShell.__init__(self)
 
 
@@ -25,7 +26,9 @@ class Start(core.CoreShell):
 
         # print exploit info
         print P_inf+'Shell obtained by PHP (%s -> %s:%s)' \
-            % (self.CNF['SRV']['client_addr'], self.CNF['SRV']['addr'], self.CNF['SRV']['port'])
+            %(self.CNF['SRV']['client_addr'],
+              self.CNF['SRV']['addr'],
+              self.CNF['SRV']['port'])
 
         print P_NL+'Connected to %s server %s' \
             % (self.CNF['SRV']['os'], self.CNF['SRV']['host'])
@@ -65,13 +68,13 @@ class Start(core.CoreShell):
         # alert for recomended ENV vars if not defined
         if not self.CNF['ENV']['WRITE_WEBDIR']:
             cmd = 'env WRITE_WEBDIR /full/path/to/writeable/web/dir'
-            print P_err+"Env warning: No writeable web directory found."
-            print P_err+"             Use '%s' to set it." % cmd
+            print(P_err+"Env warning: No writeable web directory found.")
+            print(P_err+"             Use '%s' to set it." %cmd + P_NL)
 
         if not self.CNF['ENV']['WRITE_TMPDIR']:
             cmd = 'env WRITE_WEBDIR /full/path/to/writeable/tmp/dir'
-            print P_err+"Env warning: No writeable tmp directory found."
-            print P_err+"             Use '%s' to set it." % cmd
+            print(P_err+"Env warning: No writeable tmp directory found.")
+            print(P_err+"             Use '%s' to set it." %cmd + P_NL)
 
         # load plugins as commands
         self.plugins = plugins.Load()
@@ -128,21 +131,26 @@ class Start(core.CoreShell):
 
 
     def do_exit(self, cmd):
+        # if the session comes from a source file, and it has changed,
+        # advise the user and ask confirmation before leaving.
         save_ask = None
         if 'SAVEFILE' in self.CNF['SET']:
             from usr.session import load
-            session = load(self.CNF['SET']['SAVEFILE'])
-            if session.exists:
-                session.content['SET']['SAVEFILE'] = self.CNF['SET']['SAVEFILE']
-                if session.content != self.CNF:
+            source = load(self.CNF['SET']['SAVEFILE'], self.CNF['PSCOREVER'])
+            if source.error:
+                print(source.error)
+            else:
+                source = source.content
+                # set source SAVEFILE to check equality
+                source['SET']['SAVEFILE'] = self.CNF['SET']['SAVEFILE']
+                if source != self.CNF:
                     save_ask = 'The current session has changed'
         else:
             save_ask = 'The current session was not saved'
         if save_ask:
             warning  = 'if you exit now, the session changes will be lost'
             question = 'Do you really want to leave the remote shell ?'
-
-            print P_err+'%s, %s' % (save_ask, warning)
+            print P_err+'%s, %s' %(save_ask, warning)
             if ask(question).reject():
                 return
         return True
@@ -325,6 +333,7 @@ class Start(core.CoreShell):
             else:
                 try:
                     plugin = plugins.Run(cmd, self.plugins, self.CNF)
+                    # update ENV from plugin modifications
                     self.CNF['ENV'] = plugin.env
                 except KeyboardInterrupt:
                     self.when_interrupt()

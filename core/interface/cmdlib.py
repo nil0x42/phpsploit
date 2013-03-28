@@ -16,11 +16,9 @@ class Cmd:
     misc_header  = 'Miscellaneous help topics:'
     undoc_header = 'Undocumented commands:'
 
-    CNF          = None
     misc_cmds    = list()
 
     def __init__(self, completekey='tab', stdin=None, stdout=None):
-        self.LAST_CMD_DATA = ''
         """Instantiate a line-oriented interpreter framework.
 
         The optional argument 'completekey' is the readline name of a
@@ -31,30 +29,30 @@ class Cmd:
         sys.stdin and sys.stdout are used.
 
         """
-        if stdin is not None:  self.stdin  = stdin
-        else:                  self.stdin  = sys.stdin
-        if stdout is not None: self.stdout = stdout
-        else:                  self.stdout = sys.stdout
-        self.cmdqueue    = list()
+        if stdin is not None:
+            self.stdin  = stdin
+        else:
+            self.stdin  = sys.stdin
+        if stdout is not None:
+            self.stdout = stdout
+        else:
+            self.stdout = sys.stdout
+
+        self.cmdqueue = list()
         self.completekey = completekey
+
 
     def when_interrupt(self):
         print P_NL+self.interrupt
 
-    def setConfig(self, config):
-        """Send a CNF variable to the framework.
-        """
-        self.CNF = config
-
-    def getConfig(self):
-        """Returns the current CNF variable
-        """
-        return(self.CNF)
-
     def get_prompt(self):
         """Returns the prompt string as it needs to be displayed
         """
-        return re.sub('(\x1b\[\d+?m)', '\x01\\1\x02', self.prompt)
+        # enclose color strings with 0x01 && 0x02 bytes, which indicates
+        # to readline that these string portions must be ignored by
+        # the built-in length interpreter
+        formatedPrompt = re.sub('(\x1b\[\d+?m)', '\x01\\1\x02', self.prompt)
+        return(formatedPrompt)
 
 
     def cmdloop(self, intro=None):
