@@ -125,9 +125,10 @@ class Load:
         is in conformity with the max header size
 
         """
-        for name, value in headers.items()
-            rawHeaderLen = '%s: %s\r\n' %(name, value)
-            if rawHeaderLen > self.max_header_size:
+        headers = network.http.get_headers(headers)
+        for name, value in headers.items():
+            rawHeader = '%s: %s\r\n' %(name, value)
+            if len(rawHeader) > self.max_header_size:
                 return(False)
             return(True)
 
@@ -174,8 +175,8 @@ class Load:
             self.multipart_file = phpcode.payload.py2phpVar(self.tmpdir)
             self.multipart_file = "$f=%s;" %self.multipart_file
             multipart = dict()
-            for name, phpcode in self.multipart.items():
-                multipart[name] = self.multipart_file + phpcode
+            for name, phpval in self.multipart.items():
+                multipart[name] = self.multipart_file + phpval
                 if name in ['starter', 'sender']:
                     multipart[name] = self.encapsulate( multipart[name] )
             self.multipart = multipart
@@ -430,9 +431,9 @@ class Load:
         funcName = "build_%s_request" %mode
         try:
             customBuilder = getattr(self, funcName)
-            request = customBuilder(method, payload)
         except:
             request = list()
+        request = customBuilder(method, payload)
         return(request)
 
 
@@ -590,10 +591,11 @@ class Load:
         # load the multipart module if required
         if 'multipart' in mode.values():
             try:
-                self.load_multipart()
                 print(P_inf+'Large payload: %s bytes' %payload.length)
+                self.load_multipart()
             except:
-                return(P_NL+'Payload construction aborted')
+                print('')
+                return('Payload construction aborted')
 
         # build both methods necessary requests
         request = dict()
@@ -631,7 +633,7 @@ class Load:
         if request[ self.other_method() ]:
             query += "send %s %s request%s or " \
                          %( len( request[self.other_method()] ),
-                            choice( self.pther_method() ),
+                            choice( self.other_method() ),
                             ['','s'][ len(request[self.other_method()])>1 ] )
         # or report that the other method has been disabled
         else:
@@ -647,7 +649,8 @@ class Load:
             try:
                 chosen = raw_input(query).upper()
             except:
-                return(P_NL+'Request construction aborted')
+                print('')
+                return('Request construction aborted')
             # if no choice consider 1st choice
             if not chosen.strip():
                 chosen = self.choices[0]
@@ -676,20 +679,19 @@ class Load:
         multiReqLst = request[:-1]
         lastRequest = request[-1]
 
-        multiReqError = ('Send Error: Multipart transfer interrupted'
-                         +P_NL+'The remote temporary payload %s must'
-                         ' be manually removed.' %quot(self.tmpdir) )
-
         def updateStatus(curReqNum):
             curReqNum += 1 # don't belive the fact that humans count from 1 !
             numOfReqs = str( len(multiReqLst)+1 )
             curReqNum = str(curReqNum).zfill( len(numOfReqs) )
-            statusMsg = "Sending request %s of %s" %(curReqNum, NumOfReqs))
+            statusMsg = "Sending request %s of %s" %(curReqNum, numOfReqs)
             write( '\r'+P_inf+statusMsg )
 
         # considering that the multiReqLst can be empty, is means that the
         # following loop is only executer on multipart payloads.
         for curReqNum in range( len(multiReqLst) ):
+            multiReqError = ('Send Error: Multipart transfer interrupted'
+                             +P_NL+'The remote temporary payload %s must'
+                             ' be manually removed.' %quot(self.tmpdir) )
             sent = False
             while not sent:
                 updateStatus( curReqNum )
@@ -722,7 +724,7 @@ class Load:
         # if it was a multipart payload, print status for last request
         if len(multiReqLst):
             updateStatus( len(multiReqLst) )
-            print()
+            print('')
 
         # treat the last or single request
         response = self.send_single_request(lastRequest)
