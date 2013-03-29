@@ -1,5 +1,4 @@
 import os
-import usr.session
 
 from functions import *
 from interface.func import *
@@ -166,50 +165,6 @@ class CoreShell(cmdlib.Cmd):
 
 
     #####################
-    ### COMMAND: load ###
-    def do_load(self, cmd):
-        """Load a PhpSploit session file
-
-        SYNOPSIS:
-            load [file]
-
-        DESCRIPTION:
-            The framework handles sessions, which can be saved as
-            common files by using the "save" command.
-            In order to reuse a previously saved PhpSploit session
-            file, this command must be used, restoring it to the current
-            interface.
-            Used without argument, the command try to load a working
-            "phpsploit.session" file from the current directory.
-
-        EXAMPLES:
-            load /tmp/phpsploit.session
-                - Loads the file path given as argument
-            load
-                - Try to load "./phpsploit.session" (current directory)
-        """
-        # assume "phpsploit.session" as default first argument
-        try:
-            arg = cmd['argv'][1]
-        except:
-            arg = 'phpsploit.session'
-
-        # try to load the wanted session file
-        session = usr.session.load(arg, self.CNF['PSCOREVER'])
-        if session.error:
-            print( session.error )
-            return(None)
-        else:
-            old = self.CNF
-            new = session.content
-            # update dict() objects only from new session
-            for dic in self.CNF:
-                try: self.CNF[dic].update(new[dic])
-                except: pass
-            self.CNF['SET']['SAVEFILE'] = os.path.abspath(arg)
-
-
-    #####################
     ### COMMAND: save ###
     def do_save(self, cmd):
         """Save the current session in a file
@@ -228,14 +183,14 @@ class CoreShell(cmdlib.Cmd):
             directory specified by the SAVEPATH setting.
 
         EXAMPLES:
-            save
-                - Write the session to ${SAVEPATH}/phpsploit.session
-            save target.com.sess
-                - Write the session to ${SAVEPATH}/target.com.sess
-            save ./target.com.sess
-                - Write the session as "target.com.sess" in current dir
-            save /pentest/audits/target.com/
-                - Write the session as "phpsploit.session" in given dir
+            > save
+              - Write the session to ${SAVEPATH}/phpsploit.session
+            > save target.com.sess
+              - Write the session to ${SAVEPATH}/target.com.sess
+            > save ./target.com.sess
+              - Write the session as "target.com.sess" in current dir
+            > save /pentest/audits/target.com/
+              - Write the session as "phpsploit.session" in given dir
         """
         # assume empty string as default argument
         try:
@@ -243,8 +198,9 @@ class CoreShell(cmdlib.Cmd):
         except:
             arg = ''
 
-        # then just let the session.save() function do the job
-        savedFile = usr.session.save(self.CNF, arg)
+        # then just let the usr.session.save() function do the job
+        from usr.session import save
+        savedFile = save(self.CNF, arg)
         if savedFile:
             self.CNF['SET']['SAVEFILE'] = savedFile
 
@@ -283,8 +239,8 @@ class CoreShell(cmdlib.Cmd):
             on the remotely exploited system.
 
         EXAMPLES:
-            lcd ~
-            lcd /tmp
+            > lcd ~
+            > lcd /tmp
         """
         # only one argument must be supplied
         if cmd['argc'] != 2:
@@ -338,12 +294,12 @@ class CoreShell(cmdlib.Cmd):
             as a list of PhpSploit commands.
 
         EXAMPLES:
-            eval clear "help clear"
-                - Run "clear", then "help clear"
-            eval "clear; lcd '/tmp'; lpwd"
-                - Run the given enquoted argument as a command list
-            eval /tmp/spl01t-script.phpsploit
-                - Run the given script file's content, line by line
+            > eval clear "help clear"
+              - Run "clear", then "help clear"
+            > eval "clear; lcd '/tmp'; lpwd"
+              - Run the given enquoted argument as a command list
+            > eval /tmp/spl01t-script.phpsploit
+              - Run the given script file's content, line by line
         """
 
         # at least one argument must be given
@@ -402,17 +358,17 @@ class CoreShell(cmdlib.Cmd):
             MUST be manually edited.
 
         EXAMPLES:
-            set REQ_
-                - Display all settings whose name begins with "REQ_"
-            set TEXTEDITOR
-                - Show the current value of the TEXTEDITOR setting
-            set TEXTEDITOR /usr/bin/vim
-                - Set "/usr/bin/vim" as TEXTEDITOR value (<3 vim)
-            set BACKDOOR "<?php @eval($_SERVER['HTTP_%%PASSKEY%%']);?>"
-                - Set BACKDOOR's new value, in this case, the string
-                  to use as value contained quotes and semicolons,
-                  which are interpreted by the interface, like in bash.
-                  For that reason the value MUST BE correctly enquoted.
+            > set REQ_
+              - Display all settings whose name begins with "REQ_"
+            > set TEXTEDITOR
+              - Show the current value of the TEXTEDITOR setting
+            > set TEXTEDITOR /usr/bin/vim
+              - Set "/usr/bin/vim" as TEXTEDITOR value (<3 vim)
+            > set BACKDOOR "<?php @eval($_SERVER['HTTP_%%PASSKEY%%']);?>"
+              - Set BACKDOOR's new value, in this case, the string
+                to use as value contained quotes and semicolons,
+                which are interpreted by the interface, like in bash.
+                For that reason the value MUST BE correctly enquoted.
         """
         def set_var(var, val):
             """(try to) change the value to "val" of the "var" setting"""
@@ -500,10 +456,10 @@ class CoreShell(cmdlib.Cmd):
             a argument, resulting to the same as "help <plugin>".
 
         EXAMPLES:
-            help
-                - Displpay the full help, sorted by category
-            help clear
-                - Display the help for the "clear" command
+            > help
+              - Displpay the full help, sorted by category
+            > help clear
+              - Display the help for the "clear" command
         """
         # If more than 1 argument, help to help !
         if cmd['argc'] > 2:
@@ -568,7 +524,7 @@ class CoreShell(cmdlib.Cmd):
             cmdDoc = get_doc(cmdName)
             # if the given argument if not a command, return nohelp err
             if not cmdDoc:
-                print( self.nohelp %cmdName )
+                print( self.nohelp %cmd['name'] )
                 return(None)
 
             # print the heading help line, which contain description

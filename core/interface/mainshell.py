@@ -1,4 +1,3 @@
-
 from functions       import *
 from interface       import core
 from interface.func  import *
@@ -10,7 +9,6 @@ class Start(core.CoreShell):
     shell commands.
     """
     shell_name = 'main'
-
 
     def __init__(self):
         """Explicitly load the CoreShell's __init__ method"""
@@ -57,19 +55,10 @@ class Start(core.CoreShell):
         self.CNF['LNK'] = update_opener(self.CNF)
 
 
-
     ########################
     ### COMMAND: exploit ###
     def do_exploit(self, cmd):
         """Drop a shell from target server
-
-        This command opens the remote shell.
-        He sends an http request to the focused url (the one
-        defined by the "TARGET" setting), and opens the
-        remote shell if the dynamic payload ran.
-        """
-
-        """Run remote server control
 
         SYNOPSIS:
             exploit
@@ -108,3 +97,47 @@ class Start(core.CoreShell):
             print(P_err+"Undefined target, please enable"
                   " it with 'set TARGET <backdoored-url>")
 
+
+    #####################
+    ### COMMAND: load ###
+    def do_load(self, cmd):
+        """Load a PhpSploit session file
+
+        SYNOPSIS:
+            load [file]
+
+        DESCRIPTION:
+            The framework handles sessions, which can be saved as
+            common files by using the "save" command.
+            In order to reuse a previously saved PhpSploit session
+            file, this command must be used, restoring it to the current
+            interface.
+            Used without argument, the command try to load a working
+            "phpsploit.session" file from the current directory.
+
+        EXAMPLES:
+            > load /tmp/phpsploit.session
+              - Loads the file path given as argument
+            > load
+              - Try to load "./phpsploit.session" (current directory)
+        """
+        # assume "phpsploit.session" as default first argument
+        try:
+            arg = cmd['argv'][1]
+        except:
+            arg = 'phpsploit.session'
+
+        # try to load the wanted session file
+        from usr.session import load
+        session = load(arg, self.CNF['PSCOREVER'])
+        if session.error:
+            print( session.error )
+            return(None)
+        else:
+            old = self.CNF
+            self.CNF = session.content
+
+            # only these vars do no unherit the new session
+            self.CNF['PSCOREVER'] = old['PSCOREVER']
+            self.CNF['PSVERSION'] = old['PSVERSION']
+            self.CNF['SET']['SAVEFILE'] = os.path.abspath(arg)
