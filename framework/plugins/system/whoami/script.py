@@ -1,1 +1,0 @@
-print api.server['user']

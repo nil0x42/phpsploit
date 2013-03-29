@@ -81,6 +81,13 @@ class Load:
 
 
     def get_plugins(self, categories):
+        """return a dictionnary of plugins, each one containing
+        the following elements:
+        - category: the plugin's category
+        - path:     the plugin's root directory
+        - script:   the plugin script as string
+        - help:     the plugin's docstring
+        """
         plugins = dict()
 
         for cat_name, cat_paths in categories:
@@ -98,32 +105,37 @@ class Load:
 
 
     def load_plugin(self, name, path):
-        plugin_files = ['script.py', 'help.txt']
-
-        def err(msg):
-            prefix = 'Error loading plugin %s' % quot(name)
-            print P_err+'%s: %s' % (prefix, msg)
-            return(0)
-
+        """load the given plugin "name" at "path".
+        The return is False if the given arguments do not match a valid
+        PhpSploit plugin. Otherwise, a dictionnary containg the "help"
+        and "script" strings is returned.
+        """
         if not path.isdir():
-            return(0)
+            return(False)
 
         plugin = dict()
-
-        for file_name in plugin_files:
-            try:
-                file_data = getpath(path.name, file_name).read().strip()
-            except:
-                return(err(file_name+' (File not found)'))
-            if not file_data:
-                return(err(file_name+' (Empty file)'))
-            file_id = os.path.splitext(file_name)[0]
-            plugin[file_id] = file_data
+        errTpl = P_err+"Error loading %s plugin: plugin.py file " %name
+        # try to get the plugin script
+        try:
+            plugin['script'] = getpath(path.name, "plugin.py").read().strip()
+        except:
+            print( errTpl + "not found" )
+            return(False)
+        # check if the script has some content
+        if not plugin['script']:
+            print( errTpl + "is empty" )
+            return(False)
+        # load the plugin script's help (docstring)
+        plugin['help'] = ""
+        scriptCode = compile(plugin['script'], "", "exec")
+        if "__doc__" in scriptCode.co_names:
+            plugin['help'] = scriptCode.co_consts[0]
 
         return(plugin)
 
 
     def get_categories(self):
+        """get the plugin available categories, browsing the plugins dir"""
         categories = dict()
 
         paths = list()

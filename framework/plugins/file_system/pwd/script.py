@@ -1,1 +1,0 @@
-print rpath.cwd
