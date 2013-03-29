@@ -43,12 +43,12 @@ class Start(core.CoreShell):
             if self.CNF['SRV_HASH'] != self.CNF['SRV']['signature']:
                 question = 'Server signature has changed, reset environment ?'
                 if ask(question).agree():
-                    print P_inf+'Reset environment'+P_NL
                     del self.CNF['LNK_HASH']
                     del self.CNF['ENV']
+                    print( P_inf+'Reset environment'+P_NL )
                 else:
-                    print P_inf+'Kept environment'+P_NL
                     servUpdate = True
+                    print( P_inf+'Kept environment'+P_NL )
 
         # set ENV default values if empty
         if not 'ENV' in self.CNF:
@@ -76,16 +76,25 @@ class Start(core.CoreShell):
             print(P_err+"Env warning: No writeable tmp directory found.")
             print(P_err+"             Use '%s' to set it." %cmd + P_NL)
 
-        # load plugins as commands
+
+        # Load the PhpSploit plugins
         self.plugins = plugins.Load()
-        # here we blacklist the reserved commands
+        # ignore plugins whose name is identical to an existing command
         self.plugins.blacklist(self.get_commands(self))
+        # then update the plugins list
         self.plugins.update()
 
+        # load the dynamic prompt string
         self.set_prompt()
 
 
     def precmd(self, cmd_args):
+        """overwrite the unherited cmdlib's precmd() method, which
+        is called just before command execution. This one handles "shell"
+        command specificities, prepending the current virtual shell string
+        to the use command if a virtual shell session is currently running
+
+        """
         # auto prepend current shell string if exists
         if self.CNF['CURRENT_SHELL']:
             cmd_args.insert(0, self.CNF['CURRENT_SHELL'])
@@ -99,15 +108,21 @@ class Start(core.CoreShell):
 
 
     def postcmd(self, stop, cmd_args):
+        """overwrite the unherited cmdlib's postcmd() method, which
+        is called after command execution, this one collect the last command
+        output string, which has been captured by the fork_stdout() method.
+
+        """
         try:
             self.lastcmd_data = sys.stdout.file.getvalue()
             sys.stdout.__del__()
         except:
             pass
-        return stop
+        return(stop)
 
 
     def set_prompt(self, string=''):
+        """reset the prompt string adding it's optionnal argument"""
         if string: string+=' '
         currentTarget = color(31,1)+self.CNF['LNK']['DOMAIN']+color(0)
         self.prompt = color(0,4)+'phpsploit'+color(0)
@@ -115,6 +130,10 @@ class Start(core.CoreShell):
 
 
     def default_env(self, key, value=''):
+        """set the given environment value if it's current one is
+        empty or does not exist
+
+        """
         if not key in self.CNF['ENV']:
             self.CNF['ENV'][key] = value
         elif not self.CNF['ENV'][key]:
@@ -122,23 +141,34 @@ class Start(core.CoreShell):
 
 
     def when_interrupt(self):
+        """overwrite the unherited cmdlib's when_interrupt() method, which
+        is called on user keyboard interrupt. This one also handles "shell"
+        command specificities, disabling the current virtual shell if it
+        was existing.
+
+        """
         if not self.CNF['CURRENT_SHELL']:
-            print P_NL+self.interrupt
+            print( P_NL+self.interrupt )
         else:
-            print P_NL+P_inf+self.CNF['CURRENT_SHELL']+' shell closed.'
+            print( P_NL+P_inf+self.CNF['CURRENT_SHELL']+' shell closed.' )
             self.CNF['CURRENT_SHELL'] = ''
             self.set_prompt()
 
 
     def do_exit(self, cmd):
-        # if the session comes from a source file, and it has changed,
-        # advise the user and ask confirmation before leaving.
+        """The "exit" command, which is considered as a core command
+        is in reallity rewritten on the remote shell (this one).
+        Because exiting the remote shell needs an user confirmation
+        if the current session (it it has been saved/loaded) has changed.
+        It prevents unwanted recent changes loss due to keyboard habits.
+
+        """
         save_ask = None
         if 'SAVEFILE' in self.CNF['SET']:
             from usr.session import load
             source = load(self.CNF['SET']['SAVEFILE'], self.CNF['PSCOREVER'])
             if source.error:
-                print(source.error)
+                print( source.error )
             else:
                 source = source.content
                 # set source SAVEFILE to check equality
@@ -150,10 +180,11 @@ class Start(core.CoreShell):
         if save_ask:
             warning  = 'if you exit now, the session changes will be lost'
             question = 'Do you really want to leave the remote shell ?'
-            print P_err+'%s, %s' %(save_ask, warning)
+            print( P_err+'%s, %s' %(save_ask, warning) )
             if ask(question).reject():
-                return
-        return True
+                return(None)
+        return(True)
+
 
     #######################
     ### COMMAND: reload ###
