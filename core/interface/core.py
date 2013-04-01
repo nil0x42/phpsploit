@@ -357,6 +357,16 @@ class CoreShell(cmdlib.Cmd):
             default setting value permanently, the configuration file
             MUST be manually edited.
 
+        WARNING:
+            Considering the PhpSploit's input parser, commands which
+            contain quotes, semicolons, and other chars that could be
+            interpreted by the framework MUST be enquoted to be
+            interpreted as a single argument. For example:
+              > run echo 'foo bar' > /tmp/foobar; cat /etc/passwd
+            In this case, quotes and semicolons will be interpreted by
+            the framwework, so the correct syntax is:
+              > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
+
         EXAMPLES:
             > set REQ_
               - Display all settings whose name begins with "REQ_"

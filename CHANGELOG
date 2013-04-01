@@ -1,0 +1,29 @@
+GIT DEVELOPMENT (IN TEST)
+  * Core and Shell commands help strings are now a lot more detailed
+  * Help Strings Syntax now highlights sections like in manpages
+  * Plugin script filenames are now 'plugin.py' intead of 'script.py'
+  * The plugins helps are now taken from the script's docstrings
+  * Plugin help strings are now a lot more detailed.
+  * New 'load' command, load as session file interactively (MainShell)
+
+Version 2.1.3 (2013-02-20)
+  * Bug Fix on 'system' plugin (Empty responses was badly treated)
+  * Help module now reads core/shell comands docstrings as help
+  * Leaving a remote session now warns users if it has changed
+  * First arg on env/set now displays vars which strartswhith() him
+  * Http headers filling method made more intelligent.
+  * Users config detector now also checks for the $XDG_CONFIG_HOME shell env
+  * Moved ./misc to ./framework/misc, and cleaned out it's content
+  * Moved ./readme/README to ./README (at root directory)
+  * The ./doc directory is now used to store the old ./readme/ files
+  * New documentation file (how to contribute): ./doc/CONTRIBUTE
+  * Re-Written the disclaimer for legal purposes.
+  * The manpage template is now available at: ./framework/misc/
+  * FIX: Settings from session files are now tested like any other
+  * Bash-Like multi command support, separated by semicolons
+  * Bash-Like argument enquoting policy.
+  * Adding the 'eval' command, which executes command lists from file
+
+Version 2.1.2 (2012-08-12)
+  * Line input which ends with "\" considers next line as it's continuation
+  * Unclosed quote from input considers next line as it's continuation
