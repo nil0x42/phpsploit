@@ -114,7 +114,7 @@ class Load:
             return(False)
 
         plugin = dict()
-        errTpl = P_err+"Error loading %s plugin: plugin.py file " %name
+        errTpl = P_err+"Error loading %s plugin: " %quot(name)
         # try to get the plugin script
         try:
             plugin['script'] = getpath(path.name, "plugin.py").read().strip()
@@ -127,7 +127,11 @@ class Load:
             return(False)
         # load the plugin script's help (docstring)
         plugin['help'] = ""
-        scriptCode = compile(plugin['script'], "", "exec")
+        try:
+            scriptCode = compile(plugin['script'], "", "exec")
+        except ValueError as e:
+            print( errTpl + e.message )
+            return(False)
         if "__doc__" in scriptCode.co_names:
             plugin['help'] = scriptCode.co_consts[0]
 
