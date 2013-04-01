@@ -1,3 +1,58 @@
+"""A client for Microsoft SQL Server
+
+SYNOPSIS:
+    mssql connect <USERNAME>@<HOSTNAME> [-p <PASSWORD>]
+    mssql show [databases|tables]
+    mssql use <DATABASE>
+    mssql "<SQL COMMAND>"
+
+DESCRIPTION:
+    The mssql plugin is a simulation of the unix standard mysql
+    client, it works exactly the same as the mysql plugin, but
+    adapted to handle "Microsoft SQL Server" databases.
+    - The "connect" argument, used to estabilish a connection
+    with the remote mssql server, acts writing a MSSQL_CRED
+    environment variable in case of success, this variable is
+    automatically used as credentials for next mssql commands.
+    - The "use" argument can be used to select a default
+    database to explicitly use for next mssql queries, writing
+    it into the MSSQL_BASE environment variable.
+    - Any other argument string is considered as a single mssql
+    query, execpt for ending "\G" strings, which ask to use
+    tabular format display mode.
+
+WARNING:
+    Considering the PhpSploit's input parser, commands which
+    contain quotes, semicolons, and other chars that could be
+    interpreted by the framework MUST be enquoted to be
+    interpreted as a single argument. For example:
+      > run echo 'foo bar' > /tmp/foobar; cat /etc/passwd
+    In this case, quotes and semicolons will be interpreted by
+    the framwework, so the correct syntax is:
+      > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
+
+EXAMPLES:
+    > mssql connect SA@10.0.0.100 -p god123
+      - Connect to 10.0.0.100 as "SA" with password "god123"
+    > mssql show databases
+      - Print the databases list (mysql client like)
+    > mssql use master
+      - Use the "master" database as default one
+    > mssql SELECT * FROM sysusers
+      - Print the whole "sysusers" table from "master"
+    > mssql "SELECT * FROM sysusers\G"
+      - Same as above, using tabular format (mysql client like)
+
+ENVIRONMENT:
+    * MSSQL_CRED
+        mssql's connection credentials
+    * MSSQL_BASE
+        mssql's default database to use
+
+AUTHOR:
+    nil0x42 <http://goo.gl/kb2wf>
+"""
+
 import time
 
 clock = time.time()

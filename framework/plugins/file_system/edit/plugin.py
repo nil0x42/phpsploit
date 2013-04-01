@@ -1,3 +1,26 @@
+"""Print a file content to standard output
+
+SYNOPSIS:
+    edit <REMOTE FILE>
+
+DESCRIPTION:
+    This command is an enhancement of the 'cat' plugin. Instead
+    of simply writing the content to standard output, it opens
+    the remote file content with your prefered text editor,
+    which if defined by the TEXTEDITOR setting.
+    - Once opened with the local text editor, the file can be
+    edited. When leaving the text editor, the plugin checks if
+    the content has changed, and automatically uploads the new
+    file content to the remote server.
+
+EXAMPLES:
+    > edit ../includes/connect.inc.php
+      - Open the file with the TEXTEDITOR
+
+AUTHOR:
+    nil0x42 <http://goo.gl/kb2wf>
+"""
+
 import os, base64
 
 api.needsenv('TEXTEDITOR')

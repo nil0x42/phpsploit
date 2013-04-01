@@ -1,3 +1,23 @@
+"""Remove a file
+
+SYNOPSIS:
+    rm <REMOTE FILE>
+
+DESCRIPTION:
+    Remove the given REMOTE FILE from remote server, or print
+    concerned errors in case of insufficient permissions or
+    bad file path.
+
+    NOTE: Unlike the GNU's 'rm' coreutils command, this plugin
+    only supports a single file as argument.
+
+EXAMPLES:
+    > rm pdfs/r57.php
+      - Remove the ./pdfs/r75.php file from remote server
+
+AUTHOR:
+    nil0x42 <http://goo.gl/kb2wf>
+"""
 
 if self.argc not in [2,3]:
     api.exit(self.help)
@@ -21,7 +41,7 @@ basename = rpath.basename(absPath)
 query = {'FILE' : absPath}
 
 if recurse:
-    api.exit(P_err+"Intersted by developping recursive rm option ? contact me ;)")
+    api.exit(P_err+"Recursive remote is not available yet !")
 
 else:
     http.send(query, 'single')

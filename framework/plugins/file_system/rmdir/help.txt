@@ -1,4 +1,0 @@
-Remove empty directory
-
-Usage:   rmdir [directory]
-Example: rmdir /tmp/test

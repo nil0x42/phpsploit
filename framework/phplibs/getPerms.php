@@ -46,14 +46,26 @@ function getPerms($absFilePath,$permstype='nix'){
                     (($perms & 0x0200) ? 'T' : '-'));
 
         if ($type == '-'){
-            if (fileAccess($absFilePath,'r')){$Rperm = 'r';}
-            else                       {$Rperm = '-';}
-            if (fileAccess($absFilePath,'w')){$Wperm = 'w';}
-            else                       {$Wperm = '-';}}
+            if (fileAccess($absFilePath,'r'))
+                $Rperm = 'r';
+            else
+                $Rperm = '-';
+
+            if (fileAccess($absFilePath,'w'))
+                $Wperm = 'w';
+            else
+                $Wperm = '-';
+            }
+
         if ($type == 'd'){
-            if (dirAccess($absFilePath,'r')){ $Rperm = 'r';}
-            else                       {$Rperm = '-';}}
-        $info = $Rperm.$Wperm.$Xperm;}
+            if (dirAccess($absFilePath,'r'))
+                $Rperm = 'r';
+            else
+                $Rperm = '-';}
+
+        $info = $Rperm.$Wperm.$Xperm;
+
+        }
     $result = $type.$info;
     return($result);}
 ?>

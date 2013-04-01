@@ -1,3 +1,16 @@
+"""Remove empty directory
+
+SYNOPSIS:
+    rmdir <REMOTE DIRECTORY>
+
+DESCRIPTION:
+    'rmdir' removes the given directory path if the operation
+    is permitted and the given directory is empty. Otherwise
+    an error is returned.
+
+AUTHOR:
+    nil0x42 <http://goo.gl/kb2wf>
+"""
 
 if self.argc != 2:
     api.exit(self.help)

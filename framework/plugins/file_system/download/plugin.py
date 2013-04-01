@@ -1,3 +1,39 @@
+"""Download a remote file
+
+SYNOPSIS:
+    download [-f] <REMOTE FILE> [<LOCAL DESTINATION>]
+
+OPTIONS:
+    -f      Overwrite destination without confirmation if it
+            already exists.
+
+DESCRIPTION:
+    Download a remote file to your local system.
+    - In the case the destination is a directory, the file will
+    be copied into it keeping it's original file name.
+    - Unless the '-f' option has been set, the download process
+    aborts if the destination file already exists, and asks for
+    a confirmation to overwrite the file.
+    - If the LOCAL DESTINATION is not given, the plugin assumes
+    destination as the current local working directory (which
+    can be known with the 'lpwd' command)
+
+    NOTE: For the moment, only a single file can be downloaded
+    at the time. Recursive directory downloads and multiple
+    file downloads are not available.
+
+EXAMPLES:
+    > download C:\boot.ini /tmp/pentest/
+      - Download the remote boot.ini file into your local dir
+    > download -f /etc/passwd ./hacked-etcpasswd.txt
+      - Download the current remote passwd file and force copy
+    > download /srv/www/inc/sql.php
+      - Downalod the sql.php file to the current local directory
+
+AUTHOR:
+    nil0x42 <http://goo.gl/kb2wf>
+"""
+
 import os, base64
 
 if self.argc not in [2,3,4]:

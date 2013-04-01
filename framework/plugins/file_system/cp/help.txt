@@ -1,9 +1,0 @@
-Copy a file between two server paths
-
-Usage:   cp [remote file] [remote destination]
-
-Options:
-  -f     Force overwriting if desination exists
-
-Example: cp \\Bach\weblogs_register$\archive_ftp\ex111213.zip C:\intepub\wwwroot\x.zip
-         cp -f /mnt/backup/2009/etc/shadow ./

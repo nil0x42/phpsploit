@@ -1,4 +1,0 @@
-Dump the server's phpinfo
-
-Usage:   phpinfo
-         phpinfo --html

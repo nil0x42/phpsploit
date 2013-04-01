@@ -1,4 +1,0 @@
-Get informations about a file
-
-Usage:   fileinfo [file]
-Example: fileinfo /tmp/

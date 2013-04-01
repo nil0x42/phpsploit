@@ -1,3 +1,41 @@
+"""List directory contents
+
+SYNOPSIS:
+    ls [<REMOTE PATH>]
+
+DESCRIPTION:
+    List the files in given remote directory path
+    - If the given element is not an accessible directory, the
+    payload automatically considers the path's basename as a
+    regex pattern, it allows to list files which match a
+    specific pattern only, for example: "ls /tmp/*.txt", will
+    list only .txt files.
+    - Ending the argument string with a path separator (for
+    example, '/tmp/' instead of '/tmp') explicitly indicates
+    that the given path is the exact directory location you
+    want to list, so it disables the pattern feature mentionned
+    above.
+
+WARNING:
+    The 'ls' plugin gives permission informations about each
+    listed file, in unix drwxrwxrwx mode. If the permission
+    informations are not available, then the payload tries to
+    provide basic permission informations in drwx mode, which
+    indicates the file rights relative to the current user.
+
+EXAMPLES:
+    > ls
+      - List any element in the current directory
+    > ls ~
+      - List any element in the user's home directory
+    > ls ..
+      - List the path above the current working directory
+    > ls D:\\*.ini
+      - List any element in D:\\ whose names end with '.ini'
+
+AUTHOR:
+    nil0x42 <http://goo.gl/kb2wf>
+"""
 
 if self.argc > 2:
     api.exit(self.help)

@@ -1,4 +1,0 @@
-Change directory
-
-Usage:   cd [directory]
-Example: cd /var/www

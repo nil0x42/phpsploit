@@ -1,3 +1,29 @@
+"""Get informations about a file
+
+SYNOPSIS:
+    fileinfo <REMOTE FILE>|<REMOTE DIRECTORY>
+
+DESCRIPTION:
+    Display real privileges, rights, and owner informations
+    about the given remote file or directory path.
+
+    Unless the 'ls' command which just prints system's files
+    rights, the fileinfo command really tries to read and write
+    to the given path, to get the real privilege iniformations
+    on it.
+    It also prints the "Last Modified" information, and the
+    absolute path of the element.
+
+WARNING:
+    Because it physically tries to write to the file, this
+    command will alter the "Last Modified" attribute, which may
+    decrease stealth in some cases. For this reason, the
+    'fileinfo' plugin must be used sparingly !
+
+AUTHOR:
+    nil0x42 <http://goo.gl/kb2wf>
+"""
+
 if self.argc != 2:
     api.exit(self.help)
 

@@ -1,3 +1,34 @@
+"""Change directory
+
+SYNOPSIS:
+    cd <DIRECTORY>
+
+DESCRIPTION:
+    Move the PhpSploit's current working directory to the given
+    directory location.
+    Unlike manually changing the CWD environment variable to
+    the wanted location, this plugins directly checks on the
+    remote server if the new directory exists and is
+    reachable. For those reasons, and the fact that relative
+    paths can be specified, the method is a lot more safe
+    than manual CWD edition, which must be used only on the
+    rare cases you have no choice.
+
+EXAMPLES:
+    > cd ..
+      - Go to the directory below
+    > cd "C:\\Program Files\\"
+      - Go to Program Files directory
+    > cd ~
+      - Move the the user's base directory
+
+ENVIRONMENT:
+    * CWD
+        The current PhpSploit working directory
+
+AUTHOR:
+    nil0x42 <http://goo.gl/kb2wf>
+"""
 
 if self.argc > 2:
     api.exit(self.help)

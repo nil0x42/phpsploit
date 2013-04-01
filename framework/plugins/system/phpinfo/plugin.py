@@ -1,3 +1,20 @@
+"""Dump the server's phpinfo
+
+SYNOPSIS:
+    phpinfo
+
+DESCRIPTION:
+    Dump the remote server's phpinfo() data in tabular
+    text format.
+
+    TODO: a --browser argument must be developed in a future
+    PhpSploit release, opening the user's web browser with the
+    dumped data in html format.
+
+AUTHOR:
+    nil0x42 <http://goo.gl/kb2wf>
+"""
+
 import os
 
 def sanitize(string):

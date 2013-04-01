@@ -1,3 +1,25 @@
+"""Recursively search for files matching pattern
+
+SYNOPSIS:
+    search [<BASE DIRECTORY>] <PATTERN>
+
+DESCRIPTION:
+    The 'search' plugin recursively searchs for files and
+    directories matching PATTERN from the given BASE DIRECTORY.
+    - If the BASE DIRECTORY is not specified, the plugin
+    sets it's value at the current working directory, it means
+    that 'cd /tmp; search *.c' is the same as 'search /tmp *.c'.
+
+EXAMPLES:
+    > search /srv/www *sql*
+      - List any file whose name contains 'sql' in the web path
+    > search *.inc
+      - Recursive search of .inc files from current directory
+
+AUTHOR:
+    nil0x42 <http://goo.gl/kb2wf>
+"""
+
 if self.argc not in [2,3]:
     api.exit(self.help)
 

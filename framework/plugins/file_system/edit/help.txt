@@ -1,4 +1,0 @@
-Edit the contents of a file
-
-Usage:   edit [file]
-Example: edit includes/mysql.php

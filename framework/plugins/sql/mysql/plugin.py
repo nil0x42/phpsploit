@@ -1,3 +1,57 @@
+"""A client for MySQL databases
+
+SYNOPSIS:
+    mysql connect <USERNAME>@<HOSTNAME> [-p <PASSWORD>]
+    mysql show [databases|tables]
+    mysql use <DATABASE>
+    mysql "<SQL COMMAND>"
+
+DESCRIPTION:
+    The mysql plugin tries to simulate the standard mysql
+    client.
+    - The "connect" argument, used to estabilish a connection
+    with the remote mysql server, acts writing a MYSQL_CRED
+    environment variable in case of success, this variable is
+    automatically used as credentials for next mysql commands.
+    - The "use" argument can be used to select a default
+    database to explicitly use for next mysql queries, writing
+    it into the MYSQL_BASE environment variable.
+    - Any other argument string is considered as a single mysql
+    query, execpt for ending "\G" strings, which ask to use
+    tabular format display mode.
+
+WARNING:
+    Considering the PhpSploit's input parser, commands which
+    contain quotes, semicolons, and other chars that could be
+    interpreted by the framework MUST be enquoted to be
+    interpreted as a single argument. For example:
+      > run echo 'foo bar' > /tmp/foobar; cat /etc/passwd
+    In this case, quotes and semicolons will be interpreted by
+    the framwework, so the correct syntax is:
+      > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
+
+EXAMPLES:
+    > mysql connect root@10.0.0.100 -p god123
+      - Connect to 10.0.0.100 as "root" with password "god123"
+    > mysql show databases
+      - Print the databases list (mysql client like)
+    > mysql use information_schema
+      - Use the "information_schema" database as default one
+    > mysql SELECT * FROM schemata
+      - Print the whole schemata table from information_schema
+    > mysql "SELECT * FROM schemata\G"
+      - Same as above, using tabular format (mysql client like)
+
+ENVIRONMENT:
+    * MYSQL_CRED
+        Mysql's connection credentials
+    * MYSQL_BASE
+        Mysql's default database to use
+
+AUTHOR:
+    nil0x42 <http://goo.gl/kb2wf>
+"""
+
 import time
 
 clock = time.time()
