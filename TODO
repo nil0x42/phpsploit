@@ -6,20 +6,27 @@ Interface:
   * @--version -v: print version information
   * @--help -h: print help about the available commands
 
-Core:
-  * @cmdlib.py check if the cmd['args|line|name|argc'] can be removed for argv
-  * @settings.py must also search for the ~/.config user root directory
-  * @Session Files must keep the readline commands history
-  * @Session Files must keep the last command output
+Settings:
+  * Also search for a ~/.config/phpsploit/ dir before using ~/.phpsploit
+  * Defaults must be defined into the setting.py lib
+  * Define the user config file as a phpsploit interpreted script as start
+  * Create a REAL, non sucking settings management class.
+
+Sessions:
+  * Add readline history saving capability
+  * Add last command output buffer saving capability
 
 Commands:
   * @lastcmd must correctly support regexp and -i on grep/hilight modes
-  * Write complete help docstrings for the @Remote Shell commands
   * @alias core commant must be created
   * @doc core command must be created, to handle ./doc/ reading from interface
+  * @save needs an '-f' (force) option to force file overwrite
+  * remote shell @exit needs a -f opt to bypass leave confirmation in case of
+    unsaved session.
 
 Plugins:
-  * Privilegiate the @self.argv plugin variable, others are deprecated
+  * Write a "plugins/network/scan/plugin.py" small ip scanner, to be able to
+    progressively gain access on controlled server's internal network.
 
 Documentation:
   * Move current ./doc files to the root dir
@@ -28,5 +35,5 @@ Documentation:
   * Simplify the manpage to summarize only commands and how to get started
   * When all this done, the 'rtfm' core command can be removed
 
-HTTP Manager:
+Network Stealth:
   * Write a stealth module which use other target on each command (with 404)

@@ -95,14 +95,26 @@ class Start(core.CoreShell):
         to the use command if a virtual shell session is currently running
 
         """
-        # auto prepend current shell string if exists
+        if not argv:
+            return([])
+
+        # virtual plugin shell handler
         if self.CNF['CURRENT_SHELL']:
-            argv.insert(0, self.CNF['CURRENT_SHELL'])
-        # fork standard output for command logging
-        if argv:
-            if argv[0] not in ['', 'lastcmd'] \
-            and argv != ['lastcmd', 'exit']:
-                sys.stdout = fork_stdout(StringIO())
+            # the following conditions handle the 'shell' command capability
+            # to consider commands prepended with "%" and "% " as bypassing
+            # the corrent virtual plugin dedicated shell.
+            if argv[0] == "%":
+                argv.pop(0)
+            elif argv[0].startswith("%"):
+                argv[0] = argv[0][1:]
+            # else, simply prepend the virtual plugin shell name as first arg
+            else:
+                argv.insert(0, self.CNF['CURRENT_SHELL'])
+
+        # for stdout, except for 'lastcmd' commands
+        if argv[0] != 'lastcmd':
+            sys.stdout = fork_stdout(StringIO())
+
         return(argv)
 
 
@@ -247,7 +259,7 @@ class Start(core.CoreShell):
             remote shell innterface, press Ctrl-C (keyboard interrupt)
         """
         if len(argv) != 2:
-            self.run('help shell')
+            return( self.run('help shell') )
 
         if argv[1] in self.plugins.shells():
             quit = color(37)+'Ctrl+C'+color(0)
@@ -258,7 +270,7 @@ class Start(core.CoreShell):
             self.CNF['CURRENT_SHELL'] = argv[1]
             self.set_prompt(argv[1])
         else:
-            self.run('help shell')
+            return( self.run('help shell') )
 
 
 
@@ -375,8 +387,14 @@ class Start(core.CoreShell):
     ####################
     ### COMMAND: env ###
     def complete_env(self, text, *ignored):
-        keys = self.CNF['ENV'].keys()
-        return([x+' ' for x in keys if x.startswith(text)])
+        """use the env vars list as "env" argument completion array"""
+        text = text.upper()
+        completions = list()
+        for key in self.CNF['ENV'].keys():
+            if key.startswith(text):
+                completions.append(key+' ')
+        return(completions)
+
 
     def do_env(self, argv):
         """View and change environment variables.

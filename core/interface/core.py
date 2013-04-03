@@ -308,8 +308,12 @@ class CoreShell(cmdlib.Cmd):
     ### COMMAND: set ###
     def complete_set(self, text, *ignored):
         """use the settings list as "set" argument completion array"""
-        keys = self.CNF['SET'].keys()
-        return([x+' ' for x in keys if x.startswith(text)])
+        text = text.upper()
+        completions = list()
+        for key in self.CNF['SET'].keys():
+            if key.startswith(text):
+                completions.append(key+' ')
+        return(completions)
 
     def do_set(self, argv):
         """View and edit settings
