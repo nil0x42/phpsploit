@@ -57,7 +57,7 @@ class Start(core.CoreShell):
 
     ########################
     ### COMMAND: exploit ###
-    def do_exploit(self, cmd):
+    def do_exploit(self, argv):
         """Drop a shell from target server
 
         SYNOPSIS:
@@ -100,11 +100,11 @@ class Start(core.CoreShell):
 
     #####################
     ### COMMAND: load ###
-    def do_load(self, cmd):
+    def do_load(self, argv):
         """Load a PhpSploit session file
 
         SYNOPSIS:
-            load [file]
+            load [<FILE>]
 
         DESCRIPTION:
             The framework handles sessions, which can be saved as
@@ -121,15 +121,11 @@ class Start(core.CoreShell):
             > load
               - Try to load "./phpsploit.session" (current directory)
         """
-        # assume "phpsploit.session" as default first argument
-        try:
-            arg = cmd['argv'][1]
-        except:
-            arg = 'phpsploit.session'
+        argv.append('phpsploit.session') # set default argument value
 
         # try to load the wanted session file
         from usr.session import load
-        session = load(arg, self.CNF['PSCOREVER'])
+        session = load(argv[1], self.CNF['PSCOREVER'])
         if session.error:
             print( session.error )
             return(None)
@@ -137,7 +133,7 @@ class Start(core.CoreShell):
             old = self.CNF
             self.CNF = session.content
 
-            # only these vars do no unherit the new session
+            # only these vars do not unherit the new session
             self.CNF['PSCOREVER'] = old['PSCOREVER']
             self.CNF['PSVERSION'] = old['PSVERSION']
-            self.CNF['SET']['SAVEFILE'] = os.path.abspath(arg)
+            self.CNF['SET']['SAVEFILE'] = os.path.abspath(argv[1])

@@ -3,12 +3,13 @@ import sys, string, random
 
 class api:
     def __init__(self, core, cmd):
-        self.settings = core['SET']
-        self.server   = core['SRV']
-        self.env      = core['ENV']
-        self.cmd      = cmd
-
+        self.cmd = cmd
         self.currentShell = core['CURRENT_SHELL']
+
+        self.settings    = self.set = core['SET']
+        self.server      = self.srv = core['SRV']
+        self.environment = self.env = core['ENV']
+
 
     def exit(self, text='', replaceLst=None):
         if type(replaceLst).__name__ == 'str':
@@ -17,6 +18,7 @@ class api:
             for n in range(len(replaceLst)):
                 text = text.replace('%'+str(n+1), replaceLst[n])
         sys.exit(text)
+
 
     def isshell(self):
         if self.currentShell:
@@ -29,6 +31,7 @@ class api:
                 if args == 'exit':
                     raise KeyboardInterrupt
 
+
     def needsenv(self, name):
         name = name.upper()
         if not name in self.env:
@@ -37,9 +40,11 @@ class api:
             else:
                 self.exit(P_err+"Undefined %s, please enable it with the 'env' command" % name)
 
+
     def randstring(self, n):
         chars = string.ascii_letters+string.digits
         return(''.join([random.choice(chars) for i in range(0,n)]))
+
 
     def columnize(self, dic):
         if set(dic.keys()) != set(['sep','sort','keys','data']): return('error')

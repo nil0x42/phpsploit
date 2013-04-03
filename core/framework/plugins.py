@@ -46,8 +46,8 @@ class Load:
 
 
     def list_category(self, category):
-        """returns the list of plugin names
-        owned by the specified category
+        """provides the list of any plugin
+        that belong to the given category
         """
         items = list()
         for name, item in self.items.items():
@@ -178,22 +178,26 @@ class Load:
 class Run:
     libs_path = getpath('core/pspapi').name
 
-    def __init__(_self, cmd, plugins, core):
+    def __init__(_self, argv, plugins, core):
         """ in this class, we use _self instead of self,
-        because self is used for the plugins API
+        because the self object is used for the plugins API
 
         """
-        # we add 'help' into the 'self' api object
-        cmd['help'] = plugins.get(cmd['name'], 'help')
-        cmd['path'] = plugins.get(cmd['name'], 'path')
+        # instantiate the plugin's self vars
+        cmd = dict()
+        cmd['name'] = argv[0]
+        cmd['argv'] = argv
+        cmd['argc'] = len(argv)
+        cmd['args'] = ' '.join(argv[1:])
+        cmd['help'] = plugins.get(argv[0], 'help')
+        cmd['path'] = plugins.get(argv[0], 'path')
         _self.cmd = cmd
 
         exec(_self.lib_loader())
         exec(_self.load_self_lib())
 
-        plugin = plugins.get(cmd['name'], 'script')
         try:
-            exec(plugin)
+            exec( plugins.get(argv[0], 'script') )
         except KeyboardInterrupt:
             raise KeyboardInterrupt
         except:
@@ -201,24 +205,23 @@ class Run:
             etype = etype[etype.find('.')+1:-2]
             evalue = str(sys.exc_info()[1])
             if etype == 'SystemExit':
-                if evalue: print evalue
+                if evalue:
+                    print(evalue)
             else:
-                print P_err+'An error has occured launching the plugin'
-                print P_err+etype+' : '+evalue
+                print( P_err+'An error has occured launching the plugin' )
+                print( P_err+etype+' : '+evalue )
 
         _self.env = dict([(x.upper(),y) for x,y in api.env.items()])
 
 
     def lib_loader(_self):
-        loader = ''
-        tpl = 'import pspapi.*\n'
-        tpl+= '* = pspapi.*.*(core, cmd)\n'
+        loader = str()
+        tpl = ('import pspapi.*\n'
+               '* = pspapi.*.*(core, cmd)\n')
         for lib in os.listdir(_self.libs_path):
-            if lib.endswith('.py') \
-            and lib != '__init__.py' \
-            and lib != 'self.py':
+            if lib.endswith('.py') and lib not in ['__init__.py','self.py']:
                 lib = os.path.splitext(lib)[0]
-                loader+= tpl.replace('*', lib)
+                loader += tpl.replace('*', lib)
         return(loader)
 
 
@@ -226,5 +229,5 @@ class Run:
         loader = 'import pspapi.self as self\n'
         tpl = "self.* = cmd['*']\n"
         for var in _self.cmd:
-            loader+= tpl.replace('*', var)
+            loader += tpl.replace('*', var)
         return(loader)

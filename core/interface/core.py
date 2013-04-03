@@ -56,29 +56,9 @@ class CoreShell(cmdlib.Cmd):
         return(commands)
 
 
-    def run(self, cmdString):
-        """Evatuate the given argument as a command-line string, as if
-        it was typed by the user in the software interface.
-
-        """
-        cmdQueue = self.parse_input(cmdString)
-
-        # the "stop" variable may interrupt the loop, because a
-        # positive return value indicates a shell exit request.
-        stop = False
-        while cmdQueue and not stop:
-            command = self.precmd( cmdQueue.pop(0) )
-            stop = self.onecmd(command)
-            stop = self.postcmd(stop, command)
-
-        # if the last run command was an exit query, then it must
-        # also be returned by this function, to know what to do outside
-        return(stop)
-
-
     #####################
     ### COMMAND: exit ###
-    def do_exit(self, cmd):
+    def do_exit(self, argv):
         """Leave the current shell interface
 
         SYNOPSIS:
@@ -95,7 +75,7 @@ class CoreShell(cmdlib.Cmd):
 
     ######################
     ### COMMAND: clear ###
-    def do_clear(self, cmd):
+    def do_clear(self, argv):
         """Clear the terminal screen
 
         SYNOPSIS:
@@ -111,7 +91,7 @@ class CoreShell(cmdlib.Cmd):
 
     #####################
     ### COMMAND: rtfm ###
-    def do_rtfm(self, line):
+    def do_rtfm(self, argv):
         """Read the fine manual
 
         SYNOPSIS:
@@ -135,7 +115,7 @@ class CoreShell(cmdlib.Cmd):
 
     #######################
     ### COMMAND: infect ###
-    def do_infect(self, cmd):
+    def do_infect(self, argv):
         """Print the injectable payload
 
         SYNOPSIS:
@@ -166,11 +146,11 @@ class CoreShell(cmdlib.Cmd):
 
     #####################
     ### COMMAND: save ###
-    def do_save(self, cmd):
+    def do_save(self, argv):
         """Save the current session in a file
 
         SYNOPSIS:
-            save [file|directory]
+            save [<LOCAL FILE>|<LOCAL DIRECTORY>]
 
         DESCRIPTION:
             Dump the current framework session, (aka environment,
@@ -193,21 +173,18 @@ class CoreShell(cmdlib.Cmd):
               - Write the session as "phpsploit.session" in given dir
         """
         # assume empty string as default argument
-        try:
-            arg = cmd['argv'][1]
-        except:
-            arg = ''
+        argv.append('')
 
         # then just let the usr.session.save() function do the job
         from usr.session import save
-        savedFile = save(self.CNF, arg)
+        savedFile = save(self.CNF, argv[1])
         if savedFile:
             self.CNF['SET']['SAVEFILE'] = savedFile
 
 
     #####################
     ### COMMAND: lpwd ###
-    def do_lpwd(self, cmd):
+    def do_lpwd(self, argv):
         """Print local working directory
 
         SYNOPSIS:
@@ -223,11 +200,11 @@ class CoreShell(cmdlib.Cmd):
 
     ####################
     ### COMMAND: lcd ###
-    def do_lcd(self, cmd):
+    def do_lcd(self, argv):
         """Change local working directory
 
         SYNOPSIS:
-            cd [directory]
+            lcd <LOCAL DIRECTORY>
 
         DESCRIPTION:
             The "lcd" command is an equivalent of the "cd" unix
@@ -243,11 +220,11 @@ class CoreShell(cmdlib.Cmd):
             > lcd /tmp
         """
         # only one argument must be supplied
-        if cmd['argc'] != 2:
+        if len(argv) != 2:
             return( self.run('help lcd') )
 
         # expand user special path notation "~"
-        newDir = os.path.expanduser( cmd['argv'][1] )
+        newDir = os.path.expanduser( argv[1] )
         try:
             os.chdir(newDir)
         except OSError as e:
@@ -257,7 +234,7 @@ class CoreShell(cmdlib.Cmd):
 
     #######################
     #### COMMAND: debug ###
-    def do_debug(self, line):
+    def do_debug(self, argv):
         """Trivial debugging command
 
         SYNPOPSIS:
@@ -277,11 +254,11 @@ class CoreShell(cmdlib.Cmd):
 
     ####################
     ### COMMAND: eval ##
-    def do_eval(self, cmd):
+    def do_eval(self, argv):
         """Execute the given commands list
 
         SYNOPSIS:
-            eval <file ... | command ...>
+            eval <LOCAL FILE>|<COMMAND> ...
 
         DESCRIPTION:
             This command can take as many arguments as necessary.
@@ -303,17 +280,17 @@ class CoreShell(cmdlib.Cmd):
         """
 
         # at least one argument must be given
-        if cmd['argc'] < 2:
+        if len(argv) < 2:
             return( self.run('help eval') )
 
         # treat each given argument
-        for i in range(1, cmd['argc']):
+        for i in range(1, len(argv)):
             # check if it is a file path
-            f = getpath(cmd['argv'][i])
+            f = getpath(argv[i])
             if f.isfile():
                 # then assume it's content as data instead of argument string
                 try:
-                    cmd['argv'][i] = f.read()
+                    argv[i] = f.read()
                 except EnvironmentError, e:
                     print( P_err + "Eval error: '%s': %s" %(e.filename,
                                                             e.strerror) )
@@ -323,7 +300,7 @@ class CoreShell(cmdlib.Cmd):
                     return(None)
 
         # eval all resulting data
-        data = '\n'.join(cmd['argv'][1:])
+        data = '\n'.join( argv[1:] )
         return( self.run(data) )
 
 
@@ -334,16 +311,18 @@ class CoreShell(cmdlib.Cmd):
         keys = self.CNF['SET'].keys()
         return([x+' ' for x in keys if x.startswith(text)])
 
-    def do_set(self, cmd):
+    def do_set(self, argv):
         """View and edit settings
 
         SYNOPSIS:
-            set [variable [value]]
+            set [<NAME> ["<VALUE>"]]
 
         DESCRIPTION:
-            The settings are loaded at start from default ones, and
-            from the user configuration file. The "set" command is used
-            to manage them from the framework interface.
+            The PhpSploit settings are declared at start by their
+            default values. The user configuration overwrite them for
+            customisation purposes.
+            The 'set' command handles settings from the framework
+            interface.
             - Called with no argument, the whole settings list will be
               displayed.
             - A single argument displays the list of settings whose
@@ -352,10 +331,11 @@ class CoreShell(cmdlib.Cmd):
               considering the first one as the setting to be changed;
               and the second as the new setting value.
 
-            NOTE: Be advised that any setting modification from this
-            command only takes effect in the current session. To edit a
-            default setting value permanently, the configuration file
-            MUST be manually edited.
+            NOTE: The 'set' operating scope is limited to the current
+            PhpSploit session. It means that persistant settings value
+            changes must be defined by the hand in the user
+            configuration file.
+
 
         WARNING:
             Considering the PhpSploit's input parser, commands which
@@ -418,9 +398,9 @@ class CoreShell(cmdlib.Cmd):
                 self.CNF['SET'][var] = backup
 
         # Display settings list
-        if cmd['argc'] <= 2:
+        if len(argv) <= 2:
             # list settings matching argv[1]
-            patern = cmd['argv'][1].upper() if cmd['argc'] > 1 else ''
+            patern = argv[1].upper() if len(argv) > 1 else ''
             title = "Session settings"
             items = self.CNF['SET'].items()
             elems = [(x.upper(),y) for x,y in items if x.startswith(patern)]
@@ -433,13 +413,13 @@ class CoreShell(cmdlib.Cmd):
 
         # Change the specified setting
         else:
-            var = cmd['argv'][1].upper()
-            if var in self.CNF['SET']:
-                if var in self.locked_settings:
-                    print P_err+'Locked session setting: '+var
+            setting = argv[1].upper()
+            if setting in self.CNF['SET']:
+                if setting in self.locked_settings:
+                    print( P_err+'Locked session setting: '+setting )
                 else:
-                    val = ' '.join(cmd['argv'][2:]).strip()
-                    set_var(var, val)
+                    value = ' '.join( argv[2:] ).strip()
+                    set_var(setting, value)
             else:
                 self.run('help set')
 
@@ -447,11 +427,11 @@ class CoreShell(cmdlib.Cmd):
 
     #####################
     ### COMMAND: help ###
-    def do_help(self, cmd):
+    def do_help(self, argv):
         """Show commands help
 
         SYNOPSIS:
-            help [command]
+            help [<COMMAND>]
 
         DESCRIPTION:
             It displays help message for any command, including
@@ -472,7 +452,7 @@ class CoreShell(cmdlib.Cmd):
               - Display the help for the "clear" command
         """
         # If more than 1 argument, help to help !
-        if cmd['argc'] > 2:
+        if len(argv) > 2:
             return( self.run('help help') )
 
         # collect the command list from current shell
@@ -526,27 +506,26 @@ class CoreShell(cmdlib.Cmd):
                     line = color(1) + line + color(0)
                 result += line + P_NL
 
-            print( result )
+            print(result)
 
         # get full help on a single command
-        if cmd['argc'] == 2:
-            cmdName = cmd['argv'][1]
-            cmdDoc = get_doc(cmdName)
+        if len(argv) == 2:
+            doc = get_doc(argv[1])
             # if the given argument if not a command, return nohelp err
-            if not cmdDoc:
-                print( self.nohelp %cmd['name'] )
+            if not doc:
+                print( self.nohelp %raw_repr(argv[1]) )
                 return(None)
 
             # print the heading help line, which contain description
-            print( P_NL + P_inf + cmdName + ": " +
-                   get_description(cmdDoc) +P_NL )
+            print( P_NL + P_inf + argv[1] + ": " +
+                   get_description(doc) + P_NL )
 
             # call the help_<command> method, otherwise, print it's docstring
             try:
-                getattr(self, 'help_'+arg)()
+                getattr( self, 'help_'+argv[1] )()
             except:
-                doc_help(cmdDoc)
-            return
+                doc_help(doc)
+            return(None)
 
         # display the whole list of commands, with their description line
 
