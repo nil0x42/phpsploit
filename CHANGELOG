@@ -7,6 +7,7 @@ IN DEVELOPMENT (git branch)
   * Prefixing a command with % from virtual plugin 'shell' instances allows
     remoteShell command execution without leaving the virtual shell.
   * Added lowercase variable name completion on 'set' and 'env' commands.
+  * The "./doc/" files has been moved the the root directory.
 
 Version 2.1.3 (2013-02-20)
   * The 'system' plugin now handles empty responses.
