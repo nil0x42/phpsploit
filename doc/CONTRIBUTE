@@ -58,4 +58,5 @@ PhpSploit documentation, you are very welcome and invited to share your
 contribution by E-Mail or pull request.
 
 #NOTE: If you want to bring manpage contribution, consider editing it's source
-file "framework/misc/user-manual.txt2tags" instead of "doc/MANUAL".
+file "framework/misc/manual-page.txt2tags", which uses txt2tags syntax and
+must be used instead of "framework/misc/manual-page.1" to generate the manpage

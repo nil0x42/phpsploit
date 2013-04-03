@@ -108,7 +108,7 @@ class CoreShell(cmdlib.Cmd):
         if os.name == 'nt':
             _printit()
         else:
-            cmd = 'man ' + getpath('doc/MANUAL').name
+            cmd = 'man ' + getpath('framework/misc/manual-page.1').name
             if os.system(cmd) != 0:
                 _printit()
 
