@@ -4,10 +4,10 @@
 from os.path import abspath, dirname, join as joinpath
 import sys
 
-# adding ./core in python modules path list:
+# adding ./core in python modules path list (has priority)
 scriptDir  = abspath(dirname(sys.argv[0]))
 pythonPath = joinpath(scriptDir, './core')
-sys.path.append(pythonPath)
+sys.path.insert(0, pythonPath)
 
 # now, local libs can be imported
 from functions import *
