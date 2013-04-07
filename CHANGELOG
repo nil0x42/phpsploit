@@ -1,4 +1,4 @@
-IN DEVELOPMENT (git branch)
+Version 2.1.4 (2013-04-07)
   * The plugins main script names are now plugin.py instead of script.py.
   * Plugin help strings are now taken from the plugin.py's docString.
   * Improved all command specific help strings, with man like syntax.

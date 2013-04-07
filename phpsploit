@@ -13,7 +13,7 @@ sys.path.insert(0, pythonPath)
 from functions import *
 
 CNF = dict()
-CNF['PSVERSION'] = '2.1.3'
+CNF['PSVERSION'] = '2.1.4'
 CNF['PSCOREVER'] = 2
 
 
