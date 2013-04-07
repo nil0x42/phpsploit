@@ -1,0 +1,23 @@
+#!/usr/bin/python2
+#-*- coding: iso-8859-15 -*-
+#XXX open to suggestions for using another encoding
+
+"""PhpSploit Launcher
+
+This file is intended to load the phpsploit core and libraries,
+nothing more, nothing less.
+
+"""
+
+# define load(), which adds python library paths
+import sys
+from os.path import abspath, dirname, join as joinpath
+scriptDir = abspath(dirname( sys.argv[0] ))
+load = lambda path: sys.path.insert( 0 , joinpath(scriptDir,path) )
+
+
+# the following dirs are loaded as absolute paths
+load('lib')
+load('core')
+
+
