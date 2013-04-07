@@ -23,9 +23,9 @@ the following syntax:
     - The maximum line length is limited to 80 characters.
     - PHP code portions MUST be compatible with at least php 4.1.0.
 
-Finally, your contribution must be provided by a pull request on bitbucket.
+Finally, your contribution must be submited by a pull request on bitbucket.
 Otherwise, your patch can be sent to the main developper's E-Mail whith the
-"git format-patch" feature. For more infos about if, see:
+"git format-patch" feature. For more infos about it, see:
     - https://github.com/bard/sameplace/wiki/Getting-started-with-git
 
 
