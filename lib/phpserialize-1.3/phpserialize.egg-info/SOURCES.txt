@@ -1,0 +1,9 @@
+README
+phpserialize.py
+setup.cfg
+setup.py
+phpserialize.egg-info/PKG-INFO
+phpserialize.egg-info/SOURCES.txt
+phpserialize.egg-info/dependency_links.txt
+phpserialize.egg-info/not-zip-safe
+phpserialize.egg-info/top_level.txt
