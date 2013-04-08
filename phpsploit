@@ -4,12 +4,12 @@
 ## PhpSploit launcher.
 
 import sys
+import os.path as path
 
 # Get the software root directory
 import __main__
 if not hasattr(__main__, "__file__"):
     exit("phpsploit must be started with the provided script.")
-import os.path as path
 rootDir = path.abspath( path.dirname(__main__.__file__) )
 
 # Use the core directory as first choice path
@@ -19,34 +19,19 @@ sys.path.insert( 0, path.join(rootDir,'core') )
 # Include third-party libraries
 libraries = {'phpserialize': 'phpserialize-1.3',
              'colorama':     'colorama-0.2.5'}
-
-for module, dirName in libraries.items():
-    if not module in sys.modules:
-        libDir = path.join(rootDir, 'lib', dirName)
-        sys.path.append(libDir)
-        exec("import "+module)
-        sys.path.pop()
-
-# this is a very trash test above, i am actually reading doc of the following
-# modules:
-#   imp
-#   pkgutil
-#   importlib
-# what i want is to be able to load the third-party libs KEEPING
-# their content as they was downloaded, it will make very more easy
-# upgrading new versions of them, and also for legal purposes
-# (licenses, credits, etc...)/
-# if i juste add rootDir/colorama-0.2.5 to python path, the dir
-# included file "setup.py" will be considered as a python module, thats
-# very stinky, i plan to import only the module (or package in case of
-# colorama), by the given "libraries" dict, which is easily maintainable.
-
+for libName, libDir in libraries.items():
+    try:
+        __import__(libName)
+    except ImportError:
+        libPath = path.join(rootDir, 'lib', libDir, libName)
+        if not path.isdir(libPath): libPath += ".py"
+        import imp
+        try:
+            imp.load_package(libName, libPath)
+        except (ImportError, FileNotFoundError):
+            exit('missing phpsploit dependency: "%s"' %libName)
 
 
 # Use the dedicated stdout wrapper
-#import stdout
-#sys.stdout = stdout.Wrapper()
-
-
-
-
+import stdout
+sys.stdout = stdout.Wrapper()
