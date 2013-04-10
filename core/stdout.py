@@ -1,85 +1,76 @@
-"""Standard Output Wrapper
-
-This class extends and replace the standard python standard output,
-aka sys.stdout, and adds some nice multiplatform relative color
-support, intellligent buffer forking, and some features really
-interesting for the phpsploit framework.
-
-MEMO FOR BUILD:
->>> sys.stdout.__class__.__mro__
-(<class '_io.TextIOWrapper'>, <class '_io._TextIOBase'>, <class '_io._IOBase'>, <class 'object'>)
-
-
+"""PhpSploit framework's stdout manager.
 """
 
-# HOW CAN I CORRECTLY UNHERIT AND EXTEND THE ORIGINAL STDOUT ???
-# i want to unherit any stdout's default methods (including isatty(), etc...)
-# and only overwrite the ones i want.
-# If possible, it will be more clean than manually be forced to define
-# all standard stdout methods.
+
+import sys, io
+import termcolor
 
 
-import sys, os, io
-import _io
+class Wrapper:
+    """A custom file object designed to wrap the standard sys.stdout
+    on the PhpSploit framework environment. Additionally to acts as
+    the standard one, it features a backlog (colorless), and dynamic
+    cross-platform pattern coloration.
 
-#class Wrapper(_io.TextIOWrapper):
-class Wrapper(sys.__stdout__):
-    """An stdout wrapper, which handles advanced output features for
-    the PhpSploit framework interface.
+    >>> import sys
+    >>> sys.stdout = stdout.Wrapper() # define the new stdout
+    >>> print('foo\nbar')             # print something
+    foo
+    bar
+    >>> log = sys.stdout.backlog      # save the back log
+    foo
+    bar
+    >>> del sys.stdout.backlog        # flush the back log
+    >>> del sys.stdout                # restore original stdout
 
     """
-    def __new__(cls):
-        #return( _io.TextIOWrapper.__new__(cls) )
-        return( sys.__stdout__.__new__(cls) )
+    __dict__ = sys.__stdout__.__dict__
 
 
     def __init__(self):
-        pass
+        """Initialize self instance and it's dedicated backlog"""
+        self._backlog = io.StringIO()
 
 
-    def __writeLn(self, line):
+    def __del__(self):
+        """Restore the original sys.stdout on Wrapper deletion"""
+        self._backlog.close()
+        sys.stdout = sys.__stdout__
+
+
+    def __getattr__(self, obj):
+        """Fallback to original stdout objects for undefined methods"""
+        return( getattr(sys.__stdout__, obj) )
+
+
+    def _writeLn(self, line):
+        """Process individual line morphing, and write it"""
         # Handle custom line tags
         tags = {'[*]' : '\033[34;01m',
                 '[-]' : '\033[31;01m'}
         for tag, color in tags.items():
-            if line.startswith(tag):
-                line = color + tag + '\033[0m' + line[len(tag):]
-        # Write the treated line with original stdout
-        sys.__stdout__.write(line)
+            if line.startswith(tag+" "):
+                line = color + tag + '\033[0m ' + line[len(tag):]
+
+        # Write line to stdout, and it's decolorized version on backlog
+        sys.__stdout__.write( line )
+        self._backlog.write( termcolor.decolorize(line) )
 
 
-    def flush(self):
-        pass
+    def write(self, string):
+        """Write the given string to stdout"""
+        for line in string.splitlines(1):
+            self._writeLn( line )
 
 
-    def write(self, data):
-        # Each line is treated individually
-        for line in data.splitlines(1):
-            self.__writeLn( line )
+    @property
+    def backlog(self):
+        """Hook method called on backlog getting"""
+        self._backlog.seek(0)
+        return( self._backlog.read() )
 
 
-
-
-class fork_stdout(object):
-    """this class can replace sys.stdout and writes
-    simultaneously to standard output AND specified file.
-
-    usage: fork_stdout(altFile)
-
-    """
-    def __init__(self, file):
-        self.file = file
-        self.stdout = sys.stdout
-        sys.stdout = self
-
-    def __del__(self):
-        sys.stdout = self.stdout
-        self.file.close()
-
-    def write(self, data):
-        self.file.write(data)
-        self.stdout.write(data)
-
-    def flush(self):
-        self.stdout.flush()
-
+    @backlog.deleter
+    def backlog(self):
+        """Hook method called on backlog deletion"""
+        self._backlog.truncate(0)

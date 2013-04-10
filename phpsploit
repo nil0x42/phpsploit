@@ -37,13 +37,3 @@ for libName, libDir in libraries.items():
 import stdout
 sys.stdout = stdout.Wrapper()
 
-print('[*] info')
-print('[-] error')
-
-print( type(sys.__stdout__).mro() )
-print( type(sys.stdout).mro() )
-
-print('[-] FOO')
-
-if sys.stdout.isatty():
-    print('True')
