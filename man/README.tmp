@@ -1,9 +1,0 @@
-The dir must contain the following files:
-
-    * template.[md|creole|txt2tags|?]
-        A markup file designed to create the manpage
-
-    * phpsploit.1
-        The generated manpage itself
-
-NOTE: the README generated from manpage is deprecated.
