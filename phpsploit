@@ -1,39 +1,16 @@
 #!/usr/bin/python3 -B
 # -*- coding: utf-8 -*-
 
-## PhpSploit launcher.
+try: from __main__ import __file__
+except: exit('PhpSploit must be run with the provided script')
 
-import sys
-import os.path as path
-
-# Get the software root directory
-import __main__
-if not hasattr(__main__, "__file__"):
-    exit("phpsploit must be started with the provided script.")
-rootDir = path.abspath( path.dirname(__main__.__file__) )
+import core # import the phpsploit core loader
 
 
-# Set ./core as prioritary library path
-sys.path.insert( 0, path.join(rootDir,'core') )
-
-
-# Handle dependencies (fallbacking to the provided ones if needed)
-libraries = {'phpserialize': 'phpserialize-1.3',
-             'colorama':     'colorama-0.2.5'}
-for libName, libDir in libraries.items():
-    try:
-        __import__(libName)
-    except ImportError:
-        libPath = path.join(rootDir, 'lib', libDir, libName)
-        if not path.isdir(libPath): libPath += ".py"
-        import imp
-        try:
-            imp.load_package(libName, libPath)
-        except (ImportError, FileNotFoundError):
-            exit('missing phpsploit dependency: "%s"' %libName)
-
-
-# Overwrite standard output with the custom wrapper
-import stdout
+# Extend stdout with dedicated wrapper
+import sys, stdout
 sys.stdout = stdout.Wrapper()
+
+print("blabla")
+exit(sys.stdout.backlog)
 
