@@ -1,0 +1,39 @@
+Interface:
+  * @--config=<config> -c: use an alternative configuration file
+  * @--eval=<command> -e: interpret argument as framework command
+  * @--interactive -i: force interactive mode even if -x is given
+  * @--load=<session> -l: load the given session file
+  * @--version -v: print version information
+  * @--help -h: print help about the available commands
+
+Settings:
+  * Also search for a ~/.config/phpsploit/ dir before using ~/.phpsploit
+  * Defaults must be defined into the setting.py lib
+  * Define the user config file as a phpsploit interpreted script as start
+  * Create a REAL, non sucking settings management class.
+
+Sessions:
+  * Add readline history saving capability
+  * Add last command output buffer saving capability
+
+Commands:
+  * @lastcmd must correctly support regexp and -i on grep/hilight modes
+  * @alias core commant must be created
+  * @doc core command must be created, to handle ./doc/ reading from interface
+  * @save needs an '-f' (force) option to force file overwrite
+  * remote shell @exit needs a -f opt to bypass leave confirmation in case of
+    unsaved session.
+
+Plugins:
+  * Write a "plugins/network/scan/plugin.py" small ip scanner, to be able to
+    progressively gain access on controlled server's internal network.
+
+Documentation:
+  * Move current ./doc files to the root dir
+  * The new ./doc dir must contain complete markdown documentation
+  * Write a nice README which summarizes the framework's goal and features
+  * Simplify the manpage to summarize only commands and how to get started
+  * When all this done, the 'rtfm' core command can be removed
+
+Network Stealth:
+  * Write a stealth module which use other target on each command (with 404)

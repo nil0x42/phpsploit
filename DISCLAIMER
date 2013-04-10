@@ -1,0 +1,22 @@
+PhpSploit framework disclaimer
+==============================
+
+Written by nil0x42 (https://bitbucket.org/nil0x42)
+
+Please note that this software is not made to help cyber criminals to keep
+access on remote servers unlawfully.
+
+The PhpSploit framework is first and foremost a proof of concept, designed to
+raise awareness on modern remote control technologies over the http protocol.
+
+Considering its remote control features, such as PASSKEY, which provides
+a kind of authentication method, and the built-in plugins, which simulate the
+most used unix shell commands, the PhpSploit framework will be the best
+alternative to simulate a remote ssh access, even on shared hosts that don't
+provide real ssh access, and/or keep blockng php remote command execution
+functions, such as passthru().
+That's why the framework has many legitim uses, and can not be considered as
+disrespectful of the laws (God Bless America !).
+
+You must NEVER inject a PhpSploit backdoor in a remote php installation
+without strict consent of it's legitimate owner.

@@ -1,6 +1,0 @@
-the ./old dir must be ignored, kept only to be easily able to copy files to
-their new directories.
-
-NOTE: the README generated from manpage is deprecated, the new one must
-be an explicit, markdown formated README
-
