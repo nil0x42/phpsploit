@@ -4,13 +4,14 @@
 try: from __main__ import __file__
 except: exit('PhpSploit must be run with the provided script')
 
-import core # import the phpsploit core loader
+
+# the core loader makes third-party dependencies available, then
+# it changes the sys.path to it self directory, making contained
+# packages directly importable.
+import core
 
 
 # Extend stdout with dedicated wrapper
 import sys, stdout
 sys.stdout = stdout.Wrapper()
-
-print("blabla")
-exit(sys.stdout.backlog)
 
