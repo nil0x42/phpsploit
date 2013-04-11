@@ -1,17 +1,12 @@
 #!/usr/bin/python3 -B
 # -*- coding: utf-8 -*-
+#NOTE: python3 -B argument must be removed before push into "future"
 
+
+# Make sure the script is not imported
 try: from __main__ import __file__
 except: exit('PhpSploit must be run with the provided script')
 
 
-# the core loader makes third-party dependencies available, then
-# it changes the sys.path to it self directory, making contained
-# packages directly importable.
+# Spread PhpSploit libraries
 import core
-
-
-# Extend stdout with dedicated wrapper
-import sys, stdout
-sys.stdout = stdout.Wrapper()
-
