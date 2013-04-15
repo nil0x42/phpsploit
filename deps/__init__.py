@@ -2,18 +2,21 @@
 
 Load the listed DEPENDENCIES, falling back to the provided ones in the
 current directory (./deps from PhpSploit package).
-It ensures that any system missing dependencie is anymaw made available.
+It ensures that any system missing dependency is imported anyway.
 
 The DEPENDENCIES contains a list of tuples, instead of a dictionnary,
-preventing chaotic dependency load order.
+preventing chaotic dependency load order. First element represent the
+dependency name, while the second provides it's directory path.
 
 """
 
 import os, sys, imp
 
-DEPENDENCIES = [('phpserialize',     'phpserialize-1.3'),
-                ('colorama',         'colorama-0.2.5'),
-                ('colorama_patched', '.')]
+DEPENDENCIES = [('phpserialize',       'phpserialize-1.3'),
+                ('cmdshell',           'cmdshell-0.0.1'),
+                ('colorama',           'colorama-0.2.5'),
+                ('colorama_patched',   '.'),
+                ('shutil_which_patch', '.')]
 
 for module, dirname in DEPENDENCIES:
     # try to import the dependency from system.
