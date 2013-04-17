@@ -16,7 +16,8 @@ DEPENDENCIES = [('phpserialize',       'phpserialize-1.3'),
                 ('cmdshell',           'cmdshell-0.0.1'),
                 ('colorama',           'colorama-0.2.5'),
                 ('colorama_patched',   '.'),
-                ('shutil_which_patch', '.')]
+                ('socks',              'SocksiPy-branch-1.02'),
+                ('shutil_update',      '.')]
 
 for module, dirname in DEPENDENCIES:
     # try to import the dependency from system.
