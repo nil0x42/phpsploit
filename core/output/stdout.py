@@ -23,8 +23,7 @@ As shown in the example above, the wrapper provides a nice backlog
 feature. Considering it's original design, aka enhancing the output
 experience for the PhpSplloit Framework, it also provides dynamic
 cross-platform pattern coloration. For example, if a line begins with
-"[-] ", it is automatically colored to bright red with the "termcolor"
-library.
+"[-] ", it is automatically colored to bright red.
 
 NOTE: Ansi escape codes (terminal colors) are automatically removed
 when writting to the backlog.
@@ -35,7 +34,7 @@ import sys, re
 from io import StringIO
 from os import linesep as os_linesep
 
-import termcolor
+import output
 
 __all__ = ["Wrapper"]
 
@@ -44,29 +43,44 @@ class Wrapper:
     supplying some enhancements, such as pattern coloration and
     back logging.
 
+    The 'backlog' argument is defaultly set to False, it can be
+    enabled at initialisation if set to True, or enabled later
+    setting the instance's backlog attribute to an empty string.
+
     NOTE: See module's help for more informations.
 
-    """
-    __dict__ = sys.__stdout__.__dict__
+    NEW: __init__ now also provides a middle proxy from colorama, that
+    provides ansi color conversion from ANSI to win terminal codes.
 
-    def __init__(self, backlog=False):
-        """Instance initializer"""
+    """
+
+    def __init__(self, outfile=sys.__stdout__, backlog=False):
+        # get original stdout
+        self._orig_outfile = outfile
+
+        # use the colorama wrapper (ansi to win auto convert) as outfile
+        self.outfile = colorama_wrap(self._orig_outfile)
+
+        # handle back logging
         self._backlog = StringIO()
         if backlog:
             self._has_backlog = True
         else:
             self._has_backlog = False
 
+        # are colors supported ?
+        self._has_colors = output.colors()
+
 
     def __del__(self):
         """Restore the original sys.stdout on Wrapper deletion"""
         self._backlog.close()
-        sys.stdout = sys.__stdout__
+        sys.stdout = self._orig_outfile
 
 
     def __getattr__(self, obj):
         """Fallback to original stdout objects for undefined methods"""
-        return getattr(sys.__stdout__, obj)
+        return getattr(self._orig_outfile, obj)
 
 
     def _writeLn(self, line):
@@ -80,9 +94,12 @@ class Wrapper:
         line = process_tags(line) # handle tagged lines coloration
 
         # Write line to stdout, and it's decolorized version on backlog
-        sys.__stdout__.write( line )
+        # if standard output is not a tty, decolorize anything.
         if self._has_backlog:
-            self._backlog.write( termcolor.blank(line) )
+            self._backlog.write( output.decolorize(line) )
+        if not self._has_colors:
+            line = output.decolorize(line)
+        self.outfile.write( line )
 
 
     def write(self, string):
@@ -110,7 +127,7 @@ class Wrapper:
         if not (value is False or value is None):
             self._has_backlog = True
         if type(value) == str:
-            self._backlog.write( termcolor.blank(value) )
+            self._backlog.write( output.decolorize(value) )
 
     @backlog.deleter
     def backlog(self):
@@ -125,40 +142,37 @@ def process_tags(line):
     """Process tagged line transformations, such as auto colorization
     and pattern rules.
 
-    TAGS is a termcolor.format() syntax string list, if the given line
-    starts with the uncolored version of one of them, then the line
-    will be considered (an processed) as tagged.
-
     >>> process_tags("[*] FOO: «bar»\\n")
     '\\x1b[1m\\x1b[34m[*]\\x1b[0m FOO: \\x1b[37m«bar»\\x1b[0m\\n'
     """
-    TAGS = ['~{BRIGHT,blue}[*]~{RESET} ',
-            '~{BRIGHT,red}[-]~{RESET} ']
-
-    # format tags list to ansi styled strings
-    TAGS = [termcolor.format(t) for t in TAGS]
+    TAGS = [('%BoldBlue', '[*]'),
+            ('%BoldRed',  '[-]')]
 
     # return the line as it is if untagged
-    for i, tag in enumerate(TAGS):
-        blankTag = termcolor.blank(tag)
-        if line.startswith(blankTag):
+    for index, tag in enumerate(TAGS):
+        if line.startswith(tag[1]):
             break
-        if i+1 == len(TAGS):
+        if index+1 == len(TAGS):
             return(line)
 
-    # colorize the line's tag string
-    line = tag + line[len(blankTag):]
+    # format line's tag with requested color style
+    line = output.colorize(*tag) + line[len(tag[1]):]
+
 
     # colorize «*» patterns from tagged line:
-    def anglequot_style(matchObj):
-        quote = termcolor.draw('white')
-        quote += matchObj.group(1)
-        quote += termcolor.draw('RESET')
-        return quote
-    line = re.sub('(«.+?»)', anglequot_style, line)
+    dye = lambda obj: output.colorize('%White', obj.group(1))
+    line = re.sub('(«.+?»)', dye, line)
 
     # replace angle quotes by double quotes on windws term
     if sys.platform.startswith('win'):
         line = re.sub('«|»', '"', line)
 
     return line
+
+def colorama_wrap(outfile=sys.__stdout__):
+    """Returns an colorama wrap file that acts as an stdout proxy
+    between userspace and given output file
+
+    """
+    from colorama.initialise import wrap_stream
+    return wrap_stream(outfile, None, None, False, True)
