@@ -1,4 +1,6 @@
-import re, random, termcolor
+import re, random
+from output import colorize
+
 
 class Interval(tuple):
     """Random interval from float range. (extends tuple)
@@ -41,14 +43,14 @@ class Interval(tuple):
 
 
     def __str__(self):
-        clear = lambda x: str(x).rstrip('0').rstrip('.')
-        text = termcolor.format('~{BRIGHT}%s~{NORMAL}')
-        if self[0] != self[1]:
-            text = ' <= '.join([ clear(self[0]), text%'x', clear(self[1]) ])
-            comment = 'random'
-        else:
-            text = text %clear(self[0])
-            comment = 'static'
+        low, big = [str(x).rstrip('0').rstrip('.') for x in self]
+        main = colorize('%Bold', '%s', '%Basic')
 
-        return termcolor.format('~{NORMAL,magenta}%s ~{ITALIC,white}'
-                                '(%s interval)~{RESET}' %(text, comment))
+        if low is big:
+            text = main %low
+            comment = ' (static interval)'
+        else:
+            text = ' <= '.join((low, main %'x', big))
+            comment = ' (random interval)'
+
+        return colorize('%Pink', text, '%DimWhite', comment)

@@ -1,4 +1,7 @@
-import termcolor, shutil, os
+import os
+from shutil import which
+from output import colorize
+
 
 class Executable(str):
     """Executable program or shell command. (extends str)
@@ -16,7 +19,7 @@ class Executable(str):
 
     """
     def __new__(cls, executable):
-        abspath = shutil.which(str(executable))
+        abspath = which( str(executable) )
         if abspath is None:
             raise ValueError("«%s» is not an executable program" %executable)
         return str.__new__(cls, abspath)
@@ -28,9 +31,7 @@ class Executable(str):
 
     def __str__(self):
         path, name = os.path.split(self)
+        path += os.sep
         name, ext = os.path.splitext(name)
 
-        skel = "~{NORMAL,cyan}%s~{BRIGHT,white}%s~{NORMAL,cyan}%s~{RESET}"
-        result = skel %(path+os.sep, name, ext)
-
-        return termcolor.format(result)
+        return colorize('%Cyan', path, '%BoldWhite', name, '%BasicCyan')

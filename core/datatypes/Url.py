@@ -1,4 +1,5 @@
-import re, termcolor
+import re
+from output import colorize
 
 class Url(str):
     """Http(s) url link. (extends str)
@@ -38,10 +39,6 @@ class Url(str):
         return super(Url, self).__str__()
 
     def __str__(self):
-        skel = ("~{NORMAL,cyan}%s://~{BRIGHT,white}"
-                "%s~{NORMAL,cyan}:%s%s%s~{RESET}")
-
-        result = skel %(self.scheme, self.host, self.port, self.path,
-                        ("?"+self.query if self.query else '')       )
-
-        return termcolor.format(result)
+        return colorize('%Cyan', self.scheme, '://', '%BoldWhite', self.host,
+                        '%BasicCyan', ':', self.port, self.path,
+                        ("?"+self.query if self.query else "")               )

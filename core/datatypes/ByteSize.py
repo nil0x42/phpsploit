@@ -1,4 +1,4 @@
-import termcolor
+from output import colorize
 
 class ByteSize(int):
     """Human readable byte size representation. (extends int)
@@ -80,8 +80,7 @@ class ByteSize(int):
         byteNames = ('bytes', 'KiB', 'MiB', 'GiB', 'TiB')
         result = number + " " + byteNames[index]
         if index > 0:
-            result += termcolor.draw('DIM,ITALIC,white')
-            result += " (%s bytes)" %self_str
-            result += termcolor.draw('RESET')
+            result += colorize('%DimWhite', " (%s bytes)" %self_str)
+
         return result
 
