@@ -22,11 +22,15 @@ class WritableDir(str):
         if not os.access(path, 2):
             raise ValueError("«%s» is not writable" %path)
 
-        return str.__new__(cls, path)
+        return str.__new__(cls, path+os.sep)
+
+
+    def __raw_value(self):
+        return super(Executable, self).__str__()
 
 
     def __call__(self):
-        return self.__str__()
+        return self.__raw_value()
 
 
     def __str__(self):

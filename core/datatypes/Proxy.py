@@ -54,6 +54,10 @@ class Proxy(str):
         return str.__new__(cls, proxy)
 
 
+    def __raw_value(self):
+        return super(Proxy, self).__str__()
+
+
     def __call__(self):
         return self._urllib_opener
 

@@ -6,27 +6,26 @@ from output import colorize
 class Executable(str):
     """Executable program or shell command. (extends str)
 
-    Takes an executable absolute path or shell command available from
-    unix's $PATH env.
+    Takes an executable program path or shell command.
 
-    Example:
-    >>> Executable('firefox')
-    "/usr/bin/firefox"
-    >>> path()
-    "/usr/bin/firefox"
-    >>> print(path)
+    >>> browser = Executable('firefox')
+    >>> browser()
     "/usr/bin/firefox"
 
     """
     def __new__(cls, executable):
-        abspath = which( str(executable) )
+        abspath = which( str(executable) ) # use shutil.which
         if abspath is None:
             raise ValueError("«%s» is not an executable program" %executable)
         return str.__new__(cls, abspath)
 
 
-    def __call__(self):
+    def __raw_value(self):
         return super(Executable, self).__str__()
+
+
+    def __call__(self):
+        return self.__raw_value()
 
 
     def __str__(self):

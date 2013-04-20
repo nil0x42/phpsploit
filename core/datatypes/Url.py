@@ -12,19 +12,19 @@ class Url(str):
     "http://google.fr:80/"
 
     """
-    _pattern = ('^(?:(https?)?://)?([\w.-]{3,63})'
-                '(?::(\d+))?(/.+?)?(?:\?(.+)?)?$')
 
-    _defaults = ['http', '', '80', '/', '']
     def __new__(cls, url):
+        pattern = ('^(?:(https?)?://)?([\w.-]{3,63})'
+                    '(?::(\d+))?(/.+?)?(?:\?(.+)?)?$')
         try:
-            components = list(re.match(cls._pattern, url).groups())
+            components = list( re.match(pattern, url).groups() )
         except:
             raise ValueError('«%s» is not a valid URL Link' %url)
 
+        defaults = ['http', '', '80', '/', '']
         for index, elem in enumerate(components):
             if elem is None:
-                components[index] = cls._defaults[index]
+                components[index] = defaults[index]
 
         cls.scheme, cls.host, cls.port, cls.path, cls.query = components
         cls.components = components
@@ -35,8 +35,13 @@ class Url(str):
         return str.__new__(cls, url)
 
 
-    def __call__(self):
+    def __raw_value(self):
         return super(Url, self).__str__()
+
+
+    def __call__(self):
+        return self.__raw_value()
+
 
     def __str__(self):
         return colorize('%Cyan', self.scheme, '://', '%BoldWhite', self.host,

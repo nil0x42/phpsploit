@@ -1,4 +1,4 @@
-"""Useful data types collection
+"""Useful data types collection.
 
 This package includes some useful data types, which supports
 dynamic value and enhanced representations.
@@ -6,24 +6,41 @@ It has been developped in order to properly handle the PhpSploit
 framework's session settings and environment variables.
 
 PhpSploit dedicated datatypes obey the following conventions:
-  * The __str__ method returns an human readable, nice representation,
-    with ANSI colors.
-  * The __call__ method gives a concretely usable value, which in some
-    cases is dynamic (Interval type returns a random float from range).
-    Non dynamic values also must provide a call, witch in this case
-    gives the raw value. (the tuple from interval for example)
-  * Each data type extends a built-in data type, related to it's master
-    value. (interval's master value is a tuple of floats)
+=============================================================
 
-Examples:
->>> import datatypes
->>> REQ_INTERVAL = datatypes.Interval('1.5 < 5')
->>> REQ_INTERVAL
-(1.0, 5.0)
-print(REQ_INTERVAL)
-1.5 < 5 (random interval)
->>> REQ_INTERVAL()
-4.2
+* __raw_value()
+    Returns the unherited type's raw value. It convention has been
+    made to assist session pickling, because even if custom types
+    can be pickled, it stands hard to work with pickled sessions
+    on future PhpSploit versions that use different datatypes names,
+    or if the structure changes in the future.
+    >>> val = Interval('1-10')
+    >>> print( type(val), "==>", repr(val) )
+    <class 'datatypes.Interval.Interval'> ==> (1.0, 10.0)
+    >>> raw = val.__raw_value()
+    >>> print( type(raw), "==>", repr(raw) )
+    <class 'tuple'> ==> (1.0, 10.0)
+
+* __call__()
+    Return an usable value. If dynamic, it must return one of the
+    possible values. In the case it is static, it returns the same as
+    __raw_value().
+    >>> val = Interval('1-10')
+    >>> val()
+    3.2
+
+* __str__()
+    Return a nice string representation of the object, it may include
+    ANSI colors, because anyway the PhpSploit framework's output
+    manager automagically strips them if they cannot be displayed.
+    >>> print(Interval('1-10'))
+    1 <= x <= 10 (random interval)
+
+* Initialization:
+    Any data type MUST be able to take its __raw_value() as instance
+    initializer.
+    >>> Interval( Interval("1-10").__raw_value() ) # it must be valid
+
 
 """
 

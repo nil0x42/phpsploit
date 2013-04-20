@@ -1,12 +1,11 @@
-
-import re, output
+from re import match as regex_match
+import output
 
 class PhpCode(str):
-    """Valid php code line (extends str)
+    """Line of PHP Code. (extends str)
 
-    Takes a line of PHP code as value.
+    Takes a string representing a portion of PHP code.
 
-    Example:
     >>> code = PhpCode('<? phpinfo() ?>')
     >>> code()
     'phpinfo();'
@@ -27,13 +26,17 @@ class PhpCode(str):
         return str.__new__(cls, php)
 
 
-    def __call__(self):
+    def __raw_value(self):
         return super(PhpCode, self).__str__()
+
+
+    def __call__(self):
+        return self.__raw_value()
 
 
     def __str__(self):
         string = "<?php %s; ?>" %self.__call__()
-        # use pygments if available, else return uncolored formatted string
+        # colored representation depends on pygments lib.
         try:
             import pygments
             import pygments.formatters

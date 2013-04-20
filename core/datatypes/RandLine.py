@@ -84,6 +84,10 @@ class RandLine(list):
             raise ValueError("couldn't find valid lines from buffer")
 
 
+    def __raw_value(self):
+        return list(self)
+
+
     def __call__(self):
         """pick a random line from the valid ones"""
         return random( self.choices() )
@@ -112,6 +116,22 @@ class RandLine(list):
         return string
 
 
+    def update(self):
+        """Try to update the current buffer with the current parent
+        file's data. To be updated, the object must be file based,
+        file must exist, and at least one line must be usable as
+        choice. Otherwise, the old buffer will be kept.
+
+        """
+        try:
+            buffer = open(self[0], 'r').read()
+            assert self.choices(buffer)
+        except:
+            return
+
+        self[1] = buffer
+
+
     def choices(self, target=None):
         """Takes a string as 'target' and return a list of lines from it
         that are not empty or commented (start with #).
@@ -120,17 +140,10 @@ class RandLine(list):
         if not orphan, and the file is currently available.
 
         """
-        # if no target string defined, use self buffer, and before
-        # try to update the object's parent file (if any)
+        # if no given arguments, choices on self buffer will be sent.
+        # mening that it must be updated first.
         if target is None:
-            parent = self[0]
-            if parent is not None:
-                try:
-                    newBuffer = open(parent, 'r').read()
-                    assert self.choices(newBuffer)
-                    self[1] = newBuffer
-                except (OSError, AssertionError):
-                    pass
+            self.update()
             target = self[1]
 
         # if not none, target MUST be a string

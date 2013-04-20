@@ -3,26 +3,13 @@ from output import colorize
 class ByteSize(int):
     """Human readable byte size representation. (extends int)
 
-    Extends: int
+    Takes an integer or byte number string representation (e.g. "1kb").
 
-    The ByteSize datatype takes a string which represents an human
-    easy to type byte number. It also accepts integers as argument,
-    in which case the raw value is kept as it is.
-
-    Example:
-    >>> size = ByteSize("1 kb")
-    >>> size()
-    1024
+    >>> size = ByteSize("1 KB")
     >>> print(size)
     1 KiB (1024 bytes)
-
-    NOTE: The input parser is very (too much ?) flexible, it accepts
-    as input value any string representing a float or int, followed by
-    one of the byte metrics first letters, aka "K", "M", "G" and "T".
-    Otherwise, the number must be alone or followed by "O" or "B", which
-    means that the number represent a non multipliable value.
-    Conclusion: "200BITCOINS" will be accepted as a 200 Bytes value, and
-    "3 Thousands", considered as 3 Terabytes...
+    >>> size()
+    1024
 
     """
     _metrics = 'BKMGT' # ordered byte metric prefixes
@@ -56,8 +43,12 @@ class ByteSize(int):
         return int.__new__(cls, result)
 
 
-    def __call__(self):
+    def __raw_value(self):
         return int(self)
+
+
+    def __call__(self):
+        return self.__raw_value()
 
 
     def __str__(self):
