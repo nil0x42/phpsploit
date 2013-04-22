@@ -1,9 +1,9 @@
 """PhpSploit configuration settings.
 
-The settings instance is initialized by the session's __init__.py file,
-as "Conf", ( aka `Conf  = settings.Init()`).
+Configuration settings data descriptor, instanciated from session's
+package as "Conf".
 
-Standard settings behavior:
+Basic Behavior:
   * Considering their internal uses by the core, they are defined and
     set to their default values at initialization. It also means that
     unlike environment variables (see environment.py), new settings
@@ -34,6 +34,8 @@ class Init:
       supported, with backward compatibility with python built-in types.
     * This data descriptor ignores case, and implitly considers any
       attribute (var name) call as uppercase.
+    * All settings are binded as attributes, handled by the data
+      descriptor.
 
     Restrictions:
       - Only "[A-Za-z0-9_]" chars are accepted for names

@@ -12,10 +12,9 @@ from .pickle import load, dump
 
 
 
-"""BEHAVIOR SIMULATION
+"""BEHAVIOR SIMULATION (subject to modifications, just testing)
 
 >>> import session
-
 
 Setter:
 >>> session.Conf.REQ_INTERVAL = "1-5"

@@ -1,12 +1,9 @@
-#!/usr/bin/python3 -B
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
-#NOTE: python3 -B argument must be removed before push into "future"
-
 
 # Make sure the script is not imported
 try: from __main__ import __file__
 except: exit('PhpSploit must be run with the provided script')
-
 
 # Spread PhpSploit libraries
 import core

@@ -32,7 +32,8 @@ class Cmd(cmd.Cmd):
     prompt_ps2   = "> "
 
     def __init__(self, completekey='tab', stdin=None, stdout=None):
-        cmd.Cmd.__init__(self, completekey=completekey, stdin=stdin, stdout=stdout)
+        cmd.Cmd.__init__(self, completekey=completekey, \
+                         stdin=stdin, stdout=stdout)
 
 
     def when_interrupt(self):
@@ -289,6 +290,7 @@ class Cmd(cmd.Cmd):
 
     def do_help(self, argv):
         'List available commands with "help" or detailed help with "help cmd".'
+        print(self.__class__.mro())
         argv.append('')
         super(Cmd, self).do_help(argv[1])
 
