@@ -1,6 +1,6 @@
 import os
 from shutil import which
-from output import colorize
+from ui.color import colorize
 
 
 class Executable(str):

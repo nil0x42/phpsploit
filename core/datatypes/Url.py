@@ -1,5 +1,5 @@
 import re
-from output import colorize
+from ui.color import colorize
 
 class Url(str):
     """Http(s) url link. (extends str)

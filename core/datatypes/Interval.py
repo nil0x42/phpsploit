@@ -1,6 +1,6 @@
 from re import split as regex_split
 from random import uniform as random
-from output import colorize
+from ui.color import colorize
 
 
 class Interval(tuple):

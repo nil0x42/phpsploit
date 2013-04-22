@@ -105,19 +105,3 @@ def decolorize(string):
     regex = "\x01?\x1b\[((?:\d|;)*)([a-zA-Z])\x02?"
     return re.sub(regex, "", string)
 
-def colors():
-    """Returns the number of colors actually supported by current
-    output. Actually, possible values are:
-    0   -> for non terminal outputs
-    8   -> for windows or standard unix terminals
-    256 -> for terminals which 'TERM' env var contains '256'
-    """
-    from sys import __stdout__
-    from os import environ
-    if not __stdout__.isatty():
-        return(0)
-    try:
-        assert '256' in environ['TERM']
-        return(256)
-    except:
-        return(8)

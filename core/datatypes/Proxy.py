@@ -1,5 +1,5 @@
 import re
-from output import colorize
+from ui.color import colorize
 from urllib.request import build_opener, ProxyHandler
 
 #TODO: add support for socks4://, socks://, socks5:// proxy types

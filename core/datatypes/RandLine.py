@@ -1,5 +1,5 @@
 from random import choice as random
-from output import colorize
+from ui.color import colorize
 import os.path as path
 
 class RandLine(list):

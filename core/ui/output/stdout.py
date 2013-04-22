@@ -34,7 +34,7 @@ import sys, re
 from io import StringIO
 from os import linesep as os_linesep
 
-import output
+from ui.color import *
 
 __all__ = ["Wrapper"]
 
@@ -96,9 +96,9 @@ class Wrapper:
         # Write line to stdout, and it's decolorized version on backlog
         # if standard output is not a tty, decolorize anything.
         if self._has_backlog:
-            self._backlog.write( output.decolorize(line) )
+            self._backlog.write( decolorize(line) )
         if not self._has_colors:
-            line = output.decolorize(line)
+            line = decolorize(line)
         self.outfile.write( line )
 
 
@@ -127,7 +127,7 @@ class Wrapper:
         if not (value is False or value is None):
             self._has_backlog = True
         if type(value) == str:
-            self._backlog.write( output.decolorize(value) )
+            self._backlog.write( decolorize(value) )
 
     @backlog.deleter
     def backlog(self):
@@ -145,8 +145,10 @@ def process_tags(line):
     >>> process_tags("[*] FOO: «bar»\\n")
     '\\x1b[1m\\x1b[34m[*]\\x1b[0m FOO: \\x1b[37m«bar»\\x1b[0m\\n'
     """
-    TAGS = [('%BoldBlue', '[*]'),
-            ('%BoldRed',  '[-]')]
+    TAGS = [('%BoldBlue',   '[*]'),  # INFO
+            ('%BoldRed',    '[!]'),  # WARNING
+            ('%BoldPink',   '[?]'),  # QUESTION
+            ('%BoldYellow', '[-]')]  # DEBUG
 
     # return the line as it is if untagged
     for index, tag in enumerate(TAGS):
@@ -156,11 +158,11 @@ def process_tags(line):
             return(line)
 
     # format line's tag with requested color style
-    line = output.colorize(*tag) + line[len(tag[1]):]
+    line = colorize(*tag) + line[len(tag[1]):]
 
 
     # colorize «*» patterns from tagged line:
-    dye = lambda obj: output.colorize('%White', obj.group(1))
+    dye = lambda obj: colorize('%White', obj.group(1))
     line = re.sub('(«.+?»)', dye, line)
 
     # replace angle quotes by double quotes on windws term

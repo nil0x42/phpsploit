@@ -1,5 +1,5 @@
 from re import match as regex_match
-import output
+import ui.output
 
 class PhpCode(str):
     """Line of PHP Code. (extends str)
@@ -41,12 +41,12 @@ class PhpCode(str):
             import pygments
             import pygments.formatters
             from pygments.lexers import PhpLexer as lexer
-            assert output.colors()
+            assert ui.output.colors()
         except:
             return string
 
         # 265 colors will be used if current output supports them
-        if output.colors() >= 256:
+        if ui.output.colors() >= 256:
             formatter = pygments.formatters.Terminal256Formatter
         else:
             formatter = pygments.formatters.TerminalFormatter

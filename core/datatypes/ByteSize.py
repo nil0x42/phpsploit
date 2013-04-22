@@ -1,4 +1,4 @@
-from output import colorize
+from ui.color import colorize
 
 class ByteSize(int):
     """Human readable byte size representation. (extends int)
