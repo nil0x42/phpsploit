@@ -1,54 +1,108 @@
 """A generic command interpreter with multicommand support.
 
-The cmdshell library extends the (very good) python 'cmd' library, and
-provides many new features to it:
+The cmdshell library has been initially developped to correctly handle
+PhpSploit framework's shell interfaces. That being said, it was built
+in order to stand generic, and usable by any other open-source project.
 
-1 - Keyboard interrupt handling with the 'interrupt' string and
-    when_interrupt() hook method.
-2 - Advanced bash simulation, with multi command support with semicolon
-    and newline separation.
-3 - Newline escape with backslash, like in bash.
-4 - Fixed ansi colored prompt length missinterpretation with readline.
-5 - New run() method, that interprets a string like if it was typed in
-    the user input.
-6 - The parseline() method supports multiline and returns a list of
-    commands, each command is an argv list.
-7 - Unlike 'cmd', cmdshell don't provide support of interpretation
-    withou rawinput.
-8 - Empty line re-loops instead of re running the last typed command
-9 - Added get_names() object limitation by argument.
+It extends the pretty good 'cmd' library, adding many new features, and
+a little bit new behaviors.
+
+It was built to theorically work on all 3.x python versions.
+For any bug, issue or enhancement proposal, please contact the author.
+
+NOTE: Assuming cmdshell is an extension of the cmd library, only NEW
+      behaviors will be listed above, for a more complete help,
+      consider reading the 'cmd' library documentation.
+
+NEW FEATURES:
+=============
+
+Command line interface:
+  * The command line interpreter has been highly enhanced, with a
+    complete overwrite of the parseline() method, to provide the
+    most bash-like features as possible.
+  * Multi commands, separated by semicolons can now be typed.
+  * Multi line command also can be written, like on bash prompt by
+    ending a line with a backslash, prompting the user to continue
+    writing the command in the next line (like bash's PS2).
+  * Strings can now be enquoted, to be processed as a single argument.
+
+Command execution:
+  * An argv array of arguments is now passed as do_foo() argument
+    (an all other *cmd related methods) instead of the 'cmd' tuple.
+  * A raw string can be passed to the addcmd() method, which parses it,
+    an then adds each command in the order, at start of cmdqueue.
+
+Prompt feature:
+  * Included an input() wrapper (classe's raw_input() method) that
+    makes use of regular expressions to automatically enclose
+    enventual prompt's ANSI color codes with '\\01%s\\02', fixing
+    readline's prompt length missinterpretation on colored ones.
+  * Since multiline commands are supported, a new variable:
+    prompt_ps2 can be used to change PS2 prompt prefix.
+
+Exception handling:
+  * The new onexception() method has been made to handle exceptions.
+    It eases a lot command methods (do_foo()) development, allowing
+    them to simply raise exceptions on error, that will be
+    automatically handled and represented by a standard error line.
+  * An exception `foo` is dispatched to a method `except_foo` if
+    available; the except_ method is passed a single argument, the
+    exception object itself.
+  * The new variable `error` defines the error line template.
+
+Command return values:
+  * Adding support for command return values. Instead of the 'cmd'
+    trivial boolean behavior, any command are now able to return
+    anything.
+  * Raising an EOFError is now considered as the `exit` request
+    convention, unlike the 'cmd' lib.
+
+Misc behaviors:
+  * Extended the get_names() method, which now can take an instance
+    as argument, limiting the returned attributes to this one.
+  * Unlike `cmd` lib, emptyline()'s default behavior defaultly does
+    nothing instead of repeating the last typed command (bash like).
+  * Typing 'EOF' to leave is not used on cmdshell, consider using
+    'exit' and raise EOFError instead.
+  * The classe's default() method had been enhanced, writing command
+    representation in case of unprintable chars, and also takes use of
+    the new 'nocmd' variable.
+
+Limitations:
+  * Unlike 'cmd', the cmdshell library do not provides support for
+    command line interpretation without input() built-in function.
+  * Unlike 'cmd', cmdshell is NOT compatible with python 2.x.
 
 
 """
 
-
-
-
 import cmd, shlex, re, bz2
 
+__author__ = "nil0x42 <http://goo.gl/kb2wf>"
+
 class Cmd(cmd.Cmd):
-    interrupt    = "Interruption: run 'exit' to quit"
-    unknow       = "*** Unknown command: %s"
-    prompt_ps2   = "> "
+    prompt = "cmdshell > "
+    prompt_ps2 = "> "
+    nocmd = "*** Unknow command: %s"
+    error = "*** Error raised: %s"
+
 
     def __init__(self, completekey='tab', stdin=None, stdout=None):
         cmd.Cmd.__init__(self, completekey=completekey, \
                          stdin=stdin, stdout=stdout)
 
 
-    def when_interrupt(self):
-        """hook method executed on user keyboard interrupt"""
-        self.stdout.write('\n'+self.interrupt+'\n')
-
-
     def raw_input(self, prompt):
-        """Returns a readline aware prompt string for input, that
-        encloses ansi codes to make its length ignored readline
+        """An input() wrapper that fixes readline ansi colored prompt
+        length missinterpretation if it is used.
 
         """
+        # if not readline, return prompt as it is
         try: import readline
         except: return input(prompt)
 
+        # else, fix readline length missinterpretation
         pattern = "\x01?(\x1b\[((?:\d|;)*)([a-zA-Z]))\x02?"
         return input( re.sub(pattern, "\x01\\1\x02", prompt) )
 
@@ -59,8 +113,8 @@ class Cmd(cmd.Cmd):
         the remainder of the line as argument.
 
         """
+        # try to load readline (if available)
         if self.completekey:
-            # optionally import the readline module
             try:
                 import readline
                 self.old_completer = readline.get_completer()
@@ -68,41 +122,46 @@ class Cmd(cmd.Cmd):
                 readline.parse_and_bind(self.completekey+": complete")
             except ImportError:
                 pass
+
+        # print intro message (if any)
+        if intro:
+            self.intro = intro
+        if self.intro:
+            self.stdout.write( str(self.intro)+"\n" )
+
+        # start command loop
         try:
-            if intro:
-                self.intro = intro
-            if self.intro:
-                self.stdout.write( str(self.intro)+"\n" )
-
             self.preloop() # pre command hook method
-
-            stop = None
-            while not stop:
-                # run queued command is any
+            while True:
+                # run next queued command (if any)
                 if self.cmdqueue:
                     argv = self.cmdqueue.pop(0)
                     argv = self.precmd(argv)
-                    stop = self.onecmd(argv)
-                    stop = self.postcmd(stop, argv)
+                    retval = self.onecmd(argv)
+                    retval = self.postcmd(retval, argv)
 
                 # if no queue, get new user input
                 else:
                     try:
                         line = self.raw_input(self.prompt)
+                    # consider line='exit' on EOF
                     except EOFError:
                         self.stdout.write('\n')
                         line = 'exit'
-                    except KeyboardInterrupt:
-                        self.when_interrupt()
+                    # pass errors to the exception handler
+                    except BaseException as e:
+                        self.onexception(e)
                         line = ''
                     # fill cmd queue with input commands
-                    self.cmdqueue = self.parseline(line)
+                    self.addcmd(line)
 
+        # EOFError is the standard exit convention.
+        except EOFError:
             self.postloop() # post command hook method
 
+        # restore readline completer (if used)
         finally:
             if self.completekey:
-                # reset original readline completer
                 try:
                     import readline
                     readline.set_completer(self.old_completer)
@@ -110,27 +169,27 @@ class Cmd(cmd.Cmd):
                     pass
 
 
-    def run(self, cmdString):
-        """Interpret the given command(s) string.
-        Supports multiline and semicolon separation for multi commands.
-        The whole string is parsed, then executed one by one.
+    def addcmd(self, string):
+        """Parse `string` with parseline(), and add the resulting array
+        at start of cmdqueue.
 
         """
-        cmdQueue = self.parseline(cmdString)
-        stop = False
-        while cmdQueue and not stop:
-            argv = cmdQueue.pop(0)
-            argv = self.precmd(argv)
-            stop = self.onecmd(argv)
-            stop = self.postcmd(stop, argv)
-        return stop
+        self.cmdqueue = self.parseline(string) + self.cmdqueue
 
 
     def parseline(self, string):
-        """Parse the input into a list of 'argv' elements for each command.
+        """Parse `string` into an ordered list of `argv`, each of them
+        representing a single command's argument list.
+
         Example:
-        >>> parseline("echo -e 'foo bar'; ls /tmp")
-        [["echo", "-e", "bla bla"], ["ls", "/tmp"]]
+        >>> string = "echo -e 'foo bar'\\nls /tmp; help"
+        >>> for argv in parseline(string):
+        ...     print(argv)
+        ...
+        ...
+        ["echo", "-e", "foo bar"]
+        ["ls", "/tmp"]
+        ["help"]
 
         """
         def shlex_patch(cmd, reverse=False):
@@ -164,11 +223,11 @@ class Cmd(cmd.Cmd):
             except ValueError as e:
                 # if the last argument quotation has not be closed, assume
                 # the string is unfinished, and add a newline to it's end.
-                if e.message == "No closing quotation":
+                if str(e) == "No closing quotation":
                     string += '\n'
                 # if a lines ends with an antislash, assume the pressed
                 # <RETURN> key as an escaped char, then just remove it.
-                elif e.message == "No escaped character":
+                elif str(e) == "No escaped character":
                     string = string[:-1]
                 # pursue interpretation on the next line (bash like)
                 try:
@@ -208,12 +267,64 @@ class Cmd(cmd.Cmd):
         # call 'help <cmd>' when '<cmd> --help' is typed
         if len(argv) == 2 and argv[1] == '--help':
             return self.run('help '+argv[0])
-        # try to call the command's dedicated do_ method
+
+        # get command function
+        try: cmdFunc = getattr(self, 'do_'+argv[0])
+        except AttributeError: cmdFunc = self.default
+
+        # execute it, and handle error representation if fails:
         try:
-            return getattr(self, 'do_'+argv[0])(argv)
-        # otherwise, fallback to default()
-        except AttributeError:
-            return self.default(argv)
+            return cmdFunc(argv)
+        except BaseException as e:
+            return self.onexception(e)
+
+
+    def onexception(self, exception):
+        """Hook method executed when a python exception is raised
+        on command execution or prompt interface.
+
+        It is called each time the prompt, or a command beeing executed
+        by onecmd() raises an exception.
+        For custom error handling, special methods except_ERR()
+        may be defined. See the except_KeyboardInterrupt() method for
+        a concrete example.
+
+        Defaultly, it calls print_error() to print exception
+        representation. However, if an except_foo() method is found
+        it must return a tuple of strings or an exception object to
+        keep this behavior.
+
+        """
+        # try to call concerned except_* hooks in the order
+        for cls in exception.__class__.mro()[:-1]:
+            hook = 'except_' + cls.__name__
+            if hasattr(self, hook):
+                exception = getattr(self, hook)(exception)
+                break
+
+        if isinstance(exception, BaseException):
+            exception = (type(exception).__name__, str(exception))
+
+        if isinstance(exception, tuple):
+            self.print_error(*exception)
+
+
+    def print_error(self, title='ERROR', message=''):
+        """Converts title and message to a nice error representation.
+        >>> format_error('EOFError', 'raised end of file !')
+        'EOF Error: raised end of file !'
+
+        """
+        # get exception name, nicely word separated by regex
+        if not ' ' in title:
+            title = re.sub('([A-Z][a-z])', ' \\1', title).strip()
+
+        # format error message (if any)
+        if message:
+            message = ': ' + message
+
+        self.stdout.write( (self.error+'\n') %(title+message) )
+
 
 
     def emptyline(self):
@@ -234,7 +345,7 @@ class Cmd(cmd.Cmd):
         """
         cmdRepr = "${!r}".format(argv[0])
         cmd = argv[0] if argv[0] == cmdRepr[2:-1] else cmdRepr
-        self.stdout.write((self.unknow+'\n') %cmd)
+        self.stdout.write( (self.nocmd+'\n') %cmd )
 
 
     def complete(self, text, state):
@@ -269,13 +380,6 @@ class Cmd(cmd.Cmd):
                 compfunc = self.completenames
             self.completion_matches = compfunc(text, line, begidx, endidx)
         try:
-            #print()
-            #print()
-            #import pprint
-            #pprint.pprint(self.completion_matches[state])
-            #print()
-            #print()
-            #return [e+' ' for e in self.completion_matches[state]]
             return self.completion_matches[state]+' '
         except IndexError:
             return
@@ -290,7 +394,6 @@ class Cmd(cmd.Cmd):
 
     def do_help(self, argv):
         'List available commands with "help" or detailed help with "help cmd".'
-        print(self.__class__.mro())
         argv.append('')
         super(Cmd, self).do_help(argv[1])
 
@@ -298,4 +401,24 @@ class Cmd(cmd.Cmd):
     def do_exit(self, argv):
         'Leave the shell interface'
         self.stdout.write("*** Command shell left with 'exit'\n")
-        return True
+        raise EOFError
+
+
+    def except_EOFError(self, exception):
+        """It just raises an EOFError without doing anything else.
+        this permits loop interruption on exit.
+
+        If overwritten, take care to correctly raise EOFError at the
+        end of method execution, or the cmdloop will be unconditionnal.
+
+        """
+        raise EOFError
+
+
+    def except_KeyboardInterrupt(self, exception):
+        """It writes a newline, then returns its own value to keep
+        onexception()'s error printing.
+
+        """
+        self.stdout.write('\n')
+        return exception
