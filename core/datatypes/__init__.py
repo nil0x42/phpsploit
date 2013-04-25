@@ -45,7 +45,7 @@ PhpSploit dedicated datatypes obey the following conventions:
 """
 
 from .ByteSize    import ByteSize
-from .WritableDir import WritableDir
+from .Path        import Path
 from .Executable  import Executable
 from .Interval    import Interval
 from .PhpCode     import PhpCode
