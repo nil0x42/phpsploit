@@ -5,7 +5,7 @@ class Path(str):
 
     Take a file or directory path. It will be automatically converted
     to an absolute path. If a tuple of strings is given, then the
-    elements will be joined as a single path.
+    elements will be joined as a single path string.
 
     The optionnal `rights` argument may be used to add some path
     attributes conditions.
@@ -26,6 +26,9 @@ class Path(str):
 
     """
     def __new__(cls, path, rights=''):
+        if isinstance(path, tuple):
+            path = os.path.join(*path)
+
         path = os.path.expandvars( str(path) )
         path = os.path.realpath( os.path.expanduser(path) )
 
