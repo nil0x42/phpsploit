@@ -10,6 +10,9 @@ python environment.
 # Make dependencies available:
 import deps
 
-# Make ./core/* libs available:
+# set basedir (phpsploit's root, aka ./), and coredir (./core) vars, then
+# re bind first priority path (sys.path[0]) to coredir instead of basedir.
 import sys, os.path
-sys.path[0] = os.path.join(sys.path[0], __name__)
+basedir = sys.path[0]
+coredir = os.path.join(basedir, __name__)
+sys.path[0] = coredir
