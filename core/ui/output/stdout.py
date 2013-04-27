@@ -145,10 +145,10 @@ def process_tags(line):
     >>> process_tags("[*] FOO: «bar»\\n")
     '\\x1b[1m\\x1b[34m[*]\\x1b[0m FOO: \\x1b[37m«bar»\\x1b[0m\\n'
     """
-    TAGS = [('%BoldBlue',   '[*]'),  # INFO
-            ('%BoldRed',    '[!]'),  # WARNING
-            ('%BoldPink',   '[?]'),  # QUESTION
-            ('%BoldYellow', '[-]')]  # DEBUG
+    TAGS = [('%BoldBlue',   '[*] '),  # INFO
+            ('%BoldRed',    '[!] '),  # WARNING
+            ('%BoldPink',   '[?] '),  # QUESTION
+            ('%BoldYellow', '[-] ')]  # DEBUG
 
     # return the line as it is if untagged
     for index, tag in enumerate(TAGS):
@@ -156,6 +156,10 @@ def process_tags(line):
             break
         if index+1 == len(TAGS):
             return(line)
+
+    # remove dulpicate tags >>> "[!] [!] Foo" -> "[!] Foo"
+    while line[len(tag[1]):][0:len(tag[1])] == tag[1]:
+        line = line[len(tag[1]):]
 
     # format line's tag with requested color style
     line = colorize(*tag) + line[len(tag[1]):]
