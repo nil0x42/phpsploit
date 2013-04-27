@@ -1,17 +1,16 @@
 import os
 
 class Path(str):
-    """Writable absolute directory path. (extends str)
+    """File or directory path. (extends str)
 
-    Take a file or directory path. It will be automatically converted
-    to an absolute path. If a tuple of strings is given, then the
-    elements will be joined as a single path string.
+    Takes one or more string arguments, joinded as a single absolute
+    file or directory path.
 
-    The optionnal `rights` argument may be used to add some path
-    attributes conditions.
+    The optionnal keyword arg, `rights` may define some conditionnal
+    path properties.
 
-    A ValueError is raised is path do not exists, or if at least one
-    of the `rights` tags are not True.
+    A ValueError is raised if path do not exists, or if at least one
+    of the `rights` conditions are not True.
 
     Available rights tags:
         f: is a file
@@ -25,7 +24,9 @@ class Path(str):
     "/home/user/test"
 
     """
-    def __new__(cls, path, rights=''):
+    def __new__(cls, *args, rights=''):
+        path = os.path.join(*args)
+
         if isinstance(path, tuple):
             path = os.path.join(*path)
 
@@ -53,7 +54,7 @@ class Path(str):
         if 'w' in rights and not os.access(path, os.W_OK):
             error("Not writable")
 
-        return str.__new__(cls, path+os.sep)
+        return str.__new__(cls, path)
 
 
     def __raw_value(self):
@@ -66,3 +67,28 @@ class Path(str):
 
     def __str__(self):
         return self.__raw_value()
+
+
+    def read(self):
+        """Return a string buffer of the file path's data. Newlines are
+        automatically replaced by system specific newline char(s)
+
+        """
+        lines = self.readlines()
+        data = os.linesep.join(lines)
+        return(data)
+
+
+    def write(self, data):
+        """Write `data` to the file path. Newlines are automatically
+        replaced by system specific newline char(s)
+
+        """
+        lines = data.splitlines()
+        data = os.linesep.join(lines)
+        open(self.name,'w').write(data)
+
+
+    def readlines(self):
+        """Get a list of file path content as a list of lines"""
+        return open(self ,'r').read().splitlines()
