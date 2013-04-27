@@ -2,5 +2,5 @@
 
 """
 
-from .main import Cmd as Main
-from .remote import Cmd as Remote
+from .main import MainShell as Main
+from .remote import RemoteShell as Remote

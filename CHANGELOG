@@ -6,7 +6,7 @@ Version 2.2.0 (IN ACTIVE DEVELOPMENT)
   * The 'set' command now supplies a new keyword ("+") for 
   * Any setting now suports random choice from multiple values, with the new
     'set' command's "+" keyword, that uses RandLine datatype as data wrapper.
-  * 
+  * The 'eval' command has been replaced by 'source', more restrictive.
 
 
 Version 2.1.4 (2013-04-07)

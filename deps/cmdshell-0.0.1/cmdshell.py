@@ -339,6 +339,8 @@ class Cmd(cmd.Cmd):
         if isinstance(exception, tuple):
             self.print_error(*exception)
 
+        return 1
+
 
     def print_error(self, title='ERROR', message=''):
         """Converts title and message to a nice error representation.
