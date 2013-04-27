@@ -54,7 +54,8 @@ Exception handling:
 Command return values:
   * Adding support for command return values. Instead of the 'cmd'
     trivial boolean behavior, any command are now able to return
-    anything.
+    anything. The postcmd method manages integer return values, in
+    a similar way than the sys.exit's behavior.
   * Raising an EOFError is now considered as the `exit` request
     convention, unlike the 'cmd' lib.
 
@@ -77,7 +78,7 @@ Limitations:
 
 """
 
-import cmd, shlex, re, bz2
+import cmd, shlex, re
 
 __author__ = "nil0x42 <http://goo.gl/kb2wf>"
 
@@ -89,8 +90,9 @@ class Cmd(cmd.Cmd):
 
 
     def __init__(self, completekey='tab', stdin=None, stdout=None):
-        cmd.Cmd.__init__(self, completekey=completekey, \
-                         stdin=stdin, stdout=stdout)
+        # explicitly run parent's __init__()
+        super(Cmd, self).__init__(completekey=completekey, \
+                                  stdin=stdin, stdout=stdout)
 
 
     def raw_input(self, prompt):
@@ -175,6 +177,35 @@ class Cmd(cmd.Cmd):
 
         """
         self.cmdqueue = self.parseline(string) + self.cmdqueue
+        # it returns 1, i.e: failure, this way it can be used as such
+        # in a command method: return self.addcmd("help me")
+        return 1
+
+
+    def postcmd(self, retval, argv):
+        """Hook method executed just after a command dispatch is finished.
+
+        * cmdshell's behavior differs from the `cmd` one, this method
+        handles command return codes.
+
+        Actually, it acts like the python's exit() built-in function, i.e:
+        If the status is omitted or None, it defaults to zero (i.e., success).
+        If the status is numeric, it will be used as the command exit status.
+        If status is tuple or list, a ': '.join(status) is printed, and the
+        command exit status will be one (i.e., failure).
+        If it is another kind of object, it will be printed and the command
+        exit status will be one (i.e., failure).
+
+        """
+        if retval is None:
+            return 0
+        elif isinstance(retval, int):
+            return retval
+        elif isinstance(retval, tuple) or isinstance(retval, list):
+            retval = ': '.join([str(e) for e in retval])
+
+        print( "[!] {}: {}".format(argv[0], retval) )
+        return 1
 
 
     def parseline(self, string):
@@ -266,7 +297,7 @@ class Cmd(cmd.Cmd):
             return self.emptyline()
         # call 'help <cmd>' when '<cmd> --help' is typed
         if len(argv) == 2 and argv[1] == '--help':
-            return self.run('help '+argv[0])
+            return self.addcmd('help '+argv[0])
 
         # get command function
         try: cmdFunc = getattr(self, 'do_'+argv[0])
@@ -385,11 +416,19 @@ class Cmd(cmd.Cmd):
             return
 
 
-    def get_names(self, obj=None):
-        """Pull in 'obj' base class attributes (defaults to self)"""
+    def get_names(self, obj=None, filter=''):
+        """Pull in 'obj' base class attributes (defaults to self).
+        'filter' ads possibility to add a word prefix condition, auto
+        stripped from returned elements.
+        >>> get_names(perfix='do_')
+        ['help', 'exit']
+
+        """
         if obj is None:
-            return dir(self.__class__)
-        return dir(obj.__class__)
+            obj = self
+
+        attrs = dir(obj.__class__)
+        return [e[len(filter):] for e in attrs if e.startswith(filter)]
 
 
     def do_help(self, argv):
