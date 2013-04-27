@@ -1,3 +1,14 @@
+Version 2.2.0 (IN ACTIVE DEVELOPMENT)
+  * Rewritten the whole PhpSploit framework in python 3 with new skeleton.
+  * The 'infect' command has been removed, its role is now taken by 'exploit'.
+  * The new 'session' command now manages the old 'load' and 'save' commands.
+  * 'set' takes a new feature, "set <VAR> +" now allows 
+  * The 'set' command now supplies a new keyword ("+") for 
+  * Any setting now suports random choice from multiple values, with the new
+    'set' command's "+" keyword, that uses RandLine datatype as data wrapper.
+  * 
+
+
 Version 2.1.4 (2013-04-07)
   * The plugins main script names are now plugin.py instead of script.py.
   * Plugin help strings are now taken from the plugin.py's docString.

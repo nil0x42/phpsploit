@@ -21,7 +21,7 @@ Stuff:
 * columns(): (int)
     how many columns ?
 
-* lines(): (lin)
+* lines(): (int)
     how many lines ?
 
 """
