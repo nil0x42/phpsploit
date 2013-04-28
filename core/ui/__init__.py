@@ -40,11 +40,11 @@ Contents Preview / Examples:
 
 
 
------------- ui.shell ---------------------
+------------ ui.interface -----------------
 
->>> import ui.shell
+>>> import ui.interface
 
->>> interface = ui.shell.Main()
+>>> interface = ui.interface.Cmd()
 >>> interface.cmdloop()
 
 """
