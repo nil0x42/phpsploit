@@ -6,8 +6,9 @@ stdout wrapper.
 
 Stuff:
 
-* Wrapper(): (file)
-    The PhpSploit stdout wrapper
+* wrap(): (file)
+    Enable stdout/stdin file wrapping with PhpSploit dedicated
+    output fiel wrappers, providing nice features.
 
 * isatty(): (bool)
     is current output a tty ?
@@ -25,22 +26,26 @@ Stuff:
     how many lines ?
 
 """
-from sys import __stdout__
-from os import environ
-from shutil import get_terminal_size
 
-# import Wrapper locally
-from .stdout import Wrapper
+import sys
+
+# enable stdout/stderr wrappers.
+import .wrapper
+def wrap():
+    sys.stdout = wrapper.Stdout(backlog=False)
+    sys.stderr = wrapper.Stderr(outfile=sys.stdout, backlog==False)
 
 # is output a tty ?
-isatty = __stdout__.isatty
+isatty = sys.__stdout__.isatty
 
 # get current terminal size
-size = lambda: tuple(get_terminal_size(fallback=(79,24)))
+from shutil import get_terminal_size
+size    = lambda: tuple(get_terminal_size(fallback=(79,24)))
 columns = lambda: size()[0]
-lines = lambda: size()[1]
+lines   = lambda: size()[1]
 
 
+from os import environ
 def colors():
     """Returns the number of colors actually supported by current
     output. Actually, possible values are:
