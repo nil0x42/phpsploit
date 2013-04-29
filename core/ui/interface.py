@@ -1,8 +1,7 @@
-"""PhpSploit framework Main shell interface.
-The shell interface unherits from the cmdshell library, and provides
-all PhpSploit framework interface base stuff, available on both Main
-shell (this one itself) and Remote shell interface (which extends this
-one).
+"""PhpSploit shell interface.
+Unheriting the cmdshell's Cmd class, the PhpSplpoit shell interface
+provides interactive use of commands.
+
 """
 import os, difflib
 

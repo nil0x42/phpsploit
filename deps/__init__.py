@@ -13,7 +13,7 @@ dependency name, while the second provides it's directory path.
 import os, sys, imp
 
 DEPENDENCIES = [('phpserialize',       'phpserialize-1.3'),
-                ('cmdshell',           'cmdshell-0.0.1'),
+                ('cmdshell',           'cmdshell-0.0.2'),
                 ('colorama',           'colorama-0.2.5'),
                 ('colorama_patched',   '.'),
                 ('socks',              'SocksiPy-branch-1.02'),
