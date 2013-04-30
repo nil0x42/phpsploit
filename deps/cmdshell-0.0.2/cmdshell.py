@@ -10,9 +10,10 @@ a little bit new behaviors.
 It was built to theorically work on all 3.x python versions.
 For any bug, issue or enhancement proposal, please contact the author.
 
-NOTE: Assuming cmdshell is an extension of the cmd library, only NEW
-      behaviors will be listed above, for a more complete help,
-      consider reading the 'cmd' library documentation.
+NOTE: Keep in mind that the cmdshell library extends and wraps the
+      `cmd` python standard library. It means that you must read
+      the `cmd` documentation, in order to correctly understand
+      how cmdshell works, and its new features.
 
 NEW FEATURES:
 =============
@@ -70,7 +71,7 @@ Misc behaviors:
   * Unlike `cmd` lib, emptyline()'s default behavior defaultly does
     nothing instead of repeating the last typed command (bash like).
   * Typing 'EOF' to leave is not used on cmdshell, consider using
-    'exit' and raise EOFError instead.
+    'exit' and raise SystemExit instead.
   * The classe's default() method had been enhanced, writing command
     representation in case of unprintable chars, and also takes use of
     the new 'nocmd' variable.
@@ -147,10 +148,10 @@ class Cmd(cmd.Cmd):
             self.stdout.write( str(self.intro)+"\n" )
 
 
-        self.preloop() # pre command hook method
 
         # start command loop
         try:
+            self.preloop() # pre command hook method
             while True:
                 try:
                     line = self.raw_input(self.prompt)
@@ -158,14 +159,14 @@ class Cmd(cmd.Cmd):
                     self.stdout.write("\n")
                     line = "exit"
                 except BaseException as e:
+                    # nothing to interpret on exception
                     self.onexception(e)
                     continue
-
                 try:
                     self.interpret(line)
+                # system exit is the correct way to leave loop
                 except SystemExit as e:
-                    RETURN_VAL = e.code
-                    break
+                    return e.code
 
         # restore readline completer (if used)
         finally:
@@ -175,18 +176,19 @@ class Cmd(cmd.Cmd):
                     readline.set_completer(self.old_completer)
                 except ImportError:
                     pass
-
-        self.postloop() # post command hook method
-        return self.return_handler(RETURN_VAL)
+            self.postloop() # post command hook method
 
 
     def interpret(self, string):
         """Interpret the given string as commands"""
         retval = 0
         for argv in self.parseline(string):
-            argv = self.precmd(argv)
-            retval = self.onecmd(argv)
-            retval = self.postcmd(retval, argv)
+            try:
+                argv = self.precmd(argv)
+                retval = self.onecmd(argv)
+                retval = self.postcmd(retval, argv)
+            except SystemExit as e:
+                raise SystemExit(self.return_handler(e.code))
         return self.return_handler(retval)
 
 
