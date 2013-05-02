@@ -12,12 +12,13 @@ dependency name, while the second provides it's directory path.
 
 import os, sys, imp
 
-DEPENDENCIES = [('phpserialize',       'phpserialize-1.3'),
-                ('cmdshell',           'cmdshell-0.0.2'),
-                ('colorama',           'colorama-0.2.5'),
-                ('colorama_patched',   '.'),
-                ('socks',              'SocksiPy-branch-1.02'),
-                ('shutil_update',      '.')]
+DEPENDENCIES = [('phpserialize',           'phpserialize-1.3'),
+                ('cmdshell',               'cmdshell-0.0.2'),
+                ('colorama',               'colorama-0.2.5'),
+                ('colorama_patched',       '.'),
+                ('socks',                  'SocksiPy-branch-1.02'),
+                ('os_path_truepath_patch', '.'),
+                ('shutil_update',          '.')]
 
 for module, dirname in DEPENDENCIES:
     # try to import the dependency from system.
