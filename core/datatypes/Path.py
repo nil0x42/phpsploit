@@ -6,13 +6,14 @@ class Path(str):
     Takes one or more string arguments, joinded as a single absolute
     file or directory path.
 
-    The optionnal keyword arg, `rights` may define some conditionnal
+    The optionnal keyword arg, `mode` may define some conditionnal
     path properties.
 
     A ValueError is raised if path do not exists, or if at least one
-    of the `rights` conditions are not True.
+    of the `mode` conditions are not True.
 
-    Available rights tags:
+    Available mode tags:
+        e: path exists (default value)
         f: is a file
         d: is a directory
         r: is readable
@@ -20,53 +21,50 @@ class Path(str):
         w: is writable
 
     Example:
-    >>> Path("./test", 'frw')
+    >>> Path("./test", 'efrw')
     "/home/user/test"
 
     """
-    def __new__(cls, *args, rights=''):
-        path = os.path.join(*args)
+    def __new__(cls, *args, mode='e'):
+        path = os.path.truepath(*args)
 
-        if isinstance(path, tuple):
-            path = os.path.join(*path)
+        def error(msg):
+            raise ValueError("«{}»: {}".format(path, msg))
 
-        path = os.path.expandvars( str(path) )
-        path = os.path.realpath( os.path.expanduser(path) )
-
-        error = lambda msg: raise ValueError("«{}»: {}".format(path, msg))
-
-        # default assertion: path MUST exist anyway
-        if not os.path.exists(path):
+        # exists
+        if 'e' in mode and not os.path.exists(path):
             error("No such file or directory")
-
-        # optionnal `rights` tags assertions:
-        if 'f' in rights and not os.path.isfile(path):
+        # is file
+        if 'f' in mode and not os.path.isfile(path):
             error("Is a directory")
-        elif 'd' in rights
+        # is directory
+        if os.path.isdir(path):
             path += os.sep
-            if not os.path.isdir(path):
-                error("Not a directory")
-
-        if 'x' in rights and not os.access(path, os.X_OK):
+        elif 'd' in mode:
+            error("Not a directory")
+        # is executable
+        if 'x' in mode and not os.access(path, os.X_OK):
             error("Not executable")
-        if 'r' in rights and not os.access(path, os.R_OK):
+        # is readable
+        if 'r' in mode and not os.access(path, os.R_OK):
             error("Not readable")
-        if 'w' in rights and not os.access(path, os.W_OK):
+        # is writable
+        if 'w' in mode and not os.access(path, os.W_OK):
             error("Not writable")
 
         return str.__new__(cls, path)
 
 
     def __raw_value(self):
-        return super(Path, self).__str__()
+        return os.path.realpath( str(self) )
 
 
     def __call__(self):
-        return self.__raw_value()
+        return os.path.realpath( str(self) )
 
 
     def __str__(self):
-        return self.__raw_value()
+        return super(Path, self).__str__()
 
 
     def read(self):
