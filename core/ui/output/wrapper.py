@@ -1,11 +1,8 @@
-"""Phpsploit output (stdout/stderr) wrappers.
-
-The provided wrapping instances, Stdout() and Stderr() can
-(and must be) used to wrap sys.stdout && sys.stderr.
+"""Phpsploit standard output wrapper.
 
 Usage:
 >>> import stdout, sys
->>> sys.stdout = wrap.Stdout(backlog=True)
+>>> sys.stdout = Stdout(backlog=True)
 >>> print("foo")
 foo
 >>> print("bar")
@@ -33,7 +30,8 @@ import sys, re
 from io import StringIO
 from os import linesep as os_linesep
 
-from ui.color import colorize, decolorize
+import ui.output
+from ..color import colorize, decolorize
 
 class Stdout:
     """PhpSploit framework's dedicated standard output wrapper,
@@ -66,7 +64,7 @@ class Stdout:
             self._has_backlog = False
 
         # are colors supported ?
-        self._has_colors = output.colors()
+        self._has_colors = ui.output.colors()
 
 
     def __del__(self):
@@ -132,34 +130,6 @@ class Stdout:
         self._backlog.truncate(0)
         self._backlog.seek(0)
         self._has_backlog = False
-
-
-class Stderr(Stdout):
-    """PhpSploit framework's dedicated standard error wrapper.
-    It unherits from Stdout, meaning that it does exactly the same.
-    The only concrete difference is that any line is automatically
-    preceeded by an `error message tag`, aka "[!] ".
-
-    """
-    def __init__(self, outfile=sys.__stderr__, backlog=False):
-        """Run unherited __init__ method from Stdout wrapper"""
-        super(Stdout, self).__init__(outfile=outfile, backlog=backlog)
-
-
-    def __del__(self):
-        """Unlike stdout wrapper, this one resets stderr instead of
-        stdout on deletion
-
-        """
-        self._backlog.close()
-        sys.stderr = self._orig_outfile
-
-
-    def write(self, string):
-        """Stderr wrapper simply adds "[!] " before each written line"""
-        for line in string.splitlines(1):
-            self._writeLn( "[!] "+line )
-
 
 
 

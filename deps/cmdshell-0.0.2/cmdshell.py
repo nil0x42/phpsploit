@@ -59,9 +59,6 @@ Command return values:
     trivial boolean behavior, any command are now able to return
     anything. The postcmd method manages integer return values, in
     a similar way than the sys.exit's behavior.
-  * The feature above also implies that error messages (if any)
-    are printed into stderr, thats why self.stderr is now available
-    and can be declared in __init__().
   * To leave the cmdloop() method, a SystemExit must be raised
     (with the exit() built_in function for example)
 
@@ -98,13 +95,7 @@ class Cmd(cmd.Cmd):
     error = "*** Error raised: %s"
 
 
-    def __init__(self, completekey='tab', stdin=None, \
-                 stdout=None, stderr=None):
-        # handle new stderr manager
-        if stderr is not None:
-            self.stderr = stderr
-        else:
-            self.stderr = sys.stderr
+    def __init__(self, completekey='tab', stdin=None, stdout=None):
         # explicitly run parent's __init__()
         super(Cmd, self).__init__(completekey=completekey, \
                                   stdin=stdin, stdout=stdout)
@@ -187,9 +178,11 @@ class Cmd(cmd.Cmd):
                 argv = self.precmd(argv)
                 retval = self.onecmd(argv)
                 retval = self.postcmd(retval, argv)
+            # on exit, let return_errcode() handle error message if any,
+            # then raise SystemExit with the proper return code number.
             except SystemExit as e:
-                raise SystemExit(self.return_handler(e.code))
-        return self.return_handler(retval)
+                raise SystemExit(self.return_errcode(e.code))
+        return self.return_errcode(retval)
 
 
     def postcmd(self, retval, argv):
@@ -330,14 +323,15 @@ class Cmd(cmd.Cmd):
             name = re.sub('([A-Z][a-z])', ' \\1', name).strip()
             exception = (name,) + exception.args
 
-        return self.return_handler(exception)
+        return self.return_errcode(exception)
 
 
-    def return_handler(self, code):
+    def return_errcode(self, code):
         """Called by onecmd() and cmdloop() methods, to manage commands
         and instance return codes. It acts like the sys.exit method,
-        converting None returns values to 0, writting error to stderr
-        if it is a string (before returning 1).
+        converting None returns values to 0, writting error (prepended
+        with self.error str) if it is a string, in which case it then
+        returns 1.
 
         """
         if code is None:
@@ -345,7 +339,9 @@ class Cmd(cmd.Cmd):
         if isinstance(code, tuple):
             code = ': '.join(str(e) for e in code)
         if not isinstance(code, int):
-            self.stderr.write(code + "\n")
+            for line in str(code).splitlines(1):
+                self.stdout.write( self.error %line )
+            self.stdout.write("\n")
             code = 1
         return code
 
@@ -432,7 +428,7 @@ class Cmd(cmd.Cmd):
     def do_exit(self, argv):
         'Leave the shell interface'
         self.stdout.write("*** Command shell left with 'exit'\n")
-        exit()
+        exit('chlick\nchez\nchlouck!')
 
 
     def except_SystemExit(self, exception):

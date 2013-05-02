@@ -29,11 +29,10 @@ Stuff:
 
 import sys
 
-# enable stdout/stderr wrappers.
-import .wrapper
-def wrap():
-    sys.stdout = wrapper.Stdout(backlog=False)
-    sys.stderr = wrapper.Stderr(outfile=sys.stdout, backlog==False)
+from . import wrapper
+Wrapper = wrapper.Stdout
+
+#from . import wrapper.Stdout as Wrapper
 
 # is output a tty ?
 isatty = sys.__stdout__.isatty

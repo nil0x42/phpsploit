@@ -27,7 +27,7 @@ class Cmd(cmdshell.Cmd):
         """Handle session aliases"""
 
         # if first arg is not an alias, return normal argv
-        try: alias = getattr(session.Alias, argv[0]):
+        try: alias = getattr(session.Alias, argv[0])
         except AttributeError: return argv
 
         # parse alias value, and add result to cmdqueue
@@ -56,7 +56,7 @@ class Cmd(cmdshell.Cmd):
             - Calling it from a remote shell session simply leaves it,
             backing to the main shell interface
         """
-        raise EOFError
+        exit()
 
 
     ########################
