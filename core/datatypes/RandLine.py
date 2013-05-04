@@ -84,7 +84,7 @@ class RandLine(list):
             raise ValueError("couldn't find valid lines from buffer")
 
 
-    def __raw_value(self):
+    def _raw_value(self):
         return list(self)
 
 

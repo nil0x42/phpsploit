@@ -29,7 +29,7 @@ class Proxy(str):
     _pattern  = "^(?:(https?)://)?([\w.-]{3,63})(?::(\d+))$"
     _defaults = ['http', '', '']
 
-    def __new__(cls, proxy):
+    def __new__(cls, proxy=None):
         cls._urllib_opener = build_opener()
         if str(proxy).lower() == 'none':
             return str.__new__(cls, 'None')
@@ -54,7 +54,7 @@ class Proxy(str):
         return str.__new__(cls, proxy)
 
 
-    def __raw_value(self):
+    def _raw_value(self):
         return super(Proxy, self).__str__()
 
 

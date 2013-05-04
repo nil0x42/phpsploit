@@ -28,6 +28,9 @@ class Path(str):
     def __new__(cls, *args, mode='e'):
         path = os.path.truepath(*args)
 
+        if mode:
+            mode += 'e'
+
         def error(msg):
             raise ValueError("«{}»: {}".format(path, msg))
 
@@ -55,7 +58,7 @@ class Path(str):
         return str.__new__(cls, path)
 
 
-    def __raw_value(self):
+    def _raw_value(self):
         return os.path.realpath( str(self) )
 
 
@@ -90,3 +93,8 @@ class Path(str):
     def readlines(self):
         """Get a list of file path content as a list of lines"""
         return open(self ,'r').read().splitlines()
+
+
+class WritableDir(Path):
+    def __new__(cls, *args, mode='e'):
+        super(WritableDir, cls).__new__(cls, *args, mode='drw')

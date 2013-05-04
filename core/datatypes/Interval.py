@@ -42,7 +42,7 @@ class Interval(tuple):
         return tuple.__new__(cls, value)
 
 
-    def __raw_value(self):
+    def _raw_value(self):
         return tuple(self)
 
 

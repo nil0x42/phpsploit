@@ -35,12 +35,12 @@ class Url(str):
         return str.__new__(cls, url)
 
 
-    def __raw_value(self):
+    def _raw_value(self):
         return super(Url, self).__str__()
 
 
     def __call__(self):
-        return self.__raw_value()
+        return self._raw_value()
 
 
     def __str__(self):

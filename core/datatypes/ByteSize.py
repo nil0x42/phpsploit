@@ -43,12 +43,12 @@ class ByteSize(int):
         return int.__new__(cls, result)
 
 
-    def __raw_value(self):
+    def _raw_value(self):
         return int(self)
 
 
     def __call__(self):
-        return self.__raw_value()
+        return self._raw_value()
 
 
     def __str__(self):
