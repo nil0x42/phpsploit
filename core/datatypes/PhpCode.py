@@ -46,5 +46,6 @@ class PhpCode(str):
             formatter = pygments.formatters.Terminal256Formatter
         else:
             formatter = pygments.formatters.TerminalFormatter
+        lexer, formatter = lexer(), formatter(style='vim', bg='dark')
 
-        return pygments.highlight(string, lexer(), formatter(style='tango'))
+        return pygments.highlight(string, lexer, formatter).strip()
