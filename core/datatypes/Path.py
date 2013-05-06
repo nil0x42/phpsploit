@@ -21,8 +21,10 @@ class Path(str):
         w: is writable
 
     Example:
-    >>> Path("./test", 'efrw')
-    "/home/user/test"
+    >>> Path("./test", mode='efrw')
+    '/home/user/test'
+    >>> Path("/home", "user", ".bashrc", mode="fr")
+    '/home/user/.bashrc'
 
     """
     def __new__(cls, *args, mode='e'):

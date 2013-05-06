@@ -22,8 +22,8 @@ class Interval(tuple):
     1.5 <= x <= 5 (random interval)
 
     """
-    def __new__(cls, interval):
-        value = interval
+    def __new__(cls, value):
+        rawval = str(value)
         if type(value) in (int, float, str):
             value = str(value).replace(',','.')
             value = regex_split('[^0-9.]', value)
@@ -37,7 +37,7 @@ class Interval(tuple):
             value = tuple(sorted([float(e) for e in value]))
         except:
             raise ValueError('«%s» must be an int/float interval'
-                             ' representation' %interval)
+                             ' representation' %rawval)
 
         return tuple.__new__(cls, value)
 
