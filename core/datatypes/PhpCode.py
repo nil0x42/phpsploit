@@ -1,5 +1,4 @@
-from re import match as regex_match
-import ui.output
+import re, ui.output
 
 class PhpCode(str):
     """Line of PHP Code. (extends str)
@@ -13,15 +12,12 @@ class PhpCode(str):
     '<?php phpinfo(); ?>'
 
     """
-    _pattern = ("^\s*(?:<\?(?:[pP][hH][pP])?\s+)?\s*("
-                "[^\<\s].{4,}?)\s*;?\s*(?:\?\>)?\s*$")
-
     def __new__(cls, string):
+        pattern = ("^\s*(?:<\?(?:[pP][hH][pP])?\s+)?\s*("
+                   "[^\<\s].{4,}?)\s*;?\s*(?:\?\>)?\s*$")
         # regex validates and parses the string
-        try:
-            php = re.match(cls._pattern, string).group(1)
-        except:
-            raise ValueError('«%s» is not PHP code' %string)
+        try: php = re.match(pattern, string).group(1)
+        except: raise ValueError('«%s» is not PHP code' %string)
 
         return str.__new__(cls, php)
 
