@@ -22,22 +22,9 @@ coredir = os.path.join(basedir, __name__)
 # Use `coredir` as new primary python path
 sys.path[0] = coredir
 
+
 ############### USER CONFIG DIR ################
-import hashlib
 from datatypes import Path
-
-def filehash(path):
-    """PhpSploit file hash signature.
-    This function gives and md5sum of the file data, in a cross platform
-    way, independently of the newlines.
-
-    WARNING: The md5 hex digest returned is completely dirrefent of a
-    real file md5sum.
-
-    """
-    lines = open(path, 'r').read().splitlines()
-    hash = hashlib.md5( str(lines).encode('utf-8') )
-    return hash.hexdigest()
 
 # Define `userdir`, the phpsploit user config dir.
 def _get_userdir():
@@ -72,50 +59,30 @@ def _get_userdir():
             return Path(choice, mode="edrw")()
         except: pass
 
-    # it raises the apropriate ValueError
+    # it raises the apropriate ValueError if failed
     Path(choice, mode="edrw")
 
+
 def _fill_userdir(path):
-    """Add user configuration dir's default content.
+    """Add user configuration dir's default content."""
+    # touch ./config
+    config = os.path.truepath(path, "config")
+    if not os.path.isfile(config):
+        open(config, "w")
 
-    The default user config directory can be found at:
-        ./framework/rc_template/
+    # overwrite ./README
+    readme = Path(basedir, "framework/misc/userdir.readme").read()
+    open(os.path.truepath(path, "README"), "w").write(readme)
 
-    """
-
-    # this dict takes relpaths of default user config files as keys.
-    # the value is a list of hashs. If one of these user config files
-    # exists, it will not be overwritten, except if its current hash
-    # is the same than one of the file's hash, that represent default
-    # values.
-    #NOTE: in order to get filehash of a file, use:
-    # >>> import core
-    # >>> core.filehash('/file/path')
-    files = {"config"         : [],
-             "plugins/README" : []}
-
-    for filepath, defaults in files.items():
-        # get path of template file
-        template = Path(basedir, 'framework/rc_template', filepath)
-
-        # add current default file content's hash to hashs list
-        defaults.append(filehash(template))
-
-        # get `path` (absolute path), and its parent dir
-        path = os.path.truepath(userdir, filepath)
-        dirname = os.path.dirname(path)
-
-        # make sur file's parent directory exists
-        try: os.makedirs(dirname)
-        except: pass
-        Path(dirname, mode="edrw")
-
-        # if user manually changed a file, don't overwrite it:
-        if os.path.exists(path) and filehash(path) not in defaults:
-            continue
-
-        # write template data to file
-        open(path, 'w').write( template.read() )
+    # mkdirs
+    dirs = ["plugins"]
+    for elem in dirs:
+        elem = os.path.truepath(path, elem)
+        try:
+            os.mkdir(elem)
+        except FileExistsError as e:
+            if not os.path.isdir(elem):
+                raise e
 
 userdir = _get_userdir()
 _fill_userdir(userdir)
