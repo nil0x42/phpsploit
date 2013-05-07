@@ -1,0 +1,282 @@
+
+PHPSPLOIT
+
+
+= NAME =
+**phpsploit** — furtive tunnel based php webshell
+
+
+= SYNOPSIS =
+**phpsploit** [//target-url//|//session//]
+
+
+= DESCRIPTION =
+**phpsploit** is a furtive tunnel //based// php webshell: it was designed in order to help privilege escalation through a very small php backdoor, while remaining the most stealth, efficient, and adjustable as possible.
+
+It innovates by settling for a remotely stored micro backdoor that forwards to dynamic encoded HTTP headers, which act as dynamic payload. This feature is usefull to bypass admins searching for suspicious lines in the server logs, because GET requests without arguments, are not as suspect as POST requests, or GET requests with suspicious arguments (eg: "?cmd=cat&edit=/etc/passwd").
+
+The **phpsploit** framework is plugin based, so users can easily make their own plugins, or edit the built-in ones, with the //pspapi// (phpsploit API) that interracts with the target server through the framework.
+
+Its structure allows him to evolve and be easily adapted to all types of web exploitation scenarios, because every setting can be edited //globally// (through user configuration file), or //locally//, using the **set** command.
+
+A backdoor to bring them all... - https://bitbucket.org/nil0x42/phpsploit
+
+
+= OPTIONS =
+Running **phpsploit** without any argument runs a blank session, with all settings set to default.
+
+: If an URL is specified as argument, only sets the //TARGET// setting to that value.
+**$ phpsploit http://127.0.0.1/backdoored-url.php**
+
+: You also can use a previously saved //session// file as argument, to use him instead of a blank session. Sessions can (and need to) be saved with the **save** command.
+**$ phpsploit ~/targets/localhost/phpsploit.session**
+
+: For inline help, you also can use **phpsploit --help**
+
+
+= USAGE =
+The most basic way to use phpsploit it as described here:
+
++ First, find a remote php execution access.
++ Open phpsploit, and run the **infect** command to get the working backdoor.
++ Inject that backdoor on the remote server.
++ Run "**set TARGET http://site/backdoored-url.php**".
++ You also can edit some **SETTINGS** (with the "**set**" command), such as the PROXY, or REQ_* variables.
++ Just type "**exploit**", and enjoy your remote shell access :)
+
+
+//WARNING//: If the "**exploit**" command doesn't works, and returns an error, it can be for a lot of reasons:
++ **HTTP Error 400: Bad request** - Generally, this error occurs because one or some **REQ_*** settings are too big for the server. So you need to settle their values.
++ **Request error: Connection refused** - If you are sure that the specified **TARGET** is accessible from your computer (or from the **PROXY** if defined), this error can occur because the **PROXY** is invalid
++ If you have injected your **BACKDOOR** in an existing remote php code, make sure it is each time executed.
++ Other issues can occur because one of your **SETTINGS** where modified without taking care of their validity, or because an IDS has detected the exploitation try.
++ If the encountered issue is not in the list, you can also post an issue with all details here: https://bitbucket.org/nil0x42/phpsploit/issues or contact the Author (see the **AUTHOR** section)
+
+
+= INTERFACE =
+The **phpsploit** framework includes two shell interfaces.
+- The **MAIN SHELL** is the first shell interface, spawned when the framework starts. It is used to prepare a target exploitation. Through it, you can locally adjust the **SETTINGS** with the "**set**" command, and use the "**infect**" command to get the micro-backdoor that needs to be injected on the target.
+- The **REMOTE SHELL** interface starts when a target server was exploited. Its is used to interract with the backdoored URL.
+
+
+**TO GET HELP** on a phpsploit command, you can use "**help <command>**", "**<command> --help**" or "**<command> -h**". If there is no specific help for a command, such as **infect**, a short description of each command's purpose is available typing **help** without arguments.
+
+The commands are auto-completed on unix clients, and try to use **readline** if available.
+They are divided into groups when shown whith the "**help**" command:
+- The **CORE COMMANDS** contains all commands available through every interface.
+- The Shell Commands contains the commands specific to the current interface.
+- In the remote shell, plugin commands are grouped by categories.
+
+
+//Core Commands://
+: **clear**
+Clear the terminal screen
+: **exit**
+Leave the current shell interface
+: **help**
+Shows help for all available commands
+: **infect**
+Prints a working backdoor to inject in the target
+: **lcd**
+Change local working directory
+: **lpwd**
+Print local working directory
+: **rtfm**
+Read this manual page
+: **save**
+Save the current session in a file, for future usage
+: **set**
+View and edit phpsploit settings
+
+
+
+= MAIN SHELL =
+When entering **phpsploit**, the main shell is spawned, it helps you to locally edit your settings (**set** command), get the working backdoor (**infect** command), and then start the //remote shell// (**exploit** command).
+
+//Shell Commands://
+: **exploit**
+Drop a shell from target server
+
+
+= REMOTE SHELL =
+When you run the **exploit** command, you enter the remote shell, and directly interracts with the remotely backdoored server through the **phpsploit** plugins.
+Typing **help** will show the available commands.
+**Core Commands** are all the **phpsploit** remote shell built-in commands.
+
+//Shell Commands://
+: **env**
+This command interracts with the environment variables, for more informations, please read the **REMOTE ENVIRONMENT** section.
+: **lastcmd**
+Allows user to show or save the last command output
+: **reload**
+Reloads the commands list, usefull if you have edited one plugin during an exploitation session
+: **shell**
+Various command plugins, such as //system//, //mysql// and //suidroot// can be used as frontend shell. For example, "**> shell system**" will spawn the "**system**" command as default prompt, making all typed lines to be executed by this plugin.
+
+
+All the other remote shell commands are in reality dynamic plugins, built with the **PSPAPI** (phpsploit API).
+As with all commands, you can use "**help <command>**" to get help.
+
+The built-in plugins are storred in the //./framework/plugins/// directory, sorted by categories, you can edit a built-in or make your own command, with the **PSPAPI**.
+
+If you want to make you own plugin, it is recommended to use the alternative plugin directory //./plugins/// from the phpsploit's user directory, this one works exactly like the buit-in plugins directory.
+
+If a command has been edited during an exploitation session, use the "**reload**" command to reload the plugins list.
+
+
+= SETTINGS =
+The **phpsploit** settings are available from the interface, they can be viewed, and edited with the **set** command.
+
+When a new session is opened, all //settings// are set to their default values, specified in the phpsploit's user configuration file. Editing this file allows you to specify your own default values, a very usefull feature for polymorphic backdoor, or custom HTTP headers. To get more informations about the configuration directory, please go to the **FILES** section.
+
+: **TARGET**
+This setting contains the remote backdoored URL in target server, for example, if you have injected the backdoor (obtained with the **infect** command) on a file named **test.php** in your local server's webroot, the **TARGET** will be http://localhost/test.php .
+	**Default value: None**
+
+: **BACKDOOR**
+This is the backdoor template, used to generate the effective micro-payload to be written into a target web page, it needs to be valid php code, and it's preferable to make him non-verbose, by prexifing it's main function with an //@//. For example, //@//eval() instead of eval(). For more informations about how **phpsploit** builds request, please read the **REQUEST BUILDING** section.
+The only purpose of the **BACKDOOR** is to execute the **REQ_HEADER_PAYLOAD**'s content so it need to contain the dynamic var %%PASSKEY%%.
+	**Default value: <?php @eval($_SERVER['HTTP_%%PASSKEY%%']);?>**
+
+: **PASSKEY**
+This var is interesting for customisation, assuming it is used as main header forwarder's name, changing is default value will act as a //password//, making another **phpsploit** user unable to use your //backdoor// if it does not own the **PASSKEY**.
+	**Default value: phpSpl01t**
+
+: **PROXY**
+With this setting, you can specify an //HTTP Proxy//, matching the pattern **address:port**, to send **phpsploit**'s requests through it. Be carrefull, a non-working **PROXY** will make the requests unreachable. To disable the proxy, set it's value to **None**.
+	**Default value: None**
+
+: **SAVEPATH**
+Here you can specify the default directory that will be used to save **phpsploit** sessions, when no arguments are specified for the **save** command. It uses your system's temporary directory as //default// value.
+
+: **TMPPATH**
+This setting is a bit different than the **SAVEPATH** one, because phpsploit use it to write temporary files, for example, it is used by the **edit** command in the //remote shell//. It uses your system's temporary directory as //default// value.
+
+: **REQ_DEFAULT_METHOD**
+This is the default http METHOD that will be used to send payloads, so it's value can only be //GET// or //POST//.
+	**Default value: GET**
+
+: **REQ_HEADER_PAYLOAD**
+This setting is the dynamic payload forwarder, when a request is send by the **phpsploit** framework, a dynamic //HTTP HEADER// will be sent on eaceh request, the header's name is the **PASSKEY** setting, and the value is the  **REQ_HEADER_PAYLOAD** value, for more informations about how **phpsploit** builds requests, please read the **REQUEST BUILDING** section.
+	**Default value: eval(base64_decode(%%BASE64%%))**
+
+: **REQ_INTERVAL**
+This setting can be usefull for large payloads, sent with a big amount of requests, for example, when using the **upload**'s remote shell command, when seending a big file to the server.
+It's used to add a delay between each request with a simple syntax. Using a number as value (ex: 20) will wait this exact numer of seconds, but you cal also specify a tuple of numbers, for example, the default value will make the builder wait a random number of seconds between **1** and **10** before each request. To disable it, just set it to //0//.
+	**Default value: 1-10**
+
+: **REQ_MAX_HEADERS**
+**Mainly used for HTTP GET requests**. Assuming that phpsploit use http headers for payload encapsulation, it's important to know what is the exact http server's headers limit, because a too small **REQ_MAX_HEADERS** value will decrease the max payload size per request. Most servers, like apache and IIS accept up to 100 headers per request, but other servers can allow 200 headers or more, and smaller servers can limit headers numer to 50 or less. The default value works with a large amount of common servers with default configuration, but in some cases it will be necessary to reduce this value.
+	**Default value: 100**
+
+: **REQ_MAX_HEADER_SIZE**
+**Mainly used for HTTP GET requests**. This setting is complementary to the **REQ_MAX_HEADERS** one, because it sets the max size that //each header// can contain. In most cases, the common servers limit the size to //8Kio//, but many others, like **apache tomcat** and a lot of virtualized web hosting solutions limit the maximum size of each header to //4Kio// or less.
+	**Default value: 8Kb**
+
+: **REQ_MAX_POST_SIZE**
+**Mainly used for HTTP POST requests**. This is the target server's limit for POST data, in a lot of servers, this limit is very large, such as 32Mio or more, but a lot of other web servers, and their default configurations sets this limit to 8Mio. If you intend to use POST request during a remote **phpsploit** session, it is recommended to run the **phpinfo** command that provides the real server's //maximum post size//, then adapt the **phpsploit**'s **REQ_MAX_POST_SIZE**.
+	**Default value: 8Mb**
+
+: **REQ_ZLIB_TRY_LIMIT**
+On the **phpsploit**'s request builder, when the payload can't be sent in one single request because he is too large, the framework will start a lot of computering functions to calculate how much requests are needed for each //http method//, and to decrease the number of needed requests, he will each time try to compress the payload with **ZLIB**, this feature is usefull to descrease the number of requests. But, the bigger the base payload, the slower the needed computation time. Assuming this, you can with this setting specify a maximum payload size, from which the manufacturer will not longer try to compress the cuted payload. That will increase the number of needed requests, but shalt the computation time acceptable. More powerfull your computer, more this value can be increased.
+	**Default value: 5Mb**
+
+: **HTTP_USER_AGENT**
+This is the user-agent header used on each **phpsploit** request, to pick a random user-agent from a wordlist on each request, you can also use a //file object// as value.
+	**Default value: file://framework/misc/http_user_agents.lst**
+
+------------------------------------------------------------------------------
+Note that the **HTTP_USER_AGENT** setting is included by default, but it is possible to create as many default headers as you want, you just need to create a setting starting with HTTP_ followed by the name of the header.
+	**Example: set HTTP_ACCEPT_LANGUAGE fr-FR;en-US**
+
+//File objects// can be used for HTTP_* settings, the syntax is **file:///full/path/to/file.txt**, these objects will pick an random line in file for each http request. This facilitates polymorphic requests generation, and therefore, stealth. A file object is defaultly used for the **HTTP_USER_AGENT** setting.
+
+
+= REMOTE ENVIRONMENT =
+The remote environment variables are available from the **REMOTE SHELL**.
+They are usefull to store server related informations, and **PSPAPI** plugins have write access to them.
+
+User can show, edit or delete them with the "**env**" command, through the **REMOTE SHELL** instance.
+
+Be very careful while manually editing these variables, because wrong values can render inoperative certain commands.
+
+There is a list of **REMOTE ENVIRONMENT** variables defaultly used by **phpsploit** core and built-in plugins:
+
+: **CWD**
+This variable contains the current remote working directory, the **cd** and **pwd** commands use it as reference.
+
+: **WEB_ROOT**
+This variable contains the absolute path to the remote web root directory.
+
+: **WRITE_TMPDIR**
+This variable imperatively needs to conatain the absolute path to a writeable remote directory. It is essential for multirequest payloads execution, that stores full payload parts into this path.
+
+: **WRITE_WEBDIR**
+This environment variable contains the absolute path to a writeable remote directory //imperatively accessible from the web//. It can be used for evasion **MODULES**.
+
+
+= REQUEST BUILDING =
+This section is about how the **phpsploit framework** manages the requests.
+
+**1 - BACKDOOR**
+- First, the **BACKDOOR** setting defines the main backdoor template, him, //and only HIM// needs to be written in the **TARGET** remote URL.
+- To understand the principle, it is necessary to know that the PHP language automatically adds all the //request headers// into the $_SERVER global array, prefixing each header name by the "HTTP_" string.
+- Assuming that, the **BACKDOOR** just works like a forwarder, executing the $_SERVER['HTTP_%%**PASSKEY**%%'] remote variable who contains the **REQ_HEADER_PAYLOAD**.
+
+
+**2 - REQ_HEADER_PAYLOAD**
+- The **REQ_HEADER_PAYLOAD** also known as //Header Forwarder// is a header that is sent on each http request, the **PASSKEY** setting is used as name, and the **REQ_HEADER_PAYLOAD** is he's value's template.
+- This header acts like a payload forwarder, permitting execution of the **BASE64 PAYLOAD**, by executing **BASE64** encoded php code.
+
+
+**3 - BASE64 PAYLOAD**
+- The **BASE64 PAYOLOAD** is automatically generated for each request, he is the last step for //real payload execution//. They undencoded values can be found in the //./framework/phpfiles/forwarders/// **phpsploit** directory.
+- **For POST request**, this payload executes the $POST['%%**PASSKEY**%%'] php variable, who is used as **REAL PAYLOAD** when usgin this http method.
+- **For GET requests**, it acts concatenating the list of dynamic **phpsploit** headers alphabetically reordrered, each containing the splitted **REAL PAYLOAD**.
+
+
+**4 - REAL PAYLOAD**
+- The **REAL PAYLOAD** contains a large amout of //zlib compressed// then //base64 encoded// php code, who is dynamically generated by the **phppsloit** framework's optimization functions.
+- Unencoded (defaultly done by the **BASE64 PAYLOAD**), he is the **BASE PAYLOAD** passed through **ENCAPSULATION**.
+
+
+**5 - BASE PAYLOAD**
+- The base payload, can be a plugin's payload (contained in the //./framework/commands/<gategory>/<plugin>/payload.php// file), or the default **phpsploit** remote session opener that is called when running the **exploit** command (available in the //./framework/phpfiles/server_link/open.php// file).
+- Base payloads are php 4.1.1 compatible (because a lot of web servers already use an old version of php).
+- The //!import(<function>)// lines allows php base payloads to import **phpsploit** dedicated functions contained in the//./framework/phplibs/// directory. Usefull to limit redundancy.
+
+
+**6 - ENCAPSULATION**
+- To manage return codes and **phpsploit** tunneling, each **BASE PAYLOAD** is encapsulated with the //./framework/phpfiles/encapsulator.php//'s php code.
+- It also manages response compression with **ZLIB**, to speed-up server's responses.
+
+
+= FILES =
+**Configuration directory:**
+: If the **$XDG_CONFIG_HOME** shell environment variable is set:
+**${XDG_CONFIG_HOME}/phpsploit/** (a.k.a. likely ~/.config/phpsploit/)
+: Else the user home is used as base directory:
+**~/.phpsploit/** (a.k.a. ${HOME}/.phpsploit/ on GNU/Linux)
+
+
+The "./config" file is used as **phpsploit** configuration file, on root user's configuration directory.
+It allows to reconfigure the default **SETTINGS** (see the **SETTINGS** section for more informations)
+
+The "./plugins/" directory can be used to make your own **phpsploit** plugins.
+
+
+= ISSUES =
+: To submit any issue, bug or proposal, please send it in the phpsploit's issues section:
+https://bitbucket.org/nil0x42/phpsploit/issues
+
+
+= CONTRIBUTE =
+: If you want to contribute to **phpsploit**, submit a plugin, patch, or anything else, take a look at the **CONTRIBUTE** file, from the ./doc directory
+
+
+= AUTHOR =
+**nil0x42** <http://goo.gl/kb2wf>
+
+
+= LICENCE =
+This software is under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
