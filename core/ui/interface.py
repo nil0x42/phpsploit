@@ -20,7 +20,7 @@ class Cmd(cmdshell.Cmd):
 
     def __init__(self):
         # explicitly run parent's __init__()
-        super(Cmd, self).__init__(self)
+        super(Cmd, self).__init__()
 
 
     def precmd(self, argv):
@@ -82,14 +82,14 @@ class Cmd(cmdshell.Cmd):
             the "infect" command.
         """
         print("[*] Current backdoor is:")
-        print( PhpCode(session.Conf.BACKDOOR) + "\n" )
+        print( session.Conf.BACKDOOR() + "\n" )
 
         if self.__class__.__name__ == "RemoteShell":
             m = ("[*] Use `set TARGET <VALUE>` to use another url as target."
                  "\n[*] To exploit a new server, disconnect from «%s» first.")
             return print( m.format(session.Env.HOST) )
 
-        if session.Conf.TARGET is None:
+        if session.Conf.TARGET() is None:
             m = ("To run a remote tunnel, the backdoor shown above must be\n"
                  "manually injected in a remote server executable web page.\n"
                  "Then, use `set TARGET <BACKDOORED_URL>` and run `exploit`.")
