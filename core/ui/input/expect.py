@@ -1,17 +1,6 @@
-"""PhpSploit input related classes.
-
-Provides classes related to user input.
-
-SUMMARY:
-
-* Expect()
-    Ask a question which expects some user input, with timer feature.
-
-"""
-
 import signal
-from .color import colorize
-#import ui.input
+from ..color import colorize
+from ..output import isatty
 
 class Expect:
     """Expect some user input, and provide response related to the
@@ -167,11 +156,10 @@ class Expect:
                 question = question.rstrip() + suffix
 
         # force timeout = 1 if not interactive:
-        #if ui.input.isatty():
-        #    timeout = self.timeout
-        #else:
-        #    timeout = 1
-        timeout = self.timeout
+        if isatty():
+            timeout = self.timeout
+        else:
+            timeout = 1
 
 
         # ask loop
