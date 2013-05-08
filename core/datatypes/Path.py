@@ -28,6 +28,20 @@ class Path(str):
 
     """
     def __new__(cls, *args, mode='e'):
+        cls.tmpfile = False
+
+        # if not args, default to random tmp file path:
+        if not args:
+            try: import session, string, random
+            except: raise TypeError("Required 'path' argument(s) not found")
+            # get random tmp file path
+            randStrChars = string.ascii_lowercase + string.digits
+            randStr = "".join( random.choice(randStrChars) for x in range(8) )
+            args = (session.Conf.TMPPATH(), "phpsploit-%s.txt" %randStr)
+            # create the file with empty content
+            open(os.path.truepath(*args), "w").close()
+            cls.tmpfile = True # set obj type = tmpfile
+
         path = os.path.truepath(*args)
 
         if mode:
@@ -72,6 +86,27 @@ class Path(str):
         return super(Path, self).__str__()
 
 
+    def __del__(self):
+        # remove tmp file
+        if self.tmpfile:
+            os.unlink(self)
+
+    def edit(self):
+        """Try to open file with system's text editor. Return False if the
+        edit() method is not available or the file has not changed, and
+        return True if the data had been edited.
+
+        """
+        try: import session, subprocess
+        except: return False
+
+        old = self.read()
+        subprocess.call([session.Conf.TEXTEDITOR(), self])
+        if self.read() != old:
+            return True
+        return False
+
+
     def read(self):
         """Return a string buffer of the file path's data. Newlines are
         automatically replaced by system specific newline char(s)
@@ -89,7 +124,7 @@ class Path(str):
         """
         lines = data.splitlines()
         data = os.linesep.join(lines)
-        open(self.name,'w').write(data)
+        open(self ,'w').write(data)
 
 
     def readlines(self):
