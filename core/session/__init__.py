@@ -7,3 +7,5 @@ self as a PhpSploit blank session, with its default values.
 from . import settings
 
 Conf = settings.Settings()
+#Alias = aliases.New()
+#Env = environment.New()
