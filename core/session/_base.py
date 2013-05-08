@@ -55,7 +55,7 @@ class BaseDict(dict):
         buffer += tpl.format("Variable", "Value")
         buffer += tpl.format("--------", "-----")
 
-        for id, key in enumerate(keys):
+        for id, key in enumerate( sorted(keys) ):
             buffer += colorize( ["%Reset", "%Reset"][id%2], \
                                 tpl.format(key, self[key]))
 
