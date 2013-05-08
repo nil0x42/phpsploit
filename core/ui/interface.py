@@ -383,15 +383,14 @@ class Cmd(cmdshell.Cmd):
             # `set <VAR> +`: use TEXTEDITOR as buffer viewer in file mode
             if len(argv) == 3:
                 # get a buffer obj from setting's raw buffer value
-                buffer = ui.input.Buffer( session.Conf[argv[1]].buffer )
+                buffer = Path(); buffer.write( session.Conf[argv[1]].buffer )
                 # try to edit it through TEXTEDITOR, and update it
                 # if it has been modified.
                 if buffer.edit():
-                    session.Conf[argv[1]] = buffer
-
+                    session.Conf[argv[1]] = buffer.read()
+            else:
             # `set <VAR> + "value"`: add value on setting possible choices
             session.Conf[argv[1]] += " ".join(argv[3:])
-
         # `set <VAR> "value"`: just change VAR's "value"
         else:
             session.Conf[argv[1]] = argv[2]

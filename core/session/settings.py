@@ -1,6 +1,6 @@
 import os, sys, re, random, tempfile, webbrowser
 from datatypes import *
-from ui.color import colorize, decolorize
+from ui.color import colorize
 
 
 class SettingVar:
@@ -89,7 +89,6 @@ class SettingVar:
         string += " (%s choice%s)" %(choices, ('','s')[choices>1])
         string += colorize("%BoldBlack", ">")
 
-        return decolorize(string)
         return string
 
 
@@ -169,8 +168,8 @@ class Settings:
 
     def __init__(self):
         # Dirs
-        self.TMPPATH  = tempfile.gettempdir()
-        self.SAVEPATH = tempfile.gettempdir()
+        self.TMPPATH  = "%%DEFAULT%%"
+        self.SAVEPATH = "%%DEFAULT%%"
 
         # Tunnel link opener
         self.TARGET   = None
@@ -197,10 +196,7 @@ class Settings:
 
 
     def __getattribute__(self, name):
-
-        value = object.__getattribute__(self, name)
-        #print(type(value))
-        return value
+        return object.__getattribute__(self, name)
 
 
     def __setattr__(self, name, value):
