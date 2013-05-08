@@ -4,7 +4,9 @@ from datatypes import *
 
 
 class Settings(_base.MetaDict):
-    """Instanciate a dict() like object that stores PhpSploit
+    """Configuration Settings
+
+    Instanciate a dict() like object that stores PhpSploit
     session settings.
 
     Behavior:

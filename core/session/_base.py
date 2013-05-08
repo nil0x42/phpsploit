@@ -19,26 +19,6 @@ class BaseDict(dict):
     def __init__(self):
         pass
 
-    def __str__(self):
-        """Display the whole items list.
-        >>> obj = BaseDict()
-        >>> str(obj) # does the same than:
-        >>> obj()
-
-        """
-        return self.__call__()
-
-    def __call__(self, pattern=""):
-        """Display all self items whose name starts with `pattern`.
-        By default, it print the whole list.
-
-        """
-        string = "=========================="
-        for key, value in self.items():
-            if key.startswith(pattern):
-                string += key + " ---> " + str(value) + "\n"
-        string += "=========================="
-        return string
 
     def __setitem__(self, name, value):
         """overwrite dict()'s __setitem__ magic method, by calling
@@ -49,6 +29,38 @@ class BaseDict(dict):
         if isinstance(value, str) and str(value).lower() in ["", "none"]:
             return self.__delitem__(self, name)
         super(BaseDict, self).__setitem__(name, value)
+
+
+    def __str__(self):
+        """Display the whole items list.
+        >>> obj = BaseDict()
+        >>> str(obj) # does the same than:
+        >>> obj()
+
+        """
+        return self.__call__()
+
+
+    def __call__(self, pattern=""):
+        """Display all self items whose name starts with `pattern`.
+        By default, it print the whole list.
+
+        """
+        keys = [k for k in self.keys() if k.startswith(pattern)]
+        tpl = ("    {:%s}  {}\n") %max(8, len(max(keys, key=len)))
+
+        title = self.__doc__.splitlines()[0].strip()
+        buffer = title + "\n" + ("=" * len(title)) + "\n\n"
+
+        buffer += tpl.format("Variable", "Value")
+        buffer += tpl.format("--------", "-----")
+
+        for id, key in enumerate(keys):
+            buffer += colorize( ["%Reset", "%Reset"][id%2], \
+                                tpl.format(key, self[key]))
+
+        return "\n" + buffer + colorize("%Reset")
+
 
 
 
@@ -77,11 +89,13 @@ class MetaDict(BaseDict):
     def __init__(self):
         pass
 
+
     def __getattribute__(self, name):
         """Uppercase syntaxically valid names loop to getitem"""
         if name != "_item_pattern" and re.match(self._item_pattern, name):
             return self.__getitem__(name)
         return super(MetaDict, self).__getattribute__(name)
+
 
     def __setattr__(self, name, value):
         """Uppercase syntaxically valid names loop to setitem"""
@@ -89,9 +103,11 @@ class MetaDict(BaseDict):
             return self.__setitem__(name, value)
         return super(MetaDict, self).__setattr__(name, value)
 
+
     def __dir__(self):
         """Append self dict's keys to standard __dir__ method."""
         return super(MetaDict, self).__dir__() + list(self.keys())
+
 
 
 
