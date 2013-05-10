@@ -112,14 +112,15 @@ class Path(str):
         return True if the data had been edited.
 
         """
-        try: import session, subprocess
-        except: return False
-
-        old = self.read()
-        subprocess.call([session.Conf.TEXTEDITOR(), self])
-        if self.read() != old:
+        try:
+            import session, subprocess, ui.output
+            assert ui.output.isatty()
+            old = self.read()
+            subprocess.call([session.Conf.TEXTEDITOR(), self])
+            assert self.read() != old
             return True
-        return False
+        except (ImportError, AssertionError):
+            return False
 
 
     def read(self):
