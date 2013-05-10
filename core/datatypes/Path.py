@@ -27,7 +27,21 @@ class Path(str):
     '/home/user/.bashrc'
 
     """
-    def __new__(cls, *args, mode='e'):
+    def __new__(cls, *args, mode='', ext='txt'):
+        """Create a new path object.
+
+        The file/dir path is determined by joining `args` as a single
+        absolute path.
+
+        virtual undefined path:
+        -----------------------
+        If no args are specified, then an empty virtual Path object is
+        created. It defaultly binds to a temporary file name randomized
+        whithin PhpSploit set temporary directory (TMPPATH setting).
+        In this case, the `ext` argument provides file name's default
+        type extension, which defaults to "txt".
+
+        """
         cls.tmpfile = False
 
         # if not args, default to random tmp file path:
@@ -36,13 +50,13 @@ class Path(str):
             except: raise TypeError("Required 'path' argument(s) not found")
             # get random tmp file path
             randStrChars = string.ascii_lowercase + string.digits
-            randStr = "".join( random.choice(randStrChars) for x in range(8) )
-            args = (session.Conf.TMPPATH(), "phpsploit-%s.txt" %randStr)
+            randStr = "".join(random.choice(randStrChars) for x in range(12))
+            path = session.Conf.TMPPATH() + randStr + "." + ext
             # create the file with empty content
-            open(os.path.truepath(*args), "w").close()
+            open(path, "w").close()
             cls.tmpfile = True # set obj type = tmpfile
-
-        path = os.path.truepath(*args)
+        else:
+            path = os.path.truepath(*args)
 
         if mode:
             mode += 'e'
@@ -79,7 +93,7 @@ class Path(str):
 
 
     def __call__(self):
-        return os.path.realpath( str(self) )
+        return str(self)
 
 
     def __str__(self):
@@ -90,6 +104,7 @@ class Path(str):
         # remove tmp file
         if self.tmpfile:
             os.unlink(self)
+
 
     def edit(self):
         """Try to open file with system's text editor. Return False if the
@@ -130,8 +145,3 @@ class Path(str):
     def readlines(self):
         """Get a list of file path content as a list of lines"""
         return open(self ,'r').read().splitlines()
-
-
-class WritableDir(Path):
-    def __new__(cls, *args, mode='e'):
-        super(WritableDir, cls).__new__(cls, *args, mode='drw')
