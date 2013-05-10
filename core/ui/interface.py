@@ -1,11 +1,13 @@
 """PhpSploit shell interface.
 Unheriting the cmdshell's Cmd class, the PhpSplpoit shell interface
+
 provides interactive use of commands.
 
 """
-import os, difflib
+import sys, os, difflib
 
-import core, cmdshell, session, ui.input
+import core, cmdshell, ui.input
+import session, plugins
 
 from datatypes import Path, PhpCode
 from ui.color import colorize, decolorize
@@ -24,22 +26,16 @@ class Cmd(cmdshell.Cmd):
 
 
     def precmd(self, argv):
-        """Handle session aliases"""
+        """Handle pre command hooks such as session aliases"""
+        # if not an alias, return argv at is is
+        try: cmds = self.parseline( session.Alias[argv[0]] )
+        except (KeyError, IndexError): return argv
+        # interpret all except last and return last
+        # NOTE: interpreter's precmd had been overwritten
+        # to ignore relooping to this precmd function.
+        self.interpret(cmds[:-1], precmd=(lambda x: x))
+        return cmds[-1] + argv[1:]
 
-        # if first arg is not an alias, return normal argv
-        try: alias = getattr(session.Alias, argv[0])
-        except AttributeError: return argv
-
-        # parse alias value, and add result to cmdqueue
-        cmds = self.parseline(alias)
-        if not cmds: return []
-        cmds[-1] += argv
-        self.cmdqueue = cmds + self.cmdqueue
-
-        aliasArgs = self.parseline(alias)
-        aliasArgs[-1] += argv
-        self.cmdqueue = aliasArgs + self.cmdqueue
-        return []
 
 
     #####################
@@ -57,6 +53,7 @@ class Cmd(cmdshell.Cmd):
             backing to the main shell interface
         """
         exit()
+
 
 
     ########################
@@ -103,6 +100,7 @@ class Cmd(cmdshell.Cmd):
         self.cmdqueue = remoteShell.cmdqueue # get back command queue
 
 
+
     ######################
     ### COMMAND: clear ###
     def do_clear(self, argv):
@@ -116,6 +114,7 @@ class Cmd(cmdshell.Cmd):
             screen. Used for visibility purposes.
         """
         return os.system('cls' if os.name=='nt' else 'clear')
+
 
 
     #####################
@@ -139,6 +138,7 @@ class Cmd(cmdshell.Cmd):
             return_value = os.system(cmd)
             if return_value is not 0:
                 txtMan()
+
 
 
     ########################
@@ -227,6 +227,7 @@ class Cmd(cmdshell.Cmd):
             return self.interpret("help session")
 
 
+
     #####################
     ### COMMAND: lpwd ###
     def do_lpwd(self, argv):
@@ -241,6 +242,7 @@ class Cmd(cmdshell.Cmd):
             unix systems.
         """
         print( os.getcwd() )
+
 
 
     ####################
@@ -276,6 +278,7 @@ class Cmd(cmdshell.Cmd):
             return "«{}»".format(e.filename), e.strerror
 
 
+
     ####################
     ### COMMAND: source ##
     def do_source(self, argv):
@@ -299,6 +302,7 @@ class Cmd(cmdshell.Cmd):
             self.interpret( open(argv[1], 'r').read() )
         except OSError as e:
             return "«{}»".format(e.filename), e.strerror
+
 
 
     ####################
@@ -388,12 +392,111 @@ class Cmd(cmdshell.Cmd):
                 # if it has been modified.
                 if buffer.edit():
                     session.Conf[argv[1]] = buffer.read()
-            else:
             # `set <VAR> + "value"`: add value on setting possible choices
-            session.Conf[argv[1]] += " ".join(argv[3:])
+            else:
+                session.Conf[argv[1]] += " ".join(argv[3:])
         # `set <VAR> "value"`: just change VAR's "value"
         else:
             session.Conf[argv[1]] = argv[2]
+
+
+
+    ####################
+    ### COMMAND: env ###
+    def complete_env(self, text, *ignored):
+        """use the env vars list as "env" argument completion array"""
+        text = text.upper()
+        completions = list()
+        for key in self.CNF['ENV'].keys():
+            if key.startswith(text):
+                completions.append(key+' ')
+        return(completions)
+
+    def do_env(self, argv):
+        """Environment variables handler
+
+        SYNOPSIS:
+            env [<NAME> ["<VALUE>"|None]]
+
+        DESCRIPTION:
+            The PhpSploit environment variables are created once a remote
+            server tunnel is opened through the interface.
+            These variables are used by the core and some plugins to
+            correctly manage and know server's current state.
+
+            > env
+            - Display all current env vars
+
+            > env <STRING>
+            - Display all env vars whose name starts with STRING.
+
+            > env <NAME> "<VALUE>"
+            - Set NAME env variable's value to VALUE.
+
+            > env <NAME> None
+            - Remove NAME environment variable.
+
+        CASE STUDY:
+            The `CWD` environment variable changes each time the `cd`
+            command is used. It contains the current directory path of
+            the session. When a remote server exploitation session starts,
+            it is defaultly set to the server's HOME directory if,
+            available, otherwise, it is set to the root web directory.
+            This environment variable may be manually changed by using the
+            `env CWD "/other/path"`, but it is generally not recommended
+            since it can broke some plugins if the value is not a remote
+            accessible absolute path.
+
+        BEHAVIOR:
+            - At framework start, the env vars array is empty.
+
+            - Env vars array is filled once a remote server shell is
+            started through the PhpSploit framework.
+
+            - Some envionment variables, such as CWD and WEB_ROOT are
+            crucial for remote session consistency. Be careful before
+            manually editing them.
+
+            - Plugins that need persistent server based variables may and
+            must use env vars. For example, the `mysql` plugin creates a
+            `MYSQL_CRED` environment variable that contains remote
+            database connection credentials when using `mysql commect`,
+            it allows the plugin to not require setting user/pass/serv
+            informations on each remote sql command.
+
+            - Unlike settings, env vars do not provide dynamic random
+            values. Setting a value is simply interpreted as a string,
+            apart for the special "None" value, that deletes the variable.
+        """
+        # `env [<PATTERN>]` display concerned settings list
+        if len(argv) < 3:
+            return print(session.Env( (argv+[""])[1] ))
+
+        # `env <NAME> <VALUE>`
+        session.Env[argv[1]] = " ".join(argv[2:])
+
+
+
+    ########################
+    ### COMMAND: backlog ###
+    def do_backlog(self, argv):
+        """Open last command's output with text editor
+
+        SYNOPSIS:
+            backlog
+
+        DESCRIPTION:
+            Get the last command's output data opened through
+            $TEXTEDITOR setting on a temporary file.
+
+            NOTE: Last command buffer is colorless. It means that
+            it does not contains ansy ANSI terminal color codes.
+        """
+        backlog = Path()
+        backlog.write(sys.stdout.backlog)
+        backlog.edit()
+        return
+
 
 
     #####################

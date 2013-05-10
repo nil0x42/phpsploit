@@ -84,7 +84,7 @@ Limitations & Other changes:
 
 """
 
-import cmd, shlex, re, sys
+import sys, re, cmd, shlex
 
 __author__ = "nil0x42 <http://goo.gl/kb2wf>"
 
@@ -138,8 +138,6 @@ class Cmd(cmd.Cmd):
         if self.intro:
             self.stdout.write( str(self.intro)+"\n" )
 
-
-
         # start command loop
         try:
             self.preloop() # pre command hook method
@@ -170,14 +168,28 @@ class Cmd(cmd.Cmd):
             self.postloop() # post command hook method
 
 
-    def interpret(self, string):
-        """Interpret the given string as commands"""
+    def interpret(self, commands, precmd=None, onecmd=None, postcmd=None):
+        """Interpret `commands` as a list of commands.
+        `commands` can be a multi command raw string or a preformated
+        commands list. If str, is is automatically parsed.
+
+        precmd, onecmd and postcmd funcs can be overwritten from arguments.
+        If None, they default to their respective class methods.
+        """
+        # is commands is str, use self.parseline
+        if isinstance(commands, str):
+            commands = self.parseline(commands)
+
+        if precmd is None: precmd = self.precmd
+        if onecmd is None: onecmd = self.onecmd
+        if postcmd is None: postcmd = self.postcmd
+
         retval = 0
-        for argv in self.parseline(string):
+        for argv in commands:
             try:
-                argv = self.precmd(argv)
-                retval = self.onecmd(argv)
-                retval = self.postcmd(retval, argv)
+                argv = precmd(argv)
+                retval = onecmd(argv)
+                retval = postcmd(retval, argv)
             # on exit, let return_errcode() handle error message if any,
             # then raise SystemExit with the proper return code number.
             except SystemExit as e:
