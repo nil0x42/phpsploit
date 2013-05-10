@@ -27,12 +27,9 @@ class Cmd(cmdshell.Cmd):
 
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
-        # if not an alias, return argv at is is
+        # Alias Handler
         try: cmds = self.parseline( session.Alias[argv[0]] )
         except (KeyError, IndexError): return argv
-        # interpret all except last and return last
-        # NOTE: interpreter's precmd had been overwritten
-        # to ignore relooping to this precmd function.
         self.interpret(cmds[:-1], precmd=(lambda x: x))
         return cmds[-1] + argv[1:]
 
@@ -196,35 +193,34 @@ class Cmd(cmdshell.Cmd):
         """
         argv += [None, None] # prevent argv IndexErrors
 
-        try:
-            # session save
-            if argv[1] == 'save':
-                return session.dump(argv[2])
-            # session load
-            if argv[1] == 'load':
-                return session.load(argv[2])
-            # session diff
-            if argv[1] == 'diff':
-                new = decolorize(session.dump()).splitlines()
-                if argv[2] is None:
-                    old = session.Backup().dump()
-                else:
-                    old = session.New(argv[2])
-                old = decolorize(old).splitlines()
+        # session save
+        if argv[1] == 'save':
+            return session.dump(argv[2])
 
-                color = {' ':'%Reset', '+':'%Red', '-':'%Green', '?':'%Pink'}
-                for line in difflib.Differ().compare(old, new):
-                    print( colorize(color[line[0]], line) )
-                return
-            # session <FILE>
-            if argv[1] is not None:
-                return print( session.load(argv[1]).dump() )
-            # session
-            return print( session.dump() )
+        # session load
+        if argv[1] == 'load':
+            return session.load(argv[2])
 
-        # run command help on any error
-        except:
-            return self.interpret("help session")
+        # session diff
+        if argv[1] == 'diff':
+            new = decolorize(session.dump()).splitlines()
+            if argv[2] is None:
+                old = session.Backup().dump()
+            else:
+                old = session.New(argv[2])
+            old = decolorize(old).splitlines()
+
+            color = {' ':'%Reset', '+':'%Red', '-':'%Green', '?':'%Pink'}
+            for line in difflib.Differ().compare(old, new):
+                print( colorize(color[line[0]], line) )
+            return
+
+        # session <FILE>
+        if argv[1] is not None:
+            return print( session.load(argv[1]).dump() )
+
+        # session
+        return print( session.dump() )
 
 
 
