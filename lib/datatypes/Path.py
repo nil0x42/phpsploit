@@ -46,7 +46,8 @@ class Path(str):
 
         # if not args, default to random tmp file path:
         if not args:
-            try: import session, string, random
+            import string, random
+            try: from core import session
             except: raise TypeError("Required 'path' argument(s) not found")
             # get random tmp file path
             randStrChars = string.ascii_lowercase + string.digits
@@ -113,7 +114,8 @@ class Path(str):
 
         """
         try:
-            import session, subprocess, ui.output
+            import subprocess, ui.output
+            from core import session
             assert ui.output.isatty()
             old = self.read()
             subprocess.call([session.Conf.TEXTEDITOR(), self])

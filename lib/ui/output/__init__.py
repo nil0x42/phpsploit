@@ -6,7 +6,7 @@ stdout wrapper.
 
 Stuff:
 
-* wrap(): (file)
+* Wrapper(): (file)
     Enable stdout/stdin file wrapping with PhpSploit dedicated
     output fiel wrappers, providing nice features.
 

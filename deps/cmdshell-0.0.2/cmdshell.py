@@ -438,7 +438,6 @@ class Cmd(cmd.Cmd):
     def do_exit(self, argv):
         'Leave the shell interface'
         self.stdout.write("*** Command shell left with 'exit'\n")
-        exit('chlick\nchez\nchlouck!')
 
 
     def except_SystemExit(self, exception):

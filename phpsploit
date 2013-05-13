@@ -1,18 +1,19 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# Make sure the script is not imported
+## Make sure the script is not imported
 try: from __main__ import __file__
 except: exit('PhpSploit must be run with the provided script')
 
-# Spread PhpSploit libraries
+## Spread PhpSploit libraries
 import lib
 
-# Enable stdout wrapper
+## Enable stdout wrapper
 import sys, ui.output
+#sys.stdout = ui.output.Wrapper(backlog=True)
 sys.stdout = ui.output.Wrapper()
 
-# Start shell interface
+## Start shell interface
 import ui.interface
 interface = ui.interface.Cmd()
 interface.cmdloop()
