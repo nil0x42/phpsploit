@@ -17,18 +17,21 @@ class Settings(baseclass.MetaDict):
     >>> Conf.HTTP_USER_AGENT += "IE7" # add a possible TMPPATH value (random)
     >>> Conf.HTTP_USER_AGENT = "file:///tmp/useragents.lst"
 
-    The last example above bind the var's value to the file's data.
-    It means that the var's value is a dynamically picked valid line
-    from file.
+    The last example binds the var's value to the file's data.
+
+    When a setting buffer contains multiple lines, such as in
+    the case of file binds, the the var's value will be randomly
+    picked from valid lines.
 
     """
     def __init__(self):
         """Declare default settings values"""
         super().__init__()
 
-        # Dirs
+        # Session related
         self.TMPPATH  = "%%DEFAULT%%"
         self.SAVEPATH = "%%DEFAULT%%"
+        self.CACHE_SIZE = "1 MiB"
 
         # Tunnel link opener
         self.TARGET   = None
@@ -99,6 +102,9 @@ class Settings(baseclass.MetaDict):
         if value == "%%DEFAULT%%":
             value = tempfile.gettempdir()
         return Path(value, mode="drw")
+
+    def _set_CACHE_SIZE(self, value):
+        return ByteSize(value)
 
     def _set_TARGET(self, value):
         if value.lower() in ["", "none"]:
