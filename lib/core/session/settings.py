@@ -1,9 +1,9 @@
 import os, sys, re, tempfile, webbrowser
-from . import _base
+from . import baseclass
 from datatypes import *
 
 
-class Settings(_base.MetaDict):
+class Settings(baseclass.MetaDict):
     """Configuration Settings
 
     Instanciate a dict() like object that stores PhpSploit
@@ -24,6 +24,9 @@ class Settings(_base.MetaDict):
     """
     def __init__(self):
         """Declare default settings values"""
+        #super(baseclass.MetaDict, self).__init__()
+        super().__init__()
+
         # Dirs
         self.TMPPATH  = "%%DEFAULT%%"
         self.SAVEPATH = "%%DEFAULT%%"
@@ -39,7 +42,7 @@ class Settings(_base.MetaDict):
         self.WEBBROWSER = "%%DEFAULT%%"
 
         # HTTP Headers
-        self.HTTP_USER_AGENT = "file://framework/misc/http_user_agents.lst"
+        self.HTTP_USER_AGENT = "file://data/user_agents.lst"
 
         # HTTP Requests settings
         self.REQ_DEFAULT_METHOD  = "GET"
@@ -53,13 +56,13 @@ class Settings(_base.MetaDict):
 
     def __setitem__(self, name, value):
         # if the set value is a RandLineBuffer obj, just do it!
-        if isinstance(value, _base.RandLineBuffer):
+        if isinstance(value, baseclass.RandLineBuffer):
             return super(Settings, self).__setitem__(name, value)
 
         name = name.replace('-', '_').upper()
 
         # ensure the setting name has good syntax
-        if not re.match(self._item_pattern, name):
+        if not self._isattr(name):
             raise KeyError("illegal name: '{}'".format(name))
 
         # ensure the setting name is allowed
@@ -72,10 +75,14 @@ class Settings(_base.MetaDict):
 
         # extend value into MultiLineItem() instance.
         #value = SettingItem(value, setter)
-        value = _base.RandLineBuffer(value, setter)
+        value = baseclass.RandLineBuffer(value, setter)
 
-        # set item via parent class
-        super(Settings, self).__setitem__(name, value)
+        # set item via parent dict() class
+        super(baseclass.MetaDict, self).__setitem__(name, value)
+
+
+    def _isattr(self, name):
+        return re.match("^[A-Z][A-Z0-9_]+$", name)
 
 
     def _set_HTTP_header(self, value):
