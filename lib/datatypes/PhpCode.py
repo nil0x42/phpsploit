@@ -23,7 +23,7 @@ class PhpCode(str):
 
 
     def _raw_value(self):
-        return super(PhpCode, self).__str__()
+        return super().__str__()
 
 
     def __call__(self):

@@ -21,7 +21,7 @@ class Executable(str):
 
 
     def _raw_value(self):
-        return super(Executable, self).__str__()
+        return super().__str__()
 
 
     def __call__(self):

@@ -96,9 +96,7 @@ class Cmd(cmd.Cmd):
 
 
     def __init__(self, completekey='tab', stdin=None, stdout=None):
-        # explicitly run parent's __init__()
-        super(Cmd, self).__init__(completekey=completekey, \
-                                  stdin=stdin, stdout=stdout)
+        super().__init__(completekey=completekey, stdin=stdin, stdout=stdout)
 
 
     def raw_input(self, prompt):
@@ -434,7 +432,7 @@ class Cmd(cmd.Cmd):
     def do_help(self, argv):
         'List available commands with "help" or detailed help with "help cmd".'
         argv.append('')
-        super(Cmd, self).do_help(argv[1])
+        super().do_help(argv[1])
 
 
     def do_exit(self, argv):

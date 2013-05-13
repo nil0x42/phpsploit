@@ -97,7 +97,7 @@ class Path(str):
 
 
     def __str__(self):
-        return super(Path, self).__str__()
+        return super().__str__()
 
 
     def __del__(self):

@@ -36,7 +36,7 @@ class Url(str):
 
 
     def _raw_value(self):
-        return super(Url, self).__str__()
+        return super().__str__()
 
 
     def __call__(self):

@@ -38,4 +38,6 @@ class Session(baseclass.MetaDict):
         """Session items are alphabetic and capitalized strings"""
         return re.match("^[A-Z][a-z]+$", name)
 
+
+# instanciate main phpsploit session as core.session
 session = Session()

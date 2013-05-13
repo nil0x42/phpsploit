@@ -22,7 +22,7 @@ class Cmd(cmdshell.Cmd):
 
     def __init__(self):
         # explicitly run parent's __init__()
-        super(Cmd, self).__init__()
+        super().__init__()
 
 
     def precmd(self, argv):

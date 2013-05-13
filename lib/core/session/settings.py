@@ -24,7 +24,6 @@ class Settings(baseclass.MetaDict):
     """
     def __init__(self):
         """Declare default settings values"""
-        #super(baseclass.MetaDict, self).__init__()
         super().__init__()
 
         # Dirs
@@ -57,7 +56,7 @@ class Settings(baseclass.MetaDict):
     def __setitem__(self, name, value):
         # if the set value is a RandLineBuffer obj, just do it!
         if isinstance(value, baseclass.RandLineBuffer):
-            return super(Settings, self).__setitem__(name, value)
+            return super().__setitem__(name, value)
 
         name = name.replace('-', '_').upper()
 
@@ -77,8 +76,8 @@ class Settings(baseclass.MetaDict):
         #value = SettingItem(value, setter)
         value = baseclass.RandLineBuffer(value, setter)
 
-        # set item via parent dict() class
-        super(baseclass.MetaDict, self).__setitem__(name, value)
+        # use grandparent class (bypass parent's None feature)
+        dict.__setitem__(self, name, value)
 
 
     def _isattr(self, name):

@@ -52,7 +52,7 @@ class ByteSize(int):
 
 
     def __str__(self):
-        self_str = super(ByteSize, self).__str__()
+        self_str = super().__str__()
         if self == 1:
             return "1 byte"
 

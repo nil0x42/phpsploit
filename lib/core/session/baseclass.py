@@ -74,7 +74,7 @@ class MetaDict(dict):
             return self.__getitem__(name)
 
         # otherwise call parent's getattribute
-        return super(MetaDict, self).__getattribute__(name)
+        return super().__getattribute__(name)
 
 
     def __setattr__(self, name, value):
@@ -83,7 +83,7 @@ class MetaDict(dict):
             return self.__setitem__(name, value)
 
         # otherwise call parent's setattr
-        return super(MetaDict, self).__setattr__(name, value)
+        return super().__setattr__(name, value)
 
 
     def __setitem__(self, name, value):
@@ -92,15 +92,14 @@ class MetaDict(dict):
         and str(value).lower() in ["", "none"]:
             return self.__delitem__(name)
 
-        return super(MetaDict, self).__setitem__(name, value)
+        return super().__setitem__(name, value)
 
 
     def __dir__(self):
         # considering the special get/set behavior, the __dir__()
         # method must also return self item whose name complies
         # with the self _isattr() boolean function.
-        dir = super(MetaDict, self).__dir__()
-        return dir + [i for i in self.keys() if self._isattr(i)]
+        return super().__dir__() + [i for i in self.keys() if self._isattr(i)]
 
 
     def _isattr(self, name):

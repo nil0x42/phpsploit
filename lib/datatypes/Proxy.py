@@ -55,7 +55,7 @@ class Proxy(str):
 
 
     def _raw_value(self):
-        return super(Proxy, self).__str__()
+        return super().__str__()
 
 
     def __call__(self):
