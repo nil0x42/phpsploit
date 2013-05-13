@@ -4,20 +4,21 @@ Unheriting the cmdshell's Cmd class, the PhpSplpoit shell interface
 provides interactive use of commands.
 
 """
-import sys, os, difflib
+import sys, os, difflib, traceback
 
 import core, cmdshell, ui.input
-import session, plugins
+from core import session, plugins
 
 from datatypes import Path, PhpCode
 from ui.color import colorize, decolorize
+
 
 class Cmd(cmdshell.Cmd):
 
     prompt = colorize('%Lined', 'phpsploit', '%Reset', ' > ')
 
-    nocmd  = "[!] Unknown Command: %s"
-    nohelp = "[!] No help for: %s"
+    nocmd  = "[-] Unknown Command: %s"
+    nohelp = "[-] No help for: %s"
     error  = "[!] %s"
 
     def __init__(self):
@@ -32,6 +33,12 @@ class Cmd(cmdshell.Cmd):
         except (KeyError, IndexError): return argv
         self.interpret(cmds[:-1], precmd=(lambda x: x))
         return cmds[-1] + argv[1:]
+
+
+    def onexception(self, exception):
+        """Add traceback handler to onexception"""
+        self.last_exception = exception
+        return super().onexception(exception)
 
 
 
@@ -50,6 +57,37 @@ class Cmd(cmdshell.Cmd):
             backing to the main shell interface
         """
         exit()
+
+
+
+    ######################
+    ### COMMAND: debug ###
+    def complete_debug(self, text, *ignored):
+        keys = ["traceback"]
+        return [x+' ' for x in keys if x.startswith(text)]
+
+    def do_debug(self, argv):
+        """Core debugging tools
+
+        SYNOPSIS:
+            debug
+            debug traceback
+
+        DESCRIPTION:
+            A command designed to show additionnal informations,
+            for core developpement and debugging purposes.
+
+            > debug traceback
+            Display last python exception's full stack trace to stdout.
+        """
+        argv.append('')
+
+        if argv[1] == "traceback":
+            e = self.last_exception
+            e = traceback.format_exception(type(e), e, e.__traceback__)
+            return print( colorize("%Red", "".join(e)) )
+
+        return self.interpret("help debug")
 
 
 
@@ -271,7 +309,7 @@ class Cmd(cmdshell.Cmd):
         try:
             os.chdir(newDir)
         except OSError as e:
-            return "«{}»".format(e.filename), e.strerror
+            raise OSError("«{}»: {}".format(e.filename, e.strerror))
 
 
 
@@ -297,7 +335,7 @@ class Cmd(cmdshell.Cmd):
         try:
             self.interpret( open(argv[1], 'r').read() )
         except OSError as e:
-            return "«{}»".format(e.filename), e.strerror
+            raise OSError("«{}»: {}".format(e.filename, e.strerror))
 
 
 

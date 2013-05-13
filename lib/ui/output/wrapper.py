@@ -141,9 +141,9 @@ def process_tags(line):
     '\\x1b[1m\\x1b[34m[*]\\x1b[0m FOO: \\x1b[37m«bar»\\x1b[0m\\n'
     """
     TAGS = [('%BoldBlue',   '[*] '),  # INFO
-            ('%BoldRed',    '[!] '),  # WARNING
+            ('%BoldRed',    '[!] '),  # ERROR
             ('%BoldPink',   '[?] '),  # QUESTION
-            ('%BoldYellow', '[-] ')]  # DEBUG
+            ('%BoldYellow', '[-] ')]  # WARNING
 
     # return the line as it is if untagged
     for index, tag in enumerate(TAGS):
