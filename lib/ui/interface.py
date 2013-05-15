@@ -341,14 +341,13 @@ class Cmd(cmdshell.Cmd):
 
     ####################
     ### COMMAND: set ###
-    def complete_set(self, text, *ignored):
-        """use the settings list as "set" argument completion array"""
-        text = text.upper()
-        completions = list()
-        for key in self.CNF['SET'].keys():
-            if key.startswith(text):
-                completions.append(key+' ')
-        return(completions)
+    def complete_set(self, text, *_):
+        """Use settings as `set` completers (case insensitive)"""
+        result = []
+        for key in session.Conf.keys():
+            if key.startswith( text.upper() ):
+                result.append(key)
+        return result
 
     def do_set(self, argv):
         """View and edit settings
@@ -438,13 +437,12 @@ class Cmd(cmdshell.Cmd):
     ####################
     ### COMMAND: env ###
     def complete_env(self, text, *ignored):
-        """use the env vars list as "env" argument completion array"""
-        text = text.upper()
-        completions = list()
-        for key in self.CNF['ENV'].keys():
-            if key.startswith(text):
-                completions.append(key+' ')
-        return(completions)
+        """Use env vars as `env` completers (case insensitive)"""
+        result = []
+        for key in session.Conf.keys():
+            if key.startswith( text.upper() ):
+                result.append(key)
+        return result
 
     def do_env(self, argv):
         """Environment variables handler
