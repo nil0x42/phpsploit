@@ -2,7 +2,7 @@
 
 """
 
-import os, re, random
+import os, re, random, hashlib
 from ui.color import colorize
 
 
@@ -222,18 +222,17 @@ class RandLineBuffer:
         if not self.file and len( self.buffer.splitlines() ) == 1:
             return str( self._getobj(self.buffer.strip()) )
 
-        # else, return multi choice buffer representation
-        string = colorize("%BoldBlack", "<", "%BoldBlue",
-                          "RandLine", "%BasicCyan")
-        if self.file:
-            string += colorize("@", "%Bold", self.file)
-        string += colorize("%BasicBlue")
+        # objID is file path OR buffer's md5sum
+        if self.file: objID = self.file
+        else: objID = hashlib.md5( self.buffer.encode('utf-8') ).hexdigest()
 
-        choices = len( self.choices() )
-        string += " (%s choice%s)" %(choices, ('','s')[choices>1])
-        string += colorize("%BoldBlack", ">")
+        # choices is the string that show available choices
+        num = len( self.choices() )
+        choices += " (%s choice%s)" %(num, ('','s')[num>1])
 
-        return string
+        return colorize("%BoldBlack", "<", "%BoldBlue", "RandLine",
+                        "%BasicCyan", "@", "%Bold", objID, "%BasicBlue",
+                        choices, "%BoldBlack", ">")
 
 
     def __iadd__(self, new):
