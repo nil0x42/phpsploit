@@ -318,12 +318,7 @@ class Cmd(cmdshell.Cmd):
         if len(argv) != 2:
             return self.interpret('help lcd')
 
-        # expand user special path notation "~"
-        newDir = os.path.expanduser( argv[1] )
-        try:
-            os.chdir(newDir)
-        except OSError as e:
-            raise OSError("«{}»: {}".format(e.filename, e.strerror))
+        os.chdir( os.path.expanduser(argv[1]) )
 
 
 
@@ -346,10 +341,7 @@ class Cmd(cmdshell.Cmd):
         if len(argv) != 2:
             return self.interpret("help source")
 
-        try:
-            self.interpret( open(argv[1], 'r').read() )
-        except OSError as e:
-            raise OSError("«{}»: {}".format(e.filename, e.strerror))
+        self.interpret( open(argv[1], 'r').read() )
 
 
 
