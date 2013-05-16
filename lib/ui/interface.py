@@ -113,6 +113,7 @@ class Cmd(cmdshell.Cmd):
             Take a look at the documentation (rtfm command), and also
             the "infect" command.
         """
+        open('/tmp/sdfjk')
         print("[*] Current backdoor is:")
         print( session.Conf.BACKDOOR() + "\n" )
 
@@ -229,36 +230,49 @@ class Cmd(cmdshell.Cmd):
             first, in order to load a file stored session file.
 
         """
-        argv += [None, None] # prevent argv IndexErrors
+        # prevent argv IndexError
+        argv += [None, None]
 
-        # session save
+        # session save [<FILE>]
         if argv[1] == 'save':
-            return session.dump(argv[2])
+            session.dump(argv[2])
+        # session load [<FILE>]
+        elif argv[1] == 'load':
+            session.update(argv[2])
+        # session diff [<FILE>]
+        elif argv[1] == 'diff':
+            session.diff(argv[2])
+        # sesion [<FILE>]
+        else:
+            print( session(argv[1]) )
 
-        # session load
-        if argv[1] == 'load':
-            return session.load(argv[2])
 
-        # session diff
-        if argv[1] == 'diff':
-            new = decolorize(session.dump()).splitlines()
-            if argv[2] is None:
-                old = session.Backup().dump()
-            else:
-                old = session.New(argv[2])
-            old = decolorize(old).splitlines()
 
-            color = {' ':'%Reset', '+':'%Red', '-':'%Green', '?':'%Pink'}
-            for line in difflib.Differ().compare(old, new):
-                print( colorize(color[line[0]], line) )
-            return
+        #    new = decolorize( session ).splitlines()
+        #    if argv[2] is None:
+        #        old = session.PREVIOUS
 
-        # session <FILE>
-        if argv[1] is not None:
-            return print( session.load(argv[1]).dump() )
+        ## session diff
+        #if argv[1] == 'diff':
+        #    new = decolorize(session.dump()).splitlines()
+        #    if argv[2] is None:
+        #        old = session.Backup().dump()
+        #    else:
+        #        old = session.New(argv[2])
+        #    old = decolorize(old).splitlines()
 
-        # session
-        return print( session.dump() )
+        #    color = {' ':'%Reset', '+':'%Red', '-':'%Green', '?':'%Pink'}
+        #    for line in difflib.Differ().compare(old, new):
+        #        print( colorize(color[line[0]], line) )
+        #    return
+
+        ## session <FILE>
+        #if argv[1] is not None:
+        #    return print( session(argv[1]) )
+
+        ## session
+        #return print( session.dump() )
+
 
 
 
@@ -671,3 +685,12 @@ class Cmd(cmdshell.Cmd):
                 description = get_description( get_doc(cmdName) )
                 print( '    ' + cmdName + spaceFill + description )
             print('')
+
+
+    def except_OSError(self, exception):
+        """Fix OSError args, removing errno, and adding filename"""
+        if isinstance(exception.errno, int):
+            exception.args = (exception.strerror,)
+        if exception.filename is not None:
+            exception.args += ("«{}»".format(exception.filename),)
+        return exception
