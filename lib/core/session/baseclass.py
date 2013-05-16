@@ -154,6 +154,9 @@ class RandLineBuffer:
     dynamic binding from external file paths.
 
     It takes one required argument, which is the variable's value.
+    Alternatively, is a tuple is provided as value, its first element
+    will bind to `file`, while the second binds to `buffer`
+    EXAMPLE: RandLineBuffer( ('/tmp/filepath.txt', 'line1\\nline2\\n') )
 
     The second argument (optionnal) takes a variable setter function,
     that raizes an exception if the value can't be set, and returns
@@ -170,15 +173,26 @@ class RandLineBuffer:
         "string" into the var's buffer, considering it as a new possible
         choice.
 
+    __getitem__() allows RandLineBuffer objects being converted to list
+        or tuples as [file, buffer].
+
     """
     def __init__(self, value, setfunc=(lambda x:x)):
-        value = str(value)
         self._getobj = setfunc
 
-        if value[7:] and value[:7].lower() == "file://":
+        if not isinstance(value, (list, tuple)):
+            value = str(value)
+
+        # if value is list/tuple, set `file, buffer = value`
+        if type(value) is not str:
+            self.file =  value[0]
+            self.buffer = value[1]
+        # elif value is a file:// string
+        elif value[7:] and value[:7].lower() == "file://":
             self.file = os.path.truepath(value[7:])
             try: self.buffer = open(self.file, "r").read()
             except: raise ValueError("not a readable file: «%s»" %self.file)
+        # elif value is just a string
         else:
             self.file = None
             self.buffer = value
@@ -228,7 +242,7 @@ class RandLineBuffer:
 
         # choices is the string that show available choices
         num = len( self.choices() )
-        choices += " (%s choice%s)" %(num, ('','s')[num>1])
+        choices = " (%s choice%s)" %(num, ('','s')[num>1])
 
         return colorize("%BoldBlack", "<", "%BoldBlue", "RandLine",
                         "%BasicCyan", "@", "%Bold", objID, "%BasicBlue",
@@ -264,6 +278,17 @@ class RandLineBuffer:
             self.buffer += os.linesep
         self.buffer += new
         return RandLineBuffer(self.buffer, self._getobj)
+
+
+    def __getitem__(self, item):
+        """It allows the object being converted to list or tuple,
+        returning these two elements: [self.file, self.buffer]
+        """
+        if item in [0, "file"]:
+            return self.file
+        elif item in [1, "buffer"]:
+            return self.buffer
+        raise IndexError(self.__class__.__name__+" index out of range")
 
 
     def update(self):
