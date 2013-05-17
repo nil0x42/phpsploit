@@ -1,4 +1,4 @@
-import signal
+import sys, signal
 from ..color import colorize
 from ..output import isatty
 
@@ -168,8 +168,9 @@ class Expect:
             # start timeout that calls illegal lambda (raising TypeError)
             signal.signal(signal.SIGALRM, lambda: 0)
             signal.alarm(self.timeout)
+            sys.stdout.write(question)
             try:
-                response = input(question).strip()
+                response = input().strip()
             except BaseException as e:
                 print()
                 # if skip interrupt, just reloop, otherwise, raise
