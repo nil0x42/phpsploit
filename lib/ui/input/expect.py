@@ -165,34 +165,43 @@ class Expect:
         # ask loop
         while True:
             response = None
-            signal.signal(signal.SIGALRM, lambda: 0) # illegal lambda
+            # start timeout that calls illegal lambda (raising TypeError)
+            signal.signal(signal.SIGALRM, lambda: 0)
             signal.alarm(self.timeout)
             try:
                 response = input(question).strip()
             except BaseException as e:
                 print()
-                if type(e) in (EOFError, KeyboardInterrupt): # interrupts
-                    if not self.skip_interrupt:
+                # if skip interrupt, just reloop, otherwise, raise
+                if type(e) in (EOFError, KeyboardInterrupt):
+                    if self.skip_interrupt:
+                        continue
+                    else:
                         raise e
-                elif type(e) == TypeError: # error raised by illegal lambda
-                    return default
+                # if timeout reached, use `default` as response
+                elif type(e) == TypeError:
+                    response = default
+                # normally raise unplanned exceptions
                 else:
-                    raise e # unplanned errors stand raised normally
+                    raise e
             signal.alarm(0)
 
-
-            if response is None:
-                continue
-
-            if expect is None: # None expect = accept any response
+            # if None is expected, any response is accepted
+            if expect is None:
                 return response
 
+            # use default response if not given
             if not response:
-                if default in expect:
-                    return default
+                response = default
 
             if not self.case_sensitive:
                 response = response.lower()
 
             if response in expect:
+                # if boolean was expected, return True in the case
+                # response is the same as expected. False otherwise
+                if isinstance(self.expect, bool):
+                    r = True if response == "y" else False
+                    return True if r == self.expect else False
+                # just return response otherwise
                 return response
