@@ -90,6 +90,8 @@ class MetaDict(dict):
         # delete item if its value is empty or None:
         if isinstance(value, (str, type(None))) \
         and str(value).lower() in ["", "none"]:
+            # don't try to delete unexisting item
+            if not name in self.keys(): return
             return self.__delitem__(name)
 
         return super().__setitem__(name, value)
