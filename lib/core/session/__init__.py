@@ -15,19 +15,16 @@ A session instance contains the following objects:
     * Cache -> Remote server response cache
     * Hist  -> Readline history
 
->>> import session
->>> session.update('/tmp/new-session.txt')
->>> session.diff('/tmp/file') # get session diff
-
 """
 import os, re, gzip, pickle
 
-import ui.input
+import ui.input, backwards.session
 from datatypes import Path
 from ui.color import colorize
 
 from . import baseclass
 from . import settings
+from . import environment
 
 SESSION_FILENAME = "phpsploit.session"
 
@@ -46,8 +43,9 @@ class Session(baseclass.MetaDict):
 
         # session objects declaration
         self.Conf = settings.Settings()
-        self.Env = baseclass.MetaDict(title="Environment Variables")
+        self.Env = environment.Environment()
         self.Alias = baseclass.MetaDict(title="Command Aliases")
+        self.Cache = baseclass.MetaDict(title="HTTP Response Cache")
         self.File = None
 
 
@@ -92,21 +90,29 @@ class Session(baseclass.MetaDict):
         if file is None:
             return self
 
+        file = os.path.truepath(file)
+        # append default filename is is a directory
+        if os.path.isdir(file):
+            file = os.path.truepath(file, SESSION_FILENAME)
+
+        # create a new empty session
+        session = Session()
+
         # get unpickled `data` from `file`
         try:
             data = pickle.load( gzip.open(file) )
         except OSError as e:
             if str(e) != "Not a gzipped file":
                 raise e
-            #XXX: BACKWARDS COMP session load phpsploit 2 < 2.2
-            tmpdata = pickle.load( open(file) )
-            #XXX creer un module `backwards`
+            backwards.session.load(file)
+            try:
+                data = backwards.session.load(file)
+                import pprint
+                pprint.pprint(data)
+                assert data.keys() == session.keys()
+            except:
+                raise Warning("not a session file", "«{}»".format(file))
 
-        # create a new empty session
-        session = Session()
-        # assert data is a valid session
-        if data.keys() != session.keys():
-            raise Warning("not a session file", "«{}»".format(file))
         # fill it with loaded file data
         for key in session.keys():
             if isinstance(key, dict):
@@ -114,9 +120,10 @@ class Session(baseclass.MetaDict):
             else:
                 session[key] = data[key]
         # bind new session's File to current file
-        session.File = os.path.truepath(file)
+        session.File = file
 
         return session
+
 
     def update(self, obj=None):
         """Update current session with `obj`.
@@ -129,7 +136,7 @@ class Session(baseclass.MetaDict):
 
         """
         if obj is None:
-            obj = "./phpsploit.session"
+            obj = "./" + SESSION_FILENAME
         # if obj is a string, get path's session from self call
         if isinstance(obj, str):
             obj = self(obj)
@@ -142,7 +149,6 @@ class Session(baseclass.MetaDict):
                 self[key].update(value)
             else:
                 self[key] = value
-
 
 
     def dump(self, file=None):
@@ -170,7 +176,6 @@ class Session(baseclass.MetaDict):
             if ui.input.Expect(False)( question.format(file) ):
                 raise Warning("The session was not saved")
 
-
         # get a simplified copy of current session that
         # only contains python built-in objects:
         rawdump = {}
@@ -184,8 +189,6 @@ class Session(baseclass.MetaDict):
                 rawdump[object] = rawvar(self[object])
 
         # write it to the file
-        import pprint
-        pprint.pprint(rawdump)
         pickle.dump(rawdump, gzip.open(file, 'wb'))
 
 
