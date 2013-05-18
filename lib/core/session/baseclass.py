@@ -176,6 +176,8 @@ class RandLineBuffer:
     __getitem__() allows RandLineBuffer objects being converted to list
         or tuples as [file, buffer].
 
+    _raw_value() converts the object into a tuple whose first item is
+        self.file, while the second is the buffer.
     """
     def __init__(self, value, setfunc=(lambda x:x)):
         self._getobj = setfunc
@@ -289,6 +291,11 @@ class RandLineBuffer:
         elif item in [1, "buffer"]:
             return self.buffer
         raise IndexError(self.__class__.__name__+" index out of range")
+
+
+    def _raw_value(self):
+        """Convert the object into a built-in data type (tuple)."""
+        return tuple(self)
 
 
     def update(self):
