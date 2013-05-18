@@ -87,7 +87,7 @@ class MetaDict(dict):
 
 
     def __setitem__(self, name, value):
-        # delete item if self value is empty or None:
+        # delete item if its value is empty or None:
         if isinstance(value, (str, type(None))) \
         and str(value).lower() in ["", "none"]:
             return self.__delitem__(name)
@@ -145,6 +145,19 @@ class MetaDict(dict):
 
         return "\n" + buffer + colorize("%Reset")
 
+
+    def update(self, new):
+        """Override standard dict() update method, because it seems
+        that using the default one does not use self object's
+        __setitem__() method. This is problematic for phpsploit
+        session main objects.
+        """
+        # let parent handle exception if not a dict
+        if not isinstance(new, dict):
+            return super().update(new)
+        # replace each self item using standard setitem method
+        for key, value in new.items():
+            self[key] = value
 
 
 class RandLineBuffer:
