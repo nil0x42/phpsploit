@@ -150,7 +150,7 @@ class Cmd(cmd.Cmd):
                     self.onexception(e)
                     continue
                 try:
-                    self.interpret(line)
+                    self.interpret(line, interactive=True)
                 # system exit is the correct way to leave loop
                 except SystemExit as e:
                     return e.code
@@ -166,7 +166,8 @@ class Cmd(cmd.Cmd):
             self.postloop() # post command hook method
 
 
-    def interpret(self, commands, precmd=None, onecmd=None, postcmd=None):
+    def interpret(self, commands, precmd=None, onecmd=None, \
+                  postcmd=None, interactive=False):
         """Interpret `commands` as a list of commands.
         `commands` can be a multi command raw string or a preformated
         commands list. If str, is is automatically parsed.
@@ -176,7 +177,7 @@ class Cmd(cmd.Cmd):
         """
         # is commands is str, use self.parseline
         if isinstance(commands, str):
-            commands = self.parseline(commands)
+            commands = self.parseline(commands, interactive=interactive)
 
         if precmd is None: precmd = self.precmd
         if onecmd is None: onecmd = self.onecmd
@@ -202,7 +203,7 @@ class Cmd(cmd.Cmd):
         return retval
 
 
-    def parseline(self, string):
+    def parseline(self, string, interactive=True):
         """Parse `string` into an ordered list of `argv`, each of them
         representing a single command's argument list.
 
@@ -233,6 +234,10 @@ class Cmd(cmd.Cmd):
             return cmd
 
         string = string.lstrip()
+        if not interactive:
+            lines = string.splitlines()
+            string = "" if not lines else lines[0]
+            lines = lines[1:]
 
         # get a list of arguments from custom shlex configuration
         # Example: ['ls','-a',';','help']
@@ -256,9 +261,14 @@ class Cmd(cmd.Cmd):
                     string = string[:-1]
                 # pursue interpretation on the next line (bash like)
                 try:
-                    string += self.raw_input(self.prompt_ps2)
+                    if interactive:
+                        string += self.raw_input(self.prompt_ps2)
+                    else:
+                        string += lines.pop(0)
                 except (EOFError, KeyboardInterrupt):
                     string = ''
+                except IndexError:
+                    string += ''
 
         # separate arguments by commands [['ls','-a'],['help']]
         commands = []
