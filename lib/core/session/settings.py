@@ -1,4 +1,4 @@
-import os, sys, re, tempfile, webbrowser
+import os, sys, re, tempfile
 from . import baseclass
 from datatypes import *
 
@@ -145,8 +145,8 @@ class Settings(baseclass.MetaDict):
 
     def _set_WEBBROWSER(self, value):
         if value == "%%DEFAULT%%":
-            value = webbrowser.get().name
-        return Executable(value)
+            value = "";
+        return WebBrowser(value)
 
     def _set_REQ_DEFAULT_METHOD(self, value):
         if value.upper() not in ["GET", "POST"]:

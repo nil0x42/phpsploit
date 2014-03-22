@@ -8,9 +8,9 @@ class Executable(str):
 
     Takes an executable program path or shell command.
 
-    >>> browser = Executable('firefox')
-    >>> browser()
-    "/usr/bin/firefox"
+    >>> text_editor = Executable('vim')
+    >>> text_editor()
+    "/usr/bin/vim"
 
     """
     def __new__(cls, executable):
