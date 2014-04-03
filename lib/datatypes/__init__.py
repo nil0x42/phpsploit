@@ -47,6 +47,7 @@ PhpSploit dedicated datatypes obey the following conventions:
 from .ByteSize    import ByteSize
 from .Path        import Path
 from .Executable  import Executable
+from .WebBrowser  import WebBrowser
 from .Interval    import Interval
 from .PhpCode     import PhpCode
 from .Proxy       import Proxy
