@@ -1,19 +1,19 @@
 """PhpSploit shell interface.
-Unheriting the cmdshell's Cmd class, the PhpSplpoit shell interface
+Unheriting the shnake's Cmd class, the PhpSplpoit shell interface
 
 provides interactive use of commands.
 
 """
 import sys, os, difflib, traceback
 
-import core, cmdshell, ui.input
+import core, shnake, ui.input
 from core import session, plugins
 
 from datatypes import Path, PhpCode
 from ui.color import colorize, decolorize
 
 
-class Cmd(cmdshell.Cmd):
+class Cmd(shnake.Cmd):
 
     prompt = colorize('%Lined', 'phpsploit', '%Reset', ' > ')
 
@@ -63,6 +63,7 @@ class Cmd(cmdshell.Cmd):
     ######################
     ### COMMAND: debug ###
     def complete_debug(self, text, *ignored):
+        return ["traceback"]
         keys = ["traceback"]
         return [x+' ' for x in keys if x.startswith(text)]
 
@@ -113,7 +114,6 @@ class Cmd(cmdshell.Cmd):
             Take a look at the documentation (rtfm command), and also
             the "infect" command.
         """
-        open('/tmp/sdfjk')
         print("[*] Current backdoor is:")
         print( session.Conf.BACKDOOR() + "\n" )
 
@@ -528,7 +528,7 @@ class Cmd(cmdshell.Cmd):
             $TEXTEDITOR setting on a temporary file.
 
             NOTE: Last command buffer is colorless. It means that
-            it does not contains ansy ANSI terminal color codes.
+            it does not contains any ANSI terminal color codes.
         """
         backlog = Path()
         backlog.write(sys.stdout.backlog)

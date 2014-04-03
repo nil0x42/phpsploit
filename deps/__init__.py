@@ -13,12 +13,12 @@ dependency name, while the second provides it's directory path.
 import os, sys, imp
 
 DEPENDENCIES = [('phpserialize',           'phpserialize-1.3'),
-                ('cmdshell',               'cmdshell-0.0.2'),
                 ('colorama',               'colorama-0.2.5'),
                 ('colorama_patched',       '.'),
                 ('socks',                  'SocksiPy-branch-1.02'),
                 ('os_path_truepath_patch', '.'),
-                ('shutil_update',          '.')]
+                ('shutil_update',          '.'),
+                ('shnake',                 '.')]
 
 for module, dirname in DEPENDENCIES:
     # try to import the dependency from system.
@@ -33,4 +33,4 @@ for module, dirname in DEPENDENCIES:
             imp.load_package(module, abspath)
         # if any dependency fails to load, exit with error.
         except (ImportError, FileNotFoundError):
-            exit('Missing PhpSploit dependency: "%s"' %module)
+            sys.exit('Missing PhpSploit dependency: "%s"' %module)

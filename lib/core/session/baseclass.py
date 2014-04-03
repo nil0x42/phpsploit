@@ -168,15 +168,22 @@ class RandLineBuffer:
     It provides multilines buffers, that picks a random choice, and
     dynamic binding from external file paths.
 
-    It takes one required argument, which is the variable's value.
-    Alternatively, is a tuple is provided as value, its first element
-    will bind to `file`, while the second binds to `buffer`
-    EXAMPLE: RandLineBuffer( ('/tmp/filepath.txt', 'line1\\nline2\\n') )
+    If a tuple() of list() is given as argument, it's first item will be
+    used as object `file` (aka originating file path), and the second
+    item will be used as a possibly multiline string representation of
+    possible lines.
+    EX: RandLineBuffer( ('/tmp/filepath.txt', 'line1\\nline2\\n') )
 
-    The second argument (optionnal) takes a variable setter function,
-    that raizes an exception if the value can't be set, and returns
-    the formatted object otherwise. This argument defaults to
-    a function that returns the value as it is, and does nothing more.
+    If argument is a string whose name starts with "file://", it
+    will be assumed a file path was given, putting `file` to this path,
+    and `buffer` to the file's content.
+
+    If any other datatype is provided, its string representation will
+    be used as possible lines list paragygm.
+
+    Optionnally, the `setfunc` argument (pointer to function) can be
+    used in order to ensure that each `buffer` line is syntaxically
+    acceptable.
 
     __str__() provides a nice colored string representation of the
         variable's object.

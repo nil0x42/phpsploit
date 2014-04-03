@@ -9,6 +9,7 @@ Version 2.2.0 (IN ACTIVE DEVELOPMENT)
   * The 'lastcmd' command has been replaced by 'backlog', more simple.
   * The phpsploit source code has moved to ./lib/ directory.
   * Plugins path is now available at root directory.
+  * User plugins can now overwrite core plugins (at: ~/.phpsploit/plugins/)
 
 Version 2.1.4 (2013-04-07)
   * The plugins main script names are now plugin.py instead of script.py.
