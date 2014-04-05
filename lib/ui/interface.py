@@ -498,13 +498,13 @@ class Cmd(shnake.Cmd):
             - Plugins that need persistent server based variables may and
             must use env vars. For example, the `mysql` plugin creates a
             `MYSQL_CRED` environment variable that contains remote
-            database connection credentials when using `mysql commect`,
+            database connection credentials when using `mysql connect`,
             it allows the plugin to not require setting user/pass/serv
             informations on each remote sql command.
 
             - Unlike settings, env vars do not provide dynamic random
             values. Setting a value is simply interpreted as a string,
-            apart for the special "None" value, that deletes the variable.
+            apart for the special "None" value, which deletes the variable.
         """
         # `env [<PATTERN>]` display concerned settings list
         if len(argv) < 3:
@@ -568,7 +568,8 @@ class Cmd(shnake.Cmd):
             return self.interpret('help help')
 
         # collect the command list from current shell
-        sys_commands = self.get_commands(self)
+        # sys_commands = self.get_commands(self)
+        sys_commands = self.get_names(self, "do_");
 
         def get_doc(cmdName):
             """return the docstring lines list of specific command"""
@@ -623,7 +624,7 @@ class Cmd(shnake.Cmd):
         # get full help on a single command
         if len(argv) == 2:
             doc = get_doc(argv[1])
-            # if the given argument if not a command, return nohelp err
+            # if the given argument is not a command, return nohelp err
             if not doc:
                 print( self.nohelp %raw_repr(argv[1]) )
                 return(None)

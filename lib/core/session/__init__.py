@@ -91,7 +91,7 @@ class Session(baseclass.MetaDict):
             return self
 
         file = os.path.truepath(file)
-        # append default filename is is a directory
+        # append default filename if is a directory
         if os.path.isdir(file):
             file = os.path.truepath(file, SESSION_FILENAME)
 

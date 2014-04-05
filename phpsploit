@@ -14,20 +14,20 @@ import sys, ui.output
 sys.stdout = ui.output.Wrapper()
 
 
-import shnake
-cmdrun = shnake.Parser()
-
-if len(sys.argv) > 1:
-    file = open('/tmp/parse.test')
-else:
-    file = None
-
-result = cmdrun(file)
+# import shnake
+# cmdrun = shnake.Parser()
+#
+# if len(sys.argv) > 1:
+#     file = open('/tmp/parse.test')
+# else:
+#     file = None
+#
+# result = cmdrun(file)
 
 
 ### Start shell interface
-#import ui.interface
-#interface = ui.interface.Cmd()
-#interface.interpret("foo\\\nbar")
-#
-#interface.cmdloop()
+import ui.interface
+interface = ui.interface.Cmd()
+interface.interpret("foo\\\nbar")
+
+interface.cmdloop()
