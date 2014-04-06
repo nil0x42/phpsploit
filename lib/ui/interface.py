@@ -122,7 +122,9 @@ class Cmd(shnake.Cmd):
             the "infect" command.
         """
         print("[*] Current backdoor is:")
-        print( session.Conf.BACKDOOR() + "\n" )
+        obj = session.Conf.BACKDOOR()
+        obj = obj.replace("%%PASSKEY%%", session.Conf.PASSKEY().upper());
+        print( obj  + "\n" )
 
         if self.__class__.__name__ == "RemoteShell":
             m = ("[*] Use `set TARGET <VALUE>` to use another url as target."

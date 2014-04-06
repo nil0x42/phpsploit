@@ -57,6 +57,7 @@ class Settings(baseclass.MetaDict):
 
 
     def __setitem__(self, name, value):
+        # print("bla");
         # if the set value is a RandLineBuffer obj, just do it!
         if isinstance(value, baseclass.RandLineBuffer):
             return super().__setitem__(name, value)
@@ -107,22 +108,22 @@ class Settings(baseclass.MetaDict):
         return ByteSize(value)
 
     def _set_TARGET(self, value):
-        if value.lower() in ["", "none"]:
+        if str(value).lower() in ["", "none"]:
             return None
         return Url(value)
 
     def _set_BACKDOOR(self, value):
-        if not value.find("%%PASSKEY%%"):
+        if value.find("%%PASSKEY%%") < 0:
             raise ValueError("shall contain %%PASSKEY%% string")
         return PhpCode(value)
 
     def _set_PROXY(self, value):
-        if value.lower() in ["", "none"]:
+        if str(value).lower() in ["", "none"]:
             return None
         return Proxy(value)
 
     def _set_PASSKEY(self, value):
-        value = value.lower()
+        value = str(value).lower()
         reserved_headers = ['host','accept-encoding','connection',
                             'user-agent','content-type','content-length']
         if not value:
