@@ -29,6 +29,8 @@ class Cmd(shnake.Cmd):
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
         # Alias Handler
+        if len(argv) and argv[0] != "backlog":
+            sys.stdout.backlog = ""
         try: cmds = self.parseline( session.Alias[argv[0]] )
         except (KeyError, IndexError): return argv
         self.interpret(cmds[:-1], precmd=(lambda x: x))
@@ -84,9 +86,14 @@ class Cmd(shnake.Cmd):
         argv.append('')
 
         if argv[1] == "traceback":
-            e = self.last_exception
-            e = traceback.format_exception(type(e), e, e.__traceback__)
-            return print( colorize("%Red", "".join(e)) )
+            try:
+                e = self.last_exception
+                e = traceback.format_exception(type(e), e, e.__traceback__)
+                e = colorize("%Red", "".join(e))
+            except:
+                e = "[-] Exception stack is empty"
+            print(e)
+            return
 
         return self.interpret("help debug")
 
@@ -120,13 +127,15 @@ class Cmd(shnake.Cmd):
         if self.__class__.__name__ == "RemoteShell":
             m = ("[*] Use `set TARGET <VALUE>` to use another url as target."
                  "\n[*] To exploit a new server, disconnect from «%s» first.")
-            return print( m.format(session.Env.HOST) )
+            print( m.format(session.Env.HOST) )
+            return
 
         if session.Conf.TARGET() is None:
             m = ("To run a remote tunnel, the backdoor shown above must be\n"
                  "manually injected in a remote server executable web page.\n"
                  "Then, use `set TARGET <BACKDOORED_URL>` and run `exploit`.")
-            return print( colorize("%BoldCyan", m) )
+            print( colorize("%BoldCyan", m) )
+            return
 
         print("[*] Sending payload to «{}» ...".format(session.Conf.TARGET))
         socket = tunnel.Init() # it raises exception if fails
@@ -340,7 +349,7 @@ class Cmd(shnake.Cmd):
         """
         if len(argv) != 2:
             return self.interpret("help source")
-
+        
         self.interpret( open(argv[1], 'r').read() )
 
 
@@ -597,7 +606,7 @@ class Cmd(shnake.Cmd):
             try:
                 return( docLines[0].strip() )
             except:
-                return( color(33) + 'No description' + color(0) )
+                return ( colorize("%Yellow", "No description") )
 
         def doc_help(docLines):
             """print the formated command's docstring"""
@@ -616,8 +625,8 @@ class Cmd(shnake.Cmd):
             result = str()
             for line in docLines:
                 if line == line.lstrip():
-                    line = color(1) + line + color(0)
-                result += line + P_NL
+                    line = colorize("%Bold", line)
+                result += line + "\n"
 
             print(result)
 
@@ -630,8 +639,8 @@ class Cmd(shnake.Cmd):
                 return(None)
 
             # print the heading help line, which contain description
-            print( P_NL + P_inf + argv[1] + ": " +
-                   get_description(doc) + P_NL )
+            print( "\n[*] " + argv[1] + ": " +
+                   get_description(doc) + "\n" )
 
             # call the help_<command> method, otherwise, print it's docstring
             try:
@@ -646,20 +655,21 @@ class Cmd(shnake.Cmd):
         maxLength = max( 13, len(max(sys_commands, key=len)) )
 
         # split sys_commands into shell and core command categories
-        core_commands  = self.get_commands(CoreShell)
+        # core_commands  = self.get_commands(CoreShell)
+        core_commands = self.get_names(self, "do_");
         shell_commands = [x for x in sys_commands if x not in core_commands]
         help = [('Core Commands', core_commands),
                 ('Shell Commands', shell_commands)]
 
         # adds plugin category if we are in the remote shell
-        if self.shell_name == 'remote':
-            for category in self.plugins.categories():
-                name = category.replace('_', ' ').capitalize()
-                items = self.plugins.list_category(category)
-
-                # rescale maxLength in case of longer plugin names
-                maxLength = max( maxLength, len(max(items, key=len)) )
-                help += [ (name+' Plugins', items) ]
+#         if self.shell_name == 'remote':
+#             for category in self.plugins.categories():
+#                 name = category.replace('_', ' ').capitalize()
+#                 items = self.plugins.list_category(category)
+#
+#                 # rescale maxLength in case of longer plugin names
+#                 maxLength = max( maxLength, len(max(items, key=len)) )
+#                 help += [ (name+' Plugins', items) ]
 
         # print commands help, sorted by groups
         cmdColumn = ' ' * (maxLength-5)
@@ -667,9 +677,9 @@ class Cmd(shnake.Cmd):
 
             # display group (category) header block
             underLine = '=' * len(groupName)
-            print( P_NL + groupName +  P_NL + underLine      + P_NL +
-                   '    Command' + cmdColumn + 'Description' + P_NL +
-                   '    -------' + cmdColumn + '-----------' + P_NL )
+            print( "\n" + groupName +  "\n" + underLine      + "\n" +
+                   '    Command' + cmdColumn + 'Description' + "\n" +
+                   '    -------' + cmdColumn + '-----------' + "\n" )
 
             # display formated command/description pairs
             groupCommands.sort()

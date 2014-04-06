@@ -10,8 +10,8 @@ import lib
 
 ## Enable stdout wrapper
 import sys, ui.output
-#sys.stdout = ui.output.Wrapper(backlog=True)
-sys.stdout = ui.output.Wrapper()
+sys.stdout = ui.output.Wrapper(backlog=True)
+# sys.stdout = ui.output.Wrapper()
 
 
 # import shnake

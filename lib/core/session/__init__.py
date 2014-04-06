@@ -159,7 +159,7 @@ class Session(baseclass.MetaDict):
             file = self.File
 
         # if file is a filename only, use SAVEPATH as root directory
-        if not os.sep in file:
+        if not os.path.isdir(file) and not os.sep in file:
             file = self.Conf.SAVEPATH() + file
 
         # get file's absolute path
