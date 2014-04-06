@@ -16,11 +16,11 @@ A session instance contains the following objects:
     * Hist  -> Readline history
 
 """
-import os, re, gzip, pickle
+import os, re, gzip, copy, pickle, difflib
 
 import ui.input, backwards.session
 from datatypes import Path
-from ui.color import colorize
+from ui.color import colorize, decolorize
 
 from . import baseclass
 from . import settings
@@ -125,6 +125,10 @@ class Session(baseclass.MetaDict):
         return session
 
 
+    def load(self, file=None):
+        return (self(file));
+
+
     def update(self, obj=None):
         """Update current session with `obj`.
         The given argument can be a dictionnary instance, in which case
@@ -149,6 +153,21 @@ class Session(baseclass.MetaDict):
                 self[key].update(value)
             else:
                 self[key] = value
+
+
+    def diff(self, file):
+        diff = copy.deepcopy(self)
+        diff.update(file)
+        diff = decolorize(diff).splitlines()
+        orig = decolorize(self).splitlines()
+        
+        color = {' ':'%Reset', '-':'%Red', '+':'%Green', '?':'%Pink'}
+        for line in difflib.Differ().compare(orig, diff):
+            if len(line) > 2 and line[2:].startswith("======================="):
+                if line[0] == "-":
+                        print( " " + line[1:] )
+            else:
+                print( colorize(color[line[0]], line) )
 
 
     def dump(self, file=None):

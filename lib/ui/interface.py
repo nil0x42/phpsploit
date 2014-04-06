@@ -191,7 +191,7 @@ class Cmd(shnake.Cmd):
     ########################
     ### COMMAND: session ###
     def complete_session(self, text, *ignored):
-        keys = ['save', 'diff']
+        keys = ['save', 'diff', 'load']
         # load argument is not available from remote shell:
         if self.__class__.__name__ == "MainShell":
             keys.append('load')
@@ -627,7 +627,7 @@ class Cmd(shnake.Cmd):
             result = str()
             for line in docLines:
                 if line == line.lstrip():
-                    line = colorize("%Bold", line)
+                    line = colorize("%BoldWhite", line)
                 result += line + "\n"
 
             print(result)

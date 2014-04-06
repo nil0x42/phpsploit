@@ -61,6 +61,7 @@ def colorize(*args):
 
     for idx, arg in enumerate(args):
         # try to do a CamelCase split to check if arg is an ansi color code
+        arg = str(arg)
         split = re.split('([A-Z][a-z]+)', arg[1:])
         split = [e.lower() for e in split if e]
 
@@ -103,5 +104,5 @@ def decolorize(string):
 
     """
     regex = "\x01?\x1b\[((?:\d|;)*)([a-zA-Z])\x02?"
-    return re.sub(regex, "", string)
+    return re.sub(regex, "", str(string))
 
