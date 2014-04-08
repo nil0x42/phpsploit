@@ -25,8 +25,12 @@ class Shell(shnake.Shell):
         # explicitly run parent's __init__()
         super().__init__()
         print("[*] Loading «{}» ...".format(core.userdir+"config"))
-        self.interpret("source '"+core.userdir+"config'");
-        print('')
+        if self.interpret("source '"+core.userdir+"config'") == 0:
+            print("[*] Configuration file correctly loaded\n")
+        else:
+            print("[-] Configuration file couldn't be loaded\n")
+
+
 
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
@@ -37,6 +41,7 @@ class Shell(shnake.Shell):
         except (KeyError, IndexError): return argv
         self.interpret(cmds[:-1], precmd=(lambda x: x))
         return cmds[-1] + argv[1:]
+
 
 
     def onexception(self, exception):
@@ -325,6 +330,7 @@ class Shell(shnake.Shell):
         if len(argv) == 1:
             return self.interpret("help lrun")
         subprocess.call(argv[1:])
+
 
 
     ####################
@@ -684,6 +690,7 @@ class Shell(shnake.Shell):
                 description = get_description( get_doc(cmdName) )
                 print( '    ' + cmdName + spaceFill + description )
             print('')
+
 
 
     def except_OSError(self, exception):
