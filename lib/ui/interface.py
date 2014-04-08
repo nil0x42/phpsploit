@@ -4,7 +4,7 @@ Unheriting the shnake's Shell class, the PhpSplpoit shell interface
 provides interactive use of commands.
 
 """
-import sys, os, difflib, traceback
+import sys, os, difflib, traceback, subprocess
 
 import core, shnake, ui.input
 from core import session, plugins
@@ -302,6 +302,27 @@ class Shell(shnake.Shell):
 
         os.chdir( os.path.expanduser(argv[1]) )
 
+
+
+    ####################
+    ### COMMAND: lrun ###
+    def do_lrun(self, argv):
+        """Execute client-side shell command
+
+        SYNOPSIS:
+            lrun command [arg1 [arg2 [...] ] ]
+
+        DESCRIPTION:
+            The "lrun" command provides a way to run a shell command
+            in the client's local system.
+
+        EXAMPLES:
+            > lrun ls -la /
+            > lrun htop
+        """
+        if len(argv) == 1:
+            return self.interpret("help lrun")
+        subprocess.call(argv[1:])
 
 
     ####################
