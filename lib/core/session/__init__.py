@@ -72,7 +72,8 @@ class Session(baseclass.MetaDict):
     def __str__(self):
         """Gives a nice string representation of current session"""
         title = "PhpSploit session dump ({})".format(self.File)
-        deco = "\n" + colorize("%Blue", "=" * len(title)) + "\n"
+        # deco = "\n" + colorize("%Blue", "=" * len(title)) + "\n"
+        deco = "\n" + colorize("%Blue", "=" * 68) + "\n"
         data = deco + title + deco
         for obj in self.values():
             if isinstance(obj, baseclass.MetaDict):
@@ -163,11 +164,7 @@ class Session(baseclass.MetaDict):
         
         color = {' ':'%Reset', '-':'%Red', '+':'%Green', '?':'%Pink'}
         for line in difflib.Differ().compare(orig, diff):
-            if len(line) > 2 and line[2:].startswith("======================="):
-                if line[0] == "-":
-                        print( " " + line[1:] )
-            else:
-                print( colorize(color[line[0]], line) )
+            print( colorize(color[line[0]], line) )
 
 
     def dump(self, file=None):
