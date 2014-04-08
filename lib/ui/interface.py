@@ -1,5 +1,5 @@
 """PhpSploit shell interface.
-Unheriting the shnake's Cmd class, the PhpSplpoit shell interface
+Unheriting the shnake's Shell class, the PhpSplpoit shell interface
 
 provides interactive use of commands.
 
@@ -13,7 +13,7 @@ from datatypes import Path, PhpCode
 from ui.color import colorize, decolorize
 
 
-class Cmd(shnake.Cmd):
+class Shell(shnake.Shell):
 
     prompt = colorize('%Lined', 'phpsploit', '%Reset', ' > ')
 
@@ -65,9 +65,8 @@ class Cmd(shnake.Cmd):
     ######################
     ### COMMAND: debug ###
     def complete_debug(self, text, *ignored):
-        return ["traceback"]
         keys = ["traceback"]
-        return [x+' ' for x in keys if x.startswith(text)]
+        return [x for x in keys if x.startswith(text)]
 
     def do_debug(self, argv):
         """Core debugging tools
@@ -256,34 +255,6 @@ class Cmd(shnake.Cmd):
         # sesion [<FILE>]
         else:
             print( session(argv[1]) )
-
-
-
-        #    new = decolorize( session ).splitlines()
-        #    if argv[2] is None:
-        #        old = session.PREVIOUS
-
-        ## session diff
-        #if argv[1] == 'diff':
-        #    new = decolorize(session.dump()).splitlines()
-        #    if argv[2] is None:
-        #        old = session.Backup().dump()
-        #    else:
-        #        old = session.New(argv[2])
-        #    old = decolorize(old).splitlines()
-
-        #    color = {' ':'%Reset', '+':'%Red', '-':'%Green', '?':'%Pink'}
-        #    for line in difflib.Differ().compare(old, new):
-        #        print( colorize(color[line[0]], line) )
-        #    return
-
-        ## session <FILE>
-        #if argv[1] is not None:
-        #    return print( session(argv[1]) )
-
-        ## session
-        #return print( session.dump() )
-
 
 
 
@@ -637,7 +608,7 @@ class Cmd(shnake.Cmd):
             doc = get_doc(argv[1])
             # if the given argument is not a command, return nohelp err
             if not doc:
-                print( self.nohelp %raw_repr(argv[1]) )
+                print( self.nohelp %argv[1])
                 return(None)
 
             # print the heading help line, which contain description

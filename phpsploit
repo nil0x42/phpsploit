@@ -27,7 +27,7 @@ sys.stdout = ui.output.Wrapper(backlog=True)
 
 ### Start shell interface
 import ui.interface
-interface = ui.interface.Cmd()
-interface.interpret("foo\\\nbar")
+interface = ui.interface.Shell()
+interface.interpret("foo\\\nbar\nls -la\n\n")
 
 interface.cmdloop()
