@@ -1,7 +1,9 @@
 import os, sys, re, tempfile
+import core
 from . import baseclass
 from datatypes import *
 
+DEFAULT_HTTP_USER_AGENT = "file://"+core.basedir+"data/user_agents.lst"
 
 class Settings(baseclass.MetaDict):
     """Configuration Settings
@@ -44,7 +46,7 @@ class Settings(baseclass.MetaDict):
         self.WEBBROWSER = "%%DEFAULT%%"
 
         # HTTP Headers
-        self.HTTP_USER_AGENT = "file://data/user_agents.lst"
+        self.HTTP_USER_AGENT = DEFAULT_HTTP_USER_AGENT
 
         # HTTP Requests settings
         self.REQ_DEFAULT_METHOD  = "GET"
@@ -70,15 +72,24 @@ class Settings(baseclass.MetaDict):
 
         # ensure the setting name is allowed
         if name[5:] and name[:5] == "HTTP_":
-            setter = ( lambda x: str(x) )
+            setter = self._set_HTTP_header
         elif hasattr(self, "_set_"+name):
             setter = getattr(self, "_set_"+name)
         else:
             raise KeyError("illegal name: '{}'".format(name))
 
-        # extend value into MultiLineItem() instance.
-        #value = SettingItem(value, setter)
-        value = baseclass.RandLineBuffer(value, setter)
+        # extend value into RandLineBuffer() instance.
+
+        # This fix creates a non-failing version of user agent default value
+        if name == "HTTP_USER_AGENT" and name not in self.keys():
+            try:
+                value = baseclass.RandLineBuffer(value, setter)
+            except ValueError:
+                alt_file = value[7:]
+                alt_buff = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
+                value = baseclass.RandLineBuffer((alt_file, alt_buff), setter)
+        else:
+            value = baseclass.RandLineBuffer(value, setter)
 
         # use grandparent class (bypass parent's None feature)
         dict.__setitem__(self, name, value)
