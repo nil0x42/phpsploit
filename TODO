@@ -7,18 +7,12 @@ Interface:
   * @--help -h: print help about the available commands
 
 Settings:
-  * Also search for a ~/.config/phpsploit/ dir before using ~/.phpsploit
-  * Defaults must be defined into the setting.py lib
-  * Define the user config file as a phpsploit interpreted script as start
-  * Create a REAL, non sucking settings management class.
 
 Sessions:
   * Add readline history saving capability
-  * Add last command output buffer saving capability
 
 Commands:
-  * @lastcmd must correctly support regexp and -i on grep/hilight modes
-  * @alias core commant must be created
+  * @alias core command must be created
   * @doc core command must be created, to handle ./doc/ reading from interface
   * @save needs an '-f' (force) option to force file overwrite
   * remote shell @exit needs a -f opt to bypass leave confirmation in case of

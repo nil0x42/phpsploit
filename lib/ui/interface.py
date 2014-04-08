@@ -24,7 +24,9 @@ class Shell(shnake.Shell):
     def __init__(self):
         # explicitly run parent's __init__()
         super().__init__()
-
+        print("[*] Loading «{}» ...".format(core.userdir+"config"))
+        self.interpret("source '"+core.userdir+"config'");
+        print('')
 
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""

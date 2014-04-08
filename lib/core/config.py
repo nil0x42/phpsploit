@@ -36,8 +36,11 @@ class UserDir:
 
         # set self.path if user directory already exist
         for choice in self.choices:
-            try: self.path = Path(choice, mode="drw")()
-            except: pass
+            try:
+                self.path = Path(choice, mode="drw")()
+                break
+            except:
+                pass
 
         # try to create it otherwise, raise err if fails
         if self.path is None:
