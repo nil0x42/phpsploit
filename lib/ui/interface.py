@@ -34,9 +34,10 @@ class Shell(shnake.Shell):
 
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
-        # Alias Handler
+        # Reset backlog before each command except backlog
         if len(argv) and argv[0] != "backlog":
             sys.stdout.backlog = ""
+        # Alias Handler
         try: cmds = self.parseline( session.Alias[argv[0]] )
         except (KeyError, IndexError): return argv
         self.interpret(cmds[:-1], precmd=(lambda x: x))
@@ -523,6 +524,54 @@ class Shell(shnake.Shell):
 
         # `env <NAME> <VALUE>`
         session.Env[argv[1]] = " ".join(argv[2:])
+
+
+
+    ####################
+    ### COMMAND: alias ###
+    def complete_alias(self, text, *ignored):
+        result = []
+        for key in session.Alias.keys():
+            if key.startswith( text ):
+                result.append(key)
+        return result
+
+    def do_alias(self, argv):
+        """Define command aliases
+
+        SYNOPSIS:
+            alias [<NAME> ["<VALUE>"|None]]
+
+        DESCRIPTION:
+            Command aliases can be defined in order to ease Phpsploit
+            shell experience !
+            Once defined, an alias can be used as if it was a standard
+            command, and it's value is interpreted, then suffixed with
+            other arguments.
+
+            > alias
+            - Display all curremt command aliases.
+
+            > alias <NAME>
+            - Display aliases whose name starts with NAME.
+
+            > alias <NAME> <VALUE>
+            - Set NAME alias to the given VALUE.
+
+            > alias <NAME> None
+            - Unset NAME command alias.
+
+        BEHAVIOR:
+            - Unlike settings, aliases do not provide dynamic random
+            values. Setting a value is simply interpreted as a string,
+            apart for the special "None" value, which removes the variable.
+        """
+        # `alias [<PATTERN>]` display concerned settings list
+        if len(argv) < 3:
+            return print(session.Alias( (argv+[""])[1] ))
+
+        # `alias <NAME> <VALUE>`
+        session.Alias[argv[1]] = " ".join(argv[2:])
 
 
 

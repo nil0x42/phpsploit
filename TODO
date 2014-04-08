@@ -12,7 +12,6 @@ Sessions:
   * Add readline history saving capability
 
 Commands:
-  * @alias core command must be created
   * @doc core command must be created, to handle ./doc/ reading from interface
   * @save needs an '-f' (force) option to force file overwrite
   * remote shell @exit needs a -f opt to bypass leave confirmation in case of
