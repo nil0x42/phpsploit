@@ -18,8 +18,9 @@ class WebBrowser(str):
     def __new__(cls, name):
         blacklist = ['macosx']
         lst = [x for x in webbrowser._browsers.keys() if x not in blacklist]
+        fmt = ", ".join(lst)
         if name != "" and name not in lst:
-            raise ValueError("Invalid browser. (pick one from %s)" %lst)
+            raise ValueError("Bad value. Available browsers: %s." %fmt)
         try:
             if not name:
                 webbrowser.get()
@@ -40,7 +41,7 @@ class WebBrowser(str):
 
     def __str__(self):
         if self:
-            return colorize('%Cyan', self)
+            return colorize('%Cyan', self._raw_value())
         else:
             return colorize('%Cyan', "default")
 
