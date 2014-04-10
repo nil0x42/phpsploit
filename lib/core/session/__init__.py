@@ -25,6 +25,7 @@ from ui.color import colorize, decolorize
 from . import baseclass
 from . import settings
 from . import environment
+from . import history
 
 SESSION_FILENAME = "phpsploit.session"
 
@@ -46,6 +47,7 @@ class Session(baseclass.MetaDict):
         self.Env = environment.Environment()
         self.Alias = baseclass.MetaDict(title="Command Aliases")
         self.Cache = baseclass.MetaDict(title="HTTP Response Cache")
+        self.Hist = history.History()
         self.File = None
 
 
@@ -53,6 +55,27 @@ class Session(baseclass.MetaDict):
         """Session items are alphabetic and capitalized strings"""
         return re.match("^[A-Z][a-z]+$", name)
 
+
+    def _history_update(self, array=[]):
+        try:
+            import readline
+            # add array elements to readline history
+            for command in array:
+                # print("add: "+repr(command))
+                readline.add_history(command)
+            # recreate Hist from readline history (UGLY)
+            self.Hist.clear()
+            for i in range(1, readline.get_current_history_length() + 1):
+                # print("current item: "+repr(readline.get_history_item(i)))
+                self.Hist.append(readline.get_history_item(i))
+        except ImportError:
+            pass
+        # By default, hist max size is 20% of CACHE_SIZE
+        max_size = int(self.Conf["CACHE_SIZE"]() * 0.2)
+        # Settle Hist object to its max size
+        while self.Hist.size > max_size:
+            self.Hist.pop(0)
+        
 
     def __getitem__(self, name):
         """Overwrite standard getitem to return self.File
@@ -118,8 +141,10 @@ class Session(baseclass.MetaDict):
         for key in session.keys():
             if isinstance(key, dict):
                 session[key].update( data[key] )
-            else:
+            elif key != "Hist":
                 session[key] = data[key]
+        try: session._history_update(data["Hist"])
+        except: pass
         # bind new session's File to current file
         session.File = file
 
@@ -144,7 +169,7 @@ class Session(baseclass.MetaDict):
             obj = "./" + SESSION_FILENAME
         # if obj is a string, get path's session from self call
         if isinstance(obj, str):
-            obj = self(obj)
+            obj = self.load(obj)
         # if obj is not a dict instance, fallback to parent method
         if not isinstance(obj, dict):
             return super().update(obj)
@@ -152,6 +177,8 @@ class Session(baseclass.MetaDict):
         for key, value in obj.items():
             if isinstance(self[key], dict):
                 self[key].update(value)
+            # elif key == "Hist":
+            #     self._history_update(value)
             else:
                 self[key] = value
 
@@ -201,6 +228,9 @@ class Session(baseclass.MetaDict):
             if isinstance(self[object], dict):
                 for var, value in self[object].items():
                     rawdump[object][var] = rawvar(value)
+            elif object == "Hist":
+                self._history_update()
+                rawdump[object] = list(self[object])
             else:
                 rawdump[object] = rawvar(self[object])
 
