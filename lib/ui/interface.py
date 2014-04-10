@@ -6,7 +6,7 @@ provides interactive use of commands.
 """
 import sys, os, difflib, traceback, subprocess
 
-import core, shnake, ui.input
+import core, tunnel, shnake, ui.input
 from core import session, plugins
 
 from datatypes import Path, PhpCode
@@ -66,7 +66,10 @@ class Shell(shnake.Shell):
             - Calling it from a remote shell session simply leaves it,
             backing to the main shell interface
         """
-        exit()
+        if tunnel.connected():
+            del tunnel.socket
+        else:
+            exit()
 
 
 
@@ -170,7 +173,7 @@ class Shell(shnake.Shell):
         obj = obj.replace("%%PASSKEY%%", session.Conf.PASSKEY().upper());
         print( obj  + "\n" )
 
-        if self.__class__.__name__ == "RemoteShell":
+        if tunnel.connected():
             m = ("[*] Use `set TARGET <VALUE>` to use another url as target."
                  "\n[*] To exploit a new server, disconnect from «%s» first.")
             print( m.format(session.Env.HOST) )
@@ -184,11 +187,7 @@ class Shell(shnake.Shell):
             return
 
         print("[*] Sending payload to «{}» ...".format(session.Conf.TARGET))
-        socket = tunnel.Init() # it raises exception if fails
-        remoteShell = ui.shell.Remote()      # start remote shell instance
-        remoteShell.cmdqueue = self.cmdqueue # send current command queue
-        remoteShell.cmdloop()                # start remote shell interface
-        self.cmdqueue = remoteShell.cmdqueue # get back command queue
+        tunnel.socket = tunnel.Init()        # it raises exception if fails
 
 
 
@@ -239,7 +238,7 @@ class Shell(shnake.Shell):
         # load argument is not available from remote shell:
         if self.__class__.__name__ == "MainShell":
             keys.append('load')
-        return [x+' ' for x in keys if x.startswith(text)]
+        return [x for x in keys if x.startswith(text)]
 
     def do_session(self, argv):
         """PhpSploit session handler
@@ -494,7 +493,7 @@ class Shell(shnake.Shell):
     def complete_env(self, text, *ignored):
         """Use env vars as `env` completers (case insensitive)"""
         result = []
-        for key in session.Conf.keys():
+        for key in session.Env.keys():
             if key.startswith( text.upper() ):
                 result.append(key)
         return result
@@ -665,29 +664,19 @@ class Shell(shnake.Shell):
             return self.interpret('help help')
 
         # collect the command list from current shell
-        # sys_commands = self.get_commands(self)
-        sys_commands = self.get_names(self, "do_");
+        core_commands = self.get_names(self, "do_");
 
-        def get_doc(cmdName):
+        def get_doc(cmd):
             """return the docstring lines list of specific command"""
             # try to get the doc from the plugin method
             try:
-                docString = self.plugins.get(cmdName, 'help')
+                doc = plugins.get(cmdName, 'help')
             except:
-                docString = None
-            # or try to get it from the shell commands
-            if cmdName in sys_commands:
-                docString = getattr(self, 'do_'+cmdName).__doc__
-            # else try to get it from the core commands
-            if docString is None:
                 try:
-                    docString = getattr(CoreShell, 'do_'+cmdName).__doc__
+                    doc = getattr(self, 'do_'+cmd).__doc__
                 except:
-                    docString = None
-            # a list, even empty must be returned in any case
-            if docString is None:
-                return( list() )
-            return( docString.strip().splitlines() )
+                    return( list() )
+            return( doc.strip().splitlines() )
 
         def get_description(docLines):
             """return the command description (1st docstring line)"""
@@ -723,41 +712,40 @@ class Shell(shnake.Shell):
             doc = get_doc(argv[1])
             # if the given argument is not a command, return nohelp err
             if not doc:
-                print( self.nohelp %argv[1])
-                return(None)
+                return print( self.nohelp %argv[1])
 
             # print the heading help line, which contain description
-            print( "\n[*] " + argv[1] + ": " +
-                   get_description(doc) + "\n" )
+            print( "\n[*] " + argv[1] + ": " + get_description(doc) + "\n" )
 
             # call the help_<command> method, otherwise, print it's docstring
             try:
                 getattr( self, 'help_'+argv[1] )()
             except:
                 doc_help(doc)
-            return(None)
+            return
 
         # display the whole list of commands, with their description line
 
         # set maxLength to the longest command name, and at least 13
-        maxLength = max( 13, len(max(sys_commands, key=len)) )
+        maxLength = max( 13, len(max(core_commands, key=len)) )
 
-        # split sys_commands into shell and core command categories
-        # core_commands  = self.get_commands(CoreShell)
-        core_commands = self.get_names(self, "do_");
-        shell_commands = [x for x in sys_commands if x not in core_commands]
-        help = [('Core Commands', core_commands),
-                ('Shell Commands', shell_commands)]
+        help = [('Core Commands', core_commands)]
 
-        # adds plugin category if we are in the remote shell
-#         if self.shell_name == 'remote':
-#             for category in self.plugins.categories():
-#                 name = category.replace('_', ' ').capitalize()
-#                 items = self.plugins.list_category(category)
-#
-#                 # rescale maxLength in case of longer plugin names
-#                 maxLength = max( maxLength, len(max(items, key=len)) )
-#                 help += [ (name+' Plugins', items) ]
+        # adds plugin category if we are connected to target
+        if tunnel.connected():
+            for category in plugins.categories():
+                name = category.replace('_', ' ').capitalize()
+                items = plugins.list_category(category)
+
+                # rescale maxLength in case of longer plugin names
+                maxLength = max( maxLength, len(max(items, key=len)) )
+                help += [ (name+' Plugins', items) ]
+
+        # Settle maxLength if there are command aliases
+        aliases = list(session.Alias.keys())
+        if aliases:
+            maxLength = max( maxLength, len(max(aliases, key=len)) )
+            help += [ ("Command Aliases", aliases) ]
 
         # print commands help, sorted by groups
         cmdColumn = ' ' * (maxLength-5)
@@ -765,15 +753,23 @@ class Shell(shnake.Shell):
 
             # display group (category) header block
             underLine = '=' * len(groupName)
-            print( "\n" + groupName +  "\n" + underLine      + "\n" +
-                   '    Command' + cmdColumn + 'Description' + "\n" +
-                   '    -------' + cmdColumn + '-----------' + "\n" )
+            if groupName == "Command Aliases":
+                print( "\n" + groupName +  "\n" + underLine      + "\n" +
+                       '    Alias  ' + cmdColumn + 'Value      ' + "\n" +
+                       '    -----  ' + cmdColumn + '-----      ' + "\n" )
+            else:
+                print( "\n" + groupName +  "\n" + underLine      + "\n" +
+                       '    Command' + cmdColumn + 'Description' + "\n" +
+                       '    -------' + cmdColumn + '-----------' + "\n" )
 
             # display formated command/description pairs
             groupCommands.sort()
             for cmdName in groupCommands:
                 spaceFill = ' ' * ( maxLength - len(cmdName) +2 )
-                description = get_description( get_doc(cmdName) )
+                if groupName == "Command Aliases":
+                    description = session.Alias[cmdName]
+                else:
+                    description = get_description( get_doc(cmdName) )
                 print( '    ' + cmdName + spaceFill + description )
             print('')
 

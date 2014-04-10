@@ -1,0 +1,2 @@
+def connected():
+    return False
