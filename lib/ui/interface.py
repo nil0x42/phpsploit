@@ -107,6 +107,43 @@ class Shell(shnake.Shell):
 
 
     ########################
+    ### COMMAND: history ###
+    def do_history(self, argv):
+        """Command line history
+
+        SYNOPSIS:
+            history
+            history <[COUNT]>
+
+        DESCRIPTION:
+            Returns a formatted string giving the event number and
+            contents for each of the events in the history list
+            except the current event.
+
+            If count is specified then only the most recent count
+            events are returned.
+
+            > history 10
+            Display last 10 commands of the history.
+        """
+        import readline
+
+        argv.append('9999999999')
+
+        try: count = int(argv[1])
+        except: return self.interpret("help history")
+
+        last = readline.get_current_history_length()
+        first = last - count
+        if first < 1:
+            first = 1
+        for i in range(first, last):
+            cmd = readline.get_history_item(i)
+            print( "{:4d}  {:s}".format(i, cmd) )
+
+
+
+    ########################
     ### COMMAND: exploit ###
     def do_exploit(self, argv):
         """Drop a shell from target server
