@@ -67,7 +67,7 @@ class Shell(shnake.Shell):
             backing to the main shell interface
         """
         if tunnel.connected():
-            del tunnel.socket
+            tunnel.disconnect()
         else:
             exit()
 
@@ -187,7 +187,7 @@ class Shell(shnake.Shell):
             return
 
         print("[*] Sending payload to «{}» ...".format(session.Conf.TARGET))
-        tunnel.socket = tunnel.Init()        # it raises exception if fails
+        tunnel.Init()        # it raises exception if fails
 
 
 
