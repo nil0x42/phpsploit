@@ -161,8 +161,8 @@ def process_tags(line):
 
 
     # colorize «*» patterns from tagged line:
-    dye = lambda obj: colorize('%White', obj.group(1))
-    line = re.sub('(«.+?»)', dye, line)
+    dye = lambda obj: colorize('%White', "« " + obj.group(1) + " »")
+    line = re.sub('«(.+?)»', dye, line)
 
     # replace angle quotes by double quotes on windws term
     if sys.platform.startswith('win'):
