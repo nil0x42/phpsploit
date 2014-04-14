@@ -1,15 +1,8 @@
 Interface:
-  * @--config=<config> -c: use an alternative configuration file
-  * @--eval=<command> -e: interpret argument as framework command
-  * @--interactive -i: force interactive mode even if -x is given
-  * @--load=<session> -l: load the given session file
-  * @--version -v: print version information
-  * @--help -h: print help about the available commands
 
 Settings:
 
 Sessions:
-  * Add readline history saving capability
 
 Commands:
   * @doc core command must be created, to handle ./doc/ reading from interface

@@ -24,11 +24,11 @@ class Shell(shnake.Shell):
     def __init__(self):
         # explicitly run parent's __init__()
         super().__init__()
-        print("[*] Loading «{}» ...".format(core.userdir+"config"))
-        if self.interpret("source '"+core.userdir+"config'") == 0:
-            print("[*] Configuration file correctly loaded\n")
-        else:
-            print("[-] Configuration file couldn't be loaded\n")
+        # print("[*] Loading «{}» ...".format(core.userdir+"config"))
+        # if self.interpret("source '"+core.userdir+"config'") == 0:
+        #     print("[*] Configuration file correctly loaded\n")
+        # else:
+        #     print("[-] Configuration file couldn't be loaded\n")
 
 
 

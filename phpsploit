@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+VERSION = "2.1.4"
+
 ## Make sure the script is not imported
 try: from __main__ import __file__
 except: exit('PhpSploit must be run with the provided script')
@@ -8,14 +10,99 @@ except: exit('PhpSploit must be run with the provided script')
 ## Spread PhpSploit libraries
 import lib
 
+import sys, os, argparse                # python imports
+
+## Parse argument list:
+
+def help_format(prog):
+    import ui.output
+    kwargs = dict()
+    kwargs['width'] = ui.output.columns()
+    kwargs['max_help_position'] = 34
+    format = argparse.HelpFormatter(prog, **kwargs)
+    return (format)
+
+def run_process(cmd):
+    import subprocess as sp
+    child = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.DEVNULL)
+    streamdata = child.communicate()[0]
+    if child.returncode != 0:
+        return ("")
+    return streamdata.decode("utf-8").strip()
+
+
+parser = argparse.ArgumentParser()
+parser.formatter_class = help_format
+parser.description = 'A furtive tunnel based php webshell'
+parser.add_argument('-v', '--version',
+        help = "output version information and exit",
+        action = 'store_true')
+parser.add_argument('-c', '--config',
+        help = "use alternative configuration file",
+        metavar = "<FILE>")
+parser.add_argument('-l', '--load',
+        help = "load the given phpsploit session file",
+        metavar = "<SESSION>")
+parser.add_argument('-t', '--target',
+        help = "use the given URL as phpsploit target",
+        metavar = "<URL>")
+parser.add_argument('-s', '--source',
+        help = "execute file data commands (disables interactive shell)",
+        metavar = "<FILE>")
+parser.add_argument('-e', '--eval',
+        help = "run phpsploit command (disables interactive shell)",
+        metavar = "<CMD>")
+parser.add_argument('-i', '--interactive',
+        help = "force interactive mode if disabled by `-e` or `-s`",
+        action = 'store_true')
+opt = vars(parser.parse_args())
+
+import core
+
+if opt['version']:
+    tmp = run_process(['git', '-C', core.basedir, 'describe'])
+    VERSION = (tmp + " (git)") if tmp else VERSION
+    msg = "PhpSploit Framework, version %s\n" %VERSION
+    msg += "License GPLv3+: GNU GPL version 3 or later"
+    msg += " <http://gnu.org/licenses/gpl.html>\n\n"
+    msg += "This is free software; you are free"
+    msg += " to change and redistribute it.\n"
+    msg += "There is NO WARRANTY, to the extent permitted by law."
+    print(msg)
+    sys.exit(0)
+
+import ui.output, ui.interface
 
 ## Enable stdout wrapper
-import sys, ui.output
 sys.stdout = ui.output.Wrapper(backlog=True)
 
-
-### Start shell interface
-import ui.interface
+## Start shell interface
 interface = ui.interface.Shell()
 
-interface.cmdloop()
+if opt['config'] is None:
+    opt['config'] = core.userdir + "config"
+
+if interface.interpret("source '%s'" %opt['config']) != 0:
+    print()
+    parser.error("%r: couldn't load config file." %opt['config'])
+
+if opt['load']:
+    if interface.interpret("session load '%s'" %opt['load']) != 0:
+        print()
+        parser.error("%r: couldn't load session file." %opt['load'])
+
+if opt['target']:
+    if interface.interpret("set TARGET '%s'" %opt['target']) != 0:
+        print()
+        parser.error("%r: couldn't set target url." %opt['target'])
+
+if opt['source']:
+    if interface.interpret("source '%s'" %opt['source']) != 0:
+        print()
+        parser.error("%r: couldn't read source file." %opt['source'])
+
+if opt['eval']:
+    interface.interpret(opt['eval'])
+
+if (opt['eval'] is None and opt['source'] is None) or opt['interactive']:
+    interface.cmdloop()

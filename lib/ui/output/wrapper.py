@@ -70,7 +70,9 @@ class Stdout:
     def __del__(self):
         """Restore the original sys.stdout on Wrapper deletion"""
         self._backlog.close()
-        sys.stdout = self._orig_outfile
+        # dirty hack when used before argparse on main file...
+        try: sys.stdout = self._orig_outfile
+        except: pass
 
 
     def __getattr__(self, obj):
