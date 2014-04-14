@@ -114,9 +114,9 @@ class Path(str):
 
         """
         try:
-            import subprocess, ui.output
+            import subprocess, ui.output, ui.input
             from core import session
-            assert ui.output.isatty()
+            assert ui.output.isatty() and ui.input.isatty()
             old = self.read()
             subprocess.call([session.Conf.TEXTEDITOR(), self])
             assert self.read() != old
