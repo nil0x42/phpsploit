@@ -22,13 +22,7 @@ class Shell(shnake.Shell):
     error  = "[!] %s"
 
     def __init__(self):
-        # explicitly run parent's __init__()
         super().__init__()
-        # print("[*] Loading «{}» ...".format(core.userdir+"config"))
-        # if self.interpret("source '"+core.userdir+"config'") == 0:
-        #     print("[*] Configuration file correctly loaded\n")
-        # else:
-        #     print("[-] Configuration file couldn't be loaded\n")
 
 
 
@@ -42,6 +36,15 @@ class Shell(shnake.Shell):
         except (KeyError, IndexError): return argv
         self.interpret(cmds[:-1], precmd=(lambda x: x))
         return cmds[-1] + argv[1:]
+
+
+
+    def completenames(self, text, *ignored):
+        """Add aliases and plugins for completion"""
+        result = super().completenames(text, ignored)
+        result += session.Alias.keys()
+        # result += plugins.keys()
+        return ([x for x in list(set(result)) if x.startswith(text)])
 
 
 
@@ -105,6 +108,7 @@ class Shell(shnake.Shell):
             print(e)
             return
 
+        print(session.Alias.keys())
         return self.interpret("help debug")
 
 
