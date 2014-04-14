@@ -58,10 +58,11 @@ class UserDir:
 
     def fill(self):
         """Add user configuration dir's default content."""
-        # touch ./config
+        # put default config if not exists
         config = os.path.truepath(self.path, "config")
         if not os.path.isfile(config):
-            open(config, "w")
+            default_config = open(basedir+"data/config/config").read()
+            open(config, "w").write(default_config)
 
         # overwrite ./README
         readme = open(basedir+"data/config/README").read()

@@ -1,0 +1,22 @@
+# vi: ft=sh
+
+# The PhpSploit config file can be considered as a source file
+# which is defaultly sourced at framework initialisation.
+#
+# It means that you juste have to put the commands as you type them
+# in the PhpSploit shell interface in order to build your own configuration.
+
+### Those aliases are enabled by default for retrocompatibility
+### purposes. Feel free to remove them if you want !
+alias target    "set target"
+alias load      "session load"
+alias save      "session save"
+alias infect    "exploit"
+
+### Some examples of aliases you may want to add:
+
+## set your own PASSKEY to prevent other phpsploit users use your backdoors.
+# set PASSKEY "YourPassKey"
+
+## use vim as text editor because all other editors sucks !
+# set TEXTEDITOR "vim"
