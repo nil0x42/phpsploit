@@ -49,6 +49,7 @@ class UserDir:
                 except: pass
                 try:
                     self.path = Path(choice, mode="drw")
+                    break
                 except Exception as e:
                     if choice == self.choices[-1]:
                         raise e
