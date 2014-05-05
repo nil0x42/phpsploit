@@ -108,7 +108,6 @@ class Shell(shnake.Shell):
             print(e)
             return
 
-        print(session.Alias.keys())
         return self.interpret("help debug")
 
 
@@ -443,12 +442,12 @@ class Shell(shnake.Shell):
             no valid lines.
 
             > set <NAME> + "value"
-            - Add "value" as a setting possible choice. If converts the
-            current setting into a RandLine buffer if it was not.
+            - Add "value" as a setting possible choice. It converts the
+            current setting into a RandLine buffer if it was not already.
 
             > set <NAME> + "file:///path/to/file"
             - Rebind NAME setting to the given file path, even if it does
-            not exist at the moiment it had been set. It means that each
+            not exist at the moment it had been set. It means that each
             time the setting's value is called, a try is made to load the
             file's content as new buffer if it exists/is valid, and
             keeps the old one otherwise.
@@ -459,7 +458,7 @@ class Shell(shnake.Shell):
             cannot be declared.
 
             - The convention above does not apply for settings whose name
-            start with "HTTP_", because this kind of variable are
+            starts with "HTTP_", because this kind of variable are
             automatically used as custom headers on http requests. For
             example, `set HTTP_ACCEPT_LANGUAGE "en-CA"` will set the
             "Accept-Language" http header to the specified value.
@@ -511,8 +510,8 @@ class Shell(shnake.Shell):
         DESCRIPTION:
             The PhpSploit environment variables are created once a remote
             server tunnel is opened through the interface.
-            These variables are used by the core and some plugins to
-            correctly manage and know server's current state.
+            These variables are used by the core and a few plugins in
+            order to interract with the werbserver's current state.
 
             > env
             - Display all current env vars
@@ -655,11 +654,11 @@ class Shell(shnake.Shell):
               it must be given as argument.
 
             NOTE: A plugin command may also be called with "--help"
-            a argument, resulting to the same as "help <plugin>".
+            as argument, resulting to the same as "help <plugin>".
 
         EXAMPLES:
             > help
-              - Displpay the full help, sorted by category
+              - Display the full help, sorted by category
             > help clear
               - Display the help for the "clear" command
         """
