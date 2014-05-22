@@ -3,7 +3,7 @@ Reporting a new bug:
 
 If you discover any bug on the PhpSploit framework, you are invited to submit
 it in the project's bugtracker, at:
-    - https://bitbucket.org/nil0x42/phpsploit/issues/new
+    - https://github.com/nil0x42/phpsploit/issues
 
 Please ensure previously that the bug has not already been reported in the
 issues list. In case you are using an older version of the software, consider
@@ -23,7 +23,7 @@ the following syntax:
     - The maximum line length is limited to 80 characters.
     - PHP code portions MUST be compatible with at least php 4.1.0.
 
-Finally, your contribution must be submited by a pull request on bitbucket.
+Finally, your contribution must be submited by a pull request on github.
 Otherwise, your patch can be sent to the main developper's E-Mail whith the
 "git format-patch" feature. For more infos about it, see:
     - https://github.com/bard/sameplace/wiki/Getting-started-with-git
@@ -51,12 +51,12 @@ Enhancing documentation:
 
 If you found an error, or have an enhancement idea on any command/plugin help
 string, please consider creating an "enhancement" issue:
-    - https://bitbucket.org/nil0x42/phpsploit/issues/new
+    - https://github.com/nil0x42/phpsploit/issues
 
 If you are masochist and want to write, complement or review the (poor?)
 PhpSploit documentation, you are very welcome and invited to share your
 contribution by E-Mail or pull request.
 
 #NOTE: If you want to bring manpage contribution, consider editing it's source
-file "framework/misc/manual-page.txt2tags", which uses txt2tags syntax and
-must be used instead of "framework/misc/manual-page.1" to generate the manpage
+file at "man/manual-page.txt2tags", which uses txt2tags syntax and must be used
+instead of "man/manual-page.1" to generate the manpage (see man/README).
