@@ -7,8 +7,8 @@ VERSION = "2.1.4"
 try: from __main__ import __file__
 except: exit('PhpSploit must be run with the provided script')
 
-## Spread PhpSploit libraries
-import lib
+## Spread PhpSploit sources
+import src
 
 import sys, os, argparse                # python imports
 

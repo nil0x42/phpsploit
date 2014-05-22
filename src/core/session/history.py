@@ -2,13 +2,13 @@ class History(list):
     """Commands history.
 
     This class is a specialisation of the list() obj, designed
-    to store line command strings only.
+    to store command line strings only.
 
     It maintains a `size` property which gives the full size (in bytes)
     of all strings in array.
 
     To do it, the class operates overriding append(), pop() and clear()
-    methods to maintain the current size.
+    methods to keep the current size updated in real time.
 
     """
 

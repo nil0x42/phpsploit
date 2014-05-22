@@ -9,7 +9,7 @@ basic elements such as the following strings:
 
 """
 ### directory constants ###
-from lib import basedir, coredir
+from src import basedir, coredir
 from .config import userdir
 
 ### session object ###
