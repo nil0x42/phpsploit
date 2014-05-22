@@ -15,10 +15,13 @@ alias save      "session save"
 alias infect    "exploit"
 
 
-### Some examples of aliases you may want to add:
+### Some configuration examples you may want to add:
 
 ## set your own PASSKEY to prevent other phpsploit users use your backdoors.
 # set PASSKEY "YourPassKey"
 
 ## use vim as text editor because all other editors sucks !
 # set TEXTEDITOR "vim"
+
+## bypass vimist habits by aliasing 'edit' to 'vim'.
+# alias vim     "edit"
