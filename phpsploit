@@ -15,7 +15,7 @@ del __file__
 # Spread PhpSploit sources
 import src
 
-import argparse                # python imports
+import argparse
 
 # Parse argument list:
 
