@@ -36,7 +36,7 @@ a tiny **polymorphic backdoor**:
 
 3. **Convenient**: A robust interface with many crucial features
     - Powerful interface with completion and multi-command support
-    - Session saving/loading feature, with commands history saving
+    - Session saving/loading feature, with persistent history
     - Multi-request support for large payloads (such as uploads)
     - Provides a powerful, highly configurable settings engine
     - Each setting, such as user-agent has a polymorphic mode
