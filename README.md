@@ -33,5 +33,4 @@ The physical backdoor is configurable and really tiny for furtivity purposes:
 - And even more...
 
 #### Example #####
----
-![Image](http://s22.postimg.org/b0uvq3klb/Untitled.png)
+![Image](data/img/phpsploit-demo.png)
