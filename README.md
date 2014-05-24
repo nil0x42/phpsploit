@@ -7,10 +7,10 @@ compromised web server for **privilege escalation** purposes.
 
 #### Overview ####
 
-The obfuscated communication is accomplished using HTTP headers under            
+The obfuscated communication is accomplished using HTTP headers under
 valid client HTTP requests and relative web server's responses.
 
-The physical backdoor is configurable and really tiny to increase stealth:
+The physical backdoor is configurable and really tiny for furtivity purposes:
 ```php
 <? @eval($_SERVER['HTTP_PHPSPL01T']) ?>
 ```
@@ -33,5 +33,5 @@ The physical backdoor is configurable and really tiny to increase stealth:
 - And even more...
 
 #### Example #####
-
-![phpsploit example](http://s22.postimg.org/b0uvq3klb/Untitled.png)
+---
+![Image](http://s22.postimg.org/b0uvq3klb/Untitled.png)
