@@ -4,7 +4,7 @@
 - The new `session` command now manages the old `load` and `save` commands.
 - The `set` command now supplies a new keyword ("+") for line appending.
 - Any setting now suports random choice from multiple values, with the new
-`set` command's `+` keyword, that uses SettingVar class as data wrapper.
+  `set` command's `+` keyword, that uses SettingVar class as data wrapper.
 - The `eval` command has been replaced by `source`, more restrictive.
 - The `lastcmd` command has been replaced by `backlog`, more simple.
 - The phpsploit source code has moved to **./src/** directory.
@@ -18,7 +18,7 @@
 - New `load` command, which provides interactive session file loading.
 - Typing `<cmd> --help` now shows help as `help <cmd>`.
 - Prefixing a command with % from virtual plugin **shell** instances allows
-    remoteShell command execution without leaving the virtual shell.
+  remoteShell command execution without leaving the virtual shell.
 - Added lowercase variable name completion on `set` and `env` commands.
 - The **./doc/** files has been moved to the root directory.
 
@@ -28,7 +28,7 @@
 - The `env` and `set` commands now display variables which names starts
 - with the first argument string if it is not a complete variable name.
 - If present, the bash **$XDG_CONFIG_HOME** environment variable is now used
-as user's root configuration path instead of home directory.
+  as user's root configuration path instead of home directory.
 - **./framework/misc/** is now the default miscellaneous files directory.
 - The ascii **README** has been moved to the PhpSploit root directory.
 - **./doc/** is now used as help files containers instead of **./readme/**.
@@ -44,4 +44,4 @@ as user's root configuration path instead of home directory.
 - The commands can now be written in multi line mode, like in the bash
 - interpreter, by ending a line with an antislash.
 - Pressing enter on an unfinished enquoted command is now interpreted as
-a newline insertion instead of a command sending, like in bash.
+  a newline insertion instead of a command sending, like in bash.
