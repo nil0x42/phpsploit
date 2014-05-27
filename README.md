@@ -28,17 +28,18 @@ through a tiny **polymorphic backdoor**:
 
 * **Stealth**: The framework is made by paranoids, for paranoids
     - Nearly invisible by log analysis and NIDS signature detection
-    - Safe-mode and common PHP security restrictions bypass
+    - Safe-mode and common *PHP security restrictions bypass*
     - Communications are hidden in HTTP Headers
-    - Loaded payloads are obfuscated to **bypass NIDS**
-    - HTTP/HTTPS Proxy support
+    - Loaded payloads are obfuscated to *bypass NIDS*
+    - HTTP/HTTPS **Proxy support**
 
 * **Convenient**: A robust interface with many crucial features
+    - *Cross-platform* on both the client and the server.
     - Powerful interface with completion and multi-command support
     - Session saving/loading feature, with persistent history
     - Multi-request support for large payloads (such as uploads)
     - Provides a powerful, highly configurable settings engine
-    - Each setting, such as user-agent has a polymorphic mode
+    - Each setting, such as user-agent has a *polymorphic mode*
     - Customisable environment variables for plugin interaction
     - Provides a complete plugin development API
 
