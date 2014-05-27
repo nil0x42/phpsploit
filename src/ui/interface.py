@@ -4,27 +4,31 @@ Unheriting the shnake's Shell class, the PhpSplpoit shell interface
 provides interactive use of commands.
 
 """
-import sys, os, difflib, traceback, subprocess
+import os
+import sys
+import traceback
+import subprocess
 
-import core, tunnel, shnake, ui.input
+import shnake
+
+import core
+import tunnel
+
 from core import session, plugins
-
-from datatypes import Path, PhpCode
-from ui.color import colorize, decolorize
+from datatypes import Path
+from ui.color import colorize
 
 
 class Shell(shnake.Shell):
 
     prompt = colorize('%Lined', 'phpsploit', '%Reset', ' > ')
 
-    nocmd  = "[-] Unknown Command: %s"
+    nocmd = "[-] Unknown Command: %s"
     nohelp = "[-] No help for: %s"
-    error  = "[!] %s"
+    error = "[!] %s"
 
     def __init__(self):
         super().__init__()
-
-
 
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
@@ -32,12 +36,12 @@ class Shell(shnake.Shell):
         if len(argv) and argv[0] != "backlog":
             sys.stdout.backlog = ""
         # Alias Handler
-        try: cmds = self.parseline( session.Alias[argv[0]] )
-        except (KeyError, IndexError): return argv
+        try:
+            cmds = self.parseline(session.Alias[argv[0]])
+        except (KeyError, IndexError):
+            return argv
         self.interpret(cmds[:-1], precmd=(lambda x: x))
         return cmds[-1] + argv[1:]
-
-
 
     def completenames(self, text, *ignored):
         """Add aliases and plugins for completion"""
@@ -46,17 +50,13 @@ class Shell(shnake.Shell):
         # result += plugins.keys()
         return ([x for x in list(set(result)) if x.startswith(text)])
 
-
-
     def onexception(self, exception):
         """Add traceback handler to onexception"""
         self.last_exception = exception
         return super().onexception(exception)
 
-
-
-    #####################
-    ### COMMAND: exit ###
+    #################
+    # COMMAND: exit #
     def do_exit(self, argv):
         """Leave the current shell interface
 
@@ -74,10 +74,8 @@ class Shell(shnake.Shell):
         else:
             exit()
 
-
-
-    ######################
-    ### COMMAND: debug ###
+    ##################
+    # COMMAND: debug #
     def complete_debug(self, text, *ignored):
         keys = ["traceback"]
         return [x for x in keys if x.startswith(text)]
@@ -110,10 +108,8 @@ class Shell(shnake.Shell):
 
         return self.interpret("help debug")
 
-
-
-    ########################
-    ### COMMAND: history ###
+    ####################
+    # COMMAND: history #
     def do_history(self, argv):
         """Command line history
 
@@ -136,8 +132,10 @@ class Shell(shnake.Shell):
 
         argv.append('9999999999')
 
-        try: count = int(argv[1])
-        except: return self.interpret("help history")
+        try:
+            count = int(argv[1])
+        except:
+            return self.interpret("help history")
 
         last = readline.get_current_history_length()
         first = last - count
@@ -145,12 +143,10 @@ class Shell(shnake.Shell):
             first = 1
         for i in range(first, last):
             cmd = readline.get_history_item(i)
-            print( "{:4d}  {:s}".format(i, cmd) )
+            print("{:4d}  {:s}".format(i, cmd))
 
-
-
-    ########################
-    ### COMMAND: exploit ###
+    ####################
+    # COMMAND: exploit #
     def do_exploit(self, argv):
         """Drop a shell from target server
 
@@ -173,29 +169,25 @@ class Shell(shnake.Shell):
         """
         print("[*] Current backdoor is:")
         obj = session.Conf.BACKDOOR()
-        obj = obj.replace("%%PASSKEY%%", session.Conf.PASSKEY().upper());
-        print( obj  + "\n" )
+        obj = obj.replace("%%PASSKEY%%", session.Conf.PASSKEY().upper())
+        print(obj + "\n")
 
         if tunnel.connected():
             m = ("[*] Use `set TARGET <VALUE>` to use another url as target."
                  "\n[*] To exploit a new server, disconnect from «%s» first.")
-            print( m.format(session.Env.HOST) )
-            return
+            return print(m.format(session.Env.HOST))
 
         if session.Conf.TARGET() is None:
             m = ("To run a remote tunnel, the backdoor shown above must be\n"
                  "manually injected in a remote server executable web page.\n"
                  "Then, use `set TARGET <BACKDOORED_URL>` and run `exploit`.")
-            print( colorize("%BoldCyan", m) )
-            return
+            return print(colorize("%BoldCyan", m))
 
         print("[*] Sending payload to «{}» ...".format(session.Conf.TARGET))
-        tunnel.Init()        # it raises exception if fails
+        tunnel.Init()  # it raises exception if fails
 
-
-
-    ######################
-    ### COMMAND: clear ###
+    ##################
+    # COMMAND: clear #
     def do_clear(self, argv):
         """Clear the terminal screen
 
@@ -206,12 +198,10 @@ class Shell(shnake.Shell):
             Clear the current visible terminal data, leaving blank the
             screen. Used for visibility purposes.
         """
-        return os.system('cls' if os.name=='nt' else 'clear')
+        return os.system('cls' if os.name == 'nt' else 'clear')
 
-
-
-    #####################
-    ### COMMAND: rtfm ###
+    #################
+    # COMMAND: rtfm #
     def do_rtfm(self, argv):
         """Read the fine manual
 
@@ -232,10 +222,8 @@ class Shell(shnake.Shell):
             if return_value is not 0:
                 txtMan()
 
-
-
-    ########################
-    ### COMMAND: session ###
+    ####################
+    # COMMAND: session #
     def complete_session(self, text, *ignored):
         keys = ['save', 'diff', 'load']
         # load argument is not available from remote shell:
@@ -301,12 +289,10 @@ class Shell(shnake.Shell):
             session.diff(argv[2])
         # sesion [<FILE>]
         else:
-            print( session(argv[1]) )
+            print(session(argv[1]))
 
-
-
-    #####################
-    ### COMMAND: lpwd ###
+    #################
+    # COMMAND: lpwd #
     def do_lpwd(self, argv):
         """Print local working directory
 
@@ -318,12 +304,10 @@ class Shell(shnake.Shell):
             local system, exactly like does the "pwd" shell command on
             unix systems.
         """
-        print( os.getcwd() )
+        print(os.getcwd())
 
-
-
-    ####################
-    ### COMMAND: lcd ###
+    ################
+    # COMMAND: lcd #
     def do_lcd(self, argv):
         """Change local working directory
 
@@ -347,12 +331,10 @@ class Shell(shnake.Shell):
         if len(argv) != 2:
             return self.interpret('help lcd')
 
-        os.chdir( os.path.expanduser(argv[1]) )
+        os.chdir(os.path.expanduser(argv[1]))
 
-
-
-    ####################
-    ### COMMAND: lrun ###
+    #################
+    # COMMAND: lrun #
     def do_lrun(self, argv):
         """Execute client-side shell command
 
@@ -371,10 +353,8 @@ class Shell(shnake.Shell):
             return self.interpret("help lrun")
         subprocess.call(argv[1:])
 
-
-
-    ####################
-    ### COMMAND: source ##
+    ###################
+    # COMMAND: source #
     def do_source(self, argv):
         """Execute a PhpSploit script file
 
@@ -391,18 +371,16 @@ class Shell(shnake.Shell):
         """
         if len(argv) != 2:
             return self.interpret("help source")
-        
-        self.interpret( open(argv[1], 'r').read() )
 
+        self.interpret(open(argv[1], 'r').read())
 
-
-    ####################
-    ### COMMAND: set ###
+    ################
+    # COMMAND: set #
     def complete_set(self, text, *_):
         """Use settings as `set` completers (case insensitive)"""
         result = []
         for key in session.Conf.keys():
-            if key.startswith( text.upper() ):
+            if key.startswith(text.upper()):
                 result.append(key)
         return result
 
@@ -470,14 +448,15 @@ class Shell(shnake.Shell):
         """
         # `set [<PATTERN>]` display concerned settings list
         if len(argv) < 3:
-            print(session.Conf( (argv+[""])[1] ))
+            print(session.Conf((argv+[""])[1]))
 
         # buffer edit mode
         elif argv[2] == "+":
             # `set <VAR> +`: use TEXTEDITOR as buffer viewer in file mode
             if len(argv) == 3:
                 # get a buffer obj from setting's raw buffer value
-                buffer = Path(); buffer.write( session.Conf[argv[1]].buffer )
+                buffer = Path()
+                buffer.write(session.Conf[argv[1]].buffer)
                 # try to edit it through TEXTEDITOR, and update it
                 # if it has been modified.
                 if buffer.edit():
@@ -489,15 +468,13 @@ class Shell(shnake.Shell):
         else:
             session.Conf[argv[1]] = argv[2]
 
-
-
-    ####################
-    ### COMMAND: env ###
+    ################
+    # COMMAND: env #
     def complete_env(self, text, *ignored):
         """Use env vars as `env` completers (case insensitive)"""
         result = []
         for key in session.Env.keys():
-            if key.startswith( text.upper() ):
+            if key.startswith(text.upper()):
                 result.append(key)
         return result
 
@@ -559,19 +536,17 @@ class Shell(shnake.Shell):
         """
         # `env [<PATTERN>]` display concerned settings list
         if len(argv) < 3:
-            return print(session.Env( (argv+[""])[1] ))
+            return print(session.Env((argv+[""])[1]))
 
         # `env <NAME> <VALUE>`
         session.Env[argv[1]] = " ".join(argv[2:])
 
-
-
-    ####################
-    ### COMMAND: alias ###
+    ##################
+    # COMMAND: alias #
     def complete_alias(self, text, *ignored):
         result = []
         for key in session.Alias.keys():
-            if key.startswith( text ):
+            if key.startswith(text):
                 result.append(key)
         return result
 
@@ -607,15 +582,13 @@ class Shell(shnake.Shell):
         """
         # `alias [<PATTERN>]` display concerned settings list
         if len(argv) < 3:
-            return print(session.Alias( (argv+[""])[1] ))
+            return print(session.Alias((argv+[""])[1]))
 
         # `alias <NAME> <VALUE>`
         session.Alias[argv[1]] = " ".join(argv[2:])
 
-
-
-    ########################
-    ### COMMAND: backlog ###
+    ####################
+    # COMMAND: backlog #
     def do_backlog(self, argv):
         """Open last command's output with text editor
 
@@ -634,10 +607,8 @@ class Shell(shnake.Shell):
         backlog.edit()
         return
 
-
-
-    #####################
-    ### COMMAND: help ###
+    #################
+    # COMMAND: help #
     def do_help(self, argv):
         """Show commands help
 
@@ -667,7 +638,7 @@ class Shell(shnake.Shell):
             return self.interpret('help help')
 
         # collect the command list from current shell
-        core_commands = self.get_names(self, "do_");
+        core_commands = self.get_names(self, "do_")
 
         def get_doc(cmd):
             """return the docstring lines list of specific command"""
@@ -678,28 +649,28 @@ class Shell(shnake.Shell):
                 try:
                     doc = getattr(self, 'do_'+cmd).__doc__
                 except:
-                    return( list() )
-            return( doc.strip().splitlines() )
+                    return(list())
+            return(doc.strip().splitlines())
 
         def get_description(docLines):
             """return the command description (1st docstring line)"""
             try:
-                return( docLines[0].strip() )
+                return(docLines[0].strip())
             except:
-                return ( colorize("%Yellow", "No description") )
+                return (colorize("%Yellow", "No description"))
 
         def doc_help(docLines):
             """print the formated command's docstring"""
             # reject empty docstrings (description + empty line)
             if len(docLines) < 2:
                 return(None)
-            docLines.pop(0) # remove the description line
+            docLines.pop(0)  # remove the description line
             while not docLines[0].strip():
-                docLines.pop(0) # remove heading empty lines
+                docLines.pop(0)  # remove heading empty lines
 
             # remove junk leading spaces (due to python indentation)
-            trash = len( docLines[0] ) - len( docLines[0].lstrip() )
-            docLines = [ line[trash:].rstrip() for line in docLines ]
+            trash = len(docLines[0]) - len(docLines[0].lstrip())
+            docLines = [line[trash:].rstrip() for line in docLines]
 
             # hilight lines with no leading spaces (man style)
             result = str()
@@ -715,14 +686,14 @@ class Shell(shnake.Shell):
             doc = get_doc(argv[1])
             # if the given argument is not a command, return nohelp err
             if not doc:
-                return print( self.nohelp %argv[1])
+                return print(self.nohelp % argv[1])
 
             # print the heading help line, which contain description
-            print( "\n[*] " + argv[1] + ": " + get_description(doc) + "\n" )
+            print("\n[*] " + argv[1] + ": " + get_description(doc) + "\n")
 
             # call the help_<command> method, otherwise, print it's docstring
             try:
-                getattr( self, 'help_'+argv[1] )()
+                getattr(self, 'help_'+argv[1])()
             except:
                 doc_help(doc)
             return
@@ -730,7 +701,7 @@ class Shell(shnake.Shell):
         # display the whole list of commands, with their description line
 
         # set maxLength to the longest command name, and at least 13
-        maxLength = max( 13, len(max(core_commands, key=len)) )
+        maxLength = max(13, len(max(core_commands, key=len)))
 
         help = [('Core Commands', core_commands)]
 
@@ -741,14 +712,14 @@ class Shell(shnake.Shell):
                 items = plugins.list_category(category)
 
                 # rescale maxLength in case of longer plugin names
-                maxLength = max( maxLength, len(max(items, key=len)) )
-                help += [ (name+' Plugins', items) ]
+                maxLength = max(maxLength, len(max(items, key=len)))
+                help += [(name+' Plugins', items)]
 
         # Settle maxLength if there are command aliases
         aliases = list(session.Alias.keys())
         if aliases:
-            maxLength = max( maxLength, len(max(aliases, key=len)) )
-            help += [ ("Command Aliases", aliases) ]
+            maxLength = max(maxLength, len(max(aliases, key=len)))
+            help += [("Command Aliases", aliases)]
 
         # print commands help, sorted by groups
         cmdColumn = ' ' * (maxLength-5)
@@ -757,26 +728,24 @@ class Shell(shnake.Shell):
             # display group (category) header block
             underLine = '=' * len(groupName)
             if groupName == "Command Aliases":
-                print( "\n" + groupName +  "\n" + underLine      + "\n" +
-                       '    Alias  ' + cmdColumn + 'Value      ' + "\n" +
-                       '    -----  ' + cmdColumn + '-----      ' + "\n" )
+                print("\n" + groupName + "\n" + underLine + "\n" +
+                      '    Alias  ' + cmdColumn + 'Value      ' + "\n" +
+                      '    -----  ' + cmdColumn + '-----      ' + "\n")
             else:
-                print( "\n" + groupName +  "\n" + underLine      + "\n" +
-                       '    Command' + cmdColumn + 'Description' + "\n" +
-                       '    -------' + cmdColumn + '-----------' + "\n" )
+                print("\n" + groupName + "\n" + underLine + "\n" +
+                      '    Command' + cmdColumn + 'Description' + "\n" +
+                      '    -------' + cmdColumn + '-----------' + "\n")
 
             # display formated command/description pairs
             groupCommands.sort()
             for cmdName in groupCommands:
-                spaceFill = ' ' * ( maxLength - len(cmdName) +2 )
+                spaceFill = ' ' * (maxLength - len(cmdName) + 2)
                 if groupName == "Command Aliases":
                     description = session.Alias[cmdName]
                 else:
-                    description = get_description( get_doc(cmdName) )
-                print( '    ' + cmdName + spaceFill + description )
+                    description = get_description(get_doc(cmdName))
+                print('    ' + cmdName + spaceFill + description)
             print('')
-
-
 
     def except_OSError(self, exception):
         """Fix OSError args, removing errno, and adding filename"""
