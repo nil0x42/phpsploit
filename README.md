@@ -43,4 +43,4 @@ through a tiny **polymorphic backdoor**:
     - Provides a complete plugin development API
 
 
-[picture]: https://raw.githubusercontent.com/nil0x42/phpsploit/destiny/data/img/phpsploit-demo.png
+[picture]: data/img/phpsploit-demo.png
