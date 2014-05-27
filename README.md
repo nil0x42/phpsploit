@@ -1,4 +1,4 @@
-### PhpSploit: *Advanced post-exploitation framework* ###
+### PhpSploit: *Furtive post-exploitation framework* ###
 
 PhpSploit is a **remote control** framework, aiming to provide a **stealth**
 interactive shell-like connection over HTTP between client and web server.
