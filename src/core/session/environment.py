@@ -1,5 +1,7 @@
 import re
+
 from . import baseclass
+
 
 class Environment(baseclass.MetaDict):
     """Environment Variables
@@ -35,12 +37,10 @@ class Environment(baseclass.MetaDict):
         self.readonly += readonly
         super().__init__(value)
 
-
     def __setitem__(self, name, value):
         if name in self.readonly and name in self.keys():
             raise AttributeError("«{}» variable is read-only".format(name))
         super().__setitem__(name, value)
-
 
     def _isattr(self, name):
         return re.match("^[A-Z][A-Z0-9_]+$", name)
