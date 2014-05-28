@@ -1,6 +1,9 @@
-import sys, signal
+import sys
+import signal
+
 from ..color import colorize
 from ..output import isatty
+
 
 class Expect:
     """Expect some user input, and provide response related to the
@@ -80,8 +83,8 @@ class Expect:
 
     """
 
-    def __init__(self, expect=None, question='', timeout=0, \
-                 default=None, case_sensitive=False,        \
+    def __init__(self, expect=None, question='', timeout=0,
+                 default=None, case_sensitive=False,
                  append_choices=True, skip_interrupt=True):
 
         self.expect = expect
@@ -91,7 +94,6 @@ class Expect:
         self.case_sensitive = bool(case_sensitive)
         self.append_choices = bool(append_choices)
         self.skip_interrupt = bool(skip_interrupt)
-
 
     def __call__(self, question=None):
 
@@ -109,7 +111,7 @@ class Expect:
 
         # handle yes/no choice (expect=bool)
         if isinstance(expect, bool):
-            expect = ['y','n']
+            expect = ['y', 'n']
             default = expect[not self.expect]
 
         # handle multi choice (expect=list)
@@ -139,7 +141,7 @@ class Expect:
         append_choices = self.append_choices
         if append_choices and expect is not None:
             suffix = colorize('%BoldCyan', ' [')
-            sep = '/' if not '/' in str(expect) else ' || '
+            sep = '/' if '/' not in str(expect) else ' || '
             sep = colorize('%BoldCyan', sep)
             items = [e.strip() for e in expect if e.strip()]
             for index, item in enumerate(items):
@@ -161,13 +163,12 @@ class Expect:
         else:
             timeout = 1
 
-
         # ask loop
         while True:
             response = None
             # start timeout that calls illegal lambda (raising TypeError)
             signal.signal(signal.SIGALRM, lambda: 0)
-            signal.alarm(self.timeout)
+            signal.alarm(timeout)
             sys.stdout.write(question)
             try:
                 response = input().strip()
@@ -189,6 +190,8 @@ class Expect:
 
             # if None is expected, any response is accepted
             if expect is None:
+                if default and not response:
+                    return str(default)
                 return response
 
             # use default response if not given
