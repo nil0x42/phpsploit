@@ -1,10 +1,15 @@
-"""Patch os.path standard library to add to it the tryepath() function,
+"""A small os.path module improvement.
+
+Patch os.path standard library to add to it the truepath() function,
 that supports multiple path arguments, and automatically joins them
 with user dir and env vars expanded. The final result path is then
 normalized with os.path.realpath()
 
+Author: nil0x42
+
 """
 import os.path
+
 
 def _truepath(*elems):
     """A fusion of join(), expandvars(), expanduser() and realpath()"""
