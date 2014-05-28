@@ -17,7 +17,7 @@ wtf
 
 As shown in the example above, the wrapper provides a nice backlog
 feature. Considering it's original design, aka enhancing the output
-experience for the PhpSplloit Framework, it also provides dynamic
+experience for the PhpSploit Framework, it also provides dynamic
 cross-platform pattern coloration. For example, if a line begins with
 "[-] ", it is automatically colored to bright red.
 
@@ -26,12 +26,14 @@ when writting to the backlog.
 
 """
 
-import sys, re
+import sys
+import re
 from io import StringIO
 from os import linesep as os_linesep
 
 import ui.output
 from ..color import colorize, decolorize
+
 
 class Stdout:
     """PhpSploit framework's dedicated standard output wrapper,
@@ -66,19 +68,18 @@ class Stdout:
         # are colors supported ?
         self._has_colors = ui.output.colors()
 
-
     def __del__(self):
         """Restore the original sys.stdout on Wrapper deletion"""
         self._backlog.close()
         # dirty hack when used before argparse on main file...
-        try: sys.stdout = self._orig_outfile
-        except: pass
-
+        try:
+            sys.stdout = self._orig_outfile
+        except:
+            pass
 
     def __getattr__(self, obj):
         """Fallback to original stdout objects for undefined methods"""
         return getattr(self._orig_outfile, obj)
-
 
     def _writeLn(self, line):
         """Process individual line morphing, and write it"""
@@ -88,22 +89,20 @@ class Stdout:
         elif line.endswith('\n'):
             line = line[:-1] + os_linesep
 
-        line = process_tags(line) # handle tagged lines coloration
+        line = process_tags(line)  # handle tagged lines coloration
 
         # Write line to stdout, and it's decolorized version on backlog
         # if standard output is not a tty, decolorize anything.
         if self._has_backlog:
-            self._backlog.write( decolorize(line) )
+            self._backlog.write(decolorize(line))
         if not self._has_colors:
             line = decolorize(line)
-        self.outfile.write( line )
-
+        self.outfile.write(line)
 
     def write(self, string):
         """Write the given string to stdout"""
         for line in string.splitlines(1):
-            self._writeLn( line )
-
+            self._writeLn(line)
 
     @property
     def backlog(self):
@@ -124,7 +123,7 @@ class Stdout:
         if not (value is False or value is None):
             self._has_backlog = True
         if type(value) == str:
-            self._backlog.write( decolorize(value) )
+            self._backlog.write(decolorize(value))
 
     @backlog.deleter
     def backlog(self):
@@ -132,7 +131,6 @@ class Stdout:
         self._backlog.truncate(0)
         self._backlog.seek(0)
         self._has_backlog = False
-
 
 
 def process_tags(line):
@@ -151,8 +149,8 @@ def process_tags(line):
     for index, tag in enumerate(TAGS):
         if line.startswith(tag[1]):
             break
-        if index+1 == len(TAGS):
-            return(line)
+        if index + 1 == len(TAGS):
+            return line
 
     # remove dulpicate tags >>> "[!] [!] Foo" -> "[!] Foo"
     while line[len(tag[1]):][0:len(tag[1])] == tag[1]:
@@ -160,7 +158,6 @@ def process_tags(line):
 
     # format line's tag with requested color style
     line = colorize(*tag) + line[len(tag[1]):]
-
 
     # colorize «*» patterns from tagged line:
     dye = lambda obj: colorize('%White', "« " + obj.group(1) + " »")
@@ -171,6 +168,7 @@ def process_tags(line):
         line = re.sub('«|»', '"', line)
 
     return line
+
 
 def colorama_wrap(outfile=sys.__stdout__):
     """Returns an colorama wrap file that acts as an stdout proxy
