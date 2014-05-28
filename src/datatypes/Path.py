@@ -1,5 +1,6 @@
 import os
 
+
 class Path(str):
     """File or directory path. (extends str)
 
@@ -46,16 +47,19 @@ class Path(str):
 
         # if not args, default to random tmp file path:
         if not args:
-            import string, random
-            try: from core import session
-            except: raise TypeError("Required 'path' argument(s) not found")
+            import string
+            import random
+            try:
+                from core import session
+            except:
+                raise TypeError("Required 'path' argument(s) not found")
             # get random tmp file path
             randStrChars = string.ascii_lowercase + string.digits
             randStr = "".join(random.choice(randStrChars) for x in range(12))
             path = session.Conf.TMPPATH() + randStr + "." + ext
             # create the file with empty content
             open(path, "w").close()
-            cls.tmpfile = True # set obj type = tmpfile
+            cls.tmpfile = True  # set obj type = tmpfile
         else:
             path = os.path.truepath(*args)
 
@@ -88,24 +92,19 @@ class Path(str):
 
         return str.__new__(cls, path)
 
-
     def _raw_value(self):
-        return os.path.realpath( str(self) )
-
+        return os.path.realpath(str(self))
 
     def __call__(self):
         return str(self)
 
-
     def __str__(self):
         return super().__str__()
-
 
     def __del__(self):
         # remove tmp file
         if self.tmpfile:
             os.unlink(self)
-
 
     def edit(self):
         """Try to open file with system's text editor. Return False if the
@@ -114,7 +113,9 @@ class Path(str):
 
         """
         try:
-            import subprocess, ui.output, ui.input
+            import subprocess
+            import ui.output
+            import ui.input
             from core import session
             assert ui.output.isatty() and ui.input.isatty()
             old = self.read()
@@ -123,7 +124,6 @@ class Path(str):
             return True
         except (ImportError, AssertionError):
             return False
-
 
     def read(self):
         """Return a string buffer of the file path's data. Newlines are
@@ -134,7 +134,6 @@ class Path(str):
         data = os.linesep.join(lines)
         return(data)
 
-
     def write(self, data):
         """Write `data` to the file path. Newlines are automatically
         replaced by system specific newline char(s)
@@ -142,9 +141,34 @@ class Path(str):
         """
         lines = data.splitlines()
         data = os.linesep.join(lines)
-        open(self ,'w').write(data)
-
+        open(self, 'w').write(data)
 
     def readlines(self):
         """Get a list of file path content as a list of lines"""
-        return open(self ,'r').read().splitlines()
+        return open(self, 'r').read().splitlines()
+
+    def phpcode(self):
+        """Return the file's content, removing first the php
+        ending and starting tags (<? and ?>).
+        - It also removes comment lines, empty lines, and useless
+        trailing spaces.
+        - '\n' is used as line separator in any case.
+
+        NOTE: multiline comment (/* foo\nbar */) are NOT supported
+        an must NOT be used in the PhpSploit framework.
+
+        """
+        data = self.read().strip()
+        if data.startswith('<?php'):
+            data = data[5:]
+        elif data.startswith('<?'):
+            data = data[2:]
+        if data.endswith('?>'):
+            data = data[:-2]
+        data = data.strip()
+        result = list()
+        for line in data.splitlines():
+            line = line.strip()
+            if not line.startswith('//'):
+                result.append(line)
+        return('\n'.join(result))
