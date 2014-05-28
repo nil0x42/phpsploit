@@ -10,7 +10,9 @@ dependency name, while the second provides it's directory path.
 
 """
 
-import os, sys, imp
+import os
+import sys
+import imp
 
 DEPENDENCIES = [('phpserialize',           'phpserialize-1.3'),
                 ('colorama',               'colorama-0.2.5'),
@@ -34,4 +36,4 @@ for module, dirname in DEPENDENCIES:
             imp.load_package(module, abspath)
         # if any dependency fails to load, exit with error.
         except (ImportError, FileNotFoundError):
-            sys.exit('Missing PhpSploit dependency: "%s"' %module)
+            sys.exit('Missing PhpSploit dependency: "%s"' % module)
