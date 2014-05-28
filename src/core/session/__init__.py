@@ -16,10 +16,15 @@ A session instance contains the following objects:
     * Hist  -> Readline history
 
 """
-import os, re, gzip, copy, pickle, difflib
+import os
+import re
+import gzip
+import copy
+import pickle
+import difflib
 
-import ui.input, backwards.session
-from datatypes import Path
+import ui.input
+import backwards.session
 from ui.color import colorize, decolorize
 
 from . import baseclass
@@ -28,6 +33,7 @@ from . import environment
 from . import history
 
 SESSION_FILENAME = "phpsploit.session"
+
 
 class Session(baseclass.MetaDict):
     """Phpsploit Session
@@ -50,11 +56,9 @@ class Session(baseclass.MetaDict):
         self.Hist = history.History()
         self.File = None
 
-
     def _isattr(self, name):
         """Session items are alphabetic and capitalized strings"""
         return re.match("^[A-Z][a-z]+$", name)
-
 
     def _history_update(self, array=[]):
         try:
@@ -75,7 +79,6 @@ class Session(baseclass.MetaDict):
         # Settle Hist object to its max size
         while self.Hist.size > max_size:
             self.Hist.pop(0)
-        
 
     def __getitem__(self, name):
         """Overwrite standard getitem to return self.File
@@ -86,11 +89,9 @@ class Session(baseclass.MetaDict):
             value = self.Conf.SAVEPATH() + SESSION_FILENAME
         return value
 
-
     def __setitem__(self, name, value):
         # use grandparent class (bypass parent's None feature)
         dict.__setitem__(self, name, value)
-
 
     def __str__(self):
         """Gives a nice string representation of current session"""
@@ -100,10 +101,11 @@ class Session(baseclass.MetaDict):
         data = deco + title + deco
         for obj in self.values():
             if isinstance(obj, baseclass.MetaDict):
-                try: data += str(obj) + "\n"
-                except: pass
+                try:
+                    data += str(obj) + "\n"
+                except:
+                    pass
         return data
-
 
     def __call__(self, file=None):
         """Load and return the session object stored in `file`.
@@ -124,7 +126,7 @@ class Session(baseclass.MetaDict):
 
         # get unpickled `data` from `file`
         try:
-            data = pickle.load( gzip.open(file) )
+            data = pickle.load(gzip.open(file))
         except OSError as e:
             if str(e) != "Not a gzipped file":
                 raise e
@@ -140,20 +142,20 @@ class Session(baseclass.MetaDict):
         # fill it with loaded file data
         for key in session.keys():
             if isinstance(key, dict):
-                session[key].update( data[key] )
+                session[key].update(data[key])
             elif key != "Hist":
                 session[key] = data[key]
-        try: session._history_update(data["Hist"])
-        except: pass
+        try:
+            session._history_update(data["Hist"])
+        except:
+            pass
         # bind new session's File to current file
         session.File = file
 
         return session
 
-
     def load(self, file=None):
-        return (self(file));
-
+        return (self(file))
 
     def update(self, obj=None):
         """Update current session with `obj`.
@@ -182,17 +184,15 @@ class Session(baseclass.MetaDict):
             else:
                 self[key] = value
 
-
     def diff(self, file):
         diff = copy.deepcopy(self)
         diff.update(file)
         diff = decolorize(diff).splitlines()
         orig = decolorize(self).splitlines()
-        
-        color = {' ':'%Reset', '-':'%Red', '+':'%Green', '?':'%Pink'}
-        for line in difflib.Differ().compare(orig, diff):
-            print( colorize(color[line[0]], line) )
 
+        color = {' ': '%Reset', '-': '%Red', '+': '%Green', '?': '%Pink'}
+        for line in difflib.Differ().compare(orig, diff):
+            print(colorize(color[line[0]], line))
 
     def dump(self, file=None):
         """Dump current session to `file`.
@@ -202,7 +202,7 @@ class Session(baseclass.MetaDict):
             file = self.File
 
         # if file is a filename only, use SAVEPATH as root directory
-        if not os.path.isdir(file) and not os.sep in file:
+        if not os.path.isdir(file) and os.sep not in file:
             file = self.Conf.SAVEPATH() + file
 
         # get file's absolute path
@@ -216,7 +216,7 @@ class Session(baseclass.MetaDict):
         # then an user overwriting confirmation is required.
         if os.path.exists(file) and file != self.File:
             question = "File «{}» already exists, overwrite it ?"
-            if ui.input.Expect(False)( question.format(file) ):
+            if ui.input.Expect(False)(question.format(file)):
                 raise Warning("The session was not saved")
 
         # get a simplified copy of current session that
@@ -236,8 +236,6 @@ class Session(baseclass.MetaDict):
 
         # write it to the file
         pickle.dump(rawdump, gzip.open(file, 'wb'))
-
-
 
 
 # instanciate main phpsploit session as core.session
