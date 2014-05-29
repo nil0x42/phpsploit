@@ -1,6 +1,6 @@
 """PhpSploit shell interface.
-Unheriting the shnake's Shell class, the PhpSplpoit shell interface
 
+Unheriting the shnake's Shell class, the PhpSploit shell interface
 provides interactive use of commands.
 
 """
@@ -167,10 +167,9 @@ class Shell(shnake.Shell):
             Take a look at the documentation (rtfm command), and also
             the "infect" command.
         """
-        print("[*] Current backdoor is:")
         obj = session.Conf.BACKDOOR()
         obj = obj.replace("%%PASSKEY%%", session.Conf.PASSKEY().upper())
-        print(obj + "\n")
+        print("[*] Current backdoor is: " + colorize("%Red", obj) + "\n")
 
         if tunnel.connected():
             m = ("[*] Use `set TARGET <VALUE>` to use another url as target."
