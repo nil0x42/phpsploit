@@ -31,7 +31,7 @@ through a tiny **polymorphic backdoor**:
     - Safe-mode and common *PHP security restrictions bypass*
     - Communications are hidden in HTTP Headers
     - Loaded payloads are obfuscated to *bypass NIDS*
-    - HTTP/HTTPS **Proxy support**
+    - http/https/socks4/socks5 **Proxy support**
 
 * **Convenient**: A robust interface with many crucial features
     - *Cross-platform* on both the client and the server.
