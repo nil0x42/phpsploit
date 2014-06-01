@@ -45,15 +45,13 @@ through a tiny **polymorphic backdoor**:
 
 
 ---------------------------------------------------------------------
-#### Setting started ####
-
-##### Supported platforms:#####
+#### Supported platforms:####
 * GNU/Linux
 * Mac OS X
 * Windows (experimental)
 
-![get started]
+#### [Get started now !] ####
 
 
-[get started]: http://dannorrisblog.com/wp-content/uploads/2013/05/lets-get-started.png
 [picture]: data/img/phpsploit-demo.png
+[Get started now !]: https://github.com/nil0x42/phpsploit/wiki
