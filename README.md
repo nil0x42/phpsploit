@@ -44,4 +44,12 @@ through a tiny **polymorphic backdoor**:
     - Provides a complete plugin development API
 
 
+---------------------------------------------------------------------
+#### Supported platforms ####
+
+* GNU/Linux
+* Mac OS X
+* Windows (experimental)
+
+
 [picture]: data/img/phpsploit-demo.png
