@@ -50,7 +50,8 @@ through a tiny **polymorphic backdoor**:
 * Mac OS X
 * Windows (experimental)
 
-#### [Get started now !] ####
+
+## [Get started now !] ##
 
 
 [picture]: data/img/phpsploit-demo.png
