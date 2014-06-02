@@ -95,7 +95,7 @@ class Build:
             else:
                 libname = line[line.find('(')+1:line.find(')')]
                 if line.count('(') != 1 or line.count(')') != 1 or not libname:
-                    raise BuildError('Invalid php import: %s' + line.strip())
+                    raise BuildError('Invalid php import: ' + line.strip())
                 if libname not in self.loaded_phplibs:
                     try:
                         file_path = 'api/php/%s.php' % libname
