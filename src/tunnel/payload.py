@@ -1,7 +1,9 @@
 import base64
 import phpserialize
 
+import core
 from datatypes import Path
+from tunnel.exceptions import BuildError
 
 
 def py2php(python_var):
@@ -58,11 +60,10 @@ class Encode:
 
 class Build:
 
-    encapsulator = Path('framework/phpfiles/encapsulator.php').phpcode()
+    encapsulator = Path(core.basedir, 'data/tunnel/encapsulator.php').phpcode()
 
     def __init__(self, payload, parser):
 
-        self.error = ''
         self.loaded_phplibs = list()
 
         payload = self.encapsulate(payload, parser)
@@ -74,12 +75,11 @@ class Build:
         self.data = encoded.data
         self.length = encoded.length
         self.decoder = encoded.decoder
-        self.error = self.error.strip()
 
     def encapsulate(self, code, parser):
         # template encapsulation
         code = self.encapsulator.replace('%%PAYLOAD%%', code)
-        code = code.rstrip(';')+';'
+        code = code.rstrip(';') + ';'
         # parser encapsulation
         if parser:
             initCode, stopCode = ['echo "%s";' % x for x in parser.split('%s')]
@@ -95,15 +95,13 @@ class Build:
             else:
                 libname = line[line.find('(')+1:line.find(')')]
                 if line.count('(') != 1 or line.count(')') != 1 or not libname:
-                    self.error += 'Invalid php import: %s\n' % line.strip()
-                    return('')
+                    raise BuildError('Invalid php import: %s' + line.strip())
                 if libname not in self.loaded_phplibs:
                     try:
-                        file_path = 'framework/phplibs/%s.php' % libname
-                        lib = Path(file_path).phpcode()
-                    except:
-                        self.error += 'Php lib not found: %s\n' % libname
-                        return ''
+                        file_path = 'api/php/%s.php' % libname
+                        lib = Path(core.coredir, file_path).phpcode()
+                    except ValueError:
+                        raise BuildError('Php lib not found: ' + libname)
                     result += self.loadphplibs(lib)+'\n'
                     self.loaded_phplibs.append(libname)
         return result

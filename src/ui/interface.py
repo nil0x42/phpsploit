@@ -69,7 +69,7 @@ class Shell(shnake.Shell):
             - Calling it from a remote shell session simply leaves it,
             backing to the main shell interface
         """
-        if tunnel.connected():
+        if tunnel.socket:
             tunnel.disconnect()
         else:
             exit()
@@ -171,7 +171,7 @@ class Shell(shnake.Shell):
         obj = obj.replace("%%PASSKEY%%", session.Conf.PASSKEY().upper())
         print("[*] Current backdoor is: " + colorize("%Red", obj) + "\n")
 
-        if tunnel.connected():
+        if tunnel.socket:
             m = ("[*] Use `set TARGET <VALUE>` to use another url as target."
                  "\n[*] To exploit a new server, disconnect from «%s» first.")
             return print(m.format(session.Env.HOST))
@@ -705,7 +705,7 @@ class Shell(shnake.Shell):
         help = [('Core Commands', core_commands)]
 
         # adds plugin category if we are connected to target
-        if tunnel.connected():
+        if tunnel.socket:
             for category in plugins.categories():
                 name = category.replace('_', ' ').capitalize()
                 items = plugins.list_category(category)
