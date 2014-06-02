@@ -8,12 +8,13 @@ import base64
 import urllib.request
 import urllib.parse
 
-import tunnel
 import ui.input
 import core
 from core import session
 from datatypes import Path
 from ui.color import colorize
+import tunnel
+from tunnel.exceptions import BuildError, RequestError, ResponseError
 
 
 class Request:
@@ -30,7 +31,7 @@ class Request:
 
     # a stupid function designed to not exceed the 78 chars limit in the code
     def load_phpfile(filepath):
-        file = Path(core.basedir, "api/phpfiles", filepath, mode='fr')
+        file = Path(core.basedir, "data/tunnel", filepath, mode='fr')
         return file.phpcode()
 
     # specific php code templates which are injected in the main evil
@@ -56,11 +57,15 @@ class Request:
         self.is_first_payload = False
         self.is_first_request = True
 
+        # default message exceptions on request/response fail
+        self.errmsg_request = "Could not connect to TARGET"
+        self.errmsg_response = "TARGET does not seem to be backdoored"
+
         # eventual error produced on build_forwarder()
         self.payload_forwarder_error = None
 
-        # the http request opener, which considers the proxy setting
-        self.opener = tunnel.utils.build_opener(session.Conf.PROXY())
+        # Use the PROXY setting as urllib opener
+        self.opener = session.Conf.PROXY()
 
         # the list of user specified additionnal headers (HTTP_* settings)
         self.set_headers = load_headers(session.Conf)
@@ -139,7 +144,7 @@ class Request:
             rawHeader = '%s: %s\r\n' % (name, value)
             if len(rawHeader) > self.max_header_size:
                 return False
-            return True
+        return True
 
     def encapsulate(self, payload):
         """encapsulate the php unencoded payload with the parser strings"""
@@ -152,10 +157,6 @@ class Request:
         """parse the http response and return the phpsploit data response"""
 
         response = response.read()
-        # OLD CODE:
-        # errors   = self.get_php_errors(response)
-        # if errors:
-        #    return response
         try:
             return re.findall(self.unparser, response)[0]
         except:
@@ -524,32 +525,27 @@ class Request:
         response may be obtained by the read() method.
 
         """
-        self.error = None
         self.response = None
         self.response_error = None
 
-        def gotError(obj, errtype, prefix=''):
-            if prefix:
-                prefix += ' Error: '
+        def display_warnings(obj):
             if type(obj).__name__ == 'str':
-                self.error = errtype
                 for line in obj.splitlines():
                     if line:
-                        print("\r[!] %s" % (prefix + line))
+                        print("\r[-] %s" % line)
                 return True
             return False
 
+        # raises BuildError if it fails
         request = self.Build(payload)
-        if gotError(request, 'building', 'Build'):
-            return
 
         response = self.Send(request)
-        if gotError(response, 'request'):
-            return
+        if display_warnings(response):
+            raise RequestError(self.errmsg_request)
 
         readed = self.Read(response)
-        if gotError(readed, 'execution'):
-            return
+        if display_warnings(readed):
+            raise ResponseError(self.errmsg_response)
 
     def Build(self, payload):
         """Main request Builder:
@@ -560,17 +556,15 @@ class Request:
         """
         # decline conflicting passkey strings
         if self.passkey.lower().replace('_', '-') in self.set_headers:
-            return 'The PASSKEY setting is in conflict with an http header'
+            raise BuildError('PASSKEY conflicts with an http header')
 
         # decline if an user set header do not match size limits
         if not self.can_add_headers(self.set_headers):
-            return ('An HTTP header is longer than '
-                    'the REQ_MAX_HEADER_SIZE setting')
+            raise BuildError('An http header is longer '
+                             'than REQ_MAX_HEADER_SIZE')
 
         # format the current php payload whith the dedicated Build() method.
-        payload = tunnel.payload.Build(payload, self.parser)
-        if payload.error:
-            return payload.error
+        tunnel.payload.Build(payload, self.parser)
 
         # get a dict of available modes by method
         mode = {}
@@ -583,13 +577,11 @@ class Request:
 
         # if REQ_DEFAULT_METHOD setting is enough for single mode, build now !
         if mode[self.default_method] == 'single':
-            request = self.build_request('single',
-                                         self.default_method,
-                                         payload)
-            if not request:
-                return ('The forwarder is bigger than '
-                        'the REQ_MAX_HEADER_SIZE setting')
-            return request
+            req = self.build_request('single', self.default_method, payload)
+            if not req:
+                raise BuildError('The forwarder is bigger '
+                                 'than REQ_MAX_HEADER_SIZE')
+            return req
 
         # load the multipart module if required
         if 'multipart' in mode.values():
@@ -598,7 +590,7 @@ class Request:
                 self.load_multipart()
             except:
                 print('')
-                return 'Payload construction aborted'
+                raise BuildError('Payload construction aborted')
 
         # build both methods necessary requests
         request = dict()
@@ -608,14 +600,14 @@ class Request:
             try:
                 request[m] = self.build_request(mode[m], m, payload)
             except:
-                return 'Payload construction aborted'
+                raise BuildError('Payload construction aborted')
 
         # if the default method can't be built, use the other as default
         if not request[self.default_method]:
             self.default_method = self.other_method()
         # but if even the other also cannot be built, then leave with error
         if not request[self.default_method]:
-            return 'The REQ_* settings are too small to send the payload'
+            raise BuildError('REQ_* settings are too small')
 
         # give user choice for what method to use
         self.choices = list()
@@ -642,7 +634,7 @@ class Request:
                         ['', 's'][len(request[self.other_method()]) > 1])
         # or report that the other method has been disabled
         else:
-            print('[!] %s method disabled:' % self.other_method +
+            print('[-] %s method disabled:' % self.other_method +
                   ' The REQ_* settings are too restrictive')
 
         query += end + ': '  # add the Abort choice
@@ -655,7 +647,7 @@ class Request:
                 chosen = ui.input.Expect(None)(query).upper()
             except:
                 print('')
-                return 'Request construction aborted'
+                raise BuildError('Request construction aborted')
             # if no choice consider 1st choice
             if not chosen.strip():
                 chosen = self.choices[0]
@@ -667,10 +659,10 @@ class Request:
                 return request[self.other_method()]
             # if 2nd choice, abort
             if chosen == self.choices[1]:
-                return 'Request construction aborted'
+                raise BuildError('Request construction aborted')
             # else...
             else:
-                return 'Bad choice'
+                raise BuildError('Invalid user choice')
 
     def Send(self, request):
         """Main request Sender:
@@ -710,11 +702,9 @@ class Request:
 
                 # if the current request failed
                 if error:
-                    # sys.stdout.write("\n[!] %s
-
-                    timeinfo = "(Press Enter or wait 1 minut for the next try)"
-                    message = colorize("\n[!] ", error, "%White", timeinfo)
-                    ui.input.Expect(None, timeout=60)(message)
+                    msg = "(Press Enter or wait 1 minut for the next try)"
+                    sys.stdout.write(colorize("\n[-] ", error, "%White", msg))
+                    ui.input.Expect(None, timeout=60)()
                 # if the request has been corretly executed, wait the
                 # REQ_INTERVAL setting, and then go to the next request
                 else:
@@ -752,7 +742,7 @@ class Request:
             if response['error']:
                 return response['error']
             # elif no data, nothing can be parsed
-            print('[!] Execution Error: Failed to unparse the response')
+            print("[-] Server response coudn't be unparsed")
             # print payload forwarder error (if any)
             if self.payload_forwarder_error:
                 print("[*] If you are sure that the target is anyway "
@@ -776,11 +766,11 @@ class Request:
             if phpErrors:
                 return phpErrors
             else:
-                return 'Execution Error: Failed to unserialize the response'
+                raise ResponseError("Server response couldn't be unserialized")
 
         # check that the received type is a dict
         if type(response).__name__ != 'dict':
-            return 'Execution error: Decoded response is not a dictionnary'
+            raise ResponseError('Decoded response is not a dict()')
         # then check it is in the good format,
         # aka {'__RESULT__':'DATA'} OR {'__ERROR__':'ERR'}
         if response.keys() == ['__RESULT__']:
@@ -788,7 +778,7 @@ class Request:
         elif response.keys() == ['__ERROR__']:
             self.response_error = response['__ERROR__']
         else:
-            return 'Execution error: Invalid response dictionnary format'
+            raise ResponseError('Returned dict() is in a wrong format')
 
 
 # split_len('phpsploit', 2) -> ['ph', 'ps', 'pl', 'oi', 't']

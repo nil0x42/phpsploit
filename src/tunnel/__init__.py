@@ -19,7 +19,7 @@ socket = None
 def open():
     global socket
     temp_socket = connector.Request()
-    # If open() raises no error, use it as socket
+    # If open() raises no error, use it as new standard socket
     temp_socket.open()
     socket = temp_socket
 
