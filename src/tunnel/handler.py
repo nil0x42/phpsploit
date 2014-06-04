@@ -58,8 +58,8 @@ class Request:
         self.is_first_request = True
 
         # default message exceptions on request/response fail
-        self.errmsg_request = "Could not connect to TARGET"
-        self.errmsg_response = "TARGET does not seem to be backdoored"
+        self.errmsg_request = "Communication with the server impossible"
+        self.errmsg_response = "Php runtime error"
 
         # eventual error produced on build_forwarder()
         self.payload_forwarder_error = None
