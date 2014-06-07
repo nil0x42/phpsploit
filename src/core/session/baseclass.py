@@ -230,14 +230,14 @@ class RandLineBuffer:
         elif not self.choices():
             raise ValueError("couldn't find valid lines from buffer")
 
-    def __call__(self, call_choice=True):
+    def __call__(self, call=True):
         """Return a random object picked from choices.
         If callable, `obj()` is returned instead of `obj`, only
-        if call_choice argument is set to True.
+        if call argument is set to True.
 
         """
-        obj = random.choice( self.choices() )
-        if call_choice and hasattr(obj, "__call__"):
+        obj = random.choice(self.choices())
+        if call and hasattr(obj, "__call__"):
             return obj()
         return obj
 
