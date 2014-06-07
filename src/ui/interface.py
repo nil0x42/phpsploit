@@ -167,9 +167,9 @@ class Shell(shnake.Shell):
             Take a look at the documentation (rtfm command), and also
             the "infect" command.
         """
-        obj = session.Conf.BACKDOOR()
+        obj = str(session.Conf.BACKDOOR(call=False))
         obj = obj.replace("%%PASSKEY%%", session.Conf.PASSKEY().upper())
-        print("[*] Current backdoor is: " + colorize("%Red", obj) + "\n")
+        print("[*] Current backdoor is: " + obj + "\n")
 
         if tunnel.socket:
             m = ("[*] Use `set TARGET <VALUE>` to use another url as target."
