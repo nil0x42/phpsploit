@@ -52,7 +52,9 @@ class Request:
 
     def __init__(self):
         # customizable variables
-        self.target = session.Conf.TARGET()
+        target = session.Conf.TARGET(call=False)
+        self.hostname = target.host
+        self.target = target()
         self.passkey = session.Conf.PASSKEY()
         self.is_first_payload = False
         self.is_first_request = True
