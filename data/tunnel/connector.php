@@ -27,10 +27,10 @@ $R['HOME'] = ($tmp!='$HOME' && $tmp) ? $tmp : '';
 
 
 // GET THE WEB ROOT
-$R['WEBROOT'] = $R['DOCUMENT_ROOT'];
-if(!$R['WEBROOT']){
-    $R['WEBROOT']=$R['APPL_PHYSICAL_PATH'];}
-if(!$R['WEBROOT']){
+$R['WEB_ROOT'] = $R['DOCUMENT_ROOT'];
+if(!$R['WEB_ROOT']){
+    $R['WEB_ROOT']=$R['APPL_PHYSICAL_PATH'];}
+if(!$R['WEB_ROOT']){
     $rel = $R['SCRIPT_NAME'];
     $abs = $R['SCRIPT_FILENAME'];
     if (!$rel || !$abs){
@@ -41,18 +41,18 @@ if(!$R['WEBROOT']){
             $tmp=str_replace("/",$sep,$rel);
             $len=strlen($tmp);
             if($tmp==substr($abs,-$len)){
-                $R['WEBROOT']=substr($abs,0,-$len);}}}}
-$R['WEBROOT'] = @realpath($R['WEBROOT']);
+                $R['WEB_ROOT']=substr($abs,0,-$len);}}}}
+$R['WEB_ROOT'] = @realpath($R['WEB_ROOT']);
 
 
 // GET A WRITABLE DIR FROM WEB PATH
 $MAX_RECURSION=6;
-$DIRS=Array($R['WEBROOT']);
-$R['W_WEBDIR']='';
+$DIRS=Array($R['WEB_ROOT']);
+$R['WRITEABLE_WEBDIR']='';
 for ($recLvl=1;$recLvl<=$MAX_RECURSION;$recLvl++){
     foreach($DIRS as $dir){
         if (dirAccess($dir,'w')){
-            $R['W_WEBDIR'] = @realpath($dir);
+            $R['WRITEABLE_WEBDIR'] = @realpath($dir);
             break(2);}}
     if ($recLvl==$MAX_RECURSION) break;
     $oldDIRS = $DIRS;
@@ -67,7 +67,7 @@ for ($recLvl=1;$recLvl<=$MAX_RECURSION;$recLvl++){
 
 
 $tmp = getTmpDir();
-$R['W_TMPDIR'] = (dirAccess($tmp,'w')) ? $tmp : $R['W_WEBDIR'];
+$R['WRITEABLE_TMPDIR'] = (dirAccess($tmp,'w')) ? $tmp : $R['WRITEABLE_WEBDIR'];
 
 
 return $R;

@@ -1,6 +1,6 @@
 import core
 import tunnel
-import session
+from core import session
 from datatypes import Path
 
 
@@ -19,7 +19,7 @@ class Request:
         socket.open(payload)
         self.socket = socket
         raw_vars = self._get_vars(socket.read())
-        session.Env = _build_env(raw_vars)
+        session.Env = self._build_env(raw_vars)
 
     def close(self):
         """close the virtual link, actually, juste return the
@@ -38,7 +38,6 @@ class Request:
             result.append((name, value))
         return dict(result)
 
-
     def _build_env(self, raw_vars):
         """collect the server related vars, usefull for further
         plugins usage and framework management.
@@ -47,69 +46,60 @@ class Request:
         """
         def choose(options, default=''):
             for choice in options:
-                if choice in env:
-                    if env[choice].strip():
-                        return(env[choice])
-            return(default)
+                if choice in raw_vars:
+                    if raw_vars[choice].strip():
+                        return(raw_vars[choice])
+            return default
 
-        srv = dict()
+        env = {}
 
-        srv['client_addr'] = choose(['REMOTE_ADDR', 'REMOTE_HOST'])
+        env['CLIENT_ADDR'] = choose(['REMOTE_ADDR', 'REMOTE_HOST'])
+        if ":" in env['CLIENT_ADDR']:  # enclose with brackets if ipv6
+            env["CLIENT_ADDR"] = "[%s]" % env["CLIENT_ADDR"]
 
-        srv['host'] = choose(['SERVER_NAME', 'HTTP_HOST'],
-                          self.CNF['LNK']['DOMAIN'])
+        env['HOST'] = choose(['SERVER_NAME', 'HTTP_HOST'],
+                             self.socket.hostname)
 
-        srv['addr'] = choose(['SERVER_ADDR', 'LOCAL_ADDR'], srv['host'])
+        env['PORT'] = choose(['SERVER_PORT'], self.socket.port)
 
-        srv['port'] = choose(['SERVER_PORT'], '80')
+        env['ADDR'] = choose(['SERVER_ADDR', 'LOCAL_ADDR'], env['HOST'])
+        if ":" in env['ADDR']:  # enclose with brackets if ipv6
+            env["ADDR"] = "[%s]" % env["ADDR"]
 
-        srv['os'] = choose(['OS', 'PHP_OS'], 'unknow')
+        env["HTTP_SOFTWARE"] = choose(['SERVER_SOFTWARE'], 'unknow software')
 
-        srv['user'] =(choose(['WHOAMI', 'USERNAME', 'USER']) or
-                      choose(['USERPROFILE'], 'unknow').split('\\')[-1])
+        env["USER"] = (choose(['WHOAMI', 'USERNAME', 'USER']) or
+                       choose(['USERPROFILE'], 'unknow').split('\\')[-1])
 
-        srv['soft'] = choose(['SERVER_SOFTWARE'], 'unknow software')
+        env["PHP_VERSION"] = choose(['PHP_VERSION'], '?')
 
-        srv['phpver'] = choose(['PHP_VERSION'], '?')
+        env['WEB_ROOT'] = choose(['WEB_ROOT'])
 
-        srv['webroot'] = choose(['WEBROOT'])
-
-        srv['home'] = choose(['HOME'], srv['webroot'])
-
-        srv['write_webdir'] = choose(['W_WEBDIR'])
-
-        srv['write_tmpdir'] = choose(['W_TMPDIR'])
-
-        # enclose ipv6 addresses with brackets for visibility
-        if ":" in srv['client_addr']:
-            srv['client_addr'] = "[%s]" %srv['client_addr']
-        if ":" in srv['addr']:
-            srv['addr'] = "[%s]" %srv['addr']
-
-        # attempt to determine home dir if not known
-        if not srv['home']:
+        env["HOME"] = choose(["HOME"], env["WEB_ROOT"])
+        if not env['HOME']:
             path = choose(['SCRIPT_FILENAME', 'PATH_TRANSLATED'])
             sep = '\\'
             if not path:
                 path = '/'
             else:
-                if path[0] == '/': sep = '/'
+                if path[0] == '/':
+                    sep = '/'
                 path = sep.join(path.split(sep)[0:-1])
-            srv['home'] = path
+            env['HOME'] = path
 
-        # determine remote system's path separator
-        srv['separator'] = '\\'
-        if srv['home'].startswith('/'):
-            srv['separator'] = '/'
+        env['WRITEABLE_WEBDIR'] = choose(['WRITEABLE_WEBDIR'])
 
-        # get remote system's os platform
-        srv['platform'] = 'nix'
-        if srv['separator'] == '\\':
-            srv['platform'] = 'win'
+        env['WRITEABLE_TMPDIR'] = choose(['WRITEABLE_TMPDIR'])
 
-        # determine the remote server signature
-        from hashlib import md5
-        sig = srv['os']+srv['phpver']+srv['platform']+srv['soft']
-        srv['signature'] = md5(sig).hexdigest()
+        env["PATH_SEP"] = '\\'
+        if env["PATH_SEP"].startswith('/'):
+            env["PATH_SEP"] = '/'
 
-        return(srv)
+        env["PLATFORM"] = choose(['OS', 'PHP_OS'], 'unknow').split()[0].lower()
+        if env["PLATFORM"] == "unknow":
+            if env["PATH_SEP"] == "\\":
+                env["PLATFORM"] = "windows"
+            else:
+                env["PLATFORM"] = "unix"
+
+        return(env)

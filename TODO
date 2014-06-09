@@ -4,6 +4,9 @@ Settings:
 
 Sessions:
 
+Core:
+  * Update session backwards compat with new default env var names
+
 Commands:
   * @doc core command must be created, to handle ./doc/ reading from interface
   * @save needs an '-f' (force) option to force file overwrite

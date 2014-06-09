@@ -54,6 +54,7 @@ class Request:
         # customizable variables
         target = session.Conf.TARGET(call=False)
         self.hostname = target.host
+        self.port = target.port
         self.target = target()
         self.passkey = session.Conf.PASSKEY()
         self.is_first_payload = False
