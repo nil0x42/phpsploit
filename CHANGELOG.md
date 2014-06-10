@@ -1,5 +1,7 @@
 ### Version 2.2.0 *(IN ACTIVE DEVELOPMENT)*
 - **Rewritten the whole PhpSploit framework** in python 3 with new skeleton.
+- `TEXTEDITOR` setting has been renamed to `EDITOR`.
+- `WEBBROWSER` setting has been renamed to `BROWSER`.
 - The `infect` command has been removed, its role is now taken by `exploit`.
 - The new `session` command now manages the old `load` and `save` commands.
 - The `set` command now supplies a new keyword ("+") for line appending.

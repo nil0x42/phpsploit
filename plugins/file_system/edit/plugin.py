@@ -7,7 +7,7 @@ DESCRIPTION:
     This command is an enhancement of the 'cat' plugin. Instead
     of simply writing the content to standard output, it opens
     the remote file content with your prefered text editor,
-    which if defined by the TEXTEDITOR setting.
+    which if defined by the EDITOR setting.
     - Once opened with the local text editor, the file can be
     edited. When leaving the text editor, the plugin checks if
     the content has changed, and automatically uploads the new
@@ -15,7 +15,7 @@ DESCRIPTION:
 
 EXAMPLES:
     > edit ../includes/connect.inc.php
-      - Open the file with the TEXTEDITOR
+      - Open the file with the EDITOR
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
@@ -23,7 +23,7 @@ AUTHOR:
 
 import os, base64
 
-api.needsenv('TEXTEDITOR')
+api.needsenv('EDITOR')
 
 if self.argc != 2:
     api.exit(self.help)
@@ -61,8 +61,8 @@ else:
     except: api.exit(P_err+"Failed to create a local copy of the file at: "+lAbsPath)
     print P_inf+"Opening file: "+absPath
 
-if os.system(api.env['TEXTEDITOR']+' "'+lAbsPath+'"'):
-    print P_err+"Invalid 'TEXTEDITOR' environment variable"
+if os.system(api.env['EDITOR']+' "'+lAbsPath+'"'):
+    print P_err+"Invalid 'EDITOR' environment variable"
 
 try: newContent = open(lAbsPath,'r').read()
 except: api.exit(P_inf+"File creation aborted")

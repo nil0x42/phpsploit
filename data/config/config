@@ -21,7 +21,7 @@ alias infect    "exploit"
 # set PASSKEY "YourPassKey"
 
 ## use vim as text editor because all other editors sucks !
-# set TEXTEDITOR "vim"
+# set EDITOR "vim"
 
 ## bypass vimist habits by aliasing 'edit' to 'vim'.
 # alias vim     "edit"

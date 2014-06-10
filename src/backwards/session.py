@@ -44,19 +44,22 @@ def load(path):
     # replace CWD name by PWD
     data["ENV"]["PWD"] = data["ENV"].pop("CWD")
     # TEXTEDITOR as env var is useless, delete it
-    try: del data["ENV"]["TEXTEDITOR"]
-    except: pass
+    try:
+        del data["ENV"]["TEXTEDITOR"]
+    except:
+        pass
     # bind environment vars
     session["Env"] = data["ENV"]
     # add some env vars from old SRV object:
-    session["Env"]["ADDR"]          = data["SRV"]["addr"]
-    session["Env"]["HOME"]          = data["SRV"]["home"]
-    session["Env"]["HOST"]          = data["SRV"]["host"]
-    session["Env"]["PHP_VERSION"]   = data["SRV"]["phpver"]
-    session["Env"]["PATH_SEP"]      = data["SRV"]["separator"]
+    session["Env"]["ADDR"] = data["SRV"]["addr"]
+    session["Env"]["HOME"] = data["SRV"]["home"]
+    session["Env"]["HOST"] = data["SRV"]["host"]
+    session["Env"]["PHP_VERSION"] = data["SRV"]["phpver"]
+    session["Env"]["PATH_SEP"] = data["SRV"]["separator"]
     session["Env"]["HTTP_SOFTWARE"] = data["SRV"]["soft"]
-    session["Env"]["USER"]          = data["SRV"]["user"]
-    session["Env"]["WEB_ROOT"]      = data["SRV"]["webroot"]
+    session["Env"]["USER"] = data["SRV"]["user"]
+    session["Env"]["WEB_ROOT"] = data["SRV"]["webroot"]
+
     # determine PLATFORM (one word, lowercase)
     session["Env"]["PLATFORM"] = data["SRV"]["os"].split()[0].lower()
     if session["Env"]["PLATFORM"] == "unknow":
@@ -64,5 +67,18 @@ def load(path):
             session["Env"]["PLATFORM"] = "windows"
         else:
             session["Env"]["PLATFORM"] = "unix"
+
+    # EDITOR replaces old TEXTEDITOR
+    try:
+        session["Conf"]["EDITOR"] = session["Conf"]["TEXTEDITOR"]
+        del session["Conf"]["TEXTEDITOR"]
+    except:
+        pass
+    # BROWSER replaces old WEBBROWSER
+    try:
+        session["Conf"]["BROWSER"] = session["Conf"]["WEBBROWSER"]
+        del session["Conf"]["WEBBROWSER"]
+    except:
+        pass
 
     return session

@@ -414,7 +414,7 @@ class Shell(shnake.Shell):
 
             > set <NAME> +
             - Open the setting value for edition as a multiline buffer
-            with TEXTEDITOR. The buffer can then be edited, and once saved,
+            with EDITOR. The buffer can then be edited, and once saved,
             the setting will take the buffer's value, except if there are
             no valid lines.
 
@@ -451,12 +451,12 @@ class Shell(shnake.Shell):
 
         # buffer edit mode
         elif argv[2] == "+":
-            # `set <VAR> +`: use TEXTEDITOR as buffer viewer in file mode
+            # `set <VAR> +`: use EDITOR as buffer viewer in file mode
             if len(argv) == 3:
                 # get a buffer obj from setting's raw buffer value
                 buffer = Path()
                 buffer.write(session.Conf[argv[1]].buffer)
-                # try to edit it through TEXTEDITOR, and update it
+                # try to edit it through EDITOR, and update it
                 # if it has been modified.
                 if buffer.edit():
                     session.Conf[argv[1]] = buffer.read()
@@ -596,7 +596,7 @@ class Shell(shnake.Shell):
 
         DESCRIPTION:
             Get the last command's output data opened through
-            $TEXTEDITOR setting on a temporary file.
+            $EDITOR setting on a temporary file.
 
             NOTE: Last command buffer is colorless. It means that
             it does not contains any ANSI terminal color codes.

@@ -119,7 +119,7 @@ class Path(str):
             from core import session
             assert ui.output.isatty() and ui.input.isatty()
             old = self.read()
-            subprocess.call([session.Conf.TEXTEDITOR(), self])
+            subprocess.call([session.Conf.EDITOR(), self])
             assert self.read() != old
             return True
         except (ImportError, AssertionError):
