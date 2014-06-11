@@ -182,8 +182,7 @@ class Shell(shnake.Shell):
                  "Then, use `set TARGET <BACKDOORED_URL>` and run `exploit`.")
             return print(colorize("%BoldCyan", m))
 
-        print("[*] Sending payload to «{}» ...".format(session.Conf.TARGET))
-        tunnel.Init()  # it raises exception if fails
+        tunnel.open()  # it raises exception if fails
 
     ##################
     # COMMAND: clear #

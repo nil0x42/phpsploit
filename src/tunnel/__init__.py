@@ -12,6 +12,7 @@ Usage:
 
 from . import handler
 from . import connector
+from . import payload
 
 socket = None
 

@@ -1,4 +1,6 @@
+import codecs
 import base64
+
 import phpserialize
 
 import core
@@ -7,14 +9,16 @@ from tunnel.exceptions import BuildError
 
 
 def py2php(python_var):
-    serialized = phpserialize.dumps(python_var)
+    python_var = python_var.encode()
+    serialized = phpserialize.dumps(python_var).decode()
     encoded = Encode(serialized).phpLoader()
     raw_php_var = 'unserialize(%s)' % encoded
     return raw_php_var
 
 
 def php2py(raw_php_var):
-    python_var = phpserialize.loads(raw_php_var)
+    raw_php_var = raw_php_var.encode()
+    python_var = phpserialize.loads(raw_php_var, decode_strings=True)
     if type(python_var) is dict:
         # The original python var could be a list instead of dict
         # so, we try to convert it to list if it is possible
@@ -30,23 +34,29 @@ class Encode:
     # mode compress: force compression
     # mode auto:     compress only if smallest
     # else:          don't compress
+    # NOTE: code is a bytes() object !
     def __init__(self, code, mode=''):
+        # code = bytes(code, "utf-8")
         self.compressed = False
-        self.data = ''
+        self.data = b''
         self.decoder = 'base64_decode("%s")'
         if mode in ['compress', 'auto']:
-            gzPayload = base64.b64encode(code.encode('zlib'))
+            gzPayload = codecs.encode(code, "zlib")
+            gzPayload = base64.b64encode(gzPayload)
+            # gzPayload = codecs.encode(gzPayload, "base64")
             gzDecoder = 'gzuncompress(base64_decode("%s"))'
             if mode == 'compress':
                 self.compressed = True
                 self.data = gzPayload
                 self.decoder = gzDecoder
         if mode != 'compress':
+            # self.data = codecs.encode(code, "base64")
             self.data = base64.b64encode(code)
         if mode == 'auto':
             if len(gzPayload) < len(self.data):
                 self.data = gzPayload
                 self.decoder = gzDecoder
+        self.data = self.data.decode()
         self.rawlength = len(self.data)
         # patch to get the real urlencoded length of base64
         self.length = self.rawlength
@@ -70,7 +80,8 @@ class Build:
         payload = self.loadphplibs(payload)
         payload = self.shorten(payload)
 
-        encoded = Encode(payload, 'noauto')
+        # print(type(payload))
+        encoded = Encode(payload.encode(), 'noauto')
 
         self.data = encoded.data
         self.length = encoded.length

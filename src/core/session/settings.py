@@ -133,8 +133,8 @@ class Settings(baseclass.MetaDict):
         return PhpCode(value)
 
     def _set_PROXY(self, value):
-        if str(value).lower() in ["", "none"]:
-            return None
+        # if str(value).lower() in ["", "none"]:
+        #     return None
         return Proxy(value)
 
     def _set_PASSKEY(self, value):
