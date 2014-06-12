@@ -12,7 +12,10 @@ directly importable from python.
 
 """
 # load phpsploit dependencies before anything else
-import deps, sys, os
+import deps
+
+import os
+import sys
 
 basedir = os.path.truepath(sys.path[0]) + os.sep
 coredir = os.path.join(basedir, __name__) + os.sep
@@ -20,4 +23,4 @@ coredir = os.path.join(basedir, __name__) + os.sep
 # use current directory as main python path
 sys.path[0] = coredir
 
-del deps, sys, os # clean package's content
+del deps, sys, os  # clean package's content

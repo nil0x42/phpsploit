@@ -28,23 +28,24 @@ Stuff:
 """
 
 import sys
+from os import environ
+
+from shutil import get_terminal_size
 
 from . import wrapper
-Wrapper = wrapper.Stdout
 
-#from . import wrapper.Stdout as Wrapper
+
+Wrapper = wrapper.Stdout
 
 # is output a tty ?
 isatty = sys.__stdout__.isatty
 
 # get current terminal size
-from shutil import get_terminal_size
-size    = lambda: tuple(get_terminal_size(fallback=(79,24)))
+size = lambda: tuple(get_terminal_size(fallback=(79, 24)))
 columns = lambda: size()[0]
-lines   = lambda: size()[1]
+lines = lambda: size()[1]
 
 
-from os import environ
 def colors():
     """Returns the number of colors actually supported by current
     output. Actually, possible values are:

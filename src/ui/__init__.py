@@ -47,4 +47,21 @@ Contents Preview / Examples:
 >>> interface = ui.interface.Cmd()
 >>> interface.cmdloop()
 
+
+
+------------ ui.isatty --------------------
+
+>>> import ui
+>>> ui.isatty()
+True  # or False maybe...
+
+
+
 """
+
+from . import input
+from . import output
+
+
+# returns True it both stdin and stdout are tty
+isatty = lambda: input.isatty() and output.isatty()

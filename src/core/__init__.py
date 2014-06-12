@@ -8,9 +8,9 @@ basic elements such as the following strings:
     userdir -> /home/user/.phpsploit/
 
 """
-### directory constants ###
+# directory constants
 from src import basedir, coredir
 from .config import userdir
 
-### session object ###
+# session object
 from .session import session

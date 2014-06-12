@@ -170,11 +170,14 @@ class Session(baseclass.MetaDict):
         Is `obj` is None (default), "${SAVEPATH}./phpsploit.session" is used.
 
         """
-        if obj is None or isinstance(obj, str):
+        if isinstance(obj, str):
             obj = self.load(obj)
 
+        elif obj is None:
+            obj = self.load(self.File)
+
         # if obj is not a dict instance, fallback to parent method
-        if not isinstance(obj, dict):
+        elif not isinstance(obj, dict):
             return super().update(obj)
 
         for key, value in obj.items():
@@ -201,6 +204,7 @@ class Session(baseclass.MetaDict):
         """
         if file is None:
             file = self.File
+
 
         # get file's absolute path
         file = os.path.truepath(file)
