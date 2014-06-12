@@ -108,7 +108,7 @@ if opt['config'] is None:
 if interface.interpret("source '%s'" % opt['config']) != 0:
     print()
     parser.error("%r: couldn't load config file." % opt['config'])
-elif interactive:
+elif interactive and ui.output.isatty():
     logo = Path(core.basedir + "data/logo.ascii").read()
     interface.interpret("clear")
     print(logo + '\n\n')
@@ -140,6 +140,7 @@ if not ui.input.isatty():
 
 if interactive:
     interface.cmdloop()
-    print(colorize("%DimWhite", '\n' + rand_message() + '\n'))
+    if ui.output.isatty():
+        print(colorize("%DimWhite", '\n' + rand_message() + '\n'))
 
 del src  # make PEP8 syntax checker happy
