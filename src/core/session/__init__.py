@@ -85,8 +85,11 @@ class Session(baseclass.MetaDict):
         default dynamic value in the case it is None.
         """
         value = super().__getitem__(name)
-        if name == "File" and value is None:
-            value = self.Conf.SAVEPATH() + SESSION_FILENAME
+        if name == "File":
+            if value is None:
+                value = self.Conf.SAVEPATH() + SESSION_FILENAME
+            elif not os.path.isdir(value) and os.sep not in value:
+                value = self.Conf.SAVEPATH() + value
         return value
 
     def __setitem__(self, name, value):
@@ -164,14 +167,12 @@ class Session(baseclass.MetaDict):
         If `obj` is a string, it is then considered as a file path, and
         the self __call__() method is then used in order to retrieve
         corresponding session object.
-        Is `obj` is None (default), then "./phpsploit.session" is used.
+        Is `obj` is None (default), "${SAVEPATH}./phpsploit.session" is used.
 
         """
-        if obj is None:
-            obj = "./" + SESSION_FILENAME
-        # if obj is a string, get path's session from self call
-        if isinstance(obj, str):
+        if obj is None or isinstance(obj, str):
             obj = self.load(obj)
+
         # if obj is not a dict instance, fallback to parent method
         if not isinstance(obj, dict):
             return super().update(obj)
@@ -200,10 +201,6 @@ class Session(baseclass.MetaDict):
         """
         if file is None:
             file = self.File
-
-        # if file is a filename only, use SAVEPATH as root directory
-        if not os.path.isdir(file) and os.sep not in file:
-            file = self.Conf.SAVEPATH() + file
 
         # get file's absolute path
         file = os.path.truepath(file)
