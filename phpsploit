@@ -19,6 +19,7 @@ import argparse
 import subprocess as sp
 
 import core
+import ui.input
 import ui.output
 import ui.interface
 from datatypes import Path
@@ -91,10 +92,12 @@ if opt['version']:
 sys.stdout = ui.output.Wrapper(backlog=True)
 
 # determine if the interface would run in interactive mode
-if (opt['eval'] is None and opt['source'] is None) or opt['interactive']:
-    interactive = True
-else:
-    interactive = False
+interactive = False
+if ui.input.isatty():
+    if opt['eval'] is None and opt['source'] is None:
+        interactive = True
+    elif opt['interactive'] and ui.input.isatty():
+        interactive = True
 
 # Start shell interface
 interface = ui.interface.Shell()
@@ -131,6 +134,12 @@ if opt['source']:
 if opt['eval']:
     interface.interpret(opt['eval'])
 
+if not ui.input.isatty():
+    lines = sys.stdin.read()
+    interface.interpret(lines)
+
 if interactive:
     interface.cmdloop()
     print(colorize("%DimWhite", '\n' + rand_message() + '\n'))
+
+del src  # make PEP8 syntax checker happy
