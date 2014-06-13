@@ -13,6 +13,7 @@ import shnake
 
 import core
 import tunnel
+import ui.output
 
 from core import session, plugins
 from datatypes import Path
@@ -196,7 +197,8 @@ class Shell(shnake.Shell):
             Clear the current visible terminal data, leaving blank the
             screen. Used for visibility purposes.
         """
-        return os.system('cls' if os.name == 'nt' else 'clear')
+        if ui.output.isatty():
+            return os.system('cls' if os.name == 'nt' else 'clear')
 
     #################
     # COMMAND: rtfm #
