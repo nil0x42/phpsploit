@@ -2,7 +2,10 @@
 
 """
 
-import os, re, random, hashlib
+import os
+import random
+import hashlib
+
 from ui.color import colorize
 
 
@@ -67,7 +70,6 @@ class MetaDict(dict):
         else:
             self.title = self.__doc__.splitlines()[0].strip()
 
-
     def __getattribute__(self, name):
         # if _isattr(name), then call self getitem
         if name != "_isattr" and self._isattr(name):
@@ -75,7 +77,6 @@ class MetaDict(dict):
 
         # otherwise call parent's getattribute
         return super().__getattribute__(name)
-
 
     def __setattr__(self, name, value):
         # if _isattr(name), then call self setitem
@@ -85,24 +86,22 @@ class MetaDict(dict):
         # otherwise call parent's setattr
         return super().__setattr__(name, value)
 
-
     def __setitem__(self, name, value):
         # delete item if its value is empty or None:
-        if isinstance(value, (str, type(None))) \
-        and str(value).lower() in ["", "none"]:
+        if isinstance(value, (str, type(None))) and \
+           str(value).lower() in ["", "none"]:
             # don't try to delete unexisting item
-            if not name in self.keys(): return
+            if name not in self.keys():
+                return
             return self.__delitem__(name)
 
         return super().__setitem__(name, value)
-
 
     def __dir__(self):
         # considering the special get/set behavior, the __dir__()
         # method must also return self item whose name complies
         # with the self _isattr() boolean function.
         return super().__dir__() + [i for i in self.keys() if self._isattr(i)]
-
 
     def _isattr(self, name):
         """Determine whether a called attribute name may be
@@ -112,11 +111,9 @@ class MetaDict(dict):
         """
         return False
 
-
     def __str__(self):
         """Return self __call__() method"""
         return self.__call__()
-
 
     def __call__(self, pattern=""):
         """Nicely display self dict's items as an formatted
@@ -131,22 +128,21 @@ class MetaDict(dict):
         keys = [k for k in self.keys() if k.startswith(pattern)]
         if not keys:
             msg = "No such {} matching «{}»"
-            raise ValueError( msg.format(self.title ,pattern) )
+            raise ValueError(msg.format(self.title, pattern))
 
         # process formatted string
-        tpl = ("    {:%s}  {}\n") %max(8, len(max(keys, key=len)))
+        tpl = ("    {:%s}  {}\n") % max(8, len(max(keys, key=len)))
 
         buffer = self.title + "\n" + ("=" * len(self.title)) + "\n\n"
 
         buffer += tpl.format("Variable", "Value")
         buffer += tpl.format("--------", "-----")
 
-        for id, key in enumerate( sorted(keys) ):
-            buffer += colorize( ["%Reset", "%Reset"][id%2], \
-                                tpl.format(key, self[key]))
+        for id, key in enumerate(sorted(keys)):
+            buffer += colorize(["%Reset", "%Reset"][id % 2],
+                               tpl.format(key, self[key]))
 
         return "\n" + buffer + colorize("%Reset")
-
 
     def update(self, new):
         """Override standard dict() update method, because it seems
@@ -200,8 +196,10 @@ class RandLineBuffer:
 
     _raw_value() converts the object into a tuple whose first item is
         self.file, while the second is the buffer.
+
     """
-    def __init__(self, value, setfunc=(lambda x:x)):
+
+    def __init__(self, value, setfunc=(lambda x: x)):
         self._getobj = setfunc
 
         if not isinstance(value, (list, tuple)):
@@ -209,13 +207,15 @@ class RandLineBuffer:
 
         # if value is list/tuple, set `file, buffer = value`
         if type(value) is not str:
-            self.file =  value[0]
+            self.file = value[0]
             self.buffer = value[1]
         # elif value is a file:// string
         elif value[7:] and value[:7].lower() == "file://":
             self.file = os.path.truepath(value[7:])
-            try: self.buffer = open(self.file, "r").read()
-            except: raise ValueError("not a readable file: «%s»" %self.file)
+            try:
+                self.buffer = open(self.file, "r").read()
+            except:
+                raise ValueError("not a readable file: «%s»" % self.file)
         # elif value is just a string
         else:
             self.file = None
@@ -256,21 +256,22 @@ class RandLineBuffer:
 
         """
         # if buffer have one line only, return line string's obj repr
-        if not self.file and len( self.buffer.splitlines() ) == 1:
-            return str( self._getobj(self.buffer.strip()) )
+        if not self.file and len(self.buffer.splitlines()) == 1:
+            return str(self._getobj(self.buffer.strip()))
 
         # objID is file path OR buffer's md5sum
-        if self.file: objID = self.file
-        else: objID = hashlib.md5( self.buffer.encode('utf-8') ).hexdigest()
+        if self.file:
+            objID = self.file
+        else:
+            objID = hashlib.md5(self.buffer.encode('utf-8')).hexdigest()
 
         # choices is the string that show available choices
-        num = len( self.choices() )
-        choices = " (%s choice%s)" %(num, ('','s')[num>1])
+        num = len(self.choices())
+        choices = " (%s choice%s)" % (num, ('', 's')[num > 1])
 
         return colorize("%BoldBlack", "<", "%BoldBlue", "RandLine",
                         "%BasicCyan", "@", "%Bold", objID, "%BasicBlue",
                         choices, "%BoldBlack", ">")
-
 
     def __iadd__(self, new):
         """
@@ -284,7 +285,7 @@ class RandLineBuffer:
         # only strings must be added
         if not isinstance(new, str):
             msg = "Can't convert '{}' object to str implicitly"
-            raise TypeError( msg.format(type(new).__name__) )
+            raise TypeError(msg.format(type(new).__name__))
 
         new += os.linesep
         lines = len(new.splitlines())
@@ -302,7 +303,6 @@ class RandLineBuffer:
         self.buffer += new
         return RandLineBuffer(self.buffer, self._getobj)
 
-
     def __getitem__(self, item):
         """It allows the object being converted to list or tuple,
         returning these two elements: [self.file, self.buffer]
@@ -313,11 +313,9 @@ class RandLineBuffer:
             return self.buffer
         raise IndexError(self.__class__.__name__+" index out of range")
 
-
     def _raw_value(self):
         """Convert the object into a built-in data type (tuple)."""
         return tuple(self)
-
 
     def update(self):
         """Try to replace current buffer from parent file (self.file)
@@ -331,7 +329,6 @@ class RandLineBuffer:
             self.buffer = buffer
         except:
             pass
-
 
     def choices(self, buffer=None):
         """Return `buffer` string's usable choices list. Each choice
@@ -354,6 +351,8 @@ class RandLineBuffer:
         for line in buffer.splitlines():
             line = line.strip()
             if line and not line.startswith('#'):
-                try: result.append( self._getobj(line) )
-                except: continue
+                try:
+                    result.append(self._getobj(line))
+                except:
+                    continue
         return result
