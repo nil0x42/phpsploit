@@ -26,7 +26,7 @@ class Request:
         link closed's string
 
         """
-        print('[*] Connection to %s closed.' % self.host)
+        print('[*] Connection to %s closed.' % self.socket.hostname)
         return True
 
     def _get_vars(self, raw_response):

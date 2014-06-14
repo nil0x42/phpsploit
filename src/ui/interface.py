@@ -71,7 +71,7 @@ class Shell(shnake.Shell):
             backing to the main shell interface
         """
         if tunnel.socket:
-            tunnel.disconnect()
+            tunnel.close()
         else:
             exit()
 
