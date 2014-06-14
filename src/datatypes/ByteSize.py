@@ -1,5 +1,6 @@
 from ui.color import colorize
 
+
 class ByteSize(int):
     """Human readable byte size representation. (extends int)
 
@@ -12,7 +13,7 @@ class ByteSize(int):
     1024
 
     """
-    _metrics = 'BKMGT' # ordered byte metric prefixes
+    _metrics = 'BKMGT'  # ordered byte metric prefixes
 
     def __new__(cls, value=0):
 
@@ -37,41 +38,36 @@ class ByteSize(int):
             raise ValueError("invalid byte size representation")
 
         # get the real integer value, and return it's int instance
-        multiplier = 1024 ** ( cls._metrics.find(metric) )
-        result = int( number * multiplier )
+        multiplier = 1024 ** (cls._metrics.find(metric))
+        result = int(number * multiplier)
 
         return int.__new__(cls, result)
-
 
     def _raw_value(self):
         return int(self)
 
-
     def __call__(self):
         return self._raw_value()
-
 
     def __str__(self):
         self_str = super().__str__()
         if self == 1:
             return "1 byte"
 
-        number = float( self )
+        number = float(self)
 
-        for index in range( len(self._metrics) ):
-            if number < 1024.0 \
-            or index == len(self._metrics)-1:
+        for index in range(len(self._metrics)):
+            if number < 1024.0 or index == len(self._metrics)-1:
                 break
             number /= 1024.0
 
-        intLen = len(str( int(number) ))
-        precision = max( 0 , 3-intLen )
-        number = str( round(number, precision) ).rstrip('0').rstrip('.')
+        intLen = len(str(int(number)))
+        precision = max(0, (3 - intLen))
+        number = str(round(number, precision)).rstrip('0').rstrip('.')
 
         byteNames = ('bytes', 'KiB', 'MiB', 'GiB', 'TiB')
         result = number + " " + byteNames[index]
         if index > 0:
-            result += colorize('%DimWhite', " (%s bytes)" %self_str)
+            result += colorize('%DimWhite', " (%s bytes)" % self_str)
 
         return result
-
