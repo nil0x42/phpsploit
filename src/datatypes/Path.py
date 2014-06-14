@@ -43,7 +43,6 @@ class Path(str):
         type extension, which defaults to "txt".
 
         """
-        cls.tmpfile = False
 
         # if not args, default to random tmp file path:
         if not args:
@@ -59,7 +58,6 @@ class Path(str):
             path = session.Conf.TMPPATH() + randStr + "." + ext
             # create the file with empty content
             open(path, "w").close()
-            cls.tmpfile = True  # set obj type = tmpfile
         else:
             path = os.path.truepath(*args)
 
@@ -92,6 +90,16 @@ class Path(str):
 
         return str.__new__(cls, path)
 
+    def __init__(self, *args, mode='', ext='txt'):
+        # If the datatype takes no arguments, then it is
+        # a tmpfile Path() type.
+        # Defining its boolean atribute self.tmpfile allows us to
+        # unlink the file on object deletion throught __del__().
+        if args:
+            self.tmpfile = False
+        else:
+            self.tmpfile = True
+
     def _raw_value(self):
         return os.path.realpath(str(self))
 
@@ -102,7 +110,7 @@ class Path(str):
         return super().__str__()
 
     def __del__(self):
-        # remove tmp file
+        # remove tmp file (if any)
         if self.tmpfile:
             os.unlink(self)
 

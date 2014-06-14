@@ -22,42 +22,52 @@ class Proxy(str):
 
     """
 
-    _synopsis = "[http(s)|socks<4|5>]://<HOST>:<PORT>"
-    _pattern = "^(?:(socks[45]|https?)://)?([\w.-]{3,63})(?::(\d+))$"
-    _defaults = ['http', '', '']
+    _match_regexp = "^(?:(socks[45]|https?)://)?([\w.-]{3,63})(?::(\d+))$"
 
     def __new__(cls, proxy=None):
-        cls._urllib_opener = build_opener()
         if str(proxy).lower() == 'none':
             return str.__new__(cls, 'None')
 
         try:
-            components = list(re.match(cls._pattern, proxy).groups())
+            components = list(re.match(cls._match_regexp, proxy).groups())
         except:
-            raise ValueError('Invalid format (must be «%s»)' % cls._synopsis)
+            synopsis = "[http(s)|socks<4|5>]://<HOST>:<PORT>"
+            raise ValueError('Invalid format (must be «%s»)' % synopsis)
 
+        defaults = ['http', '', '']
         for index, elem in enumerate(components):
             if elem is None:
-                components[index] = cls._defaults[index]
-
-        cls.scheme, cls.host, cls.port = components
-        cls.components = components
+                components[index] = defaults[index]
 
         proxy = "{}://{}:{}".format(*tuple(components))
 
-        if cls.scheme == "socks4":
+        return str.__new__(cls, proxy)
+
+    def __init__(self, _=None):
+        """Build self._urllib_opener"""
+
+        proxy = super().__str__()
+        self._urllib_opener = build_opener()
+
+        if proxy == "None":
+            return
+
+        components = list(re.match(self._match_regexp, proxy).groups())
+        self.scheme, self.host, self.port = components
+        self.components = components
+
+        if self.scheme == "socks4":
             handler = SocksiPyHandler(socks.PROXY_TYPE_SOCKS4,
-                                      cls.host,
-                                      int(cls.port))
-        elif cls.scheme == "socks5":
+                                      self.host,
+                                      int(self.port))
+        elif self.scheme == "socks5":
             handler = SocksiPyHandler(socks.PROXY_TYPE_SOCKS5,
-                                      cls.host,
-                                      int(cls.port))
+                                      self.host,
+                                      int(self.port))
         else:
             handler = ProxyHandler({'http': proxy, 'https': proxy})
-        cls._urllib_opener.add_handler(handler)
 
-        return str.__new__(cls, proxy)
+        self._urllib_opener.add_handler(handler)
 
     def _raw_value(self):
         return super().__str__()
