@@ -5,7 +5,6 @@ provides interactive use of commands.
 
 """
 import os
-import sys
 import traceback
 import subprocess
 
@@ -35,7 +34,7 @@ class Shell(shnake.Shell):
         """Handle pre command hooks such as session aliases"""
         # Reset backlog before each command except backlog
         if len(argv) and argv[0] != "backlog":
-            sys.stdout.backlog = ""
+            self.stdout.backlog = ""
         # Alias Handler
         try:
             cmds = self.parseline(session.Alias[argv[0]])
@@ -238,7 +237,7 @@ class Shell(shnake.Shell):
             session [load|save|diff] [<FILE>]
 
         DESCRIPTION:
-            The `session` core command handles session instances.
+            The `session` core command handles phpsploit sessions.
             Sessions can be considered as PhpSploit instances. They
             handle current configuration settings, environment vars,
             command aliases, and remote tunnel attributes (if any).
@@ -272,7 +271,7 @@ class Shell(shnake.Shell):
         WARNING:
             The command's `load` argument cannot be used from a remote
             shell interface. It means that a remote shell must be left
-            first, in order to load a file stored session file.
+            first, in order to load a new phpsploit session file.
 
         """
         # prevent argv IndexError
@@ -603,7 +602,7 @@ class Shell(shnake.Shell):
             it does not contains any ANSI terminal color codes.
         """
         backlog = Path()
-        backlog.write(sys.stdout.backlog)
+        backlog.write(self.stdout.backlog)
         backlog.edit()
         return
 
@@ -616,8 +615,8 @@ class Shell(shnake.Shell):
             help [<COMMAND>]
 
         DESCRIPTION:
-            It displays help message for any command, including
-            plugins.
+            Display help message for any command, including plugins.
+
             - Without arguments, the whole available commands, sorted
               by category, are displayed including a summary line for
               each one.
