@@ -70,7 +70,7 @@ class Shell(shnake.Shell):
             backing to the main shell interface
         """
         if tunnel.socket:
-            tunnel.close()
+            tunnel.socket.close()
         else:
             exit()
 
@@ -182,7 +182,7 @@ class Shell(shnake.Shell):
                  "Then, use `set TARGET <BACKDOORED_URL>` and run `exploit`.")
             return print(colorize("%BoldCyan", m))
 
-        tunnel.open()  # it raises exception if fails
+        tunnel.socket.open()  # it raises exception if fails
 
     ##################
     # COMMAND: clear #
@@ -535,7 +535,7 @@ class Shell(shnake.Shell):
         """
         # `env [<PATTERN>]` display concerned settings list
         if len(argv) < 3:
-            return print(session.Env((argv+[""])[1]))
+            return print(session.Env((argv + [""])[1]))
 
         # `env <NAME> <VALUE>`
         session.Env[argv[1]] = " ".join(argv[2:])

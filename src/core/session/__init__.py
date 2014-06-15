@@ -50,7 +50,7 @@ class Session(baseclass.MetaDict):
 
         # session objects declaration
         self.Conf = settings.Settings()
-        self.Env = environment.Environment()
+        self.Env = {}
         self.Alias = baseclass.MetaDict(title="Command Aliases")
         self.Cache = baseclass.MetaDict(title="HTTP Response Cache")
         self.Hist = history.History()
@@ -94,6 +94,9 @@ class Session(baseclass.MetaDict):
 
     def __setitem__(self, name, value):
         # use grandparent class (bypass parent's None feature)
+        # setting Env item has special wrap
+        if name == "Env":
+            value = environment.Environment(value)
         dict.__setitem__(self, name, value)
 
     def __str__(self):
@@ -204,7 +207,6 @@ class Session(baseclass.MetaDict):
         """
         if file is None:
             file = self.File
-
 
         # get file's absolute path
         file = os.path.truepath(file)
