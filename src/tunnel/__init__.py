@@ -10,29 +10,57 @@ Usage:
 
 """
 
+from core import session
+import ui.input
+
 from . import handler
 from . import connector
 from . import payload
 
-socket = None
+
+class Socket:
+
+    def __init__(self):
+        self.socket = None
+        self.active = False
+
+    def __bool__(self):
+        return self.active
+
+    def open(self):
+        assert not self.active
+        socket = connector.Request()
+        if socket.open():
+            # handler for environment reset if needed
+            if self.socket:
+                old_hostname = self.socket.socket.hostname
+                new_hostname = socket.socket.hostname
+                if old_hostname != new_hostname:
+                    question = ("TARGET hostname has changed, wish "
+                                "you reset environment ? (recommended)")
+                    if ui.input.Expect(True)(question):
+                        session.Env = {}
+                        print("[*] Environment correctly flushed")
+                    else:
+                        print("[-] Keeping previous environment")
+
+            self.socket = socket
+            self.active = True
+            return True
+
+        return False
+
+    def close(self):
+        self.active = False
+        return True
+
+    def send(self, raw_payload):
+        assert self.active
+        assert self.socket
+        request = handler.Request()
+        request.open(raw_payload)
+        response = request.read()
+        return response
 
 
-def open():
-    global socket
-    temp_socket = connector.Request()
-    # If open() raises no error, use it as new standard socket
-    temp_socket.open()
-    socket = temp_socket
-
-
-def close():
-    global socket
-    socket.close()
-    socket = None
-
-
-def send(raw_payload):
-    request = handler.Request()
-    request.open(raw_payload)
-    response = request.read()
-    return response
+socket = Socket()

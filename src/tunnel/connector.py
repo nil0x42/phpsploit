@@ -20,6 +20,7 @@ class Request:
         self.socket = socket
         raw_vars = self._get_vars(socket.read())
         session.Env = self._build_env(raw_vars)
+        return True
 
     def close(self):
         """close the virtual link, actually, juste return the
