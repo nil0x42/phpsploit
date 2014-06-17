@@ -27,6 +27,8 @@ class Shell(shnake.Shell):
     nohelp = "[-] No help for: %s"
     error = "[!] %s"
 
+    binded_plugin = None
+
     def __init__(self):
         super().__init__()
 
@@ -42,6 +44,26 @@ class Shell(shnake.Shell):
             return argv
         self.interpret(cmds[:-1], precmd=(lambda x: x))
         return cmds[-1] + argv[1:]
+
+    def postcmd(self, retval, argv):
+        """Post command hook
+
+        - Redraw shell prompt
+
+        """
+        # redraw shell prompt after each command
+        prompt_elems = ["%Lined", "phpsploit"]
+        if tunnel.socket:
+            # if remote shell, add target hostname to prompt
+            prompt_elems += ["%Reset", "(", "%BoldRed",
+                             tunnel.socket.hostname, "%Reset", ")"]
+            if self.binded_plugin:
+                # If a plugin is binded to the prompt
+                prompt_elems += ["%ResetBoldWhite", " ", self.binded_plugin]
+        prompt_elems += ["%Reset", " > "]
+        self.prompt = colorize(*prompt_elems)
+
+        return retval
 
     def completenames(self, text, *ignored):
         """Add aliases and plugins for completion"""
