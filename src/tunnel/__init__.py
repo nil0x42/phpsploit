@@ -22,6 +22,7 @@ class Socket:
 
     def __init__(self):
         self.socket = None
+        self.hostname = None
         self.active = False
 
     def __bool__(self):
@@ -45,6 +46,7 @@ class Socket:
                         print("[-] Keeping previous environment")
 
             self.socket = socket
+            self.hostname = socket.socket.hostname
             self.active = True
             return True
 
