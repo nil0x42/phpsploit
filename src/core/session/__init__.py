@@ -24,10 +24,10 @@ import pickle
 import difflib
 
 import ui.input
+import objects
 import backwards.session
 from ui.color import colorize, decolorize
 
-from . import baseclass
 from . import settings
 from . import environment
 from . import history
@@ -35,7 +35,7 @@ from . import history
 SESSION_FILENAME = "phpsploit.session"
 
 
-class Session(baseclass.MetaDict):
+class Session(objects.MetaDict):
     """Phpsploit Session
 
     """
@@ -51,8 +51,8 @@ class Session(baseclass.MetaDict):
         # session objects declaration
         self.Conf = settings.Settings()
         self.Env = {}
-        self.Alias = baseclass.MetaDict(title="Command Aliases")
-        self.Cache = baseclass.MetaDict(title="HTTP Response Cache")
+        self.Alias = objects.MetaDict(title="Command Aliases")
+        self.Cache = objects.MetaDict(title="HTTP Response Cache")
         self.Hist = history.History()
         self.File = None
 
@@ -106,7 +106,7 @@ class Session(baseclass.MetaDict):
         deco = "\n" + colorize("%Blue", "=" * 68) + "\n"
         data = deco + title + deco
         for obj in self.values():
-            if isinstance(obj, baseclass.MetaDict):
+            if isinstance(obj, objects.MetaDict):
                 try:
                     data += str(obj) + "\n"
                 except:

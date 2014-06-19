@@ -1,16 +1,16 @@
 import re
 
-from . import baseclass
+import objects
 
 
-class Environment(baseclass.MetaDict):
+class Environment(objects.MetaDict):
     """Environment Variables
 
     Instanciate a dict() like object that stores PhpSploit
     environment variables.
 
     Unlike settings, env vars object works exactly the same way than
-    its parent (baseclass.MetaDict), excepting the fact that some
+    its parent (MetaDict), excepting the fact that some
     items (env vars) are tagged as read-only.
     This behavior only aplies if the concerned variable already
     exists.

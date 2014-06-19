@@ -4,7 +4,7 @@ import re
 import tempfile
 
 import core
-from . import baseclass
+import objects
 
 from datatypes import ByteSize, Path, Executable, WebBrowser
 from datatypes import Interval, PhpCode, Proxy, Url
@@ -12,7 +12,7 @@ from datatypes import Interval, PhpCode, Proxy, Url
 DEFAULT_HTTP_USER_AGENT = "file://"+core.basedir+"data/user_agents.lst"
 
 
-class Settings(baseclass.MetaDict):
+class Settings(objects.MetaDict):
     """Configuration Settings
 
     Instanciate a dict() like object that stores PhpSploit
@@ -67,7 +67,7 @@ class Settings(baseclass.MetaDict):
     def __setitem__(self, name, value):
         # print("bla");
         # if the set value is a RandLineBuffer obj, just do it!
-        if isinstance(value, baseclass.RandLineBuffer):
+        if isinstance(value, objects.RandLineBuffer):
             return super().__setitem__(name, value)
 
         name = name.replace('-', '_').upper()
@@ -89,13 +89,13 @@ class Settings(baseclass.MetaDict):
         # This fix creates a non-failing version of user agent default value
         if name == "HTTP_USER_AGENT" and name not in self.keys():
             try:
-                value = baseclass.RandLineBuffer(value, setter)
+                value = objects.RandLineBuffer(value, setter)
             except ValueError:
                 alt_file = value[7:]
                 alt_buff = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
-                value = baseclass.RandLineBuffer((alt_file, alt_buff), setter)
+                value = objects.RandLineBuffer((alt_file, alt_buff), setter)
         else:
-            value = baseclass.RandLineBuffer(value, setter)
+            value = objects.RandLineBuffer(value, setter)
 
         # use grandparent class (bypass parent's None feature)
         dict.__setitem__(self, name, value)
