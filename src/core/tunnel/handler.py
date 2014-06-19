@@ -1,4 +1,3 @@
-
 import sys
 import re
 import math
@@ -14,8 +13,9 @@ import core
 from core import session
 from datatypes import Path
 from ui.color import colorize
-import tunnel
-from tunnel.exceptions import BuildError, RequestError, ResponseError
+
+from .exceptions import BuildError, RequestError, ResponseError
+from . import payload
 
 
 class Request:
@@ -150,12 +150,12 @@ class Request:
                 return False
         return True
 
-    def encapsulate(self, payload):
+    def encapsulate(self, php_payload):
         """encapsulate the php unencoded payload with the parser strings"""
 
-        payload = payload.rstrip(';')
+        php_payload = php_payload.rstrip(';')
         outset, ending = [('echo "%s";' % x) for x in self.parser.split('%s')]
-        return (outset + payload + ending)
+        return (outset + php_payload + ending)
 
     def decapsulate(self, response):
         """parse the http response and return the phpsploit data response"""
@@ -190,7 +190,7 @@ class Request:
                 self.tmpdir = response + self.tmpfile
 
         if not self.multipart_file:
-            self.multipart_file = tunnel.payload.py2php(self.tmpdir)
+            self.multipart_file = payload.py2php(self.tmpdir)
             self.multipart_file = "$f=%s;" % self.multipart_file
             multipart = dict()
             for name, phpval in self.multipart.items():
@@ -211,7 +211,6 @@ class Request:
         template = template.replace('%%PASSKEY%%', self.passkey)
 
         rawForwarder = template % decoder
-        # b64Forwarder = codecs.encode(rawForwarder.encode(), "base64").decode()
         b64Forwarder = base64.b64encode(rawForwarder.encode()).decode()
         # here we delete the ending "=" from base64 payload
         # because if the string is not enquoted it will not be
@@ -259,7 +258,7 @@ class Request:
         self.payload_forwarder_error = err
         return forwarder
 
-    def build_get_headers(self, payload):
+    def build_get_headers(self, php_payload):
         """this function takes the main payload data as argument
         and returns a list of filled headers designed to be gathered
         and executed by the payload forwarder.
@@ -287,14 +286,14 @@ class Request:
         # values can be greater than the real current server's capacity, the
         # following lines equilibrates the risks we take on both settings.
         # The -8 on the max_header_size keeps space for header name and \r\n
-        dataLen = len(payload)
+        dataLen = len(php_payload)
         freeSpacePerHdr = self.max_header_size - 8
         vacantHdrs = self.vacant_headers['GET']
 
         sizePerHdr = math.sqrt((dataLen * freeSpacePerHdr) / vacantHdrs)
         sizePerHdr = int(math.ceil(sizePerHdr))
 
-        hdrDatas = split_len(payload, sizePerHdr)
+        hdrDatas = split_len(php_payload, sizePerHdr)
         hdrNames = get_header_names(len(hdrDatas))
         headers = dict(zip(hdrNames, hdrDatas))
         return headers
@@ -307,14 +306,14 @@ class Request:
         post_data = {self.passkey: data}
         return urllib.parse.urlencode(post_data)
 
-    def build_single_request(self, method, payload):
+    def build_single_request(self, method, php_payload):
         """build a single request from the given http method and
         payload, and return a request object.
         for infos about the return format, see the build_request() docstring.
 
         """
         # the header that acts as payload forwarder
-        forwarder = self.build_forwarder(method, payload.decoder)
+        forwarder = self.build_forwarder(method, php_payload.decoder)
 
         headers = {self.passkey: forwarder}  # headers dictionnary
         content = None  # post data content, None on GET requests
@@ -325,36 +324,36 @@ class Request:
             return []
         if method == 'GET':
             # add built headers containing splitted main payload
-            evil_headers = self.build_get_headers(payload.data)
+            evil_headers = self.build_get_headers(php_payload.data)
             headers.update(evil_headers)
         if method == 'POST':
             # encode the main paylod as a POST data variable
-            content = self.build_post_content(payload.data)
+            content = self.build_post_content(php_payload.data)
 
         return [(headers, content)]
 
-    def build_multipart_request(self, method, payload):
+    def build_multipart_request(self, method, php_payload):
         """build a multipart request object from the given http method
         and payload, and return it.
         for infos about the return format, see the build_request() docstring.
 
         """
         compression = 'auto'
-        if payload.length > self.zlib_try_limit:
+        if php_payload.length > self.zlib_try_limit:
             compression = 'nocompress'
 
-        def encode(forwarder, payload):
+        def encode(forwarder, php_payload):
             """insert the payload data in the forwarder and encode
             it with the phpcode.payload.Encode() class.
 
             """
-            data = forwarder.replace('DATA', payload).encode()
-            encodedPayload = tunnel.payload.Encode(data, compression)
+            data = forwarder.replace('DATA', php_payload).encode()
+            encodedPayload = payload.Encode(data, compression)
             return encodedPayload
 
-        lastForwarder = self.multipart['reader'] % (payload.decoder % "$x")
+        lastForwarder = self.multipart['reader'] % (php_payload.decoder % "$x")
 
-        rawData = payload.data
+        rawData = php_payload.data
         baseNum = self.maxsize[method]
         maxFlaw = max(100, (self.maxsize[method] / 100))
 
@@ -367,7 +366,7 @@ class Request:
             forwarder = self.multipart[forwarder]
 
             reqDone = False  # bool True when current req has been calculated
-            payload = None  # the current request's payload object
+            php_payload = None  # the current request's payload object
 
             # the following loop is designed to determine the greatest
             # usable payload that can be used in a single request.
@@ -402,7 +401,7 @@ class Request:
                     # the last built single request.
                     if testSize-minRange <= maxFlaw \
                        or (len(builtReqLst) and testSize == baseNum):
-                        payload = testPayload
+                        php_payload = testPayload
                         baseNum = testSize
                         reqDone = True
                     # we also now know that the max theorical size is bigger
@@ -412,22 +411,22 @@ class Request:
             # our single request can now be added to the multi req list
             # and it's treated data removed from the full data set
             rawData = rawData[minRange:]
-            request = self.build_single_request(method, payload)
+            request = self.build_single_request(method, php_payload)
             if not request:
                 return []
             builtReqLst += request
 
             # after each successful added request, try to put all remaining
             # data into a final request, and return full result if it enters.
-            payload = encode(lastForwarder, rawData)
-            if payload.length <= self.maxsize[method]:
-                request = self.build_single_request(method, payload)
+            php_payload = encode(lastForwarder, rawData)
+            if php_payload.length <= self.maxsize[method]:
+                request = self.build_single_request(method, php_payload)
                 if not request:
                     return []
                 builtReqLst += request
                 return builtReqLst
 
-    def build_request(self, mode, method, payload):
+    def build_request(self, mode, method, php_payload):
         """a frontend to the build_${mode}_request() functions.
         it takes request mode (single/multipart) as first argument, while
         the 2nd and 3rd are common request builder's arguments.
@@ -447,7 +446,7 @@ class Request:
             customBuilder = getattr(self, funcName)
         except:
             request = list()
-        request = customBuilder(method, payload)
+        request = customBuilder(method, php_payload)
         return request
 
     def send_single_request(self, request):
@@ -527,7 +526,7 @@ class Request:
         """read the http response"""
         return self.response
 
-    def open(self, payload):
+    def open(self, php_payload):
         """open a request to the server with the given php payload
         It respectively calls the Build(), Send() and Read() methods.
         if one of these methods returns a string, it will be considered as
@@ -554,7 +553,7 @@ class Request:
             return False
 
         # raises BuildError if it fails
-        request = self.Build(payload)
+        request = self.Build(php_payload)
 
         response = self.Send(request)
         if display_warnings(response):
@@ -564,7 +563,7 @@ class Request:
         if display_warnings(readed):
             raise ResponseError(self.errmsg_response)
 
-    def Build(self, payload):
+    def Build(self, php_payload):
         """Main request Builder:
 
         if takes the basic php payload as argument,
@@ -581,7 +580,7 @@ class Request:
                              'than REQ_MAX_HEADER_SIZE')
 
         # format the current php payload whith the dedicated Build() method.
-        payload = tunnel.payload.Build(payload, self.parser)
+        php_payload = payload.Build(payload, self.parser)
 
         # get a dict of available modes by method
         mode = {}
@@ -589,12 +588,14 @@ class Request:
             mode[m] = ''
             if self.can_send[m]:
                 mode[m] = 'single'
-                if payload.length > self.maxsize[m]:
+                if php_payload.length > self.maxsize[m]:
                     mode[m] = 'multipart'
 
         # if REQ_DEFAULT_METHOD setting is enough for single mode, build now !
         if mode[self.default_method] == 'single':
-            req = self.build_request('single', self.default_method, payload)
+            req = self.build_request('single',
+                                     self.default_method,
+                                     php_payload)
             if not req:
                 raise BuildError('The forwarder is bigger '
                                  'than REQ_MAX_HEADER_SIZE')
@@ -603,7 +604,7 @@ class Request:
         # load the multipart module if required
         if 'multipart' in mode.values():
             try:
-                print('[*] Large payload: %s bytes' % payload.length)
+                print('[*] Large payload: %s bytes' % php_payload.length)
                 self.load_multipart()
             except:
                 print('')
@@ -615,7 +616,7 @@ class Request:
             sys.stdout.write('\rBuilding %s method...\r' % m)
             sys.stdout.flush()
             try:
-                request[m] = self.build_request(mode[m], m, payload)
+                request[m] = self.build_request(mode[m], m, php_payload)
             except:
                 raise BuildError('Payload construction aborted')
 
@@ -779,7 +780,7 @@ class Request:
 
         # convert the response data into python variable
         try:
-            response = tunnel.payload.php2py(response)
+            response = payload.php2py(response)
         except:
             phpErrors = self.get_php_errors(response)
             if phpErrors:

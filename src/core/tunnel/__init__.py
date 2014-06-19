@@ -2,9 +2,10 @@
 
 Usage:
 
->>> import tunnel
->>> if not tunnel.socket:
+>>> from core import tunnel
+>>> if not tunnel:
 >>>     tunnel.open()
+>>>     tunnel.send("a php payload")
 >>> else:
 >>>     tunnel.close()
 
@@ -15,10 +16,9 @@ import ui.input
 
 from . import handler
 from . import connector
-from . import payload
 
 
-class Socket:
+class Tunnel:
 
     def __init__(self):
         self.socket = None
@@ -65,4 +65,5 @@ class Socket:
         return response
 
 
-socket = Socket()
+# instanciate main phpsploit tunnel as core.tunnel
+tunnel = Tunnel()
