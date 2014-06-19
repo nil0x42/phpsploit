@@ -2,7 +2,9 @@ from ui.color import colorize
 
 
 class MetaDict(dict):
-    """Instanciate an advanced dict() like datatype, especially
+    """Metadict() object (by nil0x42)
+
+    Instanciate an advanced dict() like datatype, especially
     made in order to extend PhpSploit session management taste.
 
     It may take a dict based object as argument to bind to it.
@@ -52,6 +54,7 @@ class MetaDict(dict):
           string result (without `pattern` argument.
 
     """
+
     def __init__(self, value={}, title=None):
         # update self dict with `value`
         self.update(value)
@@ -108,7 +111,7 @@ class MetaDict(dict):
         return self.__call__()
 
     def __call__(self, pattern=""):
-        """Nicely display self dict's items as an formatted
+        """Nicely display self dict's items as a formatted
         multiline string array.
         The optionnal argument `pattern` can be used to limit
         item display to keys whose name starts with it's value.
@@ -116,7 +119,7 @@ class MetaDict(dict):
         """
         # get matching vars list
         if not self.keys():
-            raise ValueError("No such "+self.title)
+            raise ValueError("No such " + self.title)
         keys = [k for k in self.keys() if k.startswith(pattern)]
         if not keys:
             msg = "No such {} matching «{}»"
