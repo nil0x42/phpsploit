@@ -12,5 +12,11 @@ basic elements such as the following strings:
 from src import basedir, coredir
 from .config import userdir
 
-# session object
+# session instance
 from .session import session
+
+# tunnel instance
+from .tunnel import tunnel
+
+# plugins instance
+from .plugins import plugins

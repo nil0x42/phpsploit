@@ -11,10 +11,9 @@ import subprocess
 import shnake
 
 import core
-import tunnel
 import ui.output
 
-from core import session, plugins
+from core import session, tunnel, plugins
 from datatypes import Path
 from ui.color import colorize
 
@@ -53,10 +52,10 @@ class Shell(shnake.Shell):
         """
         # redraw shell prompt after each command
         prompt_elems = ["%Lined", "phpsploit"]
-        if tunnel.socket:
+        if tunnel:
             # if remote shell, add target hostname to prompt
             prompt_elems += ["%Reset", "(", "%BoldRed",
-                             tunnel.socket.hostname, "%Reset", ")"]
+                             tunnel.hostname, "%Reset", ")"]
             if self.binded_plugin:
                 # If a plugin is binded to the prompt
                 prompt_elems += ["%ResetBoldWhite", " ", self.binded_plugin]
@@ -91,8 +90,8 @@ class Shell(shnake.Shell):
             - Calling it from a remote shell session simply leaves it,
             backing to the main shell interface
         """
-        if tunnel.socket:
-            tunnel.socket.close()
+        if tunnel:
+            tunnel.close()
         else:
             exit()
 
@@ -193,7 +192,7 @@ class Shell(shnake.Shell):
         obj = obj.replace("%%PASSKEY%%", session.Conf.PASSKEY().upper())
         print("[*] Current backdoor is: " + obj + "\n")
 
-        if tunnel.socket:
+        if tunnel:
             m = ("[*] Use `set TARGET <VALUE>` to use another url as target."
                  "\n[*] To exploit a new server, disconnect from «%s» first.")
             return print(m.format(session.Env.HOST))
@@ -204,7 +203,7 @@ class Shell(shnake.Shell):
                  "Then, use `set TARGET <BACKDOORED_URL>` and run `exploit`.")
             return print(colorize("%BoldCyan", m))
 
-        tunnel.socket.open()  # it raises exception if fails
+        tunnel.open()  # it raises exception if fails
 
     ##################
     # COMMAND: clear #
@@ -727,7 +726,7 @@ class Shell(shnake.Shell):
         help = [('Core Commands', core_commands)]
 
         # adds plugin category if we are connected to target
-        if tunnel.socket:
+        if tunnel:
             for category in plugins.categories():
                 name = category.replace('_', ' ').capitalize()
                 items = plugins.list_category(category)
