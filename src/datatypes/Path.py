@@ -7,11 +7,11 @@ class Path(str):
     Takes one or more string arguments, joinded as a single absolute
     file or directory path.
 
-    The optionnal keyword arg, `mode` may define some conditionnal
+    The optionnal keyword arg, `mode` defines some conditionnal
     path properties.
 
     A ValueError is raised if path do not exists, or if at least one
-    of the `mode` conditions are not True.
+    of the `mode` conditions is not honored.
 
     Available mode tags:
         e: path exists (default value)
@@ -36,11 +36,9 @@ class Path(str):
 
         virtual undefined path:
         -----------------------
-        If no args are specified, then an empty virtual Path object is
-        created. It defaultly binds to a temporary file name randomized
-        whithin PhpSploit set temporary directory (TMPPATH setting).
-        In this case, the `ext` argument provides file name's default
-        type extension, which defaults to "txt".
+        If args are not specified, a fresh instance wich binds to a
+        temporary file is created. The file is generated with a random
+        file name which uses `ext` as file extension.
 
         """
 
@@ -115,9 +113,13 @@ class Path(str):
             os.unlink(self)
 
     def edit(self):
-        """Try to open file with system's text editor. Return False if the
-        edit() method is not available or the file has not changed, and
-        return True if the data had been edited.
+        """Open the file with TEXTEDITOR for edition.
+
+        This boolean method returns True if the file had been
+        correctly edited, and its content changed.
+
+        The method also fails if the file cannot be edited.
+        It may happen if stdin/stdout are not TTYs.
 
         """
         try:
@@ -125,7 +127,7 @@ class Path(str):
             import ui.output
             import ui.input
             from core import session
-            assert ui.output.isatty() and ui.input.isatty()
+            assert ui.isatty()
             old = self.read()
             subprocess.call([session.Conf.EDITOR(), self])
             assert self.read() != old
@@ -134,17 +136,25 @@ class Path(str):
             return False
 
     def read(self):
-        """Return a string buffer of the file path's data. Newlines are
-        automatically replaced by system specific newline char(s)
+        """Read path file contents.
+
+        NOTE:
+        This method actually returns a string formatted for
+        the current platform.
+        It means that a file contents which uses '\r\n' line
+        separators will be returned with '\n' separators
+        instead, if it is opened through a GNU/Linux system.
 
         """
         lines = self.readlines()
         data = os.linesep.join(lines)
-        return(data)
+        return data
 
     def write(self, data):
-        """Write `data` to the file path. Newlines are automatically
-        replaced by system specific newline char(s)
+        """Write `data` to the file path.
+
+        Note that newlines are automatically replaced by system
+        specific newline char(s).
 
         """
         lines = data.splitlines()
@@ -152,18 +162,27 @@ class Path(str):
         open(self, 'w').write(data)
 
     def readlines(self):
-        """Get a list of file path content as a list of lines"""
+        """Get the list of file path lines.
+
+        NOTE: The lines are returned without newline char(s).
+
+        """
         return open(self, 'r').read().splitlines()
 
     def phpcode(self):
-        """Return the file's content, removing first the php
-        ending and starting tags (<? and ?>).
-        - It also removes comment lines, empty lines, and useless
-        trailing spaces.
-        - '\n' is used as line separator in any case.
+        """Get minified php code from file.
 
-        NOTE: multiline comment (/* foo\nbar */) are NOT supported
-        an must NOT be used in the PhpSploit framework.
+        Minification:
+        The method removes php tag markers ('<?', '?>'),
+        empty lines and useless trailing spaces.
+
+        Format:
+        The '\n' separator is used, without caring about platform.
+
+        NOTE:
+        Multiline comment style (/* foo\nbar */) is not supported
+        by internal php code minifier, and should generally not be
+        used inside of the phpsploit framework.
 
         """
         data = self.read().strip()
@@ -179,4 +198,4 @@ class Path(str):
             line = line.strip()
             if not line.startswith('//'):
                 result.append(line)
-        return('\n'.join(result))
+        return '\n'.join(result)
