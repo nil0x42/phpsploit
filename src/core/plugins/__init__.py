@@ -9,6 +9,8 @@ import os
 
 from datatypes import Path
 
+from .Plugin import Plugin
+
 
 class Plugins:
 
@@ -65,26 +67,26 @@ class Plugins:
     def get_plugins(self, categories):
         """return a dictionnary of plugins, each one containing
         the following elements:
-        - category: the plugin's category
-        - path:     the plugin's root directory
-        - script:   the plugin script as string
-        - help:     the plugin's docstring
+        - category: category of the plugin
+        - path:     plugin location
+        - script:   python script string
+        - help:     help docstring
         """
-        plugins = dict()
+        result = []
 
         for cat_name, cat_paths in categories:
             for cat_path in cat_paths:
                 cat_elems = self.get_path_elems(cat_path)
                 for name, path in cat_elems:
-                    if name not in plugins and name not in self.blacklist:
-                        elem = self.load_plugin(name, path)
+                    if name not in result and name not in self.blacklist:
+                        elem = self._load_plugin(name, path)
                         if elem:
                             elem['category'] = cat_name
                             elem['path']     = path.name
-                            plugins[name] = elem
-        return plugins
+                            result[name] = elem
+        return result
 
-    def load_plugin(self, name, path):
+    def _load_plugin(self, name, path):
         """load the given plugin "name" at "path".
         The return is False if the given arguments do not match a valid
         PhpSploit plugin. Otherwise, a dictionnary containg the "help"
