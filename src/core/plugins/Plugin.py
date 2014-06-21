@@ -1,62 +1,125 @@
+import os
+import sys
+import importlib
+
+from core import plugins
+from datatypes import Path
 
 
+class InvalidPlugin(Exception):
+    """Invalid plugin exception
+
+    """
+    pass
 
 
-import re
+class UnloadablePlugin(Exception):
+    """Unloadable plugin exception
 
-import objects
+    """
+    pass
 
 
-class Plugin(objects.MetaDict):
+class Plugin:
     """Phpsploit plugin class
 
     This object instanciates a new plugin object.
 
     Example:
-    >>> plugin = Plugin(
-    
+    >>> plugin = Plugin("./plugins/file_system/ls")
+    >>> plugin.name
+    'ls'
+    >>> plugin.category
+    'File system'
+    >>> plugin.run(['ls', '-la'])  # run the plugin with args
 
     """
 
+    def __init__(self, path):
+        if path.endswith("/"):
+            path = path[:-1]
+
+        # name
+        self.name = os.path.basename(path)
+
+        # path
+        self.path = path
+
+        try:
+            self.path = Path(path, mode='drx')()
+        except ValueError as e:
+            raise InvalidPlugin(self.name + ": " + e)
+
+        # category
+        category = os.path.basename(os.path.dirname(path))
+        self.category = category.replace(" ", "_").capitalize()
+
+        # script
+        try:
+            self.script = Path(path, "plugin.py", mode='fr').read()
+        except:
+            raise UnloadablePlugin("plugin.py file not found")
+        if not self.script.strip():
+            raise UnloadablePlugin("plugin.py file is empty")
+
+        # help
+        self.help = ""
+        try:
+            code = compile(self.script, "", "exec")
+        except ValueError as e:
+            raise UnloadablePlugin(e.message)
+        if "__doc__" in code.co_names:
+            self.help = code.co_consts[0]
+
+    def run(self, argv):
+        # make current_plugin point to self plugin instance
+        # this allows api module imports to get triggering
+        # plugin attributes.
+        plugins.current_plugin = self
+
+        try:
+            ExecPlugin(self)
+        except KeyboardInterrupt:
+            raise KeyboardInterrupt
+        except:
+            etype = str(sys.exc_info()[0])
+            etype = etype[(etype.find('.') + 1):-2]
+            evalue = str(sys.exc_info()[1])
+            if etype == 'SystemExit':
+                if evalue:
+                    print(evalue)
+            else:
+                print('[-] An error has occured launching the plugin')
+                print("[-] %s : %s" % (etype, evalue))
 
 
-    """Environment Variables
+class ExecPlugin:
 
-    Instanciate a dict() like object that stores PhpSploit
-    environment variables.
+    filename = "plugin"
+    _instance_id = 0
 
-    Unlike settings, env vars object works exactly the same way than
-    its parent (MetaDict), excepting the fact that some
-    items (env vars) are tagged as read-only.
-    This behavior only aplies if the concerned variable already
-    exists.
-    In order to set a tagged variable's value, it must not
-    exist already.
+    def __init__(self, plugin):
+        script_path = os.path.join(plugin.path, self.filename + ".py")
+        sys.path.insert(0, plugin.path)
+        try:
+            self.exec_module(script_path)
+        finally:
+            sys.path.pop(0)
 
-    Example:
-    >>> Env = Environment()
-    >>> Env.PLATFORM = "foo"
-    >>> Env.PLATFORM = "bar"
-    AttributeError: «PLATFORM» variable is read-only
-    >>> Env.PLATFORM
-    'foo'
-    >>> del Env.PLATFORM
-    >>> Env.PLATFORM = "bar"
-    >>> Env.PLATFORM
-    'bar'
+    @classmethod
+    def is_first_instance(cls):
+        if cls._instance_id == 0:
+            result = True
+        else:
+            result = False
+        cls._instance_id += 1
+        return result
 
-    """
-    readonly = ["ADDR", "HOST", "PHP_VERSION", "PATH_SEP",
-                "HTTP_SOFTWARE", "WEB_ROOT"]
+    def exec_module(self, path):
+        loader = importlib.machinery.SourceFileLoader(self.filename, path)
+        module = importlib.import_module(self.filename)
 
-    def __init__(self, value={}, readonly=[]):
-        self.readonly += readonly
-        super().__init__(value)
-
-    def __setitem__(self, name, value):
-        if name in self.readonly and name in self.keys():
-            raise AttributeError("«{}» variable is read-only".format(name))
-        super().__setitem__(name, value)
-
-    def _isattr(self, name):
-        return re.match("^[A-Z][A-Z0-9_]+$", name)
+        # If the instance is the first one, it means that
+        # the import already executed the plugin.
+        if not self.is_first_instance():
+            loader.exec_module(module)

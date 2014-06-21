@@ -35,7 +35,7 @@ class Shell(shnake.Shell):
         """Handle pre command hooks such as session aliases"""
         # update plugins (XXX: this action is greedy)
         if tunnel:
-            plugins.update()
+            plugins.reload()
 
         # Reset backlog before each command except backlog
         if len(argv) and argv[0] != "backlog":
@@ -219,7 +219,7 @@ class Shell(shnake.Shell):
             tunnel.open()  # it raises exception if fails
             # update plugins list
             plugins.blacklist = self.get_names(self, "do_")
-            plugins.update()
+            plugins.reload()
 
     ##################
     # COMMAND: clear #
