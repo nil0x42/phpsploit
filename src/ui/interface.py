@@ -33,6 +33,10 @@ class Shell(shnake.Shell):
 
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
+        # update plugins (XXX: this action is greedy)
+        if tunnel:
+            plugins.update()
+
         # Reset backlog before each command except backlog
         if len(argv) and argv[0] != "backlog":
             self.stdout.backlog = ""
@@ -68,13 +72,21 @@ class Shell(shnake.Shell):
         """Add aliases and plugins for completion"""
         result = super().completenames(text, ignored)
         result += session.Alias.keys()
-        # result += plugins.keys()
+        if tunnel:
+            result += plugins.keys()
         return ([x for x in list(set(result)) if x.startswith(text)])
 
     def onexception(self, exception):
         """Add traceback handler to onexception"""
         self.last_exception = exception
         return super().onexception(exception)
+
+    def default(self, argv):
+        """Fallback to plugin command (if any)"""
+        if tunnel and argv[0] in plugins.keys():
+            plugins[argv[0]].run()
+        else:
+            return super().default(argv)
 
     #################
     # COMMAND: exit #
@@ -197,13 +209,17 @@ class Shell(shnake.Shell):
                  "\n[*] To exploit a new server, disconnect from «%s» first.")
             return print(m.format(session.Env.HOST))
 
-        if session.Conf.TARGET() is None:
+        elif session.Conf.TARGET() is None:
             m = ("To run a remote tunnel, the backdoor shown above must be\n"
                  "manually injected in a remote server executable web page.\n"
                  "Then, use `set TARGET <BACKDOORED_URL>` and run `exploit`.")
             return print(colorize("%BoldCyan", m))
 
-        tunnel.open()  # it raises exception if fails
+        else:
+            tunnel.open()  # it raises exception if fails
+            # update plugins list
+            plugins.blacklist = self.get_names(self, "do_")
+            plugins.update()
 
     ##################
     # COMMAND: clear #
@@ -664,26 +680,26 @@ class Shell(shnake.Shell):
             """return the docstring lines list of specific command"""
             # try to get the doc from the plugin method
             try:
-                doc = plugins.get(cmdName, 'help')
+                doc = plugins[cmdName].help
             except:
                 try:
-                    doc = getattr(self, 'do_'+cmd).__doc__
+                    doc = getattr(self, 'do_' + cmd).__doc__
                 except:
-                    return(list())
-            return(doc.strip().splitlines())
+                    return []
+            return doc.strip().splitlines()
 
         def get_description(docLines):
             """return the command description (1st docstring line)"""
             try:
-                return(docLines[0].strip())
+                return docLines[0].strip()
             except:
-                return (colorize("%Yellow", "No description"))
+                return colorize("%Yellow", "No description")
 
         def doc_help(docLines):
             """print the formated command's docstring"""
             # reject empty docstrings (description + empty line)
             if len(docLines) < 2:
-                return(None)
+                return None
             docLines.pop(0)  # remove the description line
             while not docLines[0].strip():
                 docLines.pop(0)  # remove heading empty lines
@@ -713,7 +729,7 @@ class Shell(shnake.Shell):
 
             # call the help_<command> method, otherwise, print it's docstring
             try:
-                getattr(self, 'help_'+argv[1])()
+                getattr(self, 'help_' + argv[1])()
             except:
                 doc_help(doc)
             return
@@ -728,12 +744,10 @@ class Shell(shnake.Shell):
         # adds plugin category if we are connected to target
         if tunnel:
             for category in plugins.categories():
-                name = category.replace('_', ' ').capitalize()
-                items = plugins.list_category(category)
-
+                items = [p for p in plugins if p.category == category]
                 # rescale maxLength in case of longer plugin names
                 maxLength = max(maxLength, len(max(items, key=len)))
-                help += [(name+' Plugins', items)]
+                help += [(category + ' Plugins', items)]
 
         # Settle maxLength if there are command aliases
         aliases = list(session.Alias.keys())
@@ -742,7 +756,7 @@ class Shell(shnake.Shell):
             help += [("Command Aliases", aliases)]
 
         # print commands help, sorted by groups
-        cmdColumn = ' ' * (maxLength-5)
+        cmdColumn = ' ' * (maxLength - 5)
         for groupName, groupCommands in help:
 
             # display group (category) header block
