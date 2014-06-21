@@ -1,7 +1,8 @@
 import core
-import tunnel
 from core import session
 from datatypes import Path
+
+from . import handler
 
 
 class Request:
@@ -12,7 +13,7 @@ class Request:
     def open(self):
         payload = Path(core.basedir, 'data/tunnel/connector.php').phpcode()
 
-        socket = tunnel.handler.Request()
+        socket = handler.Request()
         socket.is_first_payload = True
         socket.errmsg_request = "Could not connect to TARGET"
         socket.errmsg_response = "TARGET does not seem to be backdoored"
