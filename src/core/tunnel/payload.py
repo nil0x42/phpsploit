@@ -5,7 +5,7 @@ import phpserialize
 
 import core
 from datatypes import Path
-from tunnel.exceptions import BuildError
+from .exceptions import BuildError
 
 
 def py2php(python_var):
