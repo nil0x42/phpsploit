@@ -1,30 +1,30 @@
 """Execute a command on the server
 
 SYNOPSIS:
-    system "<SHELL COMMAND>"
+    run "<SHELL COMMAND>"
 
 DESCRIPTION:
-    Even if the PhpSploit plugins generally are mad to simulate
-    the standard usefull shell commands, in order to bypass the
-    frequent PHP installations which disables real shell
-    execution, for the times it is not blocked, this command
-    must be used to send real commands.
+    Most of the phpsploit plugins intend to simulate shell
+    commands over obfuscated PHP implementations.
+    Therefore, in a few remote servers, real command execution
+    is not blocked, so using them would be a plus in the
+    privilege escalation process.
 
     NOTE: This plugins works on any standard platform, but the
     following features are only available on unix systems:
 
-    - To any sent command, a "cd" command to move to the
-    PhpSploit's CWD environment variable will be prepended. It
-    ensures the commands are launched from the PhpSploit's
-    current working directory.
-    - To any sent command, a 'pwd' command is appendend as last
+    - To any sent command, a `cd` command to move to the
+    phpsploit's PWD environment variable will be prepended. It
+    ensures the commands are launched from the same directory
+    than in the phpsploit paradygm.
+    - To any sent command, a `pwd` command is appendend as last
     command to collect the current working directory before
     commands execution, in cases the requested commands ordered
-    to change the directory. Then the CWD environment variable
-    is updated according new pwd.
+    to change the directory. It allows the plugin to upgrade
+    PWD environment variable if necessary.
 
 WARNING:
-    Considering the PhpSploit's input parser, commands which
+    Considering phpsploit's input parser, commands which
     contain quotes, semicolons, and other chars that could be
     interpreted by the framework MUST be enquoted to be
     interpreted as a single argument. For example:
@@ -34,19 +34,17 @@ WARNING:
       > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
 
 EXAMPLES:
-    > system ipconfig /all
+    > run ipconfig /all
       - Run the 'ipconfig' tool on windows servers
-    > system ls -la /etc
+    > run ls -la /etc
       - List any file in the /etc/ directory on *nix systems
-    > system "cat /etc/passwd | grep root; ls /tmp"
+    > run "cat /etc/passwd | grep root; ls /tmp"
       - Just a multi command, which must be enquoted because
         of the semicolon (see WARNING)
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
-
-api.isshell()
 
 if self.argc < 2:
     api.exit(self.help)
