@@ -63,7 +63,10 @@ class MetaDict(dict):
         if title is not None:
             self.title = str(title)
         else:
-            self.title = self.__doc__.splitlines()[0].strip()
+            try:
+                self.title = self.__doc__.splitlines()[0].strip()
+            except:
+                self.title = "Metadict() object (by nil0x42)"
 
     def __getattribute__(self, name):
         # if _isattr(name), then call self getitem

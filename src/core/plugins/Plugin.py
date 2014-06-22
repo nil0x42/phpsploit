@@ -2,7 +2,6 @@ import os
 import sys
 import importlib
 
-from core import plugins
 from datatypes import Path
 
 
@@ -65,6 +64,7 @@ class Plugin:
         # help
         self.help = ""
         try:
+            print(self.path + " :: " + self.name)
             code = compile(self.script, "", "exec")
         except ValueError as e:
             raise UnloadablePlugin(e.message)
@@ -72,10 +72,6 @@ class Plugin:
             self.help = code.co_consts[0]
 
     def run(self, argv):
-        # make current_plugin point to self plugin instance
-        # this allows api module imports to get triggering
-        # plugin attributes.
-        plugins.current_plugin = self
 
         try:
             ExecPlugin(self)

@@ -40,6 +40,19 @@ class Plugins(objects.MetaDict):
         categories.sort()
         return list(set(categories))
 
+    def run(self, argv):
+        """Execute the plugin matching given argv list
+        """
+        # make current_plugin point to self plugin instance
+        # this allows api module imports to get triggering
+        # plugin attributes.
+        plugin = self[argv[0]]
+        self.current_plugin = plugin
+        try:
+            plugin.run(argv)
+        finally:
+            self.current_plugin = None
+
     def _load_categories(self):
         """Load currently existing categories.
 
@@ -71,11 +84,11 @@ class Plugins(objects.MetaDict):
         plugin name. Each plugin value is a Plugin() instance.
 
         """
-        for cat_name, cat_paths in categories:
+        for cat_name, cat_paths in categories.items():
             for cat_path in cat_paths:
-                cat_elems = self.list_path_dirs(cat_path)
+                cat_elems = self._list_path_dirs(cat_path)
                 for basename, abspath in cat_elems:
-                    if basename in (self.keys() + self.blacklist):
+                    if basename in (list(self.keys()) + self.blacklist):
                         continue
                     self[basename] = Plugin(abspath)
 

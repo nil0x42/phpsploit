@@ -72,16 +72,15 @@ class Build:
 
     encapsulator = Path(core.basedir, 'data/tunnel/encapsulator.php').phpcode()
 
-    def __init__(self, payload, parser):
+    def __init__(self, php_payload, parser):
 
         self.loaded_phplibs = list()
 
-        payload = self.encapsulate(payload, parser)
-        payload = self.loadphplibs(payload)
-        payload = self.shorten(payload)
+        php_payload = self.encapsulate(php_payload, parser)
+        php_payload = self.loadphplibs(php_payload)
+        php_payload = self.shorten(php_payload)
 
-        # print(type(payload))
-        encoded = Encode(payload.encode(), 'noauto')
+        encoded = Encode(php_payload.encode(), 'noauto')
 
         self.data = encoded.data
         self.length = encoded.length

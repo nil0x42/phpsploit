@@ -84,7 +84,7 @@ class Shell(shnake.Shell):
     def default(self, argv):
         """Fallback to plugin command (if any)"""
         if tunnel and argv[0] in plugins.keys():
-            plugins[argv[0]].run()
+            plugins.run(argv)
         else:
             return super().default(argv)
 

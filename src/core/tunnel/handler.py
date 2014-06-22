@@ -580,7 +580,7 @@ class Request:
                              'than REQ_MAX_HEADER_SIZE')
 
         # format the current php payload whith the dedicated Build() method.
-        php_payload = payload.Build(payload, self.parser)
+        php_payload = payload.Build(php_payload, self.parser)
 
         # get a dict of available modes by method
         mode = {}
