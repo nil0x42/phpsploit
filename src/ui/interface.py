@@ -34,8 +34,8 @@ class Shell(shnake.Shell):
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
         # update plugins (XXX: this action is greedy)
-        if tunnel:
-            plugins.reload()
+        # if tunnel:
+        #     plugins.reload()
 
         # Reset backlog before each command except backlog
         if len(argv) and argv[0] != "backlog":
@@ -206,7 +206,7 @@ class Shell(shnake.Shell):
 
         if tunnel:
             m = ("[*] Use `set TARGET <VALUE>` to use another url as target."
-                 "\n[*] To exploit a new server, disconnect from «%s» first.")
+                 "\n[*] To exploit a new server, disconnect from «{}» first.")
             return print(m.format(session.Env.HOST))
 
         elif session.Conf.TARGET() is None:
@@ -744,7 +744,7 @@ class Shell(shnake.Shell):
         # adds plugin category if we are connected to target
         if tunnel:
             for category in plugins.categories():
-                items = [p for p in plugins if p.category == category]
+                items = [p for p in plugins.values() if p.category == category]
                 # rescale maxLength in case of longer plugin names
                 maxLength = max(maxLength, len(max(items, key=len)))
                 help += [(category + ' Plugins', items)]
