@@ -13,6 +13,7 @@ import objects
 from datatypes import Path
 
 from .Plugin import Plugin
+from .exceptions import InvalidPlugin, UnloadablePlugin
 
 
 class Plugins(objects.MetaDict):
@@ -90,7 +91,13 @@ class Plugins(objects.MetaDict):
                 for basename, abspath in cat_elems:
                     if basename in (list(self.keys()) + self.blacklist):
                         continue
-                    self[basename] = Plugin(abspath)
+                    try:
+                        self[basename] = Plugin(abspath)
+                    except UnloadablePlugin as e:
+                        msg = "«%splugin.py»: %s" % (abspath, e)
+                        print("[-] Unloadable Plugin: %s" % msg)
+                    except InvalidPlugin as e:
+                        print("[-] Invalid Plugin: %s" % e)
 
     def _list_path_dirs(self, root_dir):
         """Returns a list of tuples representing a plugin directory.

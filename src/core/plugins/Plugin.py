@@ -4,19 +4,7 @@ import importlib
 
 from datatypes import Path
 
-
-class InvalidPlugin(Exception):
-    """Invalid plugin exception
-
-    """
-    pass
-
-
-class UnloadablePlugin(Exception):
-    """Unloadable plugin exception
-
-    """
-    pass
+from .exceptions import InvalidPlugin, UnloadablePlugin
 
 
 class Plugin:
@@ -57,17 +45,16 @@ class Plugin:
         try:
             self.script = Path(path, "plugin.py", mode='fr').read()
         except:
-            raise UnloadablePlugin("plugin.py file not found")
+            raise UnloadablePlugin("file not found")
         if not self.script.strip():
-            raise UnloadablePlugin("plugin.py file is empty")
+            raise UnloadablePlugin("file is empty")
 
         # help
         self.help = ""
         try:
-            print(self.path + " :: " + self.name)
             code = compile(self.script, "", "exec")
-        except ValueError as e:
-            raise UnloadablePlugin(e.message)
+        except SyntaxError as e:
+            raise UnloadablePlugin("compilation failed")
         if "__doc__" in code.co_names:
             self.help = code.co_consts[0]
 
