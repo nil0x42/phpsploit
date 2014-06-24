@@ -33,6 +33,7 @@ from os import linesep as os_linesep
 
 import ui.output
 from ..color import colorize, decolorize
+from core import session
 
 
 class Stdout:
@@ -143,13 +144,14 @@ def process_tags(line):
     TAGS = [('%BoldBlue',   '[*] '),  # INFO
             ('%BoldRed',    '[!] '),  # ERROR
             ('%BoldPink',   '[?] '),  # QUESTION
-            ('%BoldYellow', '[-] ')]  # WARNING
+            ('%BoldYellow', '[-] '),  # WARNING
+            ('%BoldBlack',  '[#] ')]  # DEBUG
 
     # return the line as it is if untagged
     for index, tag in enumerate(TAGS):
         if line.startswith(tag[1]):
             break
-        if index + 1 == len(TAGS):
+        if index == (len(TAGS) - 1):
             return line
 
     # remove dulpicate tags >>> "[!] [!] Foo" -> "[!] Foo"
