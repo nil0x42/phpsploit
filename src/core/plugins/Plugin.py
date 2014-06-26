@@ -39,7 +39,7 @@ class Plugin:
 
         # category
         category = os.path.basename(os.path.dirname(path))
-        self.category = category.replace(" ", "_").capitalize()
+        self.category = category.replace("_", " ").capitalize()
 
         # script
         try:

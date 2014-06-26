@@ -741,6 +741,7 @@ class Shell(shnake.Shell):
         if tunnel:
             for category in plugins.categories():
                 items = [p for p in plugins.values() if p.category == category]
+                items = [p.name for p in items]
                 # rescale maxLength in case of longer plugin names
                 maxLength = max(maxLength, len(max(items, key=len)))
                 help += [(category + ' Plugins', items)]
