@@ -7,7 +7,7 @@ import core
 import objects
 
 from datatypes import ByteSize, Path, Executable, WebBrowser
-from datatypes import Interval, PhpCode, Proxy, Url
+from datatypes import Interval, PhpCode, Proxy, Url, Boolean
 
 DEFAULT_HTTP_USER_AGENT = "file://"+core.basedir+"data/user_agents.lst"
 
@@ -41,6 +41,7 @@ class Settings(objects.MetaDict):
         self.TMPPATH = "%%DEFAULT%%"
         self.SAVEPATH = "%%DEFAULT%%"
         self.CACHE_SIZE = "1 MiB"
+        self.VERBOSITY = False
 
         # Tunnel link opener
         self.TARGET = None
@@ -118,6 +119,9 @@ class Settings(objects.MetaDict):
         if value == "%%DEFAULT%%":
             value = tempfile.gettempdir()
         return Path(value, mode="drw")
+
+    def _set_VERBOSITY(self, value):
+        return Boolean(value)
 
     def _set_CACHE_SIZE(self, value):
         return ByteSize(value)

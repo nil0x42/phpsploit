@@ -33,10 +33,6 @@ class Shell(shnake.Shell):
 
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
-        # update plugins (XXX: this action is greedy)
-        # if tunnel:
-        #     plugins.reload()
-
         # Reset backlog before each command except backlog
         if len(argv) and argv[0] != "backlog":
             self.stdout.backlog = ""

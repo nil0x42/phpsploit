@@ -33,7 +33,6 @@ from os import linesep as os_linesep
 
 import ui.output
 from ..color import colorize, decolorize
-from core import session
 
 
 class Stdout:
