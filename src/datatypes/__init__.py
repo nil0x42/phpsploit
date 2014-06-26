@@ -45,6 +45,7 @@ PhpSploit dedicated datatypes obey the following conventions:
 """
 
 from .ByteSize    import ByteSize
+from .Boolean     import Boolean
 from .Path        import Path
 from .Executable  import Executable
 from .WebBrowser  import WebBrowser
