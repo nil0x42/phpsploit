@@ -55,7 +55,7 @@ def readonly_settings(*decorator_args):
             # execute decorated function
             retval = function(*args, **kwargs)
             # restore protected settings
-            for name, value in protected_settings:
+            for name, value in protected_settings.items():
                 session.Conf[name] = value
             return retval
 
