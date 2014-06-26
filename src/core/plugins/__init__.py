@@ -10,7 +10,9 @@ import re
 
 import core
 import objects
+from core import session
 from datatypes import Path
+from decorators import readonly_settings
 
 from .Plugin import Plugin
 from .exceptions import InvalidPlugin, UnloadablePlugin
@@ -27,8 +29,12 @@ class Plugins(objects.MetaDict):
         self.current_plugin = None
         super().__init__()
 
-    def reload(self):
+    @readonly_settings("VERBOSITY")
+    def reload(self, verbose=False):
         """Reload the plugins list"""
+        # if is backed up anyway bo readonly_settings decorator
+        if verbose:
+            session.Conf.VERBOSITY = 10
         self.clear()
         categories = self._load_categories()
         self._load_plugins(categories)
@@ -69,7 +75,7 @@ class Plugins(objects.MetaDict):
         """
         category_dirs = []
         for root_dir in self.root_dirs:
-            category_dirs += self._list_path_dirs(root_dir)
+            category_dirs += self._list_path_dirs(root_dir, type="categpry")
 
         categories = {}
         for basename, abspath in category_dirs:
@@ -87,7 +93,7 @@ class Plugins(objects.MetaDict):
         """
         for cat_name, cat_paths in categories.items():
             for cat_path in cat_paths:
-                cat_elems = self._list_path_dirs(cat_path)
+                cat_elems = self._list_path_dirs(cat_path, type="plugin")
                 for basename, abspath in cat_elems:
                     if basename in (list(self.keys()) + self.blacklist):
                         continue
@@ -99,7 +105,7 @@ class Plugins(objects.MetaDict):
                     except InvalidPlugin as e:
                         print("[-] Invalid Plugin: %s" % e)
 
-    def _list_path_dirs(self, root_dir):
+    def _list_path_dirs(self, root_dir, type="plugin"):
         """Returns a list of tuples representing a plugin directory.
 
         Each tuple is in the form: (basename, abspath)
@@ -109,16 +115,26 @@ class Plugins(objects.MetaDict):
         [("ls", "/plugins/system/ls"), ("pwd", "/plugins/system/pwd")]
 
         """
+        errmsg = "Bad %s path" % type
+        pattern = "^[a-zA-Z0-9_]+$"
         elems = []
         for basename in os.listdir(root_dir):
             try:
                 abspath = Path(root_dir, basename, mode='drx')()
             except:
+                if not basename.startswith("README"):
+                    path = os.path.truepath(root_dir, basename)
+                    if os.path.isdir(path):
+                        reason = "Permission denied"
+                    else:
+                        reason = "Not a directory"
+                    self._log("%s: «%s»: %s" % (errmsg, path, reason))
                 continue
-            if re.match("^[a-zA-Z0-9_]+$", basename):
+            if re.match(pattern, basename):
                 elems.append((basename, abspath))
             else:
-                print("[-] Ingored plugin path '%s': bad directory name")
+                reason = "Directory don't match '%s'" % pattern
+                self._log("%s: «%s»: %s" % (errmsg, path, reason))
         return elems
 
 
