@@ -89,6 +89,11 @@ class Stdout:
         elif line.endswith('\n'):
             line = line[:-1] + os_linesep
 
+        # special case: debug tag is only printed if VERBOSITY is True
+        from core import session
+        if line.startswith("[#] ") and not session.Conf.VERBOSITY():
+            return
+
         line = process_tags(line)  # handle tagged lines coloration
 
         # Write line to stdout, and it's decolorized version on backlog
