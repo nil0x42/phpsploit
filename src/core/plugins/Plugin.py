@@ -1,10 +1,11 @@
 import os
 import sys
 import importlib
+import traceback
 
 from datatypes import Path
 
-from .exceptions import InvalidPlugin, UnloadablePlugin
+from .exceptions import BadPlugin
 
 
 class Plugin:
@@ -23,19 +24,17 @@ class Plugin:
     """
 
     def __init__(self, path):
-        if path.endswith("/"):
+        if path.endswith(os.sep) or path.endswith("/"):
             path = path[:-1]
-
-        # name
+        self.path = path
         self.name = os.path.basename(path)
 
-        # path
-        self.path = path
-
         try:
-            self.path = Path(path, mode='drx')()
+            Path(path, mode='drx')()
         except ValueError as e:
-            raise InvalidPlugin(self.name + ": " + e)
+            print("[#] Couldn't load plugin: «%s»" % self.path)
+            print("[#]     Plugin directory error: %s" % e)
+            raise BadPlugin
 
         # category
         category = os.path.basename(os.path.dirname(path))
@@ -43,18 +42,25 @@ class Plugin:
 
         # script
         try:
-            self.script = Path(path, "plugin.py", mode='fr').read()
-        except:
-            raise UnloadablePlugin("file not found")
+            self.script = Path(self.path, "plugin.py", mode='fr').read()
+        except ValueError as e:
+            print("[#] Couldn't load plugin: «%s»" % self.path)
+            print("[#]     File error on plugin.py: %s" % e)
+            raise BadPlugin
         if not self.script.strip():
-            raise UnloadablePlugin("file is empty")
+            print("[#] Couldn't load plugin: «%s»" % self.path)
+            print("[#]     File plugin.py is empty")
+            raise BadPlugin
 
         # help
         self.help = ""
         try:
             code = compile(self.script, "", "exec")
-        except SyntaxError as e:
-            raise UnloadablePlugin("compilation failed")
+        except BaseException as e:
+            e = traceback.format_exception(type(e), e, e.__traceback__)
+            print("[#] Couldn't compile plugin: «%s»" % self.path)
+            print("[#] " + "\n[#] ".join("".join(e).splitlines()))
+            raise BadPlugin
         if "__doc__" in code.co_names:
             self.help = code.co_consts[0]
 
@@ -64,16 +70,13 @@ class Plugin:
             ExecPlugin(self)
         except KeyboardInterrupt:
             raise KeyboardInterrupt
-        except:
-            etype = str(sys.exc_info()[0])
-            etype = etype[(etype.find('.') + 1):-2]
+        except SystemExit:
             evalue = str(sys.exc_info()[1])
-            if etype == 'SystemExit':
-                if evalue:
-                    print(evalue)
-            else:
-                print('[-] An error has occured launching the plugin')
-                print("[-] %s : %s" % (etype, evalue))
+            if evalue:
+                print(evalue)
+        except BaseException as err:
+            print("[-] An error occured while launching the plugin:")
+            raise err
 
 
 class ExecPlugin:

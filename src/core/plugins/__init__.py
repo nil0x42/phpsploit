@@ -15,7 +15,7 @@ from datatypes import Path
 from decorators import readonly_settings
 
 from .Plugin import Plugin
-from .exceptions import InvalidPlugin, UnloadablePlugin
+from .exceptions import BadPlugin
 
 
 class Plugins(objects.MetaDict):
@@ -34,10 +34,15 @@ class Plugins(objects.MetaDict):
         """Reload the plugins list"""
         # if is backed up anyway bo readonly_settings decorator
         if verbose:
-            session.Conf.VERBOSITY = 10
+            session.Conf.VERBOSITY = True
         self.clear()
+        self.errors = 0
         categories = self._load_categories()
         self._load_plugins(categories)
+        if self.errors and not session.Conf.VERBOSITY():
+            msg = "[-] Plugin loader: %d error(s) found (%s)"
+            info = "use `corectl reload-plugins` for more infos"
+            print(msg % (self.errors, info))
 
     def categories(self):
         """Get a list of existing plugin category names"""
@@ -75,7 +80,7 @@ class Plugins(objects.MetaDict):
         """
         category_dirs = []
         for root_dir in self.root_dirs:
-            category_dirs += self._list_path_dirs(root_dir, type="categpry")
+            category_dirs += self._list_path_dirs(root_dir, type="category")
 
         categories = {}
         for basename, abspath in category_dirs:
@@ -99,11 +104,8 @@ class Plugins(objects.MetaDict):
                         continue
                     try:
                         self[basename] = Plugin(abspath)
-                    except UnloadablePlugin as e:
-                        msg = "«%splugin.py»: %s" % (abspath, e)
-                        print("[-] Unloadable Plugin: %s" % msg)
-                    except InvalidPlugin as e:
-                        print("[-] Invalid Plugin: %s" % e)
+                    except BadPlugin:
+                        self.errors += 1
 
     def _list_path_dirs(self, root_dir, type="plugin"):
         """Returns a list of tuples representing a plugin directory.
@@ -128,13 +130,15 @@ class Plugins(objects.MetaDict):
                         reason = "Permission denied"
                     else:
                         reason = "Not a directory"
-                    self._log("%s: «%s»: %s" % (errmsg, path, reason))
+                    print("[#] %s: «%s»: %s" % (errmsg, path, reason))
+                    self.errors += 1
                 continue
             if re.match(pattern, basename):
                 elems.append((basename, abspath))
             else:
                 reason = "Directory don't match '%s'" % pattern
-                self._log("%s: «%s»: %s" % (errmsg, path, reason))
+                print("[#] %s: «%s»: %s" % (errmsg, path, reason))
+                self.errors += 1
         return elems
 
 
