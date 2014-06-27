@@ -27,9 +27,9 @@ when writting to the backlog.
 """
 
 import sys
+import os
 import re
 from io import StringIO
-from os import linesep as os_linesep
 
 import ui.output
 from ..color import colorize, decolorize
@@ -68,6 +68,8 @@ class Stdout:
         # are colors supported ?
         self._has_colors = ui.output.colors()
 
+        self._write_lock = False
+
     def __del__(self):
         """Restore the original sys.stdout on Wrapper deletion"""
         self._backlog.close()
@@ -85,14 +87,22 @@ class Stdout:
         """Process individual line morphing, and write it"""
         # Process per platform newline transformation
         if line.endswith('\r\n'):
-            line = line[:-2] + os_linesep
+            line = line[:-2] + os.linesep
         elif line.endswith('\n'):
-            line = line[:-1] + os_linesep
+            line = line[:-1] + os.linesep
 
         # special case: debug tag is only printed if VERBOSITY is True
+        # NOTE: considering that the python print() function does another
+        #       write() to add line separator, we need a self._write_lock
+        #       canary to block it if the previous message display aborted.
         from core import session
         if line.startswith("[#] ") and not session.Conf.VERBOSITY():
+            self._write_lock = True
             return
+        if self._write_lock:
+            self._write_lock = False
+            if line == os.linesep:
+                return
 
         line = process_tags(line)  # handle tagged lines coloration
 
