@@ -131,6 +131,8 @@ if opt['source']:
         print()
         parser.error("%r: couldn't read source file." % opt['source'])
 
+interface.init()
+
 if opt['eval']:
     interface.interpret(opt['eval'])
 

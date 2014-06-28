@@ -31,11 +31,11 @@ class Shell(shnake.Shell):
     def __init__(self):
         super().__init__()
 
-    def cmdloop(self, intro=None):
+    def init(self):
+        """phpsploit interface init"""
         # load phpsploit plugins list
         plugins.blacklist = self.get_names(self, "do_")
         plugins.reload(verbose=False)
-        super().cmdloop(intro)
 
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
