@@ -31,6 +31,12 @@ class Shell(shnake.Shell):
     def __init__(self):
         super().__init__()
 
+    def cmdloop(self, intro=None):
+        # load phpsploit plugins list
+        plugins.blacklist = self.get_names(self, "do_")
+        plugins.reload(verbose=False)
+        super().cmdloop(intro)
+
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
         # Reset backlog before each command except backlog
@@ -106,7 +112,7 @@ class Shell(shnake.Shell):
     ####################
     # COMMAND: corectl #
     def complete_corectl(self, text, *ignored):
-        keys = ["stack-traceback"]
+        keys = ["stack-traceback", "reload-plugins"]
         return [x for x in keys if x.startswith(text)]
 
     def do_corectl(self, argv):
@@ -145,9 +151,12 @@ class Shell(shnake.Shell):
             except:
                 e = "[-] Exception stack is empty"
             print(e)
-            return
 
-        return self.interpret("help corectl")
+        elif argv[1] == "reload-plugins":
+            plugins.reload(verbose=True)
+
+        else:
+            self.interpret("help corectl")
 
     ####################
     # COMMAND: history #
@@ -225,9 +234,6 @@ class Shell(shnake.Shell):
 
         else:
             tunnel.open()  # it raises exception if fails
-            # update plugins list
-            plugins.blacklist = self.get_names(self, "do_")
-            plugins.reload()
 
     ##################
     # COMMAND: clear #
@@ -634,7 +640,7 @@ class Shell(shnake.Shell):
     ####################
     # COMMAND: backlog #
     def do_backlog(self, argv):
-        """Open last command's output with text editor
+        """Open last output with text editor
 
         SYNOPSIS:
             backlog

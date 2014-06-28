@@ -46,10 +46,12 @@ class Plugin:
         except ValueError as e:
             print("[#] Couldn't load plugin: «%s»" % self.path)
             print("[#]     File error on plugin.py: %s" % e)
+            print("[#] ")
             raise BadPlugin
         if not self.script.strip():
             print("[#] Couldn't load plugin: «%s»" % self.path)
             print("[#]     File plugin.py is empty")
+            print("[#] ")
             raise BadPlugin
 
         # help
@@ -60,6 +62,7 @@ class Plugin:
             e = traceback.format_exception(type(e), e, e.__traceback__)
             print("[#] Couldn't compile plugin: «%s»" % self.path)
             print("[#] " + "\n[#] ".join("".join(e).splitlines()))
+            print("[#] ")
             raise BadPlugin
         if "__doc__" in code.co_names:
             self.help = code.co_consts[0]
