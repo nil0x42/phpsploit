@@ -103,29 +103,41 @@ class Shell(shnake.Shell):
         else:
             exit()
 
-    ##################
-    # COMMAND: debug #
-    def complete_debug(self, text, *ignored):
-        keys = ["traceback"]
+    ####################
+    # COMMAND: corectl #
+    def complete_corectl(self, text, *ignored):
+        keys = ["stack-traceback"]
         return [x for x in keys if x.startswith(text)]
 
-    def do_debug(self, argv):
-        """Core debugging tools
+    def do_corectl(self, argv):
+        """Advanced core debugging utils
 
         SYNOPSIS:
-            debug
-            debug traceback
+            corectl <TOOL>
 
-        DESCRIPTION:
-            A command designed to show additionnal informations,
-            for core developpement and debugging purposes.
+        CORECTL TOOLS:
+        --------------
 
-            > debug traceback
-            Display last python exception's full stack trace to stdout.
+        stack-traceback
+            Print the full track trace of last python exception.
+
+            On the phpsploit framework, error message (the ones that
+            start with a red tag '[!]') are usually the result of
+            a python exception. This command may be useful for
+            debugging purposes.
+
+        reload-plugins
+            Reload all phpsploit plugins.
+
+            Plugins are loaded at framework start, and this command
+            is apricable for phpsploit plugin developpers, for
+            updating plugins list without restarting the whole
+            framework on each plugin line edition.
+
         """
         argv.append('')
 
-        if argv[1] == "traceback":
+        if argv[1] == "stack-traceback":
             try:
                 e = self.last_exception
                 e = traceback.format_exception(type(e), e, e.__traceback__)
@@ -135,7 +147,7 @@ class Shell(shnake.Shell):
             print(e)
             return
 
-        return self.interpret("help debug")
+        return self.interpret("help corectl")
 
     ####################
     # COMMAND: history #
