@@ -24,7 +24,30 @@ AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
+import sys
 import base64
+
+from api import plugin
+from api import server
+from api import utils
+
+
+if len(plugin.argv) != 2:
+    sys.exit(plugin.help)
+
+relative_path = plugin.argv[1]
+absolute_path = server.path.abspath(relative_path)
+
+if relative_path.endswith(server.path.separator):
+    sys.exit(plugin.help)
+
+request = server.Request()
+request.payload = "payload.php"
+
+request.send(FILE=absolute_path)
+
+#############################################################################
+#############################################################################
 
 if self.argc != 2:
     api.exit(self.help)
