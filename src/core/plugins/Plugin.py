@@ -36,28 +36,24 @@ class Plugin:
             print("[#]     Plugin directory error: %s" % e)
             raise BadPlugin
 
-        # category
         category = os.path.basename(os.path.dirname(path))
         self.category = category.replace("_", " ").capitalize()
 
-        # script
+        self.help = ""
         try:
-            self.script = Path(self.path, "plugin.py", mode='fr').read()
+            script = Path(self.path, "plugin.py", mode='fr').read()
         except ValueError as e:
             print("[#] Couldn't load plugin: «%s»" % self.path)
             print("[#]     File error on plugin.py: %s" % e)
             print("[#] ")
             raise BadPlugin
-        if not self.script.strip():
+        if not script.strip():
             print("[#] Couldn't load plugin: «%s»" % self.path)
             print("[#]     File plugin.py is empty")
             print("[#] ")
             raise BadPlugin
-
-        # help
-        self.help = ""
         try:
-            code = compile(self.script, "", "exec")
+            code = compile(script, "", "exec")
         except BaseException as e:
             e = traceback.format_exception(type(e), e, e.__traceback__)
             print("[#] Couldn't compile plugin: «%s»" % self.path)
