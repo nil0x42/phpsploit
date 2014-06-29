@@ -94,7 +94,7 @@ class Request:
         env['WRITEABLE_TMPDIR'] = choose(['WRITEABLE_TMPDIR'])
 
         env["PATH_SEP"] = '\\'
-        if env["PATH_SEP"].startswith('/'):
+        if env["HOME"].startswith('/'):
             env["PATH_SEP"] = '/'
 
         env["PLATFORM"] = choose(['OS', 'PHP_OS'], 'unknow').split()[0].lower()
@@ -104,4 +104,6 @@ class Request:
             else:
                 env["PLATFORM"] = "unix"
 
-        return(env)
+        env["PWD"] = env["HOME"]
+
+        return env
