@@ -41,6 +41,12 @@ absolute_path = server.path.abspath(relative_path)
 if relative_path.endswith(server.path.separator):
     sys.exit(plugin.help)
 
+payload = server.payload.Payload("payload.php")
+
+try:
+    payload.send(FILE=absolute_path)
+except server.payload.PayloadError as err
+
 request = server.Request()
 request.payload = "payload.php"
 

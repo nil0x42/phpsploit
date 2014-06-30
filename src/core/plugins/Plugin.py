@@ -64,7 +64,6 @@ class Plugin:
             self.help = code.co_consts[0]
 
     def run(self, argv):
-
         try:
             ExecPlugin(self)
         except KeyboardInterrupt:

@@ -694,7 +694,7 @@ class Shell(shnake.Shell):
             """return the docstring lines list of specific command"""
             # try to get the doc from the plugin method
             try:
-                doc = plugins[cmdName].help
+                doc = plugins[cmd].help
             except:
                 try:
                     doc = getattr(self, 'do_' + cmd).__doc__

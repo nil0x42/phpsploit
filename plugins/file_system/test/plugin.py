@@ -8,5 +8,6 @@ AUTHOR:
 """
 
 from api import plugin
+from api import server
 
 time.sleep(42)
