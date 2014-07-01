@@ -1,3 +1,2 @@
-from .plugin import Plugin
-
-plugin = Plugin()
+from . import server
+from .plugin import plugin

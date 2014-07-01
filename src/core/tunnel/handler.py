@@ -792,7 +792,7 @@ class Request:
         if type(response).__name__ != 'dict':
             raise ResponseError('Decoded response is not a dict()')
         # then check it is in the good format,
-        # aka {'__RESULT__':'DATA'} OR {'__ERROR__':'ERR'}
+        # aka {'__RESULT__':'DATA'} OR {'__ERROR__': 'ERR'}
         if list(response.keys()) == ['__RESULT__']:
             self.response = response['__RESULT__']
         elif list(response.keys()) == ['__ERROR__']:

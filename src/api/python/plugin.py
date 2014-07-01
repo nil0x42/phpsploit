@@ -46,3 +46,7 @@ class Plugin:
             if re.match("^[a-z]+$", attr) and not callable(obj):
                 result.append(attr)
         return result
+
+
+# instanciate plugin object (for use within python API)
+plugin = Plugin()
