@@ -45,10 +45,18 @@ class Tunnel:
                     else:
                         print("[-] Keeping previous environment")
 
+            session.Env.update(socket.environ)
             self.socket = socket
             self.hostname = socket.socket.hostname
+            print("[*] Shell obtained by PHP (%s -> %s:%s)"
+                  % (session.Env.CLIENT_ADDR, session.Env.ADDR,
+                     session.Env.PORT))
+            print()
+            print("Connected to %s server (%s)"
+                  % (session.Env.PLATFORM.capitalize(), session.Env.HOST))
+            print("running PHP %s through %s"
+                  % (session.Env.PHP_VERSION, session.Env.HTTP_SOFTWARE))
             self.active = True
-            session.Env.update(socket.environ)
             return True
 
         return False
