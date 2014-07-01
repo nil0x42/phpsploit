@@ -1,4 +1,4 @@
-"""Root Setuid backdoor exploitation
+"""Basic setuid exploit handler
 
 SYNOPSIS:
     suidroot generate <FILE>
