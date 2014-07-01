@@ -66,11 +66,11 @@ class UserDir:
         # put default config if not exists
         config = os.path.truepath(self.path, "config")
         if not os.path.isfile(config):
-            default_config = open(basedir+"data/config/config").read()
+            default_config = open(basedir + "data/config/config").read()
             open(config, "w").write(default_config)
 
         # overwrite ./README
-        readme = open(basedir+"data/config/README").read()
+        readme = open(basedir + "data/config/README").read()
         open(os.path.truepath(self.path, "README"), "w").write(readme)
 
         # mkdirs
