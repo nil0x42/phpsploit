@@ -40,7 +40,7 @@ class Tunnel:
                     question = ("TARGET hostname has changed, wish "
                                 "you reset environment ? (recommended)")
                     if ui.input.Expect(True)(question):
-                        session.Env = {}
+                        session.Env.clear()
                         print("[*] Environment correctly flushed")
                     else:
                         print("[-] Keeping previous environment")
@@ -48,6 +48,7 @@ class Tunnel:
             self.socket = socket
             self.hostname = socket.socket.hostname
             self.active = True
+            session.Env.update(socket.environ)
             return True
 
         return False

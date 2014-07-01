@@ -1,5 +1,4 @@
 import core
-from core import session
 from datatypes import Path
 
 from . import handler
@@ -20,7 +19,7 @@ class Request:
         socket.open(payload)
         self.socket = socket
         raw_vars = self._get_vars(socket.read())
-        session.Env = self._build_env(raw_vars)
+        self.environ = self._build_env(raw_vars)
         return True
 
     def close(self):
