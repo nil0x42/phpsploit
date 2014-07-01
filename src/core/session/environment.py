@@ -19,14 +19,14 @@ class Environment(objects.MetaDict):
 
     Example:
     >>> Env = Environment()
-    >>> Env.PLATFORM = "foo"
-    >>> Env.PLATFORM = "bar"
-    AttributeError: «PLATFORM» variable is read-only
-    >>> Env.PLATFORM
+    >>> Env.HOST = "foo"
+    >>> Env.HOST = "bar"
+    AttributeError: «HOST» variable is read-only
+    >>> Env.HOST
     'foo'
-    >>> del Env.PLATFORM
-    >>> Env.PLATFORM = "bar"
-    >>> Env.PLATFORM
+    >>> del Env.HOST
+    >>> Env.HOST = "bar"
+    >>> Env.HOST
     'bar'
 
     """
@@ -44,3 +44,9 @@ class Environment(objects.MetaDict):
 
     def _isattr(self, name):
         return re.match("^[A-Z][A-Z0-9_]+$", name)
+
+    def update(self, *args, **kws):
+        backup = self.readonly
+        self.readonly = []
+        super().update(*args, **kws)
+        self.readonly = backup
