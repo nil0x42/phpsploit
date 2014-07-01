@@ -1,37 +1,26 @@
 <?php
 
-ini_set('display_errors','1');
-ini_set('error_reporting',E_ALL^E_NOTICE);
+ini_set('display_errors', '1');
+ini_set('error_reporting' ,E_ALL ^ E_NOTICE);
 
-$Q = array();
-$R = array();
+$ARG = array();
 
-function error($name='', $arg1=False, $arg2=False, $arg3=False, $arg4=False)
+function error($a='', $b=False, $c=False, $d=False, $e=False)
 {
-    $args = array($name);
-
-    if($arg1 !== False)
-        $args[] = $arg1;
-    if($arg2 !== False)
-        $args[] = $arg2;
-    if($arg3 !== False)
-        $args[] = $arg3;
-    if($arg4 !== False)
-        $args[] = $arg4;
-
-    return(array('__ERROR__' => $args));
+    $err_msg = sprintf($a, $b, $c, $d, $e);
+    return (array('__ERROR__' => $err_msg));
 }
 
-function PAYLOAD()
+function payload()
 {
     %%PAYLOAD%%
 }
 
-$RESULT = PAYLOAD();
+$result = payload();
 
-if (@array_keys($RESULT) !== array('__ERROR__'))
-    $RESULT = array('__RESULT__' => $RESULT);
+if (@array_keys($result) !== array('__ERROR__'))
+    $result = array('__RESULT__' => $result);
 
-echo gzcompress(serialize($RESULT));
+echo gzcompress(serialize($result));
 
 ?>
