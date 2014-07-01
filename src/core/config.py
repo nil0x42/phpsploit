@@ -4,11 +4,14 @@ Browse, initialize and load PhpSploit framework user
 configuration directory and elements.
 
 """
+
 import os
 from . import basedir
 from datatypes import Path
 
+
 class UserDir:
+
     path = None
     choices = ["~/.config/phpsploit", "~/.phpsploit"]
 
@@ -45,8 +48,10 @@ class UserDir:
         # try to create it otherwise, raise err if fails
         if self.path is None:
             for choice in self.choices:
-                try: os.mkdir(choice)
-                except: pass
+                try:
+                    os.mkdir(choice)
+                except:
+                    pass
                 try:
                     self.path = Path(choice, mode="drw")
                     break
@@ -54,8 +59,7 @@ class UserDir:
                     if choice == self.choices[-1]:
                         raise e
 
-        self.fill() # finally, fill it with default content
-
+        self.fill()  # finally, fill it with default content
 
     def fill(self):
         """Add user configuration dir's default content."""
