@@ -41,6 +41,7 @@ $R['HOME'] = ($tmp != '$HOME' && $tmp) ? $tmp : '';
 $R['WEB_ROOT'] = $R['DOCUMENT_ROOT'];
 if (!$R['WEB_ROOT'])
     $R['WEB_ROOT'] = $R['APPL_PHYSICAL_PATH'];
+
 if (!$R['WEB_ROOT'])
 {
     $rel = $R['SCRIPT_NAME'];
@@ -61,6 +62,7 @@ if (!$R['WEB_ROOT'])
         }
     }
 }
+
 $R['WEB_ROOT'] = @realpath($R['WEB_ROOT']);
 
 

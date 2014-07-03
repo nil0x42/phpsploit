@@ -70,8 +70,7 @@ class Tunnel:
         assert self.socket
         request = handler.Request()
         request.open(raw_payload)
-        response = request.read()
-        return response
+        return request
 
 
 # instanciate main phpsploit tunnel as core.tunnel

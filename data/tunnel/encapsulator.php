@@ -3,12 +3,11 @@
 ini_set('display_errors', '1');
 ini_set('error_reporting', E_ALL ^ E_NOTICE);
 
-$ARG = array();
+$PHPSPLOIT = array();
 
 function error($a='', $b=False, $c=False, $d=False, $e=False)
 {
-    $err_msg = sprintf($a, $b, $c, $d, $e);
-    return (array('__ERROR__' => $err_msg));
+    return (array('__ERROR__' => sprintf($a, $b, $c, $d, $e)));
 }
 
 function payload()
