@@ -1,12 +1,28 @@
 <?
 
+// getPerms($abspath, $perms_type) (type => string):
+//      Returns the `human permissions string` of the given
+//      file path.
+//
+//      $perms_type (string) (default="unix")
+//          - If $perms_type is "unix", then a full permissions
+//          string like '-rwxr-xr-x' is returned.
+//          - Otherwise, the returned string will be related to
+//          current access of the file for user, in the following
+//          format: 'drwx'. This format tells if we actually can
+//          read/write/execute the file, by stupidly testing
+//          accesses.
+//
+//      $abspath (string):
+//          This variable should be an existing absolute file path
+
 !import(fileAccess)
 !import(dirAccess)
 
-function getPerms($absFilePath, $permstype='unix')
+function getPerms($abspath, $perms_format="unix")
 {
-    global $ENV;
-    $perms = @fileperms($absFilePath);
+    global $PHPSPLOIT;
+    $perms = @fileperms($abspath);
 
     // FILE TYPES:
     // s: socket
@@ -33,11 +49,11 @@ function getPerms($absFilePath, $permstype='unix')
     else
         $type = 'u';
 
-    if ((substr($absFilePath, -3) == $ENV['PATH_SEP'] . '..') ||
-        (substr($absFilePath, -2) == $ENV['PATH_SEP'] . '.'))
+    if ((substr($abspath, -3) == $PHPSPLOIT['PATH_SEP'] . '..') ||
+        (substr($abspath, -2) == $PHPSPLOIT['PATH_SEP'] . '.'))
         $type = 'd';
 
-    if ($permstype == 'unix'){
+    if ($perms_format == 'unix'){
         $info = "";
         // myself
         $info .= (($perms & 0x0100) ? 'r' : '-');
@@ -68,19 +84,19 @@ function getPerms($absFilePath, $permstype='unix')
 
         if ($type == '-')
         {
-            if (fileAccess($absFilePath, 'r'))
+            if (fileAccess($abspath, 'r'))
                 $Rperm = 'r';
             else
                 $Rperm = '-';
 
-            if (fileAccess($absFilePath, 'w'))
+            if (fileAccess($abspath, 'w'))
                 $Wperm = 'w';
             else
                 $Wperm = '-';
         }
         elseif ($type == 'd')
         {
-            if (dirAccess($absFilePath, 'r'))
+            if (dirAccess($abspath, 'r'))
                 $Rperm = 'r';
             else
                 $Rperm = '-';
