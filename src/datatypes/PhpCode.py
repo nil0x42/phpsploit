@@ -1,4 +1,6 @@
-import re, ui.output
+import re
+import ui.output
+
 
 class PhpCode(str):
     """Line of PHP Code. (extends str)
@@ -16,22 +18,21 @@ class PhpCode(str):
         pattern = ("^\s*(?:<\?(?:[pP][hH][pP])?\s+)?\s*("
                    "[^\<\s].{4,}?)\s*;?\s*(?:\?\>)?\s*$")
         # regex validates and parses the string
-        try: php = re.match(pattern, string).group(1)
-        except: raise ValueError('«%s» is not PHP code' %string)
+        try:
+            php = re.match(pattern, string).group(1)
+        except:
+            raise ValueError('«%s» is not PHP code' % string)
 
         return str.__new__(cls, php)
-
 
     def _raw_value(self):
         return super().__str__()
 
-
     def __call__(self):
         return self._raw_value()
 
-
     def __str__(self):
-        string = "<?php %s; ?>" %self.__call__()
+        string = "<?php %s; ?>" % self.__call__()
         # colored representation depends on pygments lib.
         try:
             import pygments
