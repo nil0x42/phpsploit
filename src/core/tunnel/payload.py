@@ -60,12 +60,12 @@ class Encode:
         self.rawlength = len(self.data)
         # patch to get the real urlencoded length of base64
         self.length = self.rawlength
-        self.length += self.data.count('/')*2
-        self.length += self.data.count('+')*2
-        self.length += self.data.count('=')*2
+        self.length += self.data.count('/') * 2
+        self.length += self.data.count('+') * 2
+        self.length += self.data.count('=') * 2
 
     def phpLoader(self):
-        return(self.decoder % self.data)
+        return self.decoder % self.data
 
 
 class Build:
@@ -103,7 +103,7 @@ class Build:
             if not compLine.startswith('!import('):
                 result += line + '\n'
             else:
-                libname = line[line.find('(')+1:line.find(')')]
+                libname = line[(line.find('(') + 1):line.find(')')]
                 if line.count('(') != 1 or line.count(')') != 1 or not libname:
                     raise BuildError('Invalid php import: ' + line.strip())
                 if libname not in self.loaded_phplibs:
@@ -112,7 +112,7 @@ class Build:
                         lib = Path(core.coredir, file_path).phpcode()
                     except ValueError:
                         raise BuildError('Php lib not found: ' + libname)
-                    result += self.loadphplibs(lib)+'\n'
+                    result += self.loadphplibs(lib) + '\n'
                     self.loaded_phplibs.append(libname)
         return result
 
@@ -122,5 +122,4 @@ class Build:
             line = line.strip()
             if line and not line.startswith("//"):
                 lines.append(line)
-        result = '\n'.join(lines)
-        return result
+        return '\n'.join(lines)
