@@ -147,6 +147,12 @@ class Shell(shnake.Shell):
             try:
                 e = self.last_exception
                 e = traceback.format_exception(type(e), e, e.__traceback__)
+                # a small patch for traceback from plugins, remove trash lines
+                for index, line in enumerate(e):
+                    if ('File "<frozen importlib._bootstrap>"' in line
+                            and '_call_with_frames_removed' in line):
+                        e = e[(index + 1):]
+                        break
                 e = colorize("%Red", "".join(e))
             except:
                 e = "[-] Exception stack is empty"
@@ -640,7 +646,7 @@ class Shell(shnake.Shell):
     ####################
     # COMMAND: backlog #
     def do_backlog(self, argv):
-        """Open last output with text editor
+        """Show last command's output with EDITOR
 
         SYNOPSIS:
             backlog
