@@ -9,7 +9,6 @@ from .exceptions import BuildError
 
 
 def py2php(python_var):
-    python_var = python_var.encode()
     serialized = phpserialize.dumps(python_var).decode()
     encoded = Encode(serialized).phpLoader()
     raw_php_var = 'unserialize(%s)' % encoded
@@ -36,7 +35,8 @@ class Encode:
     # else:          don't compress
     # NOTE: code is a bytes() object !
     def __init__(self, code, mode=''):
-        # code = bytes(code, "utf-8")
+        if isinstance(code, str):
+            code = bytes(code, "utf-8")
         self.compressed = False
         self.data = b''
         self.decoder = 'base64_decode("%s")'
