@@ -30,8 +30,8 @@ import base64
 from api import plugin
 from api import server
 from api import environ
-from api import utils
 
+# from core import session
 
 if len(plugin.argv) != 2:
     sys.exit(plugin.help)
@@ -48,26 +48,3 @@ payload['FILE'] = absolute_path
 payload.send()
 
 print(base64.b64decode(payload.response.encode()))
-
-#############################################################################
-#############################################################################
-
-if self.argc != 2:
-    api.exit(self.help)
-
-relPath = self.argv[1]
-absPath = rpath.abspath(relPath)
-
-if relPath.endswith(rpath.separator):
-    api.exit(self.help)
-
-http.send({'FILE' : absPath})
-
-errs = {'noexists': 'No such file or directory',
-        'notafile': 'Not a file',
-        'noread':   'Permission denied'}
-
-if http.error in errs:
-    api.exit(P_err+'%s: %s: %s' % (self.name, absPath, errs[http.error]))
-
-print base64.b64decode(http.response)
