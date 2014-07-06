@@ -30,7 +30,7 @@ class Environment(objects.MetaDict):
     'bar'
 
     """
-    readonly = ["ADDR", "HOST", "PHP_VERSION", "PATH_SEP",
+    readonly = ["ADDR", "CLIENT_ADDR", "HOST", "PHP_VERSION", "PATH_SEP",
                 "HTTP_SOFTWARE", "WEB_ROOT"]
 
     def __init__(self, value={}, readonly=[]):
