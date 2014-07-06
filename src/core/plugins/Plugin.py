@@ -64,6 +64,7 @@ class Plugin:
             self.help = code.co_consts[0]
 
     def run(self, argv):
+        from api import server
         try:
             ExecPlugin(self)
         except KeyboardInterrupt:
@@ -72,8 +73,10 @@ class Plugin:
             evalue = str(sys.exc_info()[1])
             if evalue:
                 print(evalue)
+        except server.payload.PayloadError as err:
+            print("[-] %s: %s" % (self.name, err))
         except BaseException as err:
-            print("[-] An error occured while launching the plugin:")
+            print("[-] %s: Plugin exception occured:" % self.name)
             raise err
 
 
