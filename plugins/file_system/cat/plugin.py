@@ -39,12 +39,12 @@ if len(plugin.argv) != 2:
 relative_path = plugin.argv[1]
 absolute_path = server.path.abspath(relative_path)
 
-if relative_path.endswith(environ['PATH_SEP']):
-    sys.exit(plugin.help)
+# if relative_path.endswith(environ['PATH_SEP']):
+#     sys.exit(plugin.help)
 
 payload = server.payload.Payload("payload.php")
 payload['FILE'] = absolute_path
 
-payload.send()
+response = payload.send()
 
-print(base64.b64decode(payload.response.encode()))
+print(response)

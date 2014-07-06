@@ -1,30 +1,30 @@
 <?php
 
-if (@file_exists($ARG['FILE']))
+if (@file_exists($PHPSPLOIT['FILE']))
 {
-    if ((@fileperms($ARG['FILE']) & 0x8000) == 0x8000)
+    if ((@fileperms($PHPSPLOIT['FILE']) & 0x8000) == 0x8000)
     {
-        if ($h = @fopen($ARG['FILE'], 'r'))
+        if ($h = @fopen($PHPSPLOIT['FILE'], 'r'))
         {
-            $size = @filesize($ARG['FILE']);
+            $size = @filesize($PHPSPLOIT['FILE']);
             if ($size == '0')
                 return '';
             else
             {
                 if ($data = fread($h, $size))
-                    return base64_encode($data);
+                    return $data;
                 else
-                    return error("%s: Permission denied", $ARG['FILE']);
+                    return error("%s: Permission denied", $PHPSPLOIT['FILE']);
             }
             fclose($h);
         }
         else
-            return error("%s: Permission denied", $ARG['FILE']);
+            return error("%s: Permission denied", $PHPSPLOIT['FILE']);
     }
     else
-        return error("%s: Not a file", $ARG['FILE']);
+        return error("%s: Not a file", $PHPSPLOIT['FILE']);
 }
 else
-    return error("%s: No such file or directory", $ARG['FILE']);
+    return error("%s: No such file or directory", $PHPSPLOIT['FILE']);
 
 ?>
