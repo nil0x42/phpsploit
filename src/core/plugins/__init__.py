@@ -39,7 +39,7 @@ class Plugins(objects.MetaDict):
         self.errors = 0
         categories = self._load_categories()
         self._load_plugins(categories)
-        if self.errors and not session.Conf.VERBOSITY():
+        if self.errors:
             msg = "[-] Plugin loader: %d error(s) found (%s)"
             info = "use `corectl reload-plugins` for more infos"
             print(msg % (self.errors, info))
