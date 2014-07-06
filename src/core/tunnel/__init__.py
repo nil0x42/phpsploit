@@ -16,6 +16,7 @@ import ui.input
 
 from . import handler
 from . import connector
+from . import payload
 
 
 class Tunnel:
@@ -24,6 +25,7 @@ class Tunnel:
         self.socket = None
         self.hostname = None
         self.active = False
+        self.payload = payload
 
     def __bool__(self):
         return self.active

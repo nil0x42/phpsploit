@@ -6,7 +6,7 @@ from core import session
 class ServerPath:
     winPathRegex = '[a-zA-Z]:\\\\'
 
-    def __init__(self, core, cmd):
+    def __init__(self):
         pass
 
     def _sanitize(self, path):

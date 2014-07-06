@@ -1,7 +1,5 @@
-import tunnel
 import objects
-from core import session
-from api import plugin
+from core import session, tunnel, plugins
 from datatypes import Path
 
 
@@ -17,13 +15,14 @@ class Payload(objects.MetaDict):
         self.response = None
         for key in self._unherited_env_vars:
             self[key] = session.Env[key]
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             self[key] = value
-        self.payload = Path(plugin.path, filename, mode='fr').phpcode()
+        plugin_path = plugins.current_plugin.path
+        self.payload = Path(plugin_path, filename, mode='fr').phpcode()
 
     def send(self, **kwargs):
         vars = dict(self)
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             vars[key] = value
         php_vars = self._php_vars_template % tunnel.payload.py2php(vars)
 

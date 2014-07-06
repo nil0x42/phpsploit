@@ -59,6 +59,7 @@ class Plugins(objects.MetaDict):
         # this allows api module imports to get triggering
         # plugin attributes.
         plugin = self[argv[0]]
+        plugin.argv = argv
         self.current_plugin = plugin
         try:
             plugin.run(argv)
