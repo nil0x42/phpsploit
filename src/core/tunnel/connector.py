@@ -102,6 +102,7 @@ class Request:
                 env["PLATFORM"] = "windows"
             else:
                 env["PLATFORM"] = "unix"
+        env["PLATFORM"] = env["PLATFORM"].strip().lower()
 
         env["PWD"] = env["HOME"]
 
