@@ -72,11 +72,12 @@ class Plugin:
         except SystemExit:
             evalue = str(sys.exc_info()[1])
             if evalue:
-                print(evalue)
+                print("[-] %s: %s" % (self.name, evalue))
         except server.payload.PayloadError as err:
             print("[-] %s: %s" % (self.name, err))
         except BaseException as err:
-            print("[-] %s: Plugin exception occured:" % self.name)
+            msg = "Python runtime error (exception occured)"
+            print("[-] %s: %s:" % (self.name, msg))
             raise err
 
 
