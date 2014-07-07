@@ -4,15 +4,11 @@ SYNOPSIS:
     cd <DIRECTORY>
 
 DESCRIPTION:
-    Move the PhpSploit's current working directory to the given
-    directory location.
-    Unlike manually changing the CWD environment variable to
-    the wanted location, this plugins directly checks on the
-    remote server if the new directory exists and is
-    reachable. For those reasons, and the fact that relative
-    paths can be specified, the method is a lot more safe
-    than manual CWD edition, which must be used only on the
-    rare cases you have no choice.
+    Change current working directory of phpsploit target.
+    - This plugin checks if the given path is remotely
+    reachable, then changes $PWD environment variable if
+    no errors were found.
+    - If run without argument, $HOME is used as location.
 
 EXAMPLES:
     > cd ..
@@ -23,31 +19,44 @@ EXAMPLES:
       - Move the the user's base directory
 
 ENVIRONMENT:
-    * CWD
-        The current PhpSploit working directory
+    * PWD
+        The current remote working directory
+
+WARNING:
+    - Manual edition of the $PWD environment variable without using
+    this plugin is usually a bad idea, because we take the risk
+    to set it to an invalid location, without the checks done by
+    this plugin.
+    - Therefore, in a few use cases, manual edition of the $PWD
+    variable is the inly choice.
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
-if self.argc > 2:
-    api.exit(self.help)
+import sys
 
-if self.argc == 1: relPath = rpath.home
-else:              relPath = self.argv[1]
+from api import plugin
+from api import server
+from api import environ
 
-absPath = rpath.abspath(relPath)
+if len(plugin.argv) > 2:
+    sys.exit(plugin.help)
 
-http.send({'DIR' : absPath})
+if len(plugin.argv) == 2:
+    relative_path = plugin.argv[1]
+else:
+    relative_path = environ['HOME']
 
-errs = {'noexists': 'No such file or directory',
-        'notadir':  'Not a directory',
-        'noright':  'Permission denied'}
+absolute_path = server.path.abspath(relative_path)
 
-if http.error in errs:
-    api.exit(P_err+'%s: %s: %s' % (self.name, absPath, errs[http.error]))
+payload = server.payload.Payload("payload.php")
+payload['DIR'] = absolute_path
 
-if http.response != 'ok':
-    api.exit(P_err+'Unknown error:\n'+str(http.response))
+response = payload.send()
 
-api.env['CWD'] = absPath
+if response != "ok":
+    sys.exit("Unexpected response: %r" % response)
+
+# change $PWD phpsploit environment variable
+environ['PWD'] = absolute_path

@@ -11,4 +11,6 @@ AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
-print( rpath.cwd )
+from api import environ
+
+print(environ['PWD'])
