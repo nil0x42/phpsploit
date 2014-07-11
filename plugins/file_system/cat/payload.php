@@ -12,7 +12,7 @@ if (@file_exists($PHPSPLOIT['FILE']))
             else
             {
                 if ($data = fread($h, $size))
-                    return $data;
+                    return base64_encode($data);
                 else
                     return error("%s: Permission denied", $PHPSPLOIT['FILE']);
             }

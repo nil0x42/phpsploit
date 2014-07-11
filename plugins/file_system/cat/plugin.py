@@ -29,9 +29,6 @@ import base64
 
 from api import plugin
 from api import server
-from api import environ
-
-# from core import session
 
 if len(plugin.argv) != 2:
     sys.exit(plugin.help)
@@ -39,12 +36,10 @@ if len(plugin.argv) != 2:
 relative_path = plugin.argv[1]
 absolute_path = server.path.abspath(relative_path)
 
-# if relative_path.endswith(environ['PATH_SEP']):
-#     sys.exit(plugin.help)
-
 payload = server.payload.Payload("payload.php")
 payload['FILE'] = absolute_path
 
 response = payload.send()
 
-print(response)
+decoded = base64.b64decode(response)
+sys.stdout.buffer.write(decoded)
