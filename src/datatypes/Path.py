@@ -28,7 +28,7 @@ class Path(str):
     '/home/user/.bashrc'
 
     """
-    def __new__(cls, *args, mode='', ext='txt'):
+    def __new__(cls, *args, mode='', filename='file.txt'):
         """Create a new path object.
 
         The file/dir path is determined by joining `args` as a single
@@ -36,24 +36,34 @@ class Path(str):
 
         virtual undefined path:
         -----------------------
-        If args are not specified, a fresh instance wich binds to a
-        temporary file is created. The file is generated with a random
-        file name which uses `ext` as file extension.
+        If no path arguments are specified, a fresh instance which
+        binds to a temporary file is created. A random directory
+        name is created into TMPPATH, and file name unherits the
+        `filename` class argument which defaults to 'file.txt'.
+        Example:
+            >>> from core import session
+            >>> session.Conf.TMPPATH = "/tmp"
+            >>> path = Path()
+            >>> print(path)
+            /tmp/Iej4iephaeci/file.txt
+            >>> path = Path(filename="code.php")
+            >>> print(path)
+            /tmp/baeW7OoChooF/code.php
 
         """
 
         # if not args, default to random tmp file path:
         if not args:
-            import string
-            import random
+            import uuid
             try:
                 from core import session
             except:
                 raise TypeError("Required 'path' argument(s) not found")
             # get random tmp file path
-            randStrChars = string.ascii_lowercase + string.digits
-            randStr = "".join(random.choice(randStrChars) for x in range(12))
-            path = session.Conf.TMPPATH() + randStr + "." + ext
+            rand_dir = str(uuid.uuid4()) + os.sep
+            filename = filename.replace(os.sep, "")  # remove '/' from filename
+            path = session.Conf.TMPPATH() + rand_dir + filename
+            os.makedirs(os.path.dirname(path))
             # create the file with empty content
             open(path, "w").close()
         else:
@@ -88,7 +98,7 @@ class Path(str):
 
         return str.__new__(cls, path)
 
-    def __init__(self, *args, mode='', ext='txt'):
+    def __init__(self, *args, mode='', filename='file.txt'):
         # If the datatype takes no arguments, then it is
         # a tmpfile Path() type.
         # Defining its boolean atribute self.tmpfile allows us to
@@ -111,6 +121,10 @@ class Path(str):
         # remove tmp file (if any)
         if self.tmpfile:
             os.unlink(self)
+            try:
+                os.rmdir(os.path.dirname(self))
+            except:
+                pass
 
     def edit(self):
         """Open the file with TEXTEDITOR for edition.
