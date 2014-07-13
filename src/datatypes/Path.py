@@ -149,31 +149,55 @@ class Path(str):
         except (ImportError, AssertionError):
             return False
 
-    def read(self):
+    def read(self, bin_mode=False):
         """Read path file contents.
 
-        NOTE:
         This method actually returns a string formatted for
         the current platform.
         It means that a file contents which uses '\r\n' line
         separators will be returned with '\n' separators
         instead, if it is opened through a GNU/Linux system.
 
-        """
-        lines = self.readlines()
-        data = os.linesep.join(lines)
-        return data
+        If you want to read data rawly, without newline treatment
+        a mentionned above, the bin_mode optionnal argument
+        should be set to True, in which case a bytes() buffer
+        containing file data is returned instead of str().
 
-    def write(self, data):
+        """
+        if bin_mode:
+            return open(self, 'rb').read()
+        else:
+            lines = self.readlines()
+            data = os.linesep.join(lines)
+            return data
+
+    def write(self, data, bin_mode=False):
         """Write `data` to the file path.
 
+        If bin_mode is True or data is a bytes() object,
+        data is rawly written to the file in binary mode.
+
+        Otherwise, data must be of type str(), and a pre treatmen
+        is applied to the buffer, replacing line separators with
+        system specific newline char(s).
+
         Note that newlines are automatically replaced by system
-        specific newline char(s).
+        specific newline char(s) is data is a string.
+        Otherwise, is data is a bytes() buffer, data is rawly written.
 
         """
-        lines = data.splitlines()
-        data = os.linesep.join(lines)
-        open(self, 'w').write(data)
+        if bin_mode or isinstance(data, bytes):
+            # if bin_mode, convert str() to bytes()
+            if isinstance(data, str):
+                data = data.encode()
+            # otherwise, try to convert to bytes()
+            elif not isinstance(data, bytes):
+                data = bytes(data)
+            open(self, 'wb').wite(data)
+        else:
+            lines = data.splitlines()
+            data = os.linesep.join(lines)
+            open(self, 'w').write(data)
 
     def readlines(self):
         """Get the list of file path lines.
