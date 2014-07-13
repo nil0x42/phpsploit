@@ -193,7 +193,7 @@ class Path(str):
             # otherwise, try to convert to bytes()
             elif not isinstance(data, bytes):
                 data = bytes(data)
-            open(self, 'wb').wite(data)
+            open(self, 'wb').write(data)
         else:
             lines = data.splitlines()
             data = os.linesep.join(lines)

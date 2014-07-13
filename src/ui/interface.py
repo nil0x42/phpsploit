@@ -138,7 +138,7 @@ class Shell(shnake.Shell):
             Plugins are loaded at framework start, and this command
             is apricable for phpsploit plugin developpers, for
             updating plugins list without restarting the whole
-            framework on each plugin line edition.
+            framework after each modification.
 
         """
         argv.append('')
