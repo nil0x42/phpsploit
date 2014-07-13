@@ -21,70 +21,44 @@ AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
-import os, base64
+import sys
+import base64
 
-api.needsenv('EDITOR')
+from api import plugin
+from api import server
 
-if self.argc != 2:
-    api.exit(self.help)
+from datatypes import Path
 
-relPath  = self.argv[1]
-absPath  = rpath.abspath(relPath)
-basename = rpath.basename(absPath)
+if len(plugin.argv) != 2:
+    sys.exit(plugin.help)
 
-if relPath.endswith(rpath.separator):
-    api.exit(self.help)
+absolute_path = server.path.abspath(plugin.argv[1])
+path_filename = server.path.basename(absolute_path)
 
-query = {'FILE' : absPath}
+reader = server.payload.Payload("reader.php")
+reader['FILE'] = absolute_path
 
-http.send(query, 'reader')
+# send the crafted payload to get remote file contents
+reader_response = reader.send()
 
-errs = {'notafile': 'Not a file',
-        'noread':   'Read permission denied'}
+file = Path(filename=path_filename)
 
-if http.error in errs:
-    api.exit(P_err+'%s: %s: %s' % (self.name, absPath, errs[http.error]))
-
-
-tmpDir = getpath(api.settings['TMPPATH'], api.randstring(12)+os.sep).name
-try: os.mkdir(tmpDir)
-except: api.exit(P_err+"Temporary directory creation failed: "+tmpDir)
-
-lAbsPath = tmpDir+basename
-content  = ''
-
-if http.response == 'NEWFILE':
-    print P_inf+"Creating new file: "+absPath
+if reader_response == "NEW_FILE":
+    print("[*] Creating new file: %s" % absolute_path)
 else:
-    content = base64.b64decode(http.response)
-    try: open(lAbsPath,'w').write(content)
-    except: api.exit(P_err+"Failed to create a local copy of the file at: "+lAbsPath)
-    print P_inf+"Opening file: "+absPath
+    # writting bytes() obj to file in binary mode
+    file.write(base64.b64decode(reader_response), bin_mode=True)
 
-if os.system(api.env['EDITOR']+' "'+lAbsPath+'"'):
-    print P_err+"Invalid 'EDITOR' environment variable"
+modified = file.edit()
+if not modified:
+    if reader_response == "NEW_FILE":
+        sys.exit("File creation aborted")
+    else:
+        sys.exit("The file was not modified")
 
-try: newContent = open(lAbsPath,'r').read()
-except: api.exit(P_inf+"File creation aborted")
+writer = server.payload.Payload("writer.php")
+writer['FILE'] = absolute_path
+writer['DATA'] = base64.b64encode(file.read(bin_mode=True)).decode()
 
-for fl in os.listdir(tmpDir):
-    os.remove(tmpDir+fl)
-os.rmdir(tmpDir)
-
-if newContent == content:
-    if http.response == 'NEWFILE':
-        api.exit(P_inf+"File creation aborted")
-    api.exit(P_inf+"The file was not modified")
-
-# XXX #
-query['CONTENT'] = base64.b64encode(newContent)
-
-http.send(query,'writer')
-
-if http.error == 'nowrite':
-    api.exit(P_err+self.name+': '+absPath+': Write permission denied')
-
-if http.response != 'ok':
-    api.exit(P_err+self.name+': Unknown error:\n'+str(http.response))
-
-print P_inf+"File correctly written on "+absPath
+writer_response = writer.send()
+print("[*] File correctly written at %s" % absolute_path)
