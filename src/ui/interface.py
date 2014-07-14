@@ -154,6 +154,8 @@ class Shell(shnake.Shell):
                     if ('File "<frozen importlib._bootstrap>"' in line
                             and '_call_with_frames_removed' in line):
                         e = e[(index + 1):]
+                        header = "Traceback (most recent call last):"
+                        e.insert(0, header + os.linesep)
                         break
                 e = colorize("%Red", "".join(e))
             except:
