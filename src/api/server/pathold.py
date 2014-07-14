@@ -4,10 +4,9 @@ from core import session
 
 
 class ServerPath:
-    winPathRegex = '[a-zA-Z]:\\\\'
 
     def __init__(self):
-        pass
+        self.__windows_path_matcher = '[a-zA-Z]:\\\\'
 
     def _sanitize(self, path):
         info = self._split(path)
@@ -38,7 +37,7 @@ class ServerPath:
             root = '/'
             slash = '/'
         # if win physical path (C:\)
-        elif re.match(self.winPathRegex, path):
+        elif re.match(self.__windows_path_matcher, path):
             platform = 'win'
             root = path[:3]
             slash = '\\'
@@ -64,7 +63,7 @@ class ServerPath:
     def isabs(self, path):
         if path.startswith('/') or path.startswith('\\'):
             return True
-        if re.match(self.winPathRegex, path):
+        if re.match(self.__windows_path_matcher, path):
             return True
         return False
 
