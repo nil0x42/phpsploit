@@ -108,7 +108,7 @@ class Build:
                     raise BuildError('Invalid php import: ' + line.strip())
                 if libname not in self.loaded_phplibs:
                     try:
-                        file_path = 'api/php/%s.php' % libname
+                        file_path = 'api/php-functions/%s.php' % libname
                         lib = Path(core.coredir, file_path).phpcode()
                     except ValueError:
                         raise BuildError('Php lib not found: ' + libname)
