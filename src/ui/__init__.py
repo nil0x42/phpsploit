@@ -48,6 +48,12 @@ Contents Preview / Examples:
 >>> interface.cmdloop()
 
 
+------------ ui.console -------------------
+
+>>> import ui.console
+
+>>> console = ui.console.Console()
+>>> console()
 
 ------------ ui.isatty --------------------
 

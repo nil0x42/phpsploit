@@ -1,5 +1,5 @@
 """PhpSploit shell interface.
-
+nt
 Unheriting the shnake's Shell class, the PhpSploit shell interface
 provides interactive use of commands.
 
@@ -112,7 +112,7 @@ class Shell(shnake.Shell):
     ####################
     # COMMAND: corectl #
     def complete_corectl(self, text, *ignored):
-        keys = ["stack-traceback", "reload-plugins"]
+        keys = ["stack-traceback", "reload-plugins", "python-console"]
         return [x for x in keys if x.startswith(text)]
 
     def do_corectl(self, argv):
@@ -142,6 +142,18 @@ class Shell(shnake.Shell):
             the plugins in order to be able to test their
             plugin modifications without having to restart the
             framework each time.
+
+        python-console
+            Run a python interpreter.
+
+            The python console interpreter is a good gateway
+            for deep debugging, or to get help about a phpsploit
+            module, class, object, such as the plugin developpers
+            API.
+            For help with the API, run the following commands inside
+            of the python console:
+            >>> import api
+            >>> help(api)
         """
         argv.append('')
 
@@ -164,6 +176,12 @@ class Shell(shnake.Shell):
 
         elif argv[1] == "reload-plugins":
             plugins.reload(verbose=True)
+
+        elif argv[1] == "python-console":
+            import ui.console
+            console = ui.console.Console()
+            console.banner = "Phpsploit corectl: python console interpreter"
+            console()
 
         else:
             self.interpret("help corectl")
