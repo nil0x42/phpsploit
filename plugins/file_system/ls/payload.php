@@ -33,7 +33,7 @@ function printLst($lsdir, $regex)
     return ($text);
 }
 
-$lsdir = $Q['TARGET'] . $Q['SEPARATOR'];
+$lsdir = $PHPSPLOIT['TARGET'] . $PHPSPLOIT['SEPARATOR'];
 $regex = '';
 $ERROR = '';
 
@@ -41,14 +41,15 @@ if (!dirAccess($lsdir,'r'))
 {
     if (is_dir($lsdir))
         $ERROR = error('noright',substr($lsdir,0,-1));
-    elseif($Q['PARSE'])
+    elseif($PHPSPLOIT['PARSE'])
     {
-        $lsdir = substr($Q['TARGET'], 0, strrpos($Q['TARGET'], ($Q['SEPARATOR']) + 1));
-        $regex = substr($Q['TARGET'], strrpos($Q['TARGET'], ($Q['SEPARATOR']) + 1));
+        $split = strrpos($PHPSPLOIT['TARGET'], $PHPSPLOIT['SEPARATOR']) + 1;
+        $lsdir = substr($PHPSPLOIT['TARGET'], 0, $split);
+        $regex = substr($PHPSPLOIT['TARGET'], $split);
     }
 }
 
-$dirname = (strstr(substr($lsdir, 0, -1), $Q['SEPARATOR']) === FALSE) ? $lsdir : substr($lsdir, 0, -1);
+$dirname = (strstr(substr($lsdir, 0, -1), $PHPSPLOIT['SEPARATOR']) === FALSE) ? $lsdir : substr($lsdir, 0, -1);
 
 if (dirAccess($lsdir, 'r'))
 {

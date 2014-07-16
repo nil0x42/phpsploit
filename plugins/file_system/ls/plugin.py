@@ -37,49 +37,55 @@ AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
-if self.argc > 2:
-    api.exit(self.help)
+import sys
 
-if self.argc == 1: relPath = rpath.cwd
-else:              relPath = self.argv[1]
+from api import plugin
+from api import server
+from api import environ
 
-absPath = rpath.abspath(relPath)
+from ui.color import colorize
 
-query = {'TARGET' : absPath, 'PARSE' : 1}
+for path in plugin.argv[1:] or [environ['PWD']]:
 
-if absPath == rpath.home or relPath.endswith(rpath.separator):
-    query['PARSE'] = 0
+    absolute_path = server.path.abspath(path)
 
-http.send(query)
 
-errs = {'nodir':   '%1: No such file or directory',
-        'noright': '%1: Permission denied',
-        'nomatch': '%1: No such elements matching '+quot('%2')}
+    lister = server.payload.Payload("payload.php")
+    lister['TARGET'] = absolute_path
+    lister['SEPARATOR'] = "/"
 
-if http.error in errs:
-    api.exit(P_err+self.name+': '+errs[http.error] , http.response)
+    # TODO: activate or deactivate PARSE?
+    # I don't see the point of this, why not remove PARSE altogether?
+    lister['PARSE'] = 1
 
-target,regex,lines = http.response
+    try:
+        response = lister.send()
+    except server.payload.PayloadError as e:
+        if e.args[0] == 'nodir':
+            sys.exit("cannot access %s: No such file or directory." % (path))
+        if e.args[0] == 'noright':
+            sys.exit("cannot open %s: Permission denied." % (path))
+        if e.args[0] == 'nomatch':
+            sys.exit("cannot find %s: No matching elements." % (path))
 
-data = {}
+    target, regex, lines = response[0], response[1], response[2]
+    lines = [[v for _, v in sorted(line.items())] for _, line in sorted(lines.items())]
 
-if [x for x in lines if x[2]+x[3]!='??']:
-    data['keys'] = ["Mode","Owner","Group","Size","Last Modified","Name"]
-    data['data'] = [[x[0],x[2],x[3],x[4],x[5],x[6]] for x in lines]
-else:
-    data['keys'] = ["Mode","Size","Last Modified","Name"]
-    data['data'] = [[x[1],x[4],x[5],x[6]] for x in lines]
+    if any(x[2]+x[3] != '??' for x in lines):
+        rows = sorted(([l[0],l[2],l[3],l[4],l[5],l[6]] for l in lines), key=lambda x: x[-1])
+        rows.insert(0, ["Mode","Owner","Group","Size","Last Modified","Name"])
+    else:
+        rows = sorted(([x[1],x[4],x[5],x[6]] for x in lines), key=lambda x: x[-1])
+        rows.insert(0, ["Mode","Size","Last Modified","Name"])
 
-data['sep'] = "    "
-data['sort'] = len(data['keys'])-1
+    print("Listing: %s" % path + (" (matching r'%s')" % regex if regex else ""))
 
-title = "Listing: "+target
-if regex: title+= " (matching "+regex+")"
+    widths = [max(map(len, col)) for col in zip(*rows)]
+    for i, row in enumerate(rows):
+        if i > 0:
+            if row[0].startswith('d'):
+                row[-1] = colorize("%BoldBlue", row[-1])
+            elif not row[0].startswith('-'):
+                row[-1] = colorize("%BoldPink", row[-1])
 
-print ''
-print title
-print '='*len(title)
-print ''
-print api.columnize(data)
-print ''
-
+        print("  ".join((val.ljust(width) for val, width in zip(row, widths))))
