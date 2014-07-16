@@ -6,7 +6,7 @@ import tempfile
 import core
 import objects
 
-from datatypes import ByteSize, Path, Executable, WebBrowser
+from datatypes import ByteSize, Path, ShellCmd, WebBrowser
 from datatypes import Interval, PhpCode, Proxy, Url, Boolean
 
 DEFAULT_HTTP_USER_AGENT = "file://"+core.basedir+"data/user_agents.lst"
@@ -161,7 +161,7 @@ class Settings(objects.MetaDict):
                 value = os.environ["EDITOR"]
             elif sys.platform.startswith("win"):
                 value = "notepad.exe"
-        return Executable(value)
+        return ShellCmd(value)
 
     def _set_BROWSER(self, value):
         if value == "%%DEFAULT%%":

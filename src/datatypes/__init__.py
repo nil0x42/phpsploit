@@ -22,7 +22,7 @@ PhpSploit dedicated datatypes obey the following conventions:
     <class 'tuple'> ==> (1.0, 10.0)
 
 * __call__()
-    Return an usable value. If dynamic, it must return one of the
+    Returns a usable value. If dynamic, it must return one of the
     possible values. In the case it is static, it returns the same as
     _raw_value().
     >>> val = Interval('1-10')
@@ -30,9 +30,9 @@ PhpSploit dedicated datatypes obey the following conventions:
     3.2
 
 * __str__()
-    Return a nice string representation of the object, it may include
-    ANSI colors, because anyway the PhpSploit framework's output
-    manager automagically strips them if they cannot be displayed.
+    Returns a nice string representation of the object, it may include
+    ANSI colors, because the PhpSploit framework's output manager
+    automagically strips them if they cannot be displayed anyways.
     >>> print(Interval('1-10'))
     1 <= x <= 10 (random interval)
 
@@ -47,9 +47,10 @@ PhpSploit dedicated datatypes obey the following conventions:
 from .ByteSize    import ByteSize
 from .Boolean     import Boolean
 from .Path        import Path
-from .Executable  import Executable
 from .WebBrowser  import WebBrowser
 from .Interval    import Interval
-from .PhpCode     import PhpCode
 from .Proxy       import Proxy
 from .Url         import Url
+from .Code        import Code
+from .PhpCode     import PhpCode
+from .ShellCmd    import ShellCmd

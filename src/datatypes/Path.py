@@ -129,7 +129,7 @@ class Path(str):
     def edit(self):
         """Open the file with TEXTEDITOR for edition.
 
-        This boolean method returns True if the file had been
+        This boolean method returns True if the file has been
         correctly edited, and its content changed.
 
         The method also fails if the file cannot be edited.
@@ -140,14 +140,20 @@ class Path(str):
             import subprocess
             import ui.output
             import ui.input
-            from core import session
             assert ui.isatty()
-            old = self.read()
-            subprocess.call([session.Conf.EDITOR(), self])
-            assert self.read() != old
-            return True
+            from core import session
+            import shlex
         except (ImportError, AssertionError):
             return False
+
+        # We use shlex not shnake because we need something naive.
+        # We don't want to handle redirection and other stuff.
+        args = shlex.split(session.Conf.EDITOR())
+        args.append(self)
+
+        old = self.read()
+        subprocess.call(args)
+        return self.read() != old
 
     def read(self, bin_mode=False):
         """Read path file contents.
