@@ -17,6 +17,9 @@ from decorators import readonly_settings
 from .Plugin import Plugin
 from .exceptions import BadPlugin
 
+DEFAULT_PLUGIN = Plugin(core.basedir +
+                        "data/plugin-sample/category_name/plugin_example")
+
 
 class Plugins(objects.MetaDict):
 
@@ -26,7 +29,7 @@ class Plugins(objects.MetaDict):
         self.root_dirs = []
         self.root_dirs.append(Path(core.basedir, "plugins", mode='drx'))
         self.root_dirs.append(Path(core.userdir, "plugins", mode='drx'))
-        self.current_plugin = None
+        self.current_plugin = DEFAULT_PLUGIN
         super().__init__()
 
     @readonly_settings("VERBOSITY")
@@ -64,7 +67,7 @@ class Plugins(objects.MetaDict):
         try:
             plugin.run(argv)
         finally:
-            self.current_plugin = None
+            self.current_plugin = DEFAULT_PLUGIN
 
     def _load_categories(self):
         """Load currently existing categories.
