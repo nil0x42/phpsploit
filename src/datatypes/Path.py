@@ -131,20 +131,11 @@ class Path(str):
 
         This boolean method returns True if the file has been
         correctly edited, and its content changed.
-
-        The method also fails if the file cannot be edited.
-        It may happen if stdin/stdout are not TTYs.
-
         """
-        try:
-            import subprocess
-            import ui.output
-            import ui.input
-            assert ui.isatty()
-            from core import session
-            import shlex
-        except (ImportError, AssertionError):
-            return False
+
+        from core import session
+        import subprocess
+        import shlex
 
         # We use shlex not shnake because we need something naive.
         # We don't want to handle redirection and other stuff.
