@@ -776,7 +776,7 @@ class Request:
         except:
             pass
 
-        response = response.decode()
+        response = response.decode(errors='ignore')
 
         # convert the response data into python variable
         try:
