@@ -54,9 +54,9 @@ for path in plugin.argv[1:] or [environ['PWD']]:
     lister['TARGET'] = absolute_path
     lister['SEPARATOR'] = "/"
 
-    # TODO: activate or deactivate PARSE?
-    # I don't see the point of this, why not remove PARSE altogether?
     lister['PARSE'] = 1
+    if absolute_path == environ['HOME'] or path.endswith(environ['PATH_SEP']):
+        lister['PARSE'] = 0
 
     try:
         response = lister.send()
