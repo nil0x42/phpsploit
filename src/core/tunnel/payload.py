@@ -8,6 +8,19 @@ from datatypes import Path
 from .exceptions import BuildError
 
 
+def phpserialize_recursive_dict_to_list(python_var):
+    if isinstance(python_var, dict):
+        if list(python_var.keys()) == list(range(len(python_var))):
+            python_var = [python_var[x] for x in python_var]
+    if isinstance(python_var, dict):
+        for x in python_var:
+            python_var[x] = phpserialize_recursive_dict_to_list(python_var[x])
+    if isinstance(python_var, list):
+        for x in range(len(python_var)):
+            python_var[x] = phpserialize_recursive_dict_to_list(python_var[x])
+    return python_var
+
+
 def py2php(python_var):
     serialized = phpserialize.dumps(python_var).decode()
     encoded = Encode(serialized).phpLoader()
@@ -18,13 +31,7 @@ def py2php(python_var):
 def php2py(raw_php_var):
     raw_php_var = raw_php_var.encode()
     python_var = phpserialize.loads(raw_php_var, decode_strings=True)
-    if type(python_var) is dict:
-        # The original python var could be a list instead of dict
-        # so, we try to convert it to list if it is possible
-        try:
-            python_var = phpserialize.dict_to_list(python_var)
-        except ValueError:
-            pass
+    python_var = phpserialize_recursive_dict_to_list(python_var)
     return python_var
 
 
