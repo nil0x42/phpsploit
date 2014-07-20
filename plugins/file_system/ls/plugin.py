@@ -39,16 +39,16 @@ AUTHOR:
 
 import sys
 
+from ui.color import colorize, decolorize
+
 from api import plugin
 from api import server
 from api import environ
 
-from ui.color import colorize
 
 for path in plugin.argv[1:] or [environ['PWD']]:
 
     absolute_path = server.path.abspath(path)
-
 
     lister = server.payload.Payload("payload.php")
     lister['TARGET'] = absolute_path
@@ -69,16 +69,28 @@ for path in plugin.argv[1:] or [environ['PWD']]:
             sys.exit("cannot find %s: No matching elements." % (path))
 
     target, regex, lines = response[0], response[1], response[2]
-    lines = [[v for _, v in sorted(line.items())] for _, line in sorted(lines.items())]
+    lines_items = sorted(lines.items())
+    lines = [[v for _, v in sorted(line.items())] for _, line in lines_items]
 
-    if any(x[2]+x[3] != '??' for x in lines):
-        rows = sorted(([l[0],l[2],l[3],l[4],l[5],l[6]] for l in lines), key=lambda x: x[-1])
-        rows.insert(0, ["Mode","Owner","Group","Size","Last Modified","Name"])
+    # if at least one owner/group is not '?', use unix-like formatter
+    if any((x[2] + x[3]) != '??' for x in lines):
+        rows_hdr = ["Mode", "Owner", "Group", "Size", "Last Modified", "Name"]
+        rows = ([l[0], l[2], l[3], l[4], l[5], l[6]] for l in lines)
+    # otherwise, use windows-like formatter
     else:
-        rows = sorted(([x[1],x[4],x[5],x[6]] for x in lines), key=lambda x: x[-1])
-        rows.insert(0, ["Mode","Size","Last Modified","Name"])
+        rows_hdr = ["Mode", "Size", "Last Modified", "Name"]
+        rows = ([x[1], x[4], x[5], x[6]] for x in lines)
 
-    print("Listing: %s" % path + (" (matching r'%s')" % regex if regex else ""))
+    # format rows the right way
+    rows = sorted(rows, key=(lambda elem: elem[-1]))
+    rows.insert(0, rows_hdr)
+    rows.insert(1, [("-" * len(elem)) for elem in rows_hdr])
+
+    # format and display output title
+    header = "Listing: %s" % target
+    if regex:
+        header += " (matching r'%s')" % colorize("%White", regex)
+    print("\n" + header + "\n" + ("=" * len(decolorize(header))) + "\n")
 
     widths = [max(map(len, col)) for col in zip(*rows)]
     for i, row in enumerate(rows):
@@ -87,5 +99,6 @@ for path in plugin.argv[1:] or [environ['PWD']]:
                 row[-1] = colorize("%BoldBlue", row[-1])
             elif not row[0].startswith('-'):
                 row[-1] = colorize("%BoldPink", row[-1])
-
         print("  ".join((val.ljust(width) for val, width in zip(row, widths))))
+
+    print()
