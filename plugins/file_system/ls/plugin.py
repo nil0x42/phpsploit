@@ -1,7 +1,7 @@
 """List directory contents
 
 SYNOPSIS:
-    ls [<REMOTE PATH>]
+    ls [<REMOTE PATH>] ...
 
 DESCRIPTION:
     List the files in given remote directory path
@@ -16,6 +16,9 @@ DESCRIPTION:
     want to list, so it disables the pattern feature mentionned
     above.
 
+    NOTE: If the plugin receives multiple arguments, each
+    one will be listed in the given order.
+
 WARNING:
     The 'ls' plugin gives permission informations about each
     listed file, in unix drwxrwxrwx mode. If the permission
@@ -28,13 +31,15 @@ EXAMPLES:
       - List any element in the current directory
     > ls ~
       - List any element in the user's home directory
-    > ls ..
+    > ls .. /home
       - List the path above the current working directory
+      - After that, list the '/home' directory.
     > ls D:\\*.ini
       - List any element in D:\\ whose names end with '.ini'
 
-AUTHOR:
+MAINTAINERS:
     nil0x42 <http://goo.gl/kb2wf>
+    Wannes Rombouts <https://github.com/wapiflapi>
 """
 
 import sys
