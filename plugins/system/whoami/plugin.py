@@ -14,4 +14,6 @@ AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
-print api.server['user']
+from api import environ
+
+print(environ['USER'])
