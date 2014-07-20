@@ -39,7 +39,7 @@ $ERROR = '';
 
 if (!dirAccess($lsdir,'r'))
 {
-    if (is_dir($lsdir))
+    if (@is_dir($lsdir))
         $ERROR = error('noright',substr($lsdir,0,-1));
     elseif($PHPSPLOIT['PARSE'])
     {
@@ -62,7 +62,7 @@ if (dirAccess($lsdir, 'r'))
 
 elseif (!$ERROR)
 {
-    if (is_dir($lsdir))
+    if (@is_dir($lsdir))
         return error('noright', $dirname);
     else
         return error('nodir', $dirname);
