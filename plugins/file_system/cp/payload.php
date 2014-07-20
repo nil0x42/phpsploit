@@ -2,45 +2,49 @@
 
 !import(fileAccess)
 
-$source      = $Q['SOURCE'];
-$destination = $Q['DESTINATION'];
+$src = $PHPSPLOIT['SRC'];
+$dst = $PHPSPLOIT['DST'];
 
+// check source file access and get source file's buffer
+if (!@file_exists($src))
+    return error("cannot stat '%s': No such file or directory", $src);
+if (!@is_file($src))
+    return error("cannot copy '%s': Not a regular file", $src);
+if (($buffer = @file_get_contents($src)) === False)
+    return error("cannot open '%s' for reading: Permission denied", $src);
 
-if (@file_exists($source)){
-    if ((@fileperms($source) & 0x8000) == 0x8000){
-        if ($h = @fopen($source,'r')){
-            $size = @filesize($source);
-            if (!($data = fread($h,$size))) return error('src_noread');
-            fclose($h);}
-        else return error('src_noread',$source);}
-    else return error('src_notafile',$source);}
-else return error('src_noexists',$source);
+// if dst is a directory, append source's basename to it.
+if (@is_dir($dst))
+{
+    if (substr($dst, -1) != $PHPSPLOIT['PATH_SEP'])
+        $dst .= $PHPSPLOIT['PATH_SEP'];
+    $dst .= basename($src);
+}
 
+// if destination does not exists, we don't care about FORCE option.
+if (!@file_exists($dst))
+{
+    $file = @fopen($dst, 'w');
+    if ($file !== False && @fwrite($file, $buffer) !== False)
+        return array($src, $dst);
+    $dir = substr($dst, 0, (strrpos($dst, $PHPSPLOIT['PATH_SEP']) + 1));
+    if (@is_dir($dir))
+        $msg = "Permission denied";
+    else
+        $msg = "No such file or directory";
+    return error("cannot create regular file '%s': %s", $dst, $msg);
+}
 
-if ((@fileperms($destination) & 0x4000) == 0x4000){
-    $dirname     = (substr($destination,-1) == $Q['SEPARATOR']) ? $destination : $destination.$Q['SEPARATOR'];
-    $destination = $dirname.basename($source);}
+// check destination file access
+if ((@fileperms($dst) & 0x8000) != 0x8000)
+    return error("cannot overwrite '%s': Not a regular file", $dst);
+if (!fileAccess($dst, 'w'))
+    return error("cannot create regular file '%s': Permission denied", $dst);
+if (!$PHPSPLOIT['FORCE'])
+    return error("cannot overwrite '%s' without '-f' (force) option", $dst);
 
-if (@file_exists($destination)){
-    if ((@fileperms($destination) & 0x8000) == 0x8000){
-        if (fileAccess($destination,'w')){
-            if ($Q['FORCE']){
-                if ($h = @fopen($destination,'w')){
-                    @fwrite($h,$data);
-                    @fclose($h);
-                    return array('ok',$destination);}
-                else return error('dst_nowrite',$destination);}
-            else return error('dst_exists',$destination);}
-        else return error('dst_nowrite',$destination);}
-    else return error('dst_notafile',$destination);}
-else{
-    if ($h = @fopen($destination,'w')){
-        @fwrite($h,$data);
-        @fclose($h);
-        return array('ok',$destination);}
-    else{
-        $dirname = substr($destination,0,strrpos($destination,$Q['SEPARATOR'])+1);
-        if ((@fileperms($dirname) & 0x4000) == 0x4000) return error('dst_nowrite',$destination);
-        else return error('dst_noexists',$destination);}}
-
-?>
+// try to write source buffer to destination file
+$file = @fopen($dst, 'w');
+if ($file !== False && @fwrite($file, $buffer) !== False)
+    return array($src, $dst);
+return error("cannot create regular file '%s': Permission denied", $dst);
