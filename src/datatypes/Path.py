@@ -127,7 +127,7 @@ class Path(str):
                 pass
 
     def edit(self):
-        """Open the file with TEXTEDITOR for edition.
+        """Open the file with EDITOR setting for edition.
 
         This boolean method returns True if the file has been
         correctly edited, and its content changed.
@@ -145,6 +145,18 @@ class Path(str):
         old = self.read()
         subprocess.call(args)
         return self.read() != old
+
+    def browse(self):
+        """Display the file with phpsploit's BROWSER setting.
+
+        NOTE: For the moment, the method always returns True,
+              therefore, it may chance in the future.
+        """
+
+        from core import session
+
+        session.Conf.BROWSER(call=False).open(self)
+        return True
 
     def read(self, bin_mode=False):
         """Read path file contents.
