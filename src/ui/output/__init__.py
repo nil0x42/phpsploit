@@ -17,13 +17,13 @@ Stuff:
     how many colors current output supports ?
 
 * size(): (tuple)
-    how many columns/lines current terminal has ?
+    return a tuple of terminal's current cols/rows
 
 * columns(): (int)
-    how many columns ?
+    return the number of columns current tty have
 
 * lines(): (int)
-    how many lines ?
+    return the number of lines current tty have
 
 """
 
