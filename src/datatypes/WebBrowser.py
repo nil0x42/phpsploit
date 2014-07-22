@@ -22,9 +22,9 @@ class WebBrowser(str):
             raise ValueError("available browsers: %s." % fmt)
         try:
             if not name:
-                webbrowser.get()
+                name = webbrowser.get().name
             else:
-                webbrowser.get(name)
+                name = webbrowser.get(name).name
         except:
             raise ValueError("Can't bind to «%s» browser" % name)
         return str.__new__(cls, name)
