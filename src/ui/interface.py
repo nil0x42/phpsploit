@@ -436,7 +436,8 @@ class Shell(shnake.Shell):
         """
         if len(argv) == 1:
             return self.interpret("help lrun")
-        subprocess.call(argv[1:])
+        cmd = " ".join(argv[1:])
+        subprocess.call(cmd, shell=True)
 
     ###################
     # COMMAND: source #
