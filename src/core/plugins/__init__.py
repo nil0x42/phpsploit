@@ -8,6 +8,7 @@ available plugins.
 import os
 import re
 
+import ui
 import core
 import objects
 from core import session
@@ -42,10 +43,12 @@ class Plugins(objects.MetaDict):
         self.errors = 0
         categories = self._load_categories()
         self._load_plugins(categories)
-        if self.errors:
-            msg = "[-] Plugin loader: %d error(s) found (%s)"
-            info = "use `corectl reload-plugins` for more infos"
-            print(msg % (self.errors, info))
+        if self.errors and ui.interface.interactive:
+            msg = "[#] Plugin loader: %d error(s) found"
+            if not verbose:
+                msg += " (use `corectl reload-plugins` for more infos)"
+            session.Conf.VERBOSITY = True
+            print(msg % self.errors)
 
     def categories(self):
         """Get a list of existing plugin category names"""
