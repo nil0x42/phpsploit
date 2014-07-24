@@ -15,20 +15,27 @@ instead of the phpsploit's stdout wrapper.
 """
 
 import sys
-import readline
 
 
 def isolate_io_context(function):
     def wrapper(*args, **kwargs):
+        try:
+            import readline
+            handle_readline = True
+        except:
+            handle_readline = False
+
         # backup phpsploit I/O context
-        old_readline_completer = readline.get_completer()
+        if handle_readline:
+            old_readline_completer = readline.get_completer()
         old_stdout = sys.stdout
         # function's stdout is the default one
         sys.stdout = sys.__stdout__
         # execute function with fresh context
         retval = function(*args, **kwargs)
         # restore phpsploit I/O context
-        readline.set_completer(old_readline_completer)
+        if handle_readline:
+            readline.set_completer(old_readline_completer)
         sys.stdout = old_stdout
         # return function result
         return retval
