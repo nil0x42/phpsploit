@@ -4,6 +4,7 @@
 VERSION = "2.1.4"
 
 import sys
+import os
 
 # Make sure the script is not imported
 try:
@@ -47,6 +48,10 @@ def run_process(cmd):
 def rand_message():
     msg_list = Path(core.basedir + "data/messages.lst").readlines()
     return random.choice(msg_list).strip()
+
+# This makes phpsploit usable as shellbang for scripting
+if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
+    sys.argv.insert(1, "--source")
 
 
 parser = argparse.ArgumentParser()
@@ -99,6 +104,9 @@ if ui.input.isatty():
     elif opt['interactive'] and ui.input.isatty():
         interactive = True
 
+# make this variable accessible from phpsploit core
+ui.interface.interactive = interactive
+
 # Start shell interface
 interface = ui.interface.Shell()
 
@@ -116,6 +124,8 @@ elif interactive and ui.output.isatty():
     print(colorize("%DimWhite", rand_message()))
     interface.interpret("help")
 
+interface.init()
+
 if opt['load']:
     if interface.interpret("session load '%s'" % opt['load']) != 0:
         print()
@@ -130,8 +140,6 @@ if opt['source']:
     if interface.interpret("source '%s'" % opt['source']) != 0:
         print()
         parser.error("%r: couldn't read source file." % opt['source'])
-
-interface.init()
 
 if opt['eval']:
     interface.interpret(opt['eval'])
