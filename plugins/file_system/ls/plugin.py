@@ -74,8 +74,6 @@ for path in plugin.argv[1:] or [environ['PWD']]:
             sys.exit("cannot find %s: No matching elements." % (path))
 
     target, regex, lines = response[0], response[1], response[2]
-    lines_items = sorted(lines.items())
-    lines = [[v for _, v in sorted(line.items())] for _, line in lines_items]
 
     # if at least one owner/group is not '?', use unix-like formatter
     if any((x[2] + x[3]) != '??' for x in lines):
