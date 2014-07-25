@@ -697,7 +697,7 @@ class Shell(shnake.Shell):
         """Show last command's output with EDITOR
 
         SYNOPSIS:
-            backlog
+            backlog [--save <FILE>]
 
         DESCRIPTION:
             Opens previous command output into the user
@@ -705,7 +705,20 @@ class Shell(shnake.Shell):
 
             NOTE: Last command buffer is colorless. It means that
             it does not contains any ANSI terminal color codes.
+
+        OPTIONS:
+            --save $file
+                Write previous command's output to the given
+                file instead of opening it with $EDITOR.
         """
+        if len(argv) > 1:
+            if len(argv) == 3 and argv[1] == "--save":
+                file = Path(argv[2])
+                file.write(self.stdout.backlog)
+                del file
+                return
+            return self.interpret("help backlog")
+
         backlog = Path()
         backlog.write(self.stdout.backlog)
         backlog.edit()
