@@ -231,7 +231,7 @@ class Shell(shnake.Shell):
         """Spawn a shell from target server
 
         SYNOPSIS:
-            exploit
+            exploit [--get-backdoor]
 
         DESCRIPTION:
             This command send an HTTP request to the remote server
@@ -241,11 +241,24 @@ class Shell(shnake.Shell):
             the session opener in order to retrieve environment
             variables, and spawn the phpsploit remote shell.
 
+        OPTIONS:
+            --get-backdoor
+                Only display current backdoor, as it should be
+                injected on the current or future target url.
+
             NOTE: The TARGET setting should be a valid http(s) url,
             previously infected with the phpsploit backdoor.
         """
         obj = str(session.Conf.BACKDOOR(call=False))
         obj = obj.replace("%%PASSKEY%%", session.Conf.PASSKEY().upper())
+
+        if len(argv) > 1:
+            if argv[1] == "--get-backdoor":
+                print(obj)
+                return
+            else:
+                return self.interpret("help exploit")
+
         print("[*] Current backdoor is: " + obj + "\n")
 
         if tunnel:
