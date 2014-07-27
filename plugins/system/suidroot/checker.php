@@ -2,7 +2,7 @@
 
 !import(getPerms)
 
-if (getPerms($Q['BACKDOOR']) != '-rwsrwxrwx') return error('nok');
-return 'ok';
+if (getPerms($PHPSPLOIT['BACKDOOR']) != '-rwsrwxrwx')
+    return error("%s: Is not a valid backdoor", $PHPSPLOIT['BACKDOOR']);
 
 ?>

