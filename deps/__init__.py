@@ -21,7 +21,7 @@ DEPENDENCIES = [('phpserialize',           'phpserialize-1.3'),
                 ('os_path_truepath_patch', '.'),
                 ('shutil_update',          '.'),
                 ('pyparsing',              'pyparsing-2.0.1'),
-                ('shnake',                 'shnake-0.1')]
+                ('shnake',                 'shnake-0.3')]
 
 for module, dirname in DEPENDENCIES:
     # try to import the dependency from system.
