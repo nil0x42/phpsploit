@@ -28,3 +28,12 @@
 =========
     This directory contains all the default files that are created
     on empty user configuration creation.
+
+./img/
+======
+    This directory contains miscelaneous images for demos.
+
+./tunnel/
+=========
+    This directory contains php codes used by the phpsploit core
+    for the payload builder.
