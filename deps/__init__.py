@@ -20,7 +20,7 @@ DEPENDENCIES = [('phpserialize',           'phpserialize-1.3'),
                 ('socks',                  'SocksiPy-branch-1.02'),
                 ('os_path_truepath_patch', '.'),
                 ('shutil_update',          '.'),
-                ('pyparsing',              'pyparsing-2.0.1'),
+                ('pyparsing',              'pyparsing-2.0.2'),
                 ('shnake',                 'shnake-0.3')]
 
 for module, dirname in DEPENDENCIES:
