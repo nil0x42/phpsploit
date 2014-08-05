@@ -34,62 +34,74 @@ AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
-import os, base64
+import sys
+import os
+import base64
 
-if self.argc not in [2,3,4]:
-    api.exit(self.help)
+import ui.input
+from datatypes import Path
 
-force = 0
-arg1,arg2,arglen = [1,2,self.argc]
-if self.argv[1] == '-f':
-    force = 1
-    arg1,arg2,arglen = [2,3,self.argc-1]
+from api import plugin
+from api import server
 
-relPath = self.argv[arg1]
+if not 2 <= len(plugin.argv) <= 4:
+    sys.exit(plugin.help)
 
-l_relPath = os.getcwd()
+
+if plugin.argv[1] == "-f":
+    force = True
+    arg1 = 2
+    arg2 = 3
+    arglen = len(plugin.argv) - 1
+else:
+    force = False
+    arg1 = 1
+    arg2 = 2
+    arglen = len(plugin.argv)
+
+relpath = plugin.argv[arg1]
+
 if arglen == 3:
-    l_relPath = self.argv[arg2]
+    local_relpath = plugin.argv[arg2]
+else:
+    local_relpath = os.getcwd()
 
-absPath    = rpath.abspath(relPath)
-l_absPath  = os.path.abspath(l_relPath)
-l_dirname  = l_absPath
-l_basename = rpath.basename(absPath)
+abspath = server.path.abspath(relpath)
+local_abspath = os.path.abspath(local_relpath)
+local_dirname = local_abspath
+local_basename = server.path.basename(abspath)
 
-leave = P_err+self.name+': '
-
-if not os.path.isdir(l_dirname):
-    l_dirname = os.path.dirname(l_dirname)
-    if os.path.isdir(l_dirname):
-        l_basename = os.path.basename(l_absPath)
+if not os.path.isdir(local_dirname):
+    local_dirname = os.path.dirname(local_dirname)
+    if os.path.isdir(local_dirname):
+        local_basename = os.path.basename(local_abspath)
     else:
-        api.exit(leave+'Invalid local directory: %s' % quot(l_dirname))
+        sys.exit("%s: Invalid local directory" % local_dirname)
 
-if not getpath(l_dirname).access('w'):
-        api.exit(leave+'Write permission denied on local directory: %s' % quot(l_dirname))
+try:
+    Path(local_dirname, mode='w')
+except ValueError:
+    sys.exit("%s: Local directory not writable" % local_dirname)
 
-l_absPath = l_dirname+os.sep+l_basename
+local_abspath = os.path.join(local_dirname, local_basename)
 
-if not force and os.path.exists(l_absPath):
-    if os.path.isfile(l_absPath):
-        if not reply.isyes('Local destination %s already exists, overwrite it ?' % quot(l_absPath)):
-            api.exit(leave+'File transfer aborted')
+if not force and os.path.exists(local_abspath):
+    if os.path.isfile(local_abspath):
+        question = "Local destination %s already exists, overwrite it ?"
+        if ui.input.Expect(False)(question % local_abspath):
+            sys.exit("File transfer aborted")
     else:
-        api.exit(leave+'Local destination %s already exists' % quot(l_absPath))
+        sys.exit("Local destination %s already exists" % local_abspath)
 
+payload = server.payload.Payload("payload.php")
+payload['FILE'] = abspath
 
-http.send({'FILE' : absPath})
+response = payload.send()
 
-errs = {'noexists': 'No such file or directory',
-        'notafile': 'Not a file',
-        'noread':   'Permission denied'}
+file = Path(local_abspath)
+try:
+    file.write(base64.b64decode(response), bin_mode=True)
+except ValueError as err:
+    sys.exit("Couldn't download file to %s: %s" % (local_abspath, err))
 
-if http.error in errs:
-    api.exit(leave+'%s: %s' % (absPath, errs[http.error]))
-
-data = base64.b64decode(http.response)
-pipe = absPath+" -> "+l_absPath
-
-try: open(l_absPath,'w').write(data)
-except: api.exit(P_err+'Error downloading: '+pipe)
-print P_inf+'Download complete: '+pipe
+print("Download complete: %s -> %s" % (abspath, local_abspath))

