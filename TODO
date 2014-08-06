@@ -8,19 +8,17 @@ Core:
   * Update session backwards compat with new default env var names
 
 Commands:
-  * @doc core command must be created, to handle ./doc/ reading from interface
-  * @save needs an '-f' (force) option to force file overwrite
+  * `session save` needs a '-f' (force) option.
   * remote shell @exit needs a -f opt to bypass leave confirmation in case of
     unsaved session.
 
 Plugins:
   * Write a "plugins/network/scan/plugin.py" small ip scanner, to be able to
     progressively gain access on controlled server's internal network.
+  * A `stat` plugin should be created with new API. This one will replace
+    the current and deprecated `fileinfo` plugin.
 
 Documentation:
-  * Move current ./doc files to the root dir
-  * The new ./doc dir must contain complete markdown documentation
-  * Write a nice README which summarizes the framework's goal and features
   * Simplify the manpage to summarize only commands and how to get started
   * When all this done, the 'rtfm' core command can be removed
 
