@@ -1,4 +1,4 @@
-### Version 2.2.0 *(IN ACTIVE DEVELOPMENT)*
+### Version 2.2.0b *(2014-08-09)*
 - **Rewritten the whole PhpSploit framework** in python 3 with new skeleton.
 - The `system` have been renamed into `run`.
 - Add `corectl` command, which includes some core debugging utils.

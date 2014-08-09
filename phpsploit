@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-VERSION = "2.1.4"
+VERSION = "2.2.0b"
 
 import sys
 import os
