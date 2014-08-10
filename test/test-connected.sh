@@ -7,16 +7,14 @@ srv_webdir="/tmp/`uuidgen`/"
 mkdir -p "$srv_webdir"
 echo `phpsploit -e 'exploit --get-backdoor'` > "$srv_webdir/index.php"
 
-srv_cmdline="php -S $srv_addr -t $srv_webdir"
-
-$srv_cmdline &> "$srv_webdir/php.log" &
+php -S "$srv_addr" -t "$srv_webdir" &> "$srv_webdir/php.log" &
+srv_pid=$!
 
 phpsploit \
     --target "$srv_addr" \
-    --eval "exploit; cd $srv_webdir; env" \
+    --eval "exploit; cd \"$srv_webdir\"; env" \
     --interactive
 
-kill `ps -ef | grep "$srv_cmdline" | head -n 1 | awk '{print $2}'` && \
-/bin/rm -rf "$srv_webdir" && \
-echo "INFO: quick php server correctly terminated" || \
-echo "WARNING: quick php server could not be terminated correctly !"
+kill $srv_pid && /bin/rm -rf "$srv_webdir" && \
+echo "[+] php server correctly terminated" || \
+echo "[!] could not kill php server ($srv_pid)"
