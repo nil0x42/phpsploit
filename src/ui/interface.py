@@ -99,7 +99,7 @@ class Shell(shnake.Shell):
             exit
 
         DESCRIPTION:
-            If current phpsploit session is connected to a TARGET,
+            If current phpsploit session is connected to $TARGET,
             this command disconnects the user from remote session.
             Otherwise, if the interface is not connected, this
             command leaves the phpsploit framework.
@@ -235,8 +235,8 @@ class Shell(shnake.Shell):
 
         DESCRIPTION:
             This command send an HTTP request to the remote server
-            url (defined by the TARGET setting).
-            If the TARGET is correctly backdoored with the
+            url (defined by the $TARGET setting).
+            If $TARGET is correctly backdoored with the
             phpsploit backdoor, the request remotely executes
             the session opener in order to retrieve environment
             variables, and spawn the phpsploit remote shell.
@@ -246,7 +246,7 @@ class Shell(shnake.Shell):
                 Only display current backdoor, as it should be
                 injected on the current or future target url.
 
-            NOTE: The TARGET setting should be a valid http(s) url,
+            NOTE: The $TARGET setting should be a valid http(s) url,
             previously infected with the phpsploit backdoor.
         """
         obj = str(session.Conf.BACKDOOR(call=False))
@@ -357,7 +357,7 @@ class Shell(shnake.Shell):
             > session load /tmp/phpsploit.session
               - Load /tmp/phpsploit.session.
             > session save
-              - Save current state to session's source file (SAVEFILE).
+              - Save current state to session's source file ($SAVEFILE).
 
         WARNING:
             The `session load` action can't be used through a remote
@@ -553,12 +553,12 @@ class Shell(shnake.Shell):
 
         # buffer edit mode
         elif argv[2] == "+":
-            # `set <VAR> +`: use EDITOR as buffer viewer in file mode
+            # `set <VAR> +`: use $EDITOR as buffer viewer in file mode
             if len(argv) == 3:
                 # get a buffer obj from setting's raw buffer value
                 buffer = Path()
                 buffer.write(session.Conf[argv[1]].buffer)
-                # try to edit it through EDITOR, and update it
+                # try to edit it through $EDITOR, and update it
                 # if it has been modified.
                 if buffer.edit():
                     session.Conf[argv[1]] = buffer.read()
@@ -604,13 +604,13 @@ class Shell(shnake.Shell):
             - Remove NAME environment variable.
 
         CASE STUDY:
-            The `CWD` environment variable changes each time the `cd`
+            The `PWD` environment variable changes each time the `cd`
             command is used. It contains the current directory path of
             the session. When a remote server exploitation session starts,
             it is defaultly set to the server's HOME directory if,
             available, otherwise, it is set to the root web directory.
             This environment variable may be manually changed by using the
-            `env CWD "/other/path"`, but it is generally not recommended
+            `env PWD "/other/path"`, but it is generally not recommended
             since it can broke some plugins if the value is not a remote
             accessible absolute path.
 
@@ -620,7 +620,7 @@ class Shell(shnake.Shell):
             - Env vars array is filled once a remote server shell is
             started through the phpsploit framework.
 
-            - Some envionment variables, such as CWD and WEB_ROOT are
+            - Some envionment variables, such as `PWD` and `WEB_ROOT` are
             crucial for remote session consistency. Be careful before
             manually editing them.
 
@@ -662,13 +662,13 @@ class Shell(shnake.Shell):
             shell experience.
             Once defined, an alias can be used as if it was a standard
             command, and it's value is interpreted, then suffixed with
-            the following arguments.
+            arguments passed to the command line (if any).
 
-            NOTE: This core command works like the unix bash alias
+            NOTE: This core command works like the unix bash `alias`
             command.
 
             > alias
-              - Display all curremt command aliases.
+              - Display all current command aliases.
 
             > alias <NAME>
               - Display aliases whose name starts with NAME.
@@ -694,7 +694,7 @@ class Shell(shnake.Shell):
     ####################
     # COMMAND: backlog #
     def do_backlog(self, argv):
-        """Show last command's output with EDITOR
+        """Show last command's output with $EDITOR
 
         SYNOPSIS:
             backlog [--save <FILE>]
