@@ -16,6 +16,14 @@ from core import session
 _windows_path_matcher = '[a-zA-Z]:\\\\'
 
 
+def getcwd():
+    """getcwd() -> path
+
+    Return a unicode string representing the current working directory.
+    """
+    return session.Env.PWD
+
+
 def isabs(path):
     """Test whether a path is absolute"""
     if path.startswith('/') or path.startswith('\\'):
