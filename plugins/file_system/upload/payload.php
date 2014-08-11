@@ -1,35 +1,34 @@
 <?
 
-!import(fileAccess)
+$target = $PHPSPLOIT['TARGET'];
 
-$target = $Q['TARGET'];
+// if target is a directory, append $PHPSPLOIT['NAME'] to it.
+if (@is_dir($target))
+{
+    if (substr($target, -1) != $PHPSPLOIT['PATH_SEP'])
+        $target .= $PHPSPLOIT['PATH_SEP'];
+    $target .= $PHPSPLOIT['NAME'];
+}
 
-if ((@fileperms($target) & 0x4000) == 0x4000){
-    $dirname = (substr($target,-1) == $Q['SEPARATOR']) ? $target : $target.$Q['SEPARATOR'];
-    $target  = $dirname.$Q['NAME'];}
+// if file already exists, some checks are mandatory
+if (@file_exists($target))
+{
+    if (!@is_file($target))
+        return error("%s: Remote path is not a file", $target);
+    if (!$PHPSPLOIT['FORCE'])
+        return array("KO", $target);
+}
 
-if (@file_exists($target)){
-    if ((@fileperms($target) & 0x8000) == 0x8000){
-        if (fileAccess($target,'w')){
-            if ($Q['FORCE']){
-                if ($h = @fopen($target,'w')){
-                    $content = base64_decode($Q['DATA']);
-                    @fwrite($h,$content);
-                    @fclose($h);
-                    return array('ok',$target);}
-                else return error('nowrite',$target);}
-            else return array('exists',$target);}
-        else return error('nowrite',$target);}
-    else return error('notafile',$target);}
-else{
-    if ($h = @fopen($target,'w')){
-        $content = base64_decode($Q['DATA']);
-        @fwrite($h,$content);
-        @fclose($h);
-        return array('ok',$target);}
-    else{
-        $dirname = substr($target,0,strrpos($target,$Q['SEPARATOR'])+1);
-        if ((@fileperms($dirname) & 0x4000) == 0x4000) return error('nowrite',$target);
-        else return error('noexists',$target);}}
+// try to write file contents
+if (($file = @fopen($target, 'w')) === False)
+{
+    if (@is_dir(dirname($target)))
+        return error("%s: Write permission denied", $target);
+    return error("%s: No such remote file or directory", $target);
+}
+$data = base64_decode($PHPSPLOIT['DATA']);
+if (@fwrite($file, $data) === False)
+    return error("%s: Could not write to file", $target);
+return array("OK", $target);
 
 ?>

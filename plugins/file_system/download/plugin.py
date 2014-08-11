@@ -104,4 +104,4 @@ try:
 except ValueError as err:
     sys.exit("Couldn't download file to %s: %s" % (local_abspath, err))
 
-print("Download complete: %s -> %s" % (abspath, local_abspath))
+print("[*] Download complete: %s -> %s" % (abspath, local_abspath))

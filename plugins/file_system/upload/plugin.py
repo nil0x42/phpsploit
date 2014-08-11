@@ -1,7 +1,7 @@
 """Upload a file
 
 SYNOPSIS:
-    upload [-f] <LOCAL FILE> [<REMOTE DESTINATION>]
+    upload [-f] <LOCAL_FILE> [<REMOTE_DESTINATION>]
 
 OPTIONS:
     -f      Overwrite destination without confirmation if it
@@ -9,7 +9,7 @@ OPTIONS:
 
 DESCRIPTION:
     Upload a local file to the remote server.
-    - If REMOTE DESTINATION is specified, the file is uploaded
+    - If REMOTE_DESTINATION is specified, the file is uploaded
     to this remote server destination, otherwise, the remote
     current working directory is used (which can be known with
     the 'pwd' command).
@@ -46,63 +46,69 @@ AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
-import os, base64
+import sys
+import os
+import base64
 
-if self.argc not in [2,3,4]:
-    api.exit(self.help)
+import ui.input
 
-force = 0
-arg1,arg2,arglen = [1,2,self.argc]
-if self.argv[1] == '-f':
-    force = 1
-    arg1,arg2,arglen = [2,3,self.argc-1]
+from api import plugin
+from api import server
 
-l_relPath = self.argv[arg1]
+# parse arguments
+if not 2 <= len(plugin.argv) <= 4:
+    sys.exit(plugin.help)
 
-relPath = rpath.cwd
-if arglen == 3:
-    relPath = self.argv[arg2]
-
-absPath    = rpath.abspath(relPath)
-l_absPath  = os.path.abspath(l_relPath)
-l_basename = os.path.basename(l_absPath)
-
-leave = P_err+self.name+': '+l_absPath+': '
-
-if os.path.exists(l_absPath):
-    if os.path.isfile(l_absPath):
-        try: data = base64.b64encode(open(l_absPath,'r').read())
-        except: api.exit(leave+'Read permission denied')
-    else:
-        api.exit(leave+'Is not a file')
+if plugin.argv[1] == "-f":
+    force = True
+    arg1 = 2
+    arg2 = 3
+    arglen = len(plugin.argv) - 1
 else:
-    api.exit(leave+'No such file or directory')
+    force = False
+    arg1 = 1
+    arg2 = 2
+    arglen = len(plugin.argv)
 
-query = {'TARGET' : absPath,
-         'NAME'   : l_basename,
-         'DATA'   : data,
-         'FORCE'  : force}
+if arglen == 3:
+    relpath = plugin.argv[arg2]
+else:
+    relpath = server.path.getcwd()
+abspath = server.path.abspath(relpath)
 
-for secondTry in range(2):
-    if secondTry:
-        query['FORCE'] = 1
+local_relpath = plugin.argv[arg1]
+local_abspath = os.path.abspath(local_relpath)
+local_basename = os.path.basename(local_abspath)
 
-    http.send(query)
+# check for errors
+if not os.path.exists(local_abspath):
+    sys.exit("Can't upload %s: No such file or directory" % local_abspath)
 
-    errs = {'noexists': 'No such remote file or directory',
-            'notafile': 'Remote path is not a file',
-            'nowrite':  'Remote path write permission denied'}
+if not os.path.isfile(local_abspath):
+    sys.exit("Can't upload %s: Not a file" % local_abspath)
 
-    if http.error in errs:
-        api.exit(P_err+self.name+': %1: '+errs[http.error], http.response)
+try:
+    data = open(local_abspath, 'r').read()
+except OSError as e:
+    sys.exit("Can't upload %s: %s" % (e.filename, e.strerror))
 
-    response,target = http.response
-    if response == 'ok':
-        api.exit(P_inf+'Upload complete: %s -> %s' % (l_absPath, target))
+# send the payload (twice if needed)
+payload = server.payload.Payload("payload.php")
+payload['TARGET'] = abspath
+payload['NAME'] = local_basename
+payload['DATA'] = base64.b64encode(data.encode()).decode()
+payload['FORCE'] = force
 
-    if response == 'exists' and not secondTry:
-        if not reply.isyes('Remote destination %s already exists, overwrite it ?' % quot(target)):
-            api.exit(P_err+self.name+': File transfer aborted')
+for iteration in [1, 2]:
+    if iteration == 2:
+        payload['FORCE'] = True
 
-    else:
-        api.exit('Unknow error: '+str(http.response))
+    status, uploaded_file = payload.send()
+
+    if status == 'KO':
+        question = "Remote destination %s already exists, overwrite it ?"
+        if ui.input.Expect(False)(question % uploaded_file):
+            sys.exit("File transfer aborted")
+
+    print("[*] Upload complete: %s -> %s" % (local_abspath, uploaded_file))
+    sys.exit(0)
