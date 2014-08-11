@@ -69,10 +69,15 @@ class Plugin:
             ExecPlugin(self)
         except KeyboardInterrupt:
             raise KeyboardInterrupt
-        except SystemExit:
-            evalue = str(sys.exc_info()[1])
-            if evalue:
-                print("[-] %s: %s" % (self.name, evalue))
+        except SystemExit as exception:
+            try:
+                retval = exception.args[0]
+            except IndexError:
+                retval = 0
+            if isinstance(retval, str):
+                print("[-] %s: %s" % (self.name, retval))
+                return 1
+            return retval
         except server.payload.PayloadError as err:
             print("[-] %s: %s" % (self.name, err))
         except BaseException as err:
