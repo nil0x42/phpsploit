@@ -11,6 +11,7 @@ Commands:
   * `session save` needs a '-f' (force) option.
   * remote shell @exit needs a -f opt to bypass leave confirmation in case of
     unsaved session.
+  * Add a `bind` core command to bind the prompt to a plugin.
 
 Plugins:
   * Write a "plugins/network/scan/plugin.py" small ip scanner, to be able to
