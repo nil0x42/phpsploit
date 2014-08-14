@@ -51,8 +51,8 @@ class Session(objects.MetaDict):
         # session objects declaration
         self.Conf = settings.Settings()
         self.Env = {}
-        self.Alias = objects.MetaDict(title="Command Aliases")
-        self.Cache = objects.MetaDict(title="HTTP Response Cache")
+        self.Alias = objects.VarContainer(title="Command Aliases")
+        self.Cache = objects.VarContainer(title="HTTP Response Cache")
         self.Hist = history.History()
         self.File = None
 

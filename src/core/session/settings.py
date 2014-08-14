@@ -12,7 +12,7 @@ from datatypes import Interval, PhpCode, Proxy, Url, Boolean
 DEFAULT_HTTP_USER_AGENT = "file://"+core.basedir+"data/user_agents.lst"
 
 
-class Settings(objects.MetaDict):
+class Settings(objects.VarContainer):
     """Configuration Settings
 
     Instanciate a dict() like object that stores PhpSploit

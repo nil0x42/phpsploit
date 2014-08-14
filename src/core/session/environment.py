@@ -3,7 +3,7 @@ import re
 import objects
 
 
-class Environment(objects.MetaDict):
+class Environment(objects.VarContainer):
     """Environment Variables
 
     Instanciate a dict() like object that stores PhpSploit
