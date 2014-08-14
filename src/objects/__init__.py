@@ -10,4 +10,6 @@ Example:
 """
 
 from . MetaDict       import MetaDict
+from . VarContainer   import VarContainer
+
 from . RandLineBuffer import RandLineBuffer

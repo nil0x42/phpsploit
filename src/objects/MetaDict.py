@@ -56,6 +56,8 @@ class MetaDict(dict):
     """
 
     def __init__(self, value={}, title=None):
+        # default title
+        self.title = "Metadict() object (by nil0x42)"
         # update self dict with `value`
         self.update(value)
 
@@ -66,7 +68,7 @@ class MetaDict(dict):
             try:
                 self.title = self.__doc__.splitlines()[0].strip()
             except:
-                self.title = "Metadict() object (by nil0x42)"
+                self.title = "%s() object" % self.__class__.__name__
 
     def __getattribute__(self, name):
         # if _isattr(name), then call self getitem
@@ -83,17 +85,6 @@ class MetaDict(dict):
 
         # otherwise call parent's setattr
         return super().__setattr__(name, value)
-
-    def __setitem__(self, name, value):
-        # delete item if its value is empty or None:
-        if isinstance(value, (str, type(None))) and \
-           str(value).lower() in ["", "none"]:
-            # don't try to delete unexisting item
-            if name not in self.keys():
-                return
-            return self.__delitem__(name)
-
-        return super().__setitem__(name, value)
 
     def __dir__(self):
         # considering the special get/set behavior, the __dir__()
