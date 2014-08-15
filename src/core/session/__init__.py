@@ -139,8 +139,6 @@ class Session(objects.MetaDict):
             backwards.session.load(file)
             try:
                 data = backwards.session.load(file)
-                import pprint
-                pprint.pprint(data)
                 assert data.keys() == session.keys()
             except:
                 raise Warning("not a session file", "«{}»".format(file))

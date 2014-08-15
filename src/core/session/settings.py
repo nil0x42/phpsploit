@@ -66,9 +66,8 @@ class Settings(objects.VarContainer):
         self.REQ_ZLIB_TRY_LIMIT = "20 MiB"
 
     def __setitem__(self, name, value):
-        # print("bla");
-        # if the set value is a RandLineBuffer obj, just do it!
-        if isinstance(value, objects.RandLineBuffer):
+        # if the set value is a MultiLineBuffer instance, just do it!
+        if isinstance(value, objects.settings.MultiLineBuffer):
             return super().__setitem__(name, value)
 
         name = name.replace('-', '_').upper()
@@ -90,13 +89,14 @@ class Settings(objects.VarContainer):
         # This fix creates a non-failing version of user agent default value
         if name == "HTTP_USER_AGENT" and name not in self.keys():
             try:
-                value = objects.RandLineBuffer(value, setter)
+                value = objects.settings.RandLineBuffer(value, setter)
             except ValueError:
                 alt_file = value[7:]
                 alt_buff = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
-                value = objects.RandLineBuffer((alt_file, alt_buff), setter)
+                value = objects.settings.RandLineBuffer((alt_file, alt_buff),
+                                                        setter)
         else:
-            value = objects.RandLineBuffer(value, setter)
+            value = objects.settings.RandLineBuffer(value, setter)
 
         # use grandparent class (bypass parent's None feature)
         dict.__setitem__(self, name, value)

@@ -2,10 +2,11 @@ import os
 import random
 import hashlib
 
+from . import MultiLineBuffer
 from ui.color import colorize
 
 
-class RandLineBuffer:
+class RandLineBuffer(MultiLineBuffer):
     """The RandLineBuffer() class provides advanced session Dict item setter.
 
     It provides multilines buffers, that picks a random choice, and
@@ -119,50 +120,6 @@ class RandLineBuffer:
         return colorize("%BoldBlack", "<", "%BoldBlue", "RandLine",
                         "%BasicCyan", "@", "%Bold", objID, "%BasicBlue",
                         choices, "%BoldBlack", ">")
-
-    def __iadd__(self, new):
-        """
-        >>> x = RandLineBuffer("choice1")
-        >>> x += "choice2"
-        >>> x += "file:///tmp/foo"
-        >>> str(x)
-        '<RandLine@/tmp/foo (2 choices)>'
-
-        """
-        # only strings must be added
-        if not isinstance(new, str):
-            msg = "Can't convert '{}' object to str implicitly"
-            raise TypeError(msg.format(type(new).__name__))
-
-        new += os.linesep
-        lines = len(new.splitlines())
-
-        # adding file:// line changes obj's parent file
-        if lines == 1 and new[7:] and new[:7] == "file://":
-            result = RandLineBuffer(self.buffer, self._getobj)
-            result.file = new[7:].strip()
-            return result
-
-        # other strings are added to the buffer, and parent file
-        # is set to None (because buffer is no more a copy of a file)
-        if self.buffer[-1] not in "\r\n":
-            self.buffer += os.linesep
-        self.buffer += new
-        return RandLineBuffer(self.buffer, self._getobj)
-
-    def __getitem__(self, item):
-        """It allows the object being converted to list or tuple,
-        returning these two elements: [self.file, self.buffer]
-        """
-        if item in [0, "file"]:
-            return self.file
-        elif item in [1, "buffer"]:
-            return self.buffer
-        raise IndexError(self.__class__.__name__+" index out of range")
-
-    def _raw_value(self):
-        """Convert the object into a built-in data type (tuple)."""
-        return tuple(self)
 
     def update(self):
         """Try to replace current buffer from parent file (self.file)

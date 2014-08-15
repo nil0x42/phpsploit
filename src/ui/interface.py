@@ -1,5 +1,5 @@
 """PhpSploit shell interface.
-nt
+
 Unheriting the shnake's Shell class, the PhpSploit shell interface
 provides interactive use of commands.
 
