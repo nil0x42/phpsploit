@@ -1,0 +1,2 @@
+class VERBOSITY:
+    pass

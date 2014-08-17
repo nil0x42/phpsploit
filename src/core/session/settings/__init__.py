@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import tempfile
+import importlib
 
 import core
 import objects
@@ -36,6 +37,7 @@ class Settings(objects.VarContainer):
     def __init__(self):
         """Declare default settings values"""
         super().__init__()
+        self._settings = self._load_settings()
 
         # Session related
         self.TMPPATH = "%%DEFAULT%%"
@@ -103,6 +105,19 @@ class Settings(objects.VarContainer):
 
     def _isattr(self, name):
         return re.match("^[A-Z][A-Z0-9_]+$", name)
+
+    def _load_settings(self):
+        settings = {}
+        dirname = os.path.dirname(__file__)
+        sys.path.insert(0, dirname)
+        for file in os.listdir(dirname):
+            if not re.match("^[A-Z][A-Z0-9_]+\.py$", file):
+                continue
+            name = file[:-3]
+            module = importlib.import_module(name).__getattribute__(name)
+            settings[name] = module
+        sys.path.pop(0)
+        return settings
 
     def _set_HTTP_header(self, value):
         return str(value)

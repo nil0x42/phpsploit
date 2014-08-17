@@ -1,0 +1,2 @@
+class PASSKEY:
+    pass
