@@ -103,6 +103,42 @@ class Settings(objects.VarContainer):
         # use grandparent class (bypass parent's None feature)
         dict.__setitem__(self, name, value)
 
+    def __setitem__FUTURE_IMPLEMENTATION(self, name, value):
+        # if the set value is a MultiLineBuffer instance, just do it!
+        if isinstance(value, objects.settings.MultiLineBuffer):
+            return super().__setitem__(name, value)
+
+        name = name.replace('-', '_').upper()
+
+        # ensure the setting name has good syntax
+        if not self._isattr(name):
+            raise KeyError("illegal name: '{}'".format(name))
+
+        # ensure the setting name is allowed
+        if name[5:] and name[:5] == "HTTP_":
+            # HTTP_* settings have a RandLineBuffer metatype
+            metatype = objects.settings.RandLineBuffer
+            setter = self._set_HTTP_header
+        elif name in self._settings.keys():
+            metatype = self._settings[name].metatype
+            setter = self._settings[name].setter
+        else:
+            raise KeyError("illegal name: '{}'".format(name))
+
+        # This fix creates a non-failing version of user agent default value
+        if name == "HTTP_USER_AGENT" and name not in self.keys():
+            try:
+                value = metatype(value, setter)
+            except ValueError:
+                alt_file = value[7:]
+                alt_buff = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
+                value = metatype((alt_file, alt_buff), setter)
+        else:
+            value = metatype(value, setter)
+
+        # use grandparent class (bypass parent's None feature)
+        dict.__setitem__(self, name, value)
+
     def _isattr(self, name):
         return re.match("^[A-Z][A-Z0-9_]+$", name)
 
