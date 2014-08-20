@@ -1,6 +1,7 @@
 ### Version 2.2.1b *(IN DEVELOPMENT)*
 - Fix issue #9 (small bug in api.payload.Payload())
-- Remove deprecated commands `lcd` and `lpwd` in favor of `lrun`.
+- `lrun` command is now able to change PWD (issue #10)
+- Remove deprecated `lcd` and `lpwd` commands.
 - Fix some small bugs and documentation misspells.
 - Fix issue #6 (*_proxy env var handling through http tunnel).
 
