@@ -5,6 +5,7 @@ provides interactive use of commands.
 
 """
 import os
+import sys
 import traceback
 import subprocess
 
@@ -408,7 +409,7 @@ class Shell(shnake.Shell):
             lcd <LOCAL DIRECTORY>
 
         DESCRIPTION:
-            Change the local workiong directory from your own local
+            Change the local working directory from your own local
             operating system. This command works like the `cd`
             command in unix shells.
 
@@ -449,8 +450,21 @@ class Shell(shnake.Shell):
         """
         if len(argv) == 1:
             return self.interpret("help lrun")
+
+        if sys.platform.startswith("win"):
+            postcmd = " & echo %CD%"
+        else:
+            postcmd = " ; pwd"
+
         cmd = " ".join(argv[1:])
-        subprocess.call(cmd, shell=True)
+        output = subprocess.getoutput(cmd + postcmd)
+        lines = output.splitlines()
+        if os.path.isabs(lines[-1]):
+            os.chdir(lines[-1])
+            if not lines[:-1]:
+                return
+            output = os.linesep.join(lines[:-1])
+        print(output)
 
     ###################
     # COMMAND: source #

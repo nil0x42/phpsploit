@@ -1,3 +1,9 @@
+### Version 2.2.1b *(IN DEVELOPMENT)*
+- Fix issue #9 (small bug in api.payload.Payload())
+- Remove deprecated commands `lcd` and `lpwd` in favor of `lrun`.
+- Fix some small bugs and documentation misspells.
+- Fix issue #6 (*_proxy env var handling through http tunnel).
+
 ### Version 2.2.0b *(2014-08-09)*
 - **Rewritten the whole PhpSploit framework** in python 3 with new skeleton.
 - The `system` have been renamed into `run`.
