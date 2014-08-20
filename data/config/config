@@ -13,6 +13,8 @@ alias target    "set TARGET"
 alias load      "session load"
 alias save      "session save"
 alias infect    "exploit"
+alias lcd       "lrun cd"
+alias lpwd      "lrun pwd"
 
 
 ### Some configuration examples you may want to add:

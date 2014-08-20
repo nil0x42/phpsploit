@@ -382,52 +382,6 @@ class Shell(shnake.Shell):
             print(session(argv[1]))
 
     #################
-    # COMMAND: lpwd #
-    def do_lpwd(self, argv):
-        """Print local working directory
-
-        SYNOPSIS:
-            lpwd
-
-        DESCRIPTION:
-            Display the local working directory from your own local
-            operating system. This command works like the `pwd`
-            command in unix shells.
-
-            NOTE: This core command shouldn't be confused with the
-            `pwd` plugin, which does the same thing in the
-            remotely exploited system.
-        """
-        print(os.getcwd())
-
-    ################
-    # COMMAND: lcd #
-    def do_lcd(self, argv):
-        """Change local working directory
-
-        SYNOPSIS:
-            lcd <LOCAL DIRECTORY>
-
-        DESCRIPTION:
-            Change the local working directory from your own local
-            operating system. This command works like the `cd`
-            command in unix shells.
-
-            NOTE: This core command shouldn't be confused with the
-            `cd` plugin, which does the same thing in the
-            remotely exploited system.
-
-        EXAMPLES:
-            > lcd ~
-            > lcd /tmp
-        """
-        # only one argument must be supplied
-        if len(argv) != 2:
-            return self.interpret('help lcd')
-
-        os.chdir(os.path.expanduser(argv[1]))
-
-    #################
     # COMMAND: lrun #
     def do_lrun(self, argv):
         """Execute client-side shell command
