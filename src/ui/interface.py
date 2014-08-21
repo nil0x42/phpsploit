@@ -405,20 +405,31 @@ class Shell(shnake.Shell):
         if len(argv) == 1:
             return self.interpret("help lrun")
 
+        cmd = " ".join(argv[1:])
+
+        # on windows, we do not handle interactive commands
         if sys.platform.startswith("win"):
             postcmd = " & echo %CD%"
-        else:
-            postcmd = " ; pwd"
+            output = subprocess.getoutput(cmd + postcmd)
+            lines = output.splitlines()
+            if os.path.isabs(lines[-1]):
+                os.chdir(lines[-1])
+                if not lines[:-1]:
+                    return
+                output = os.linesep.join(lines[:-1])
+            return print(output)
 
-        cmd = " ".join(argv[1:])
-        output = subprocess.getoutput(cmd + postcmd)
-        lines = output.splitlines()
-        if os.path.isabs(lines[-1]):
-            os.chdir(lines[-1])
-            if not lines[:-1]:
-                return
-            output = os.linesep.join(lines[:-1])
-        print(output)
+        # on unix, we are able to handle interactive commands
+        # AND getting new $PWD by redirecting the `pwd`
+        # command to a temporary file.
+        else:
+            tmpfile = Path()
+            postcmd = " ; pwd >'%s' 2>&1" % tmpfile
+            subprocess.call(cmd + postcmd, shell=True)
+            try:
+                os.chdir(tmpfile.read())
+            finally:
+                del tmpfile
 
     ###################
     # COMMAND: source #
