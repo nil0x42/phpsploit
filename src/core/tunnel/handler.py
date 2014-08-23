@@ -744,7 +744,7 @@ class Request:
         return response
 
     def Read(self, response):
-        """Main request Reader:
+        """Main request Reader
 
         if takes the http response data as argument
         and writes the __RESULT__'s php data into the self.response string,
@@ -801,11 +801,14 @@ class Request:
             raise ResponseError('Returned dict() is in a wrong format')
 
 
-# split_len('phpsploit', 2) -> ['ph', 'ps', 'pl', 'oi', 't']
 def split_len(string, length):
     """split the given string into a list() object which contains
     a list of string sequences or 'length' size.
-    Example: split_len('phpsploit', 2) -> ['ph', 'ps', 'pl', 'oi', 't']
+
+    Example:
+    >>> split_len('phpsploit', 2)
+    ['ph', 'ps', 'pl', 'oi', 't']
+
     """
     result = list()
     for pos in range(0, len(string), length):
@@ -817,12 +820,12 @@ def split_len(string, length):
 
 def load_headers(settings):
     """load http headers specified as user settings, aka
-    variable whose names start with HTTP_.
+    variable whose names start with 'HTTP_'.
 
-    it is used to get the list of user specified headers,
-    with their names for http filling computing. it do not
-    loads dynamic file:// objects, for this, take a look at
-    the get_headers() fonction.
+    it is used to get the list of user defined headers
+    with their names for http filling computing.
+    It do not loads dynamic 'file://<PATH>' objects, for
+    this, take a look at the get_headers() fonction.
 
     """
     headers = dict()
@@ -837,7 +840,7 @@ def load_headers(settings):
 
 
 def get_headers(headers):
-    """this function must be used just before each unicast
+    """This function must be used just before each unicast
     http request, because it formats eventual dynamic user
     specified header values, such as random line values.
 
