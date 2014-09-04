@@ -37,7 +37,10 @@ class Settings(objects.VarContainer):
     def __init__(self):
         """Declare default settings values"""
         super().__init__()
-        self._settings = self._load_settings()
+        try:
+            self._settings = self._load_settings()
+        except AttributeError as e:
+            print(e)
 
         # Session related
         self.TMPPATH = "%%DEFAULT%%"
@@ -120,7 +123,7 @@ class Settings(objects.VarContainer):
             metatype = objects.settings.RandLineBuffer
             setter = self._set_HTTP_header
         elif name in self._settings.keys():
-            metatype = self._settings[name].metatype
+            metatype = self._settings[name].type
             setter = self._settings[name].setter
         else:
             raise KeyError("illegal name: '{}'".format(name))
@@ -150,7 +153,7 @@ class Settings(objects.VarContainer):
             if not re.match("^[A-Z][A-Z0-9_]+\.py$", file):
                 continue
             name = file[:-3]
-            module = importlib.import_module(name).__getattribute__(name)
+            module = getattr(importlib.import_module(name), name)
             settings[name] = module
         sys.path.pop(0)
         return settings
