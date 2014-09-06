@@ -13,7 +13,7 @@ class REQ_MAX_HEADERS:
     limit, execution of requests can fail and
     lead to an http error 500 or something else.
     """
-    type = objects.setting.RandLineBuffer
+    type = objects.settings.RandLineBuffer
 
     def setter(self, value):
         if 10 <= int(value) <= 680:
