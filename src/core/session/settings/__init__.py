@@ -37,10 +37,7 @@ class Settings(objects.VarContainer):
     def __init__(self):
         """Declare default settings values"""
         super().__init__()
-        try:
-            self._settings = self._load_settings()
-        except AttributeError as e:
-            print(e)
+        self._settings = self._load_settings()
 
         # Session related
         self.TMPPATH = "%%DEFAULT%%"
@@ -125,11 +122,13 @@ class Settings(objects.VarContainer):
         elif name in self._settings.keys():
             metatype = self._settings[name].type
             setter = self._settings[name].setter
+            default = self._settings[name].default_value
         else:
             raise KeyError("illegal name: '{}'".format(name))
 
         # This fix creates a non-failing version of user agent default value
-        if name == "HTTP_USER_AGENT" and name not in self.keys():
+        if name == "HTTP_USER_AGENT" and \
+                (name not in self.keys() or value == "%%DEFAULT%%"):
             try:
                 value = metatype(value, setter)
             except ValueError:
@@ -137,7 +136,10 @@ class Settings(objects.VarContainer):
                 alt_buff = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
                 value = metatype((alt_file, alt_buff), setter)
         else:
-            value = metatype(value, setter)
+            if value == "%%DEFAULT%%":
+                value = default()
+            else:
+                value = metatype(value, setter)
 
         # use grandparent class (bypass parent's None feature)
         dict.__setitem__(self, name, value)
