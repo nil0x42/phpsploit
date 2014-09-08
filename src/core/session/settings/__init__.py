@@ -80,49 +80,13 @@ class Settings(objects.VarContainer):
 
         # ensure the setting name is allowed
         if name[5:] and name[:5] == "HTTP_":
-            setter = self._set_HTTP_header
-        elif hasattr(self, "_set_"+name):
-            setter = getattr(self, "_set_"+name)
-        else:
-            raise KeyError("illegal name: '{}'".format(name))
-
-        # extend value into RandLineBuffer() instance.
-
-        # This fix creates a non-failing version of user agent default value
-        if name == "HTTP_USER_AGENT" and name not in self.keys():
-            try:
-                value = objects.settings.RandLineBuffer(value, setter)
-            except ValueError:
-                alt_file = value[7:]
-                alt_buff = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
-                value = objects.settings.RandLineBuffer((alt_file, alt_buff),
-                                                        setter)
-        else:
-            value = objects.settings.RandLineBuffer(value, setter)
-
-        # use grandparent class (bypass parent's None feature)
-        dict.__setitem__(self, name, value)
-
-    def __setitem__FUTURE_IMPLEMENTATION(self, name, value):
-        # if the set value is a MultiLineBuffer instance, just do it!
-        if isinstance(value, objects.settings.MultiLineBuffer):
-            return super().__setitem__(name, value)
-
-        name = name.replace('-', '_').upper()
-
-        # ensure the setting name has good syntax
-        if not self._isattr(name):
-            raise KeyError("illegal name: '{}'".format(name))
-
-        # ensure the setting name is allowed
-        if name[5:] and name[:5] == "HTTP_":
             # HTTP_* settings have a RandLineBuffer metatype
             metatype = objects.settings.RandLineBuffer
             setter = self._set_HTTP_header
         elif name in self._settings.keys():
-            metatype = self._settings[name].type
-            setter = self._settings[name].setter
-            default = self._settings[name].default_value
+            metatype = getattr(self._settings[name], "type")
+            setter = getattr(self._settings[name], "setter")
+            default = getattr(self._settings[name], "default_value")
         else:
             raise KeyError("illegal name: '{}'".format(name))
 
@@ -155,104 +119,12 @@ class Settings(objects.VarContainer):
             if not re.match("^[A-Z][A-Z0-9_]+\.py$", file):
                 continue
             name = file[:-3]
-            module = getattr(importlib.import_module(name), name)
+            # help(type(importlib.import_module(name)))
+            # module = getattr(importlib.import_module(name), name)
+            module = importlib.import_module(name)
             settings[name] = module
         sys.path.pop(0)
         return settings
 
     def _set_HTTP_header(self, value):
         return str(value)
-
-    def _set_REQ_INTERVAL(self, value):
-        return Interval(value)
-
-    def _set_TMPPATH(self, value):
-        if value == "%%DEFAULT%%":
-            value = tempfile.gettempdir()
-        return Path(value, mode="drw")
-
-    def _set_SAVEPATH(self, value):
-        if value == "%%DEFAULT%%":
-            value = tempfile.gettempdir()
-        return Path(value, mode="drw")
-
-    def _set_VERBOSITY(self, value):
-        return Boolean(value)
-
-    def _set_CACHE_SIZE(self, value):
-        return ByteSize(value)
-
-    def _set_TARGET(self, value):
-        if str(value).lower() in ["", "none"]:
-            return None
-        return Url(value)
-
-    def _set_BACKDOOR(self, value):
-        if value.find("%%PASSKEY%%") < 0:
-            raise ValueError("shall contain %%PASSKEY%% string")
-        return PhpCode(value)
-
-    def _set_PROXY(self, value):
-        # if str(value).lower() in ["", "none"]:
-        #     return None
-        return Proxy(value)
-
-    def _set_PASSKEY(self, value):
-        value = str(value).lower()
-        reserved_headers = ['host', 'accept-encoding', 'connection',
-                            'user-agent', 'content-type', 'content-length']
-        if not value:
-            raise ValueError("can't be an empty string")
-        if not re.match("^[a-zA-Z0-9_]+$", value):
-            raise ValueError("only chars from set «a-Z0-9_» are allowed")
-        if re.match('^zz[a-z]{2}$', value) or \
-           value.replace('_', '-') in reserved_headers:
-            raise ValueError("reserved header name: «{}»".format(value))
-        return value
-
-    def _set_EDITOR(self, value):
-        if value == "%%DEFAULT%%":
-            value = "vi"
-            if "EDITOR" in os.environ:
-                value = os.environ["EDITOR"]
-            elif sys.platform.startswith("win"):
-                value = "notepad.exe"
-        return ShellCmd(value)
-
-    def _set_BROWSER(self, value):
-        if value == "%%DEFAULT%%":
-            value = ""
-        return WebBrowser(value)
-
-    def _set_REQ_DEFAULT_METHOD(self, value):
-        if value.upper() not in ["GET", "POST"]:
-            raise ValueError("available methods: GET/POST")
-        return value.upper()
-
-    def _set_REQ_HEADER_PAYLOAD(self, value):
-        if not value.find("%%BASE64%%"):
-            raise ValueError("shall contain %%BASE64%% string")
-        return PhpCode(value)
-
-    def _set_REQ_MAX_HEADERS(self, value):
-        if 10 <= int(value) <= 680:
-            return int(value)
-        raise ValueError("must be an integer from 10 to 680")
-
-    def _set_REQ_MAX_HEADER_SIZE(self, value):
-        value = ByteSize(value)
-        if 250 > value:
-            raise ValueError("can't be less than 250 bytes")
-        return value
-
-    def _set_REQ_MAX_POST_SIZE(self, value):
-        value = ByteSize(value)
-        if 250 > value:
-            raise ValueError("can't be less than 250 bytes")
-        return value
-
-    def _set_REQ_ZLIB_TRY_LIMIT(self, value):
-        value = ByteSize(value)
-        if value < 1:
-            raise ValueError("must be a positive bytes number")
-        return value
