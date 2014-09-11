@@ -69,7 +69,7 @@ class Settings(objects.VarContainer):
 
     def __setitem__(self, name, value):
         # if the set value is a MultiLineBuffer instance, just do it!
-        if isinstance(value, objects.settings.MultiLineBuffer):
+        if isinstance(value, objects.buffers.MultiLineBuffer):
             return super().__setitem__(name, value)
 
         name = name.replace('-', '_').upper()
@@ -81,7 +81,7 @@ class Settings(objects.VarContainer):
         # ensure the setting name is allowed
         if name[5:] and name[:5] == "HTTP_":
             # HTTP_* settings have a RandLineBuffer metatype
-            metatype = objects.settings.RandLineBuffer
+            metatype = objects.buffers.RandLineBuffer
             setter = self._set_HTTP_header
         elif name in self._settings.keys():
             metatype = getattr(self._settings[name], "type")

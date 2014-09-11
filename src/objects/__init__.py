@@ -12,4 +12,4 @@ Example:
 from . MetaDict       import MetaDict
 from . VarContainer   import VarContainer
 
-from . import settings
+from . import buffers

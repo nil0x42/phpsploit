@@ -39,7 +39,7 @@ POST METHOD:
 import objects
 
 
-type = objects.settings.RandLineBuffer
+type = objects.buffers.RandLineBuffer
 
 
 def setter(value):

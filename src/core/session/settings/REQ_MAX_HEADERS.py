@@ -12,7 +12,7 @@ lead to an http error 500 or something else.
 import objects
 
 
-type = objects.settings.RandLineBuffer
+type = objects.buffers.RandLineBuffer
 
 
 def setter(value):
