@@ -14,7 +14,7 @@ DESCRIPTION:
     The file to copy must be at least readable, and the
     destination can be a file path, or a directory path.
     - In the case the destination is a directory, the file will
-    be copied into it keeping it's original file name.
+    be copied into it, keeping it's original file name.
     - Unless the '-f' option has been set, the copy process
     aborts if the detination file already exists, and asks for
     an confirmation to overwrite the file.

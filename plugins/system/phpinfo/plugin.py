@@ -16,6 +16,7 @@ import sys
 import ui.output
 from ui.color import colorize
 
+from api import plugin
 from api import server
 
 
@@ -63,6 +64,9 @@ def tablify(vals):
         footer_fill = [('-' * len(x)) for x in lines[n]]
         footer = '+-' + ('-+-'.join(footer_fill)) + '-+'
     return result + footer
+
+if len(plugin.argv) != 1:
+    sys.exit(plugin.help)
 
 phpinfo = server.payload.Payload("payload.php").send()
 if not phpinfo:
