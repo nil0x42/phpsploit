@@ -83,6 +83,10 @@ class Settings(objects.VarContainer):
             # HTTP_* settings have a RandLineBuffer metatype
             metatype = objects.buffers.RandLineBuffer
             setter = self._set_HTTP_header
+            # allow removal of custom HTTP_ settings
+            if name != "HTTP_USER_AGENT" and \
+                    str(value).upper() in ["", "NONE", "%%DEFAULT%%"]:
+                return super().__setitem__(name, value)
         elif name in self._settings.keys():
             metatype = getattr(self._settings[name], "type")
             setter = getattr(self._settings[name], "setter")
