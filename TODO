@@ -6,6 +6,8 @@ Sessions:
 
 Core:
   * Update session backwards compat with new default env var names
+  * Implement a $PAYLOAD_PREFIX setting to allow custom php tricks
+    on each request, before all payload executions.
 
 Commands:
   * `session save` needs a '-f' (force) option.
@@ -22,6 +24,7 @@ Plugins:
 Documentation:
   * Simplify the manpage to summarize only commands and how to get started
   * When all this done, the 'rtfm' core command can be removed
+  * Implement display of settings help with `help set BACKDOOR`.
 
 Network Stealth:
   * Write a stealth module which use other target on each command (with 404)
