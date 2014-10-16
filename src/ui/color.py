@@ -26,7 +26,7 @@ def colorize(*args):
         formated color code that start with '%' and can contain
         multiple codes.
         For example: "%BoldYellow" will return "\\x1b[1m\\x1b[33m".
-      * Any string that do not strictly matches the syntax above if
+      * Any string that do not strictly matches the syntax above is
         left as it is.
 
     Behavior:
