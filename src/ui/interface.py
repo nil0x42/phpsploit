@@ -729,9 +729,11 @@ class Shell(shnake.Shell):
               - Display the full help, sorted by category
             > help clear
               - Display the help for the "clear" command
+            > help set BACKDOOR
+              - Display help about the "BACKDOOR" setting
         """
         # If more than 1 argument, help to help !
-        if len(argv) > 2:
+        if len(argv) > 2 and argv[1] != "set":
             return self.interpret('help help')
 
         # collect the command list from current shell
@@ -793,6 +795,17 @@ class Shell(shnake.Shell):
                 getattr(self, 'help_' + argv[1])()
             except:
                 doc_help(doc)
+            return
+        # get help about settings (e.g.: `help set BACKDOOR`)
+        elif len(argv) == 3 and argv[1] == "set":
+            setting = argv[2]
+            try:
+                doc = getattr(session.Conf, setting).docstring
+            except (KeyError, AttributeError):
+                print("[-] %s: No such configuration setting" % setting)
+                return
+            print("\n[*] Help for '%s' setting\n" % setting)
+            doc_help(doc.splitlines())
             return
 
         # display the whole list of commands, with their description line

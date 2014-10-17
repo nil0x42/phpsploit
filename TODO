@@ -24,7 +24,7 @@ Plugins:
 Documentation:
   * Simplify the manpage to summarize only commands and how to get started
   * When all this done, the 'rtfm' core command can be removed
-  * Implement display of settings help with `help set BACKDOOR`.
+  * Add autocompletion for `help set <SETTING>` commands
 
 Network Stealth:
   * Write a stealth module which use other target on each command (with 404)

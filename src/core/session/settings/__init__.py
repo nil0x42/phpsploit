@@ -83,7 +83,8 @@ class Settings(objects.VarContainer):
             # HTTP_* settings have a RandLineBuffer metatype
             metatype = objects.buffers.RandLineBuffer
             setter = self._set_HTTP_header
-            # allow removal of custom HTTP_ settings
+            info = self._get_HTTP_header_info(name[5:])
+            # allow removal of custom HTTP_ settings, except for user agent.
             if name != "HTTP_USER_AGENT" and \
                     str(value).upper() in ["", "NONE", "%%DEFAULT%%"]:
                 return super().__setitem__(name, value)
@@ -91,6 +92,7 @@ class Settings(objects.VarContainer):
             metatype = getattr(self._settings[name], "type")
             setter = getattr(self._settings[name], "setter")
             default = getattr(self._settings[name], "default_value")
+            info = getattr(self._settings[name], "__doc__")
         else:
             raise KeyError("illegal name: '{}'".format(name))
 
@@ -109,6 +111,8 @@ class Settings(objects.VarContainer):
             else:
                 value = metatype(value, setter)
 
+        # add docstring attribute to setting
+        value.docstring = self.format_docstring(name, metatype, info)
         # use grandparent class (bypass parent's None feature)
         dict.__setitem__(self, name, value)
 
@@ -132,3 +136,25 @@ class Settings(objects.VarContainer):
 
     def _set_HTTP_header(self, value):
         return str(value)
+
+    def _get_HTTP_header_info(self, name):
+        result = ("Defines the value of '%s'\n"
+                  "http header for any sent request.\n") % name
+        if name != "USER_AGENT":
+            result += ("\n"
+                       "This setting is dynamic and can be removed\n"
+                       "with the `set HTTP_%s None` command.")
+        result = result.replace("%s", name)
+        return result
+
+    def format_docstring(self, name, metatype, info):
+        info = info.strip()
+        doc = "\nDESCRIPTION:\n"
+        doc += "\n".join(["    " + ln for ln in info.splitlines()])
+        import pprint
+        pprint.pprint(doc)
+        doc += ("\n"
+                "\n"
+                "TYPE:\n"
+                "    %r\n") % metatype
+        return doc
