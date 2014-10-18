@@ -84,8 +84,8 @@ class Request:
         # user will be asked to manually determine a writeable directory
         # on the self.load_multipart() function.
         self.tmpfile = '/' + str(uuid.uuid4())
-        if "WRITE_TMPDIR" in session.Env.keys():
-            self.tmpdir = session.Conf["WRITE_TMPDIR"] + self.tmpfile
+        if "WRITEABLE_TMPDIR" in session.Env.keys():
+            self.tmpdir = session.Env["WRITEABLE_TMPDIR"] + self.tmpfile
         else:
             self.tmpdir = None
 
