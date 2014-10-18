@@ -457,6 +457,8 @@ class Request:
         """
         response = {'error': None, 'data': None}  # preset response values
         headers, content = request  # retrieve request elems from given tuple
+        if isinstance(content, str):
+            content = content.encode()
 
         # add the user settings specified headers, and get their real values.
         headers.update(self.set_headers)
@@ -489,11 +491,11 @@ class Request:
             response['error'] = err
         except KeyboardInterrupt:
             response['error'] = 'HTTP Request interrupted'
-        except:
-            etype = str(sys.exc_info()[0])
-            etype = etype[(etype.find("'") + 1):-2]
-            evalue = str(sys.exc_info()[1])
-            response['error'] = 'Unexpected error %s : %s' % (etype, evalue)
+        # except:
+        #     etype = str(sys.exc_info()[0])
+        #     etype = etype[(etype.find("'") + 1):-2]
+        #     evalue = str(sys.exc_info()[1])
+        #     response['error'] = 'Unexpected error %s : %s' % (etype, evalue)
 
         return response
 
