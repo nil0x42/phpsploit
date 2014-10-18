@@ -142,9 +142,14 @@ class Path(str):
         args = shlex.split(session.Conf.EDITOR())
         args.append(self)
 
-        old = self.read()
+        bin_mode = False
+        try:
+            old = self.read(bin_mode=bin_mode)
+        except UnicodeDecodeError:
+            bin_mode = True
+            old = self.read(bin_mode=bin_mode)
         subprocess.call(args)
-        return self.read() != old
+        return self.read(bin_mode) != old
 
     def browse(self):
         """Display the file with phpsploit's BROWSER setting.
@@ -168,7 +173,7 @@ class Path(str):
         instead, if it is opened through a GNU/Linux system.
 
         If you want to read data rawly, without newline treatment
-        a mentionned above, the bin_mode optionnal argument
+        as mentionned above, the bin_mode optionnal argument
         should be set to True, in which case a bytes() buffer
         containing file data is returned instead of str().
 
