@@ -142,14 +142,9 @@ class Path(str):
         args = shlex.split(session.Conf.EDITOR())
         args.append(self)
 
-        bin_mode = False
-        try:
-            old = self.read(bin_mode=bin_mode)
-        except UnicodeDecodeError:
-            bin_mode = True
-            old = self.read(bin_mode=bin_mode)
+        old = self.read()
         subprocess.call(args)
-        return self.read(bin_mode) != old
+        return self.read() != old
 
     def browse(self):
         """Display the file with phpsploit's BROWSER setting.
@@ -178,12 +173,15 @@ class Path(str):
         containing file data is returned instead of str().
 
         """
+        if not bin_mode:
+            try:
+                lines = self.readlines()
+                data = os.linesep.join(lines)
+                return data
+            except UnicodeDecodeError:
+                bin_mode = True
         if bin_mode:
             return open(self, 'rb').read()
-        else:
-            lines = self.readlines()
-            data = os.linesep.join(lines)
-            return data
 
     def write(self, data, bin_mode=False):
         """Write `data` to the file path.
@@ -200,7 +198,19 @@ class Path(str):
         Otherwise, is data is a bytes() buffer, data is rawly written.
 
         """
-        if bin_mode or isinstance(data, bytes):
+        if isinstance(data, bytes):
+            bin_mode = True
+
+        if not bin_mode:
+            try:
+                lines = data.splitlines()
+                data = os.linesep.join(lines)
+                open(self, 'w').write(data)
+                return
+            except UnicodeDecodeError:
+                bin_mode = True
+
+        if bin_mode:
             # if bin_mode, convert str() to bytes()
             if isinstance(data, str):
                 data = data.encode()
@@ -208,10 +218,7 @@ class Path(str):
             elif not isinstance(data, bytes):
                 data = bytes(data)
             open(self, 'wb').write(data)
-        else:
-            lines = data.splitlines()
-            data = os.linesep.join(lines)
-            open(self, 'w').write(data)
+            return
 
     def readlines(self):
         """Get the list of file path lines.
