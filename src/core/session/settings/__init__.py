@@ -151,8 +151,6 @@ class Settings(objects.VarContainer):
         info = info.strip()
         doc = "\nDESCRIPTION:\n"
         doc += "\n".join(["    " + ln for ln in info.splitlines()])
-        import pprint
-        pprint.pprint(doc)
         doc += ("\n"
                 "\n"
                 "TYPE:\n"
