@@ -3,8 +3,6 @@ Interface:
 Settings:
 
 Sessions:
-  * Update session backwards compat with new default env var names
-  * Fix retrocompatibility bugs with `phpsploit v2` sessions.
   * Add retrocompatibility with `phpsploit v1` sessions (ticket #13).
 
 Core:

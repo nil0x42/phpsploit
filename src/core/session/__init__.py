@@ -136,12 +136,9 @@ class Session(objects.MetaDict):
         except OSError as e:
             if str(e) != "Not a gzipped file":
                 raise e
-            backwards.session.load(file)
-            try:
-                data = backwards.session.load(file)
-                assert data.keys() == session.keys()
-            except:
-                raise Warning("not a session file", "«{}»".format(file))
+            data = backwards.session.load(file)
+            assert data.keys() == session.keys()
+            # raise Warning("not a session file", "«{}»".format(file))
 
         # fill it with loaded file data
         for key in session.keys():

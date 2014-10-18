@@ -2,6 +2,7 @@
 
 import pickle
 
+
 def load(path):
     """Loads `file` as a deprecated pickled PhpSploit session file.
 
@@ -14,40 +15,41 @@ def load(path):
 
     session = {}
 
-    #XXX# File OBJECT ##############################
+    # XXX # File OBJECT ##############################
     session["File"] = None
 
-
-    #XXX# Alias OBJECT #############################
+    # XXX # Alias OBJECT #############################
     session["Alias"] = {}
 
-
-    #XXX# Cache OBJECT #############################
+    # XXX # Cache OBJECT #############################
     session["Cache"] = {}
 
+    # XXX # Hist OBJECT ##############################
+    session["Hist"] = {}
 
-    #XXX# Conf OBJECT ##############################
+    # XXX # Conf OBJECT ##############################
     # if useragent is an old default, remove it
     oldDefaultUA = ["file://misc/http/User-Agent.lst",
                     "file://framework/misc/http_user_agents.lst"]
     if "HTTP_USER_AGENT" in data["SET"].keys() \
-    and data["SET"]["HTTP_USER_AGENT"] in oldDefaultUA:
+            and data["SET"]["HTTP_USER_AGENT"] in oldDefaultUA:
         del data["SET"]["HTTP_USER_AGENT"]
     # remove SAVEFILE
-    try: del data["SET"]["SAVEFILE"]            # del SAVEFILE
-    except: pass
+    try:
+        del data["SET"]["SAVEFILE"]            # del SAVEFILE
+    except:
+        pass
     # bind settings
     session["Conf"] = data["SET"]
 
-
-    #XXX# Env OBJECT ###############################
-    # replace CWD name by PWD
+    # XXX # Env OBJECT ###############################
     data["ENV"]["PWD"] = data["ENV"].pop("CWD")
-    # TEXTEDITOR as env var is useless, delete it
-    try:
+    if "WRITE_TMPDIR" in data["ENV"].keys():
+        data["ENV"]["WRITEABLE_TMPDIR"] = data["ENV"].pop("WRITE_TMPDIR")
+    if "WRITE_WEBDIR" in data["ENV"].keys():
+        data["ENV"]["WRITEABLE_WEBDIR"] = data["ENV"].pop("WRITE_WEBDIR")
+    if "TEXTEDITOR" in data["ENV"]:
         del data["ENV"]["TEXTEDITOR"]
-    except:
-        pass
     # bind environment vars
     session["Env"] = data["ENV"]
     # add some env vars from old SRV object:
@@ -59,6 +61,8 @@ def load(path):
     session["Env"]["HTTP_SOFTWARE"] = data["SRV"]["soft"]
     session["Env"]["USER"] = data["SRV"]["user"]
     session["Env"]["WEB_ROOT"] = data["SRV"]["webroot"]
+    session["Env"]["PORT"] = data["SRV"]["port"]
+    session["Env"]["CLIENT_ADDR"] = data["SRV"]["client_addr"]
 
     # determine PLATFORM (one word, lowercase)
     session["Env"]["PLATFORM"] = data["SRV"]["os"].split()[0].lower()
