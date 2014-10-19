@@ -19,7 +19,6 @@ A session instance contains the following objects:
 import os
 import re
 import gzip
-import copy
 import pickle
 import difflib
 
@@ -65,12 +64,10 @@ class Session(objects.MetaDict):
             import readline
             # add array elements to readline history
             for command in array:
-                # print("add: "+repr(command))
                 readline.add_history(command)
             # recreate Hist from readline history (UGLY)
             self.Hist.clear()
             for i in range(1, readline.get_current_history_length() + 1):
-                # print("current item: "+repr(readline.get_history_item(i)))
                 self.Hist.append(readline.get_history_item(i))
         except ImportError:
             pass
@@ -121,15 +118,10 @@ class Session(objects.MetaDict):
         # A None/empty call returns current session as it is
         if file is None:
             return self
-
         file = os.path.truepath(file)
         # append default filename if is a directory
         if os.path.isdir(file):
             file = os.path.truepath(file, SESSION_FILENAME)
-
-        # create a new empty session
-        session = Session()
-
         # get unpickled `data` from `file`
         try:
             data = pickle.load(gzip.open(file))
@@ -137,22 +129,10 @@ class Session(objects.MetaDict):
             if str(e) != "Not a gzipped file":
                 raise e
             data = backwards.session.load(file)
-            assert data.keys() == session.keys()
-            # raise Warning("not a session file", "«{}»".format(file))
-
-        # fill it with loaded file data
-        for key in session.keys():
-            if isinstance(key, dict):
-                session[key].update(data[key])
-            elif key != "Hist":
-                session[key] = data[key]
-        try:
-            session._history_update(data["Hist"])
-        except:
-            pass
+        # get Session() obj from raw session value
+        session = self._obj_value(data)
         # bind new session's File to current file
         session.File = file
-
         return session
 
     def load(self, file=None):
@@ -170,24 +150,25 @@ class Session(objects.MetaDict):
         """
         if isinstance(obj, str):
             obj = self.load(obj)
-
         elif obj is None:
             obj = self.load(self.File)
-
         # if obj is not a dict instance, fallback to parent method
         elif not isinstance(obj, dict):
             return super().update(obj)
 
         for key, value in obj.items():
             if isinstance(self[key], dict):
+                self[key].clear()
                 self[key].update(value)
-            # elif key == "Hist":
-            #     self._history_update(value)
+            elif key == "Hist":
+                self._history_update(value)
             else:
                 self[key] = value
 
     def diff(self, file):
-        diff = copy.deepcopy(self)
+        # non-failing copy.deepcopy(self) equivalent:
+        diff = self._obj_value(self._raw_value(self))
+
         diff.update(file)
         diff = decolorize(diff).splitlines()
         orig = decolorize(self).splitlines()
@@ -195,6 +176,51 @@ class Session(objects.MetaDict):
         color = {' ': '%Reset', '-': '%Red', '+': '%Green', '?': '%Pink'}
         for line in difflib.Differ().compare(orig, diff):
             print(colorize(color[line[0]], line))
+
+    def _raw_value(self, obj):
+        # get raw value (dict) which represents
+        # the given Session() instance.
+        # returned value only contains python built-in objetcs.
+        rawdump = {}
+        for object in obj.keys():
+            rawdump[object] = {}
+            rawvar = (tuple if object == "Conf" else str)
+            if isinstance(obj[object], dict):
+                for var, value in obj[object].items():
+                    rawdump[object][var] = rawvar(value)
+            elif object == "Hist":
+                obj._history_update()
+                rawdump[object] = list(obj[object])
+            else:
+                rawdump[object] = rawvar(obj[object])
+        return rawdump
+
+    def _obj_value(self, raw=None):
+        def update_obj(obj_val, raw_val):
+            # ensure first loaded item is "Conf" (settings)
+            items = list(obj_val.keys())
+            items.remove("Conf")
+            items.insert(0, "Conf")
+            # load all session items, except Hist, which
+            # is loaded at the end.
+            for key in items:
+                if isinstance(obj_val[key], dict):
+                    obj_val[key].update(raw_val[key])
+                elif key != "Hist":
+                    obj_val[key] = raw_val[key]
+            obj_val._history_update(raw_val["Hist"])
+            try:
+                obj_val._history_update(raw_val["Hist"])
+            except:
+                pass
+            return obj_val
+
+        obj = Session()
+        obj = update_obj(obj, self._raw_value(self))
+        if raw is not None:
+            assert raw.keys() == obj.keys()
+            obj = update_obj(obj, raw)
+        return obj
 
     def dump(self, file=None):
         """Dump current session to `file`.
@@ -217,23 +243,8 @@ class Session(objects.MetaDict):
             if ui.input.Expect(False)(question.format(file)):
                 raise Warning("The session was not saved")
 
-        # get a simplified copy of current session that
-        # only contains python built-in objects:
-        rawdump = {}
-        for object in self.keys():
-            rawdump[object] = {}
-            rawvar = (tuple if object == "Conf" else str)
-            if isinstance(self[object], dict):
-                for var, value in self[object].items():
-                    rawdump[object][var] = rawvar(value)
-            elif object == "Hist":
-                self._history_update()
-                rawdump[object] = list(self[object])
-            else:
-                rawdump[object] = rawvar(self[object])
-
         # write it to the file
-        pickle.dump(rawdump, gzip.open(file, 'wb'))
+        pickle.dump(self._raw_value(self), gzip.open(file, 'wb'))
 
 
 # instanciate main phpsploit session as core.session
