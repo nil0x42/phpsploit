@@ -45,4 +45,4 @@ def setter(value):
 
 def default_value():
     raw_value = "phpSpl01t"
-    return setter(raw_value)
+    return raw_value

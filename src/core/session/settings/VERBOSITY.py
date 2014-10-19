@@ -15,4 +15,4 @@ def setter(value):
 
 
 def default_value():
-    return setter(False)
+    return False

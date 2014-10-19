@@ -50,5 +50,4 @@ def setter(value):
 
 
 def default_value():
-    raw_value = "GET"
-    return setter(raw_value)
+    return "GET"

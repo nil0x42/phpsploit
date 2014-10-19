@@ -30,4 +30,4 @@ def default_value():
         raw_value = os.environ["EDITOR"]
     elif sys.platform.startswith("win"):
         raw_value = "notepad.exe"
-    return setter(raw_value)
+    return raw_value

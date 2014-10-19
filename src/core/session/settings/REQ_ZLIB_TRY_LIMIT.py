@@ -25,5 +25,4 @@ def setter(value):
 
 
 def default_value():
-    raw_value = "20 MiB"
-    return setter(raw_value)
+    return "20 MiB"

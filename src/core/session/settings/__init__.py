@@ -1,14 +1,10 @@
 import os
 import sys
 import re
-import tempfile
 import importlib
 
 import core
 import objects
-
-from datatypes import ByteSize, Path, ShellCmd, WebBrowser
-from datatypes import Interval, PhpCode, Proxy, Url, Boolean
 
 DEFAULT_HTTP_USER_AGENT = "file://"+core.basedir+"data/user_agents.lst"
 
@@ -82,7 +78,8 @@ class Settings(objects.VarContainer):
         if name[5:] and name[:5] == "HTTP_":
             # HTTP_* settings have a RandLineBuffer metatype
             metatype = objects.buffers.RandLineBuffer
-            setter = self._set_HTTP_header
+            # setter = self._set_HTTP_header
+            setter = lambda x: str(x)
             info = self._get_HTTP_header_info(name[5:])
             # allow removal of custom HTTP_ settings, except for user agent.
             if name != "HTTP_USER_AGENT" and \
@@ -108,8 +105,7 @@ class Settings(objects.VarContainer):
         else:
             if value == "%%DEFAULT%%":
                 value = default()
-            else:
-                value = metatype(value, setter)
+            value = metatype(value, setter)
 
         # add docstring attribute to setting
         value.docstring = self.format_docstring(name, metatype, info)
