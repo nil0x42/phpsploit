@@ -8,7 +8,7 @@ def load(path):
 
     """
     file = open(path, 'rb')
-    data = pickle.load(file)
+    data = pickle.load(file, encoding="latin1")
 
     # only phpsploit 2 < 2.2 sessions are supported
     assert data["PSCOREVER"] == 2
