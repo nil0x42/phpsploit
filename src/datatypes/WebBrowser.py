@@ -18,10 +18,10 @@ class WebBrowser(str):
         blacklist = ['macosx']
         lst = [x for x in webbrowser._browsers.keys() if x not in blacklist]
         fmt = ", ".join(lst)
-        if name != "" and name not in lst:
+        if name and name != "default" and name not in lst:
             raise ValueError("available browsers: %s." % fmt)
         try:
-            if not name:
+            if name.lower() in ["", "default"]:
                 name = webbrowser.get().name
             else:
                 name = webbrowser.get(name).name
