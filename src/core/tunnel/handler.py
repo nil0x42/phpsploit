@@ -766,29 +766,27 @@ class Request:
             # print payload forwarder error (if any)
             if self.payload_forwarder_error:
                 print("[*] If you are sure that the target is anyway "
-                      "infected, this error may be occured because the "
+                      "infected, this error may occur because the "
                       "REQ_HEADER_PAYLOAD\n" + self.payload_forwarder_error)
             return ''
 
         # anyway, some data has been received at this point
-        response = response['data']
+        b_response = response['data']
+        assert isinstance(b_response, bytes)
         # try to decode it, optional because php encoding can be unset
         try:
-            response = codecs.decode(response, 'zlib')
+            b_response = codecs.decode(b_response, 'zlib')
         except:
             pass
 
-        response = response.decode(errors='ignore')
-
         # convert the response data into python variable
         try:
-            response = payload.php2py(response)
+            response = payload.php2py(b_response, bin_mode=True)
         except:
             phpErrors = self.get_php_errors(response)
             if phpErrors:
                 return phpErrors
-            else:
-                raise ResponseError("Server response couldn't be unserialized")
+            raise
 
         # check that the received type is a dict
         if type(response).__name__ != 'dict':

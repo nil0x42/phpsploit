@@ -28,8 +28,10 @@ def py2php(python_var):
     return raw_php_var
 
 
-def php2py(raw_php_var):
-    raw_php_var = raw_php_var.encode()
+def php2py(raw_php_var, bin_mode=False):
+    # if bin_mode, raw_php_varis already bytes()..
+    if not bin_mode:
+        raw_php_var = raw_php_var.encode()
     python_var = phpserialize.loads(raw_php_var, decode_strings=True)
     python_var = phpserialize_recursive_dict_to_list(python_var)
     return python_var
