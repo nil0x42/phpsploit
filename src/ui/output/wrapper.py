@@ -112,7 +112,11 @@ class Stdout:
             self._backlog.write(decolorize(line))
         if not self._has_colors:
             line = decolorize(line)
-        self.outfile.write(line)
+        try:
+            self.outfile.write(line)
+        except UnicodeEncodeError:
+            buf = line.encode(errors="surrogateescape")
+            self.outfile.buffer.write(buf)
 
     def write(self, string):
         """Write the given string to stdout"""
