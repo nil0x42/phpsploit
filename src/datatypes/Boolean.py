@@ -33,7 +33,7 @@ class Boolean(int):
         return int.__new__(cls, value)
 
     def _raw_value(self):
-        return bool(self)
+        return int(self)
 
     def __call__(self):
         return self._raw_value()
