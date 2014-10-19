@@ -1,4 +1,5 @@
 import re
+import copy
 
 import objects
 
@@ -30,23 +31,45 @@ class Environment(objects.VarContainer):
     'bar'
 
     """
-    readonly = ["ADDR", "CLIENT_ADDR", "HOST", "PHP_VERSION", "PATH_SEP",
-                "HTTP_SOFTWARE", "WEB_ROOT"]
+    readonly = ["ADDR", "CLIENT_ADDR", "HOST", "HTTP_SOFTWARE",
+                "PATH_SEP", "PHP_VERSION", "WEB_ROOT"]
 
     def __init__(self, value={}, readonly=[]):
         self.readonly += readonly
+        self.defaults = {}
         super().__init__(value)
+        self.defaults = copy.copy(dict(self))
 
     def __setitem__(self, name, value):
         if name in self.readonly and name in self.keys():
             raise AttributeError("«{}» variable is read-only".format(name))
-        super().__setitem__(name, value)
+        if value == "%%DEFAULT%%":
+            if name in self.defaults.keys():
+                value = self.defaults[name]
+                super().__setitem__(name, value)
+            else:
+                raise AttributeError("'%s' have no default value" % name)
+        else:
+            super().__setitem__(name, value)
+        if name not in self.defaults.keys():
+            self.defaults[name] = self[name]
 
     def _isattr(self, name):
         return re.match("^[A-Z][A-Z0-9_]+$", name)
 
-    def update(self, *args, **kws):
-        backup = self.readonly
+    def update(self, dic):
+        readonly = self.readonly
         self.readonly = []
-        super().update(*args, **kws)
-        self.readonly = backup
+        for key, value in dic.items():
+            # do not update if the key has been set to
+            # another value than the default one.
+            if key in self.keys() \
+                    and key not in readonly \
+                    and self[key] != self.defaults[key]:
+                continue
+            super().update({key: value})
+        self.readonly = readonly
+
+    def clear(self):
+        self.defaults = {}
+        super().clear()
