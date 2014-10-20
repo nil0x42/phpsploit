@@ -31,6 +31,11 @@ class Shell(shnake.Shell):
 
     def __init__(self):
         super().__init__()
+        try:
+            import readline
+            readline.set_history_length(core.MAX_HISTORY_SIZE)
+        except ImportError:
+            pass
 
     def init(self):
         """phpsploit interface init"""
@@ -219,6 +224,9 @@ class Shell(shnake.Shell):
             return self.interpret("help history")
 
         last = readline.get_current_history_length()
+        while last > core.MAX_HISTORY_SIZE:
+            readline.remove_history_item(0)
+            last -= 1
         first = last - count
         if first < 1:
             first = 1
@@ -373,7 +381,7 @@ class Shell(shnake.Shell):
             session.dump(argv[2])
         # session load [<FILE>]
         elif argv[1] == 'load':
-            session.update(argv[2])
+            session.update(argv[2], update_history=True)
         # session diff [<FILE>]
         elif argv[1] == 'diff':
             session.diff(argv[2])

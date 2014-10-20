@@ -8,7 +8,10 @@ basic elements such as the following strings:
     userdir -> /home/user/.phpsploit/
 
 """
-# directory constants
+# constant variables
+MAX_HISTORY_SIZE = 10000
+
+# constant directories
 from src import basedir, coredir
 from .config import userdir
 

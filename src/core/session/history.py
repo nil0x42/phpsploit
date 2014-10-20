@@ -1,3 +1,6 @@
+from core import MAX_HISTORY_SIZE
+
+
 class History(list):
     """Commands history.
 
@@ -12,22 +15,22 @@ class History(list):
 
     """
 
-    size = 0;
+    size = 0
 
     def append(self, string):
         if not isinstance(string, str):
-            raise ValueError("Only strings could be added to history");
+            raise ValueError("Only strings could be added to history")
+        while len(self) >= MAX_HISTORY_SIZE:
+            self.pop(0)
         self.size += len(string)
         super().append(string)
 
-
     def pop(self, index=-1):
         try:
-            self.size -= len(self[index]);
+            self.size -= len(self[index])
         except:
             pass
         super().pop(index)
-
 
     def clear(self):
         self.size = 0
