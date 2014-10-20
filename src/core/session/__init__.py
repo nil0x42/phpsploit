@@ -67,8 +67,10 @@ class Session(objects.MetaDict):
                 readline.add_history(command)
             # recreate Hist from readline history (UGLY)
             self.Hist.clear()
-            for i in range(1, readline.get_current_history_length() + 1):
-                self.Hist.append(readline.get_history_item(i))
+            history_len = readline.get_current_history_length()
+            for i in range(1, history_len + 1):
+                line = readline.get_history_item(i)
+                self.Hist.append(line)
         except ImportError:
             pass
         # By default, hist max size is 20% of CACHE_SIZE
@@ -138,7 +140,7 @@ class Session(objects.MetaDict):
     def load(self, file=None):
         return (self(file))
 
-    def update(self, obj=None):
+    def update(self, obj=None, update_history=False):
         """Update current session with `obj`.
         The given argument can be a dictionnary instance, in which case
         it must be a valid session object to merge in.
@@ -148,27 +150,30 @@ class Session(objects.MetaDict):
         Is `obj` is None (default), "${SAVEPATH}./phpsploit.session" is used.
 
         """
+        file = None
         if isinstance(obj, str):
-            obj = self.load(obj)
+            file = obj
+            obj = self.load(file)
         elif obj is None:
-            obj = self.load(self.File)
+            file = self.File
+            obj = self.load(file)
         # if obj is not a dict instance, fallback to parent method
         elif not isinstance(obj, dict):
             return super().update(obj)
 
         for key, value in obj.items():
             if isinstance(self[key], dict):
-                self[key].clear()
+                # self[key].clear()
                 self[key].update(value)
             elif key == "Hist":
-                self._history_update(value)
+                if update_history and file is not None:
+                    self._history_update(value)
             else:
                 self[key] = value
 
     def diff(self, file):
         # non-failing copy.deepcopy(self) equivalent:
         diff = self._obj_value(self._raw_value(self))
-
         diff.update(file)
         diff = decolorize(diff).splitlines()
         orig = decolorize(self).splitlines()
@@ -189,7 +194,6 @@ class Session(objects.MetaDict):
                 for var, value in obj[object].items():
                     rawdump[object][var] = rawvar(value)
             elif object == "Hist":
-                obj._history_update()
                 rawdump[object] = list(obj[object])
             else:
                 rawdump[object] = rawvar(obj[object])
@@ -206,13 +210,10 @@ class Session(objects.MetaDict):
             for key in items:
                 if isinstance(obj_val[key], dict):
                     obj_val[key].update(raw_val[key])
+                elif key == "Hist":
+                    obj_val[key] += raw_val[key]
                 elif key != "Hist":
                     obj_val[key] = raw_val[key]
-            obj_val._history_update(raw_val["Hist"])
-            try:
-                obj_val._history_update(raw_val["Hist"])
-            except:
-                pass
             return obj_val
 
         obj = Session()
@@ -244,6 +245,7 @@ class Session(objects.MetaDict):
                 raise Warning("The session was not saved")
 
         # write it to the file
+        self._history_update()
         pickle.dump(self._raw_value(self), gzip.open(file, 'wb'))
 
 
