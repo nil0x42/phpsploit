@@ -7,7 +7,6 @@ Sessions:
   * when connecting to a target with `exploit`, if the session has changes,
     show the diff and ask user for confirmation to know if writeable env
     vars can be removed
-  * Fix infinite loop @BUG on `session diff` command.
 
 Core:
   * Implement a $PAYLOAD_PREFIX setting to allow custom php tricks
