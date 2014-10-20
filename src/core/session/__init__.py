@@ -179,7 +179,11 @@ class Session(objects.MetaDict):
         orig = decolorize(self).splitlines()
 
         color = {' ': '%Reset', '-': '%Red', '+': '%Green', '?': '%Pink'}
+
         for line in difflib.Differ().compare(orig, diff):
+            # dont be too much verbose...
+            if line.startswith('?'):
+                continue
             print(colorize(color[line[0]], line))
 
     def _raw_value(self, obj):
