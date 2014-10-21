@@ -15,6 +15,7 @@ import core
 import ui.output
 
 from core import session, tunnel, plugins
+import datatypes
 from datatypes import Path
 from ui.color import colorize
 
@@ -543,7 +544,14 @@ class Shell(shnake.Shell):
             # `set <VAR> +`: use $EDITOR as buffer viewer in file mode
             if len(argv) == 3:
                 # get a buffer obj from setting's raw buffer value
-                buffer = Path()
+                file_name = argv[1].upper()
+                file_ext = "txt"
+                setting_obj = session.Conf[argv[1]](call=False)
+                if isinstance(setting_obj, datatypes.PhpCode):
+                    file_ext = "php"
+                elif isinstance(setting_obj, datatypes.ShellCmd):
+                    file_ext = "sh"
+                buffer = Path(filename="%s.%s" % (file_name, file_ext))
                 buffer.write(session.Conf[argv[1]].buffer)
                 # try to edit it through $EDITOR, and update it
                 # if it has been modified.
