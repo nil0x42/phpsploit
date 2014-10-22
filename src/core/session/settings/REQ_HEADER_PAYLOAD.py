@@ -19,7 +19,7 @@ type = objects.buffers.RandLineBuffer
 
 
 def setter(value):
-    if not value.find("%%BASE64%%"):
+    if value.find("%%BASE64%%") < 0:
         raise ValueError("shall contain %%BASE64%% string")
     return datatypes.PhpCode(value)
 
