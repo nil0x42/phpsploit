@@ -1,6 +1,6 @@
 import re
-import ui.output
 from .Code import Code
+
 
 class PhpCode(Code("php")):
     """Line of PHP Code. (extends str)
@@ -16,11 +16,15 @@ class PhpCode(Code("php")):
     def __new__(cls, string):
         pattern = ("^\s*(?:<\?(?:[pP][hH][pP])?\s+)?\s*("
                    "[^\<\s].{4,}?)\s*;?\s*(?:\?\>)?\s*$")
-        # regex validates and parses the string
-        try:
-            php = re.match(pattern, string).group(1)
-        except:
-            raise ValueError('«%s» is not PHP code' % string)
+        # disable check if code is multiline
+        if string.splitlines() == 1:
+            try:
+                # regex validates and parses the string
+                php = re.match(pattern, string).group(1)
+            except:
+                raise ValueError('«%s» is not PHP code' % string)
+        else:
+            php = string
 
         return super().__new__(cls, php)
 
