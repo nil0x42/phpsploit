@@ -105,7 +105,7 @@ class MultiLineBuffer:
         else:
             objID = hashlib.md5(self.buffer.encode('utf-8')).hexdigest()
 
-        lines_str = " (%s choices)" % len(self.buffer.splitlines())
+        lines_str = " (%s lines)" % len(self.buffer.splitlines())
         return colorize("%BoldBlack", "<", "%BoldBlue", "MultiLine",
                         "%BasicCyan", "@", "%Bold", objID, "%BasicBlue",
                         lines_str, "%BoldBlack", ">")
