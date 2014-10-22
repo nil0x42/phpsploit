@@ -506,15 +506,19 @@ class Request:
 
         """
         error = ''
-        data = data.replace('<br />', '\n')  # html NewLines to Ascii
+        data = data.replace(b'<br />', b'\n')  # html NewLines to Ascii
         # get a list of non-empty data lines
         lines = list()
-        for line in data.split('\n'):
+        for line in data.split(b'\n'):
             line = line.strip()
             if line:
                 lines.append(line)
         # extract errors from data
         for line in lines:
+            try:
+                line = line.decode()
+            except:
+                break
             # this condition basically considers current line as a php error
             if line.count(': ') > 1 and ' on line ' in line:
                 line = re.sub(' \[<a.*?a>\]', '', line)  # remove html link tag
@@ -779,11 +783,12 @@ class Request:
         except:
             pass
 
+        # response = b_response.decode(errors="replace")
         # convert the response data into python variable
         try:
             response = payload.php2py(b_response, bin_mode=True)
         except:
-            phpErrors = self.get_php_errors(response)
+            phpErrors = self.get_php_errors(response['data'])
             if phpErrors:
                 return phpErrors
             raise
