@@ -115,7 +115,7 @@ class Stdout:
         try:
             self.outfile.write(line)
         except UnicodeEncodeError:
-            buf = line.encode(errors="surrogateescape")
+            buf = line.encode(errors="replace")
             self.outfile.buffer.write(buf)
 
     def write(self, string):
