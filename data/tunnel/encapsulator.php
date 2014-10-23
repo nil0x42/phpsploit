@@ -10,9 +10,11 @@ foreach ($orig_conf as $key => $val)
         unset($orig_conf[$key]);
 }
 
-// be verbose on php errors
-ini_set('display_errors', '1');
-ini_set('error_reporting', E_ALL ^ E_NOTICE);
+// %%PAYLOAD%% is replaced by $PAYLOAD_PREFIX configuration setting.
+// This feature allow executing something in php each time the
+// payload is executed, because any sent request is encapsulated
+// through this file (encapsulator.php).
+%%PAYLOAD_PREFIX%%
 
 // container for dynamic input variables, transmitted from plugins
 // at python side (plugin.py files).

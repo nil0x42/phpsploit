@@ -63,6 +63,9 @@ class Settings(objects.VarContainer):
         self.REQ_MAX_POST_SIZE = "4 MiB"
         self.REQ_ZLIB_TRY_LIMIT = "20 MiB"
 
+        # payload prefix
+        self.PAYLOAD_PREFIX = "%%DEFAULT%%"
+
     def __setitem__(self, name, value):
         # if the set value is a MultiLineBuffer instance, just do it!
         if isinstance(value, objects.buffers.MultiLineBuffer):

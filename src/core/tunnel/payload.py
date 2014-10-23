@@ -4,6 +4,7 @@ import base64
 import phpserialize
 
 import core
+from core import session
 from datatypes import Path
 from .exceptions import BuildError
 
@@ -95,9 +96,20 @@ class Build:
         self.length = encoded.length
         self.decoder = encoded.decoder
 
-    def encapsulate(self, code, parser):
+    def _get_raw_payload_prefix(self):
+        """return $PAYLOAD_PREFIX without php tags, in raw format"""
+
+        tmpfile = Path()
+        tmpfile.write(session.Conf.PAYLOAD_PREFIX())
+        payload_prefix = tmpfile.phpcode()
+        del tmpfile
+        return payload_prefix
+
+    def encapsulate(self, payload, parser):
         # template encapsulation
-        code = self.encapsulator.replace('%%PAYLOAD%%', code)
+        code = self.encapsulator.replace('%%PAYLOAD%%', payload)
+        payload_prefix = self._get_raw_payload_prefix()
+        code = code.replace("%%PAYLOAD_PREFIX%%", payload_prefix)
         code = code.rstrip(';') + ';'
         # parser encapsulation
         if parser:
