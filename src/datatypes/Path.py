@@ -142,9 +142,10 @@ class Path(str):
         args = shlex.split(session.Conf.EDITOR())
         args.append(self)
 
-        old = self.read()
+        old = self.read(bin_mode=True)
         subprocess.call(args)
-        return self.read() != old
+        new = self.read(bin_mode=True)
+        return new != old
 
     def browse(self):
         """Display the file with phpsploit's BROWSER setting.
@@ -179,8 +180,9 @@ class Path(str):
                 data = os.linesep.join(lines)
                 return data
             except UnicodeDecodeError:
-                bin_mode = True
-        if bin_mode:
+                bytestring = self.read(bin_mode=True)
+                return bytestring.decode(errors="replace")
+        elif bin_mode:
             return open(self, 'rb').read()
 
     def write(self, data, bin_mode=False):
