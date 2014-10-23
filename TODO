@@ -11,6 +11,8 @@ Sessions:
 Core:
   * Implement a $PAYLOAD_PREFIX setting to allow custom php tricks
     on each request, before all payload executions.
+  * Before exiting framework, if the session has changed, compared to
+    binded phpsploit session file, we must prompt user for confirmation.
 
 Commands:
   * `session save` needs a '-f' (force) option.
