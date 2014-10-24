@@ -171,20 +171,31 @@ class Session(objects.MetaDict):
             else:
                 self[key] = value
 
-    def diff(self, file):
+    def diff(self, file, display_diff=False):
+        """This function returns True is the given `file` is
+        a phpsploit session which differs from current session.
+        Otherwise, False is returned.
+
+        Additionally, if `display_diff` is set, the session
+        differences will be displayed in common unix `diff` style.
+        """
         # non-failing copy.deepcopy(self) equivalent:
         diff = self._obj_value(self._raw_value(self))
         diff.update(file)
         diff = decolorize(diff).splitlines()
         orig = decolorize(self).splitlines()
 
-        color = {' ': '%Reset', '-': '%Red', '+': '%Green', '?': '%Pink'}
+        retval = diff != orig
 
-        for line in difflib.Differ().compare(orig, diff):
-            # dont be too much verbose...
-            if line.startswith('?'):
-                continue
-            print(colorize(color[line[0]], line))
+        if display_diff:
+            color = {' ': '%Reset', '-': '%Red', '+': '%Green', '?': '%Pink'}
+            for line in difflib.Differ().compare(orig, diff):
+                # dont be too much verbose...
+                if line.startswith('?'):
+                    continue
+                print(colorize(color[line[0]], line))
+
+        return retval
 
     def _raw_value(self, obj):
         # get raw value (dict) which represents

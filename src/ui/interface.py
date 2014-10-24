@@ -114,6 +114,7 @@ class Shell(shnake.Shell):
         if tunnel:
             tunnel.close()
         else:
+            # XXX: Must do task in 'TODO' file, line 12.
             exit()
 
     ####################
@@ -385,7 +386,7 @@ class Shell(shnake.Shell):
             session.update(argv[2], update_history=True)
         # session diff [<FILE>]
         elif argv[1] == 'diff':
-            session.diff(argv[2])
+            session.diff(argv[2], display_diff=True)
         # sesion [<FILE>]
         else:
             print(session(argv[1]))
