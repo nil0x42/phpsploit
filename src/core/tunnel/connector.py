@@ -23,7 +23,7 @@ class Request:
         return True
 
     def close(self):
-        """close the virtual link, actually, juste return the
+        """close the virtual link, actually, just return the
         link closed's string
 
         """

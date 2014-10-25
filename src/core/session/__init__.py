@@ -24,7 +24,7 @@ import difflib
 
 import ui.input
 import objects
-import backwards.session
+import backwards
 from ui.color import colorize, decolorize
 
 from . import settings
@@ -130,7 +130,7 @@ class Session(objects.MetaDict):
         except OSError as e:
             if str(e) != "Not a gzipped file":
                 raise e
-            data = backwards.session.load(file)
+            data = backwards.v2.session.load(file)
         # get Session() obj from raw session value
         session = self._obj_value(data)
         # bind new session's File to current file

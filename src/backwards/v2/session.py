@@ -1,4 +1,12 @@
-"""Backward compatibility session file loader."""
+"""Load a phpsplpoit v2 session file.
+
+This is a backward compatibility component, wich
+allows loading phpsploit session files that where
+generated with a framework version between versions
+2.0.0Alpha and 2.1.4.
+
+"""
+
 
 import pickle
 
