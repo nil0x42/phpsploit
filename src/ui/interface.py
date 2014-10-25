@@ -57,6 +57,16 @@ class Shell(shnake.Shell):
         self.interpret(cmds[:-1], precmd=(lambda x: x))
         return cmds[-1] + argv[1:]
 
+    def onecmd(self, argv):
+        cmdrepr = []
+        for arg in argv:
+            argrepr = repr(arg)
+            sep = argrepr[0], argrepr[-1]
+            argrepr = colorize("%DimCyan", argrepr[1:-1])
+            cmdrepr.append(sep[0] + argrepr + sep[1])
+        print("[#] CMD EXEC: %s" % (" ".join(cmdrepr)))
+        super().onecmd(argv)
+
     def postcmd(self, retval, argv):
         """Post command hook
 
@@ -383,7 +393,12 @@ class Shell(shnake.Shell):
             session.dump(argv[2])
         # session load [<FILE>]
         elif argv[1] == 'load':
-            session.update(argv[2], update_history=True)
+            try:
+                session.update(argv[2], update_history=True)
+                print("[#] Session file correctly loaded")
+            except:
+                print("[#] Could not load session file")
+                raise
         # session diff [<FILE>]
         elif argv[1] == 'diff':
             session.diff(argv[2], display_diff=True)
