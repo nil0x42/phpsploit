@@ -1,3 +1,8 @@
+### Version 0.4 *(2014-10-25)*
+- `command not found` now returns 127, just like bash
+- interpret() now supports bash's 'set -e' like behavior,
+  by setting `fatal_errors` argument to True.
+
 ### Version 0.3 *(2014-07-31)*
 - Remove implicit call of `help <cmd>` when typing `<cmd> --help`.
 - Add **CHANGELOG.md** file.

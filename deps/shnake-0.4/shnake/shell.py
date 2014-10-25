@@ -187,13 +187,24 @@ class Shell(cmd.Cmd):
             self.postloop()  # post command hook method
 
     def interpret(self, commands, precmd=None, onecmd=None,
-                  postcmd=None, interactive=False):
+                  postcmd=None, interactive=False, fatal_errors=False):
         """Interpret `commands` as a list of commands.
         `commands` can be a multi command raw string or a preformated
         commands list. If str, is is automatically parsed.
 
         precmd, onecmd and postcmd funcs can be overwritten from arguments.
         If None, they default to their respective class methods.
+
+        The `interactive` argument allows us telling to parseline() method
+        call if we are running interactively.
+
+        The `fatal_errors` argument, is True, leaves as soon as an
+        interpreted command returns an error (non zero).
+        This behavior is similar to bash's 'set -e' option.
+        Otherwise, if this argument is set to False, the function
+        returns the value returned by last executed command in the
+        list.
+
         """
         # is commands is str, use self.parseline
         if isinstance(commands, str):
@@ -212,6 +223,10 @@ class Shell(cmd.Cmd):
                 argv = precmd(argv)
                 retval = onecmd(argv)
                 retval = postcmd(retval, argv)
+                if fatal_errors:
+                    errcode = self.return_errcode(retval)
+                    if errcode != 0:
+                        return errcode
             # on exit, let return_errcode() handle error message if any,
             # then raise SystemExit with the proper return code number.
             except SystemExit as e:
@@ -283,7 +298,8 @@ class Shell(cmd.Cmd):
         try:
             return cmdrun(argv)
         except BaseException as e:
-            return self.onexception(e)
+            retval = self.onexception(e)
+            return retval
 
     def onexception(self, exception):
         """Hook method executed when a python exception is raised
@@ -357,6 +373,8 @@ class Shell(cmd.Cmd):
         cmdRepr = "${!r}".format(argv[0])
         cmd = argv[0] if argv[0] == cmdRepr[2:-1] else cmdRepr
         self.stdout.write((self.nocmd + '\n') % cmd)
+        # standard return code on bash at `command not found` error.
+        return 127
 
     def complete(self, text, state):
         """Return the next possible completion for 'text'.
