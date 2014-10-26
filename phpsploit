@@ -141,12 +141,15 @@ if opt['source']:
         print()
         parser.error("%r: couldn't read source file." % opt['source'])
 
+retval = 0
+
 if opt['eval']:
-    interface.interpret(opt['eval'])
+    retval = interface.interpret(opt['eval'])
 
 if not ui.input.isatty():
     lines = sys.stdin.read()
-    interface.interpret(lines)
+    retval = interface.interpret(lines)
+    sys.exit(retval)
 
 if interactive:
     interface.cmdloop()
@@ -154,3 +157,4 @@ if interactive:
         print(colorize("%DimWhite", '\n' + rand_message() + '\n'))
 
 del src  # make PEP8 syntax checker happy
+sys.exit(retval)
