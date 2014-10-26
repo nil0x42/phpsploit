@@ -113,7 +113,7 @@ interface = ui.interface.Shell()
 if opt['config'] is None:
     opt['config'] = core.userdir + "config"
 
-if interface.interpret("source '%s'" % opt['config']) != 0:
+if interface.interpret("source -e '%s'" % opt['config']) != 0:
     print()
     parser.error("%r: couldn't load config file." % opt['config'])
 elif interactive and ui.output.isatty():
