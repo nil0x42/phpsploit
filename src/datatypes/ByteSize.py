@@ -18,7 +18,11 @@ class ByteSize(int):
     def __new__(cls, value=0):
 
         # convert to an uppercase string, and format it.
-        value = str(value).replace(',', '.').upper() + 'B'
+        value = str(value)
+        if len(value.splitlines()) != 1:
+            raise ValueError("invalid byte size representation")
+
+        value = value.replace(',', '.').upper() + 'B'
         value = value.replace(' ', '').replace('O', 'B')
 
         # get back float number and metric prefix
