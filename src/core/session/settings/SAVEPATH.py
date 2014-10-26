@@ -13,7 +13,7 @@ import objects
 import datatypes
 
 
-type = objects.buffers.RandLineBuffer
+type = objects.buffers.MultiLineBuffer
 
 
 def setter(value):
