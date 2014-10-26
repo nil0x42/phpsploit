@@ -73,7 +73,7 @@ class Path(str):
             mode += 'e'
 
         def error(msg):
-            raise ValueError("«{}»: {}".format(path, msg))
+            raise ValueError("%r: %s" % (path, msg))
 
         # exists
         if 'e' in mode and not os.path.exists(path):

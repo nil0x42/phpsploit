@@ -135,10 +135,11 @@ class MultiLineBuffer:
 
         # other strings are added to the buffer, and parent file
         # is set to None (because buffer is no more a copy of a file)
-        if self.buffer[-1] not in "\r\n":
-            self.buffer += os.linesep
-        self.buffer += new
-        return self.__class__(self.buffer, self._getobj)
+        buffer = self.buffer
+        if buffer[-1] not in "\r\n":
+            buffer += os.linesep
+        buffer += new
+        return self.__class__(buffer, self._getobj)
 
     def __getitem__(self, item):
         """It allows the object being converted to list or tuple,
