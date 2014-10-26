@@ -5,6 +5,9 @@
 #
 # It means that you just have to put the commands as you type them in
 # the PhpSploit shell interface in order to build your own configuration.
+#
+# NOTE: If any command fails, the phpsploit framework will fail to
+#       load this configuration file.
 
 
 ### Those aliases are enabled by default for retrocompatibility
@@ -22,8 +25,8 @@ alias lpwd      "lrun pwd"
 ## set your own PASSKEY to prevent other phpsploit users use your backdoors.
 # set PASSKEY "YourPassKey"
 
-## use vim as text editor because all other editors sucks !
+## Better use the best editor within phpsploit ;)
 # set EDITOR "vim"
 
-## bypass vimist habits by aliasing 'edit' to 'vim'.
+## An useful shortcut, aliasing `edit` command with your prefered editor..
 # alias vim     "edit"
