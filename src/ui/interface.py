@@ -58,14 +58,8 @@ class Shell(shnake.Shell):
         return cmds[-1] + argv[1:]
 
     def onecmd(self, argv):
-        cmdrepr = []
-        for arg in argv:
-            argrepr = repr(arg)
-            sep = argrepr[0], argrepr[-1]
-            argrepr = colorize("%DimCyan", argrepr[1:-1])
-            cmdrepr.append(sep[0] + argrepr + sep[1])
-        print("[#] CMD EXEC: %s" % (" ".join(cmdrepr)))
-        super().onecmd(argv)
+        print("[#] %s: Running..." % debug_cmdrepr(argv))
+        return super().onecmd(argv)
 
     def postcmd(self, retval, argv):
         """Post command hook
@@ -73,6 +67,8 @@ class Shell(shnake.Shell):
         - Redraw shell prompt
 
         """
+        int_retval = self.return_errcode(retval)
+        print("[#] %s: Returned %d" % (debug_cmdrepr(argv), int_retval))
         # redraw shell prompt after each command
         prompt_elems = ["%Lined", "phpsploit"]
         if tunnel:
@@ -462,21 +458,35 @@ class Shell(shnake.Shell):
         """Execute a phpsploit script file
 
         SYNOPSIS:
-            source <LOCAL_FILE>
+            source [OPTIONS] <LOCAL_FILE>
 
         DESCRIPTION:
             Read [LOCAL_FILE] and executes the statements
             contained therein. As if each line was a phpsploit
             command.
 
+        OPTIONS:
+            -e
+                Abort file sourcing as soon as a command
+                fails (aka, returns nonzero), and return
+                the code returned by the command which failed.
+
         EXAMPLES:
             > source /tmp/spl01t-script.phpsploit
               - Run the given script file's content, line by line
         """
-        if len(argv) != 2:
+        if len(argv) == 2:
+            abort_on_error = False
+            source_file = argv[1]
+        elif len(argv) == 3 and argv[1] == "-e":
+            abort_on_error = True
+            source_file = argv[2]
+        else:
             return self.interpret("help source")
-
-        self.interpret(open(argv[1], 'r').read())
+        source_file = os.path.truepath(source_file)
+        data = open(source_file, 'r').read()
+        ret = self.interpret(data, fatal_errors=abort_on_error)
+        return ret
 
     ################
     # COMMAND: set #
@@ -712,7 +722,7 @@ class Shell(shnake.Shell):
 
         DESCRIPTION:
             Opens previous command output into the user
-            prefered test editor ($EDITOR setting).
+            prefered text editor ($EDITOR setting).
 
             NOTE: Last command buffer is colorless. It means that
             it does not contains any ANSI terminal color codes.
@@ -895,3 +905,17 @@ class Shell(shnake.Shell):
         if exception.filename is not None:
             exception.args += ("«{}»".format(exception.filename),)
         return exception
+
+
+def debug_cmdrepr(argv):
+    """Returns a nice representation of given command arguments
+    """
+    cmdrepr = []
+    for arg in argv:
+        argrepr = repr(arg)
+        sep = argrepr[0], argrepr[-1]
+        argrepr = colorize("%DimCyan", argrepr[1:-1])
+        cmdrepr.append(sep[0] + argrepr + sep[1])
+    args = " ".join(cmdrepr)
+    str = colorize("%BoldCyan", "CMD(", "%Reset", args, "%BoldCyan", ")")
+    return str
