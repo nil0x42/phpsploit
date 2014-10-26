@@ -49,6 +49,16 @@ def rand_message():
     msg_list = Path(core.basedir + "data/messages.lst").readlines()
     return random.choice(msg_list).strip()
 
+
+# run `cmd` into `interface`, with syntax error handling
+def cmdrun(interface, cmdobj):
+    try:
+        retval = interface.interpret(cmdobj)
+    except (SyntaxWarning, SyntaxError) as err:
+        retval = interface.onexception(err)
+    return retval
+
+
 # This makes phpsploit usable as shellbang for scripting
 if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
     sys.argv.insert(1, "--source")
@@ -113,42 +123,42 @@ interface = ui.interface.Shell()
 if opt['config'] is None:
     opt['config'] = core.userdir + "config"
 
-if interface.interpret("source -e '%s'" % opt['config']) != 0:
+if cmdrun(interface, "source -e '%s'" % opt['config']) != 0:
     print()
     parser.error("%r: couldn't load config file." % opt['config'])
 elif interactive and ui.output.isatty():
     logo = Path(core.basedir + "data/logo.ascii").read()
-    interface.interpret("clear")
+    cmdrun(interface, "clear")
     print(logo + '\n\n')
     print(colorize("%Bold", "# Stealth post-exploitation framework\n"))
     print(colorize("%DimWhite", rand_message()))
-    interface.interpret("help")
+    cmdrun(interface, "help")
 
 interface.init()
 
 if opt['load']:
-    if interface.interpret("session load '%s'" % opt['load']) != 0:
+    if cmdrun(interface, "session load '%s'" % opt['load']) != 0:
         print()
         parser.error("%r: couldn't load session file." % opt['load'])
 
 if opt['target']:
-    if interface.interpret("set TARGET '%s'" % opt['target']) != 0:
+    if cmdrun(interface, "set TARGET '%s'" % opt['target']) != 0:
         print()
         parser.error("%r: couldn't set target url." % opt['target'])
 
 if opt['source']:
-    if interface.interpret("source '%s'" % opt['source']) != 0:
+    if cmdrun(interface, "source '%s'" % opt['source']) != 0:
         print()
         parser.error("%r: couldn't read source file." % opt['source'])
 
 retval = 0
 
 if opt['eval']:
-    retval = interface.interpret(opt['eval'])
+    retval = cmdrun(interface, opt['eval'])
 
 if not ui.input.isatty():
     lines = sys.stdin.read()
-    retval = interface.interpret(lines)
+    retval = cmdrun(interface, lines)
     sys.exit(retval)
 
 if interactive:
