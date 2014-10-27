@@ -254,10 +254,11 @@ class Session(objects.MetaDict):
 
         # if file exists and differs from session's binded file,
         # then an user overwriting confirmation is required.
-        if os.path.exists(file) and file != self.File:
-            question = "File «{}» already exists, overwrite it ?"
-            if ui.input.Expect(False)(question.format(file)):
-                raise Warning("The session was not saved")
+        if os.path.exists(file):
+            if file != self.File or super().__getitem__("File") is not None:
+                question = "File «{}» already exists, overwrite it ?"
+                if ui.input.Expect(False)(question.format(file)):
+                    raise Warning("The session was not saved")
 
         # write it to the file
         self._history_update()
