@@ -238,7 +238,7 @@ class Session(objects.MetaDict):
             obj = update_obj(obj, raw)
         return obj
 
-    def dump(self, file=None):
+    def dump(self, file=None, ask_confirmation=True):
         """Dump current session to `file`.
         `file` defaults to self.File if unset.
         """
@@ -254,8 +254,8 @@ class Session(objects.MetaDict):
 
         # if file exists and differs from session's binded file,
         # then an user overwriting confirmation is required.
-        if os.path.exists(file):
-            if file != self.File or super().__getitem__("File") is not None:
+        if ask_confirmation and os.path.exists(file):
+            if file != self.File or super().__getitem__("File") is None:
                 question = "File «{}» already exists, overwrite it ?"
                 if ui.input.Expect(False)(question.format(file)):
                     raise Warning("The session was not saved")

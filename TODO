@@ -13,7 +13,6 @@ Core:
     binded phpsploit session file, we must prompt user for confirmation.
 
 Commands:
-  * `session save` needs a '-f' (force) option.
   * remote shell @exit needs a -f opt to bypass leave confirmation in case of
     unsaved session.
   * Add a `bind` core command to bind the prompt to a plugin.

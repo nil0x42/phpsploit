@@ -342,7 +342,8 @@ class Shell(shnake.Shell):
         """phpsploit session handler
 
         SYNOPSIS:
-            session [load|save|diff] [<FILE>]
+            session [load|diff] [<FILE>]
+            session save [-f] [<FILE>]
 
         DESCRIPTION:
             The `session` core command handles phpsploit sessions.
@@ -361,11 +362,13 @@ class Shell(shnake.Shell):
                 not set, $SAVEFILE setting is used. If $SAVEFILE is
                 not set, the session's state when framework started
                 is used as comparator.
-            * session save [<FILE>]
+            * session save [-f] [<FILE>]
                 Dumps the current session instance into the given file.
                 If FILE is unset, then the session is saved to $SAVEFILE
                 setting, if $SAVEFILE does not exist, then the file path
                 "$SAVEPATH/phpsploit.session" is implicitly used.
+                NOTE: The '-f' option, is used, saves the session without
+                      asking user confirmation is file already exists.
             * session load [<FILE>]
                 Try to load <FILE> as the current session. If unset,
                 FILE is implicitly set to "./phpsploit.session".
@@ -378,15 +381,18 @@ class Shell(shnake.Shell):
 
         WARNING:
             The `session load` action can't be used through a remote
-            shell session. If it is the case, run `exit` to leave
-            it first.
+            shell session. If it is the case, run `exit` to disconnect
+            from remote server before launching this command.
         """
         # prevent argv IndexError
         argv += [None, None]
 
         # session save [<FILE>]
         if argv[1] == 'save':
-            session.dump(argv[2])
+            if argv[2] == '-f':
+                return session.dump(argv[3], ask_confirmation=False)
+            else:
+                return session.dump(argv[2])
         # session load [<FILE>]
         elif argv[1] == 'load':
             try:
