@@ -918,10 +918,11 @@ def debug_cmdrepr(argv):
     """
     cmdrepr = []
     for arg in argv:
+        if not isinstance(arg, str):
+            continue
         argrepr = repr(arg)
         sep = argrepr[0], argrepr[-1]
         argrepr = colorize("%DimCyan", argrepr[1:-1])
         cmdrepr.append(sep[0] + argrepr + sep[1])
     args = " ".join(cmdrepr)
-    str = colorize("%BoldCyan", "CMD(", "%Reset", args, "%BoldCyan", ")")
-    return str
+    return colorize("%BoldCyan", "CMD(", "%Reset", args, "%BoldCyan", ")")
