@@ -7,8 +7,8 @@ generated with a framework version between versions
 
 """
 
-
 import pickle
+from backwards.utils import rename_key, remove_key
 
 
 def load(path):
@@ -43,21 +43,16 @@ def load(path):
             and data["SET"]["HTTP_USER_AGENT"] in oldDefaultUA:
         del data["SET"]["HTTP_USER_AGENT"]
     # remove SAVEFILE
-    try:
-        del data["SET"]["SAVEFILE"]            # del SAVEFILE
-    except:
-        pass
+    remove_key(data["SET"], "SAVEFILE")
     # bind settings
     session["Conf"] = data["SET"]
 
     # XXX # Env OBJECT ###############################
-    data["ENV"]["PWD"] = data["ENV"].pop("CWD")
-    if "WRITE_TMPDIR" in data["ENV"].keys():
-        data["ENV"]["WRITEABLE_TMPDIR"] = data["ENV"].pop("WRITE_TMPDIR")
-    if "WRITE_WEBDIR" in data["ENV"].keys():
-        data["ENV"]["WRITEABLE_WEBDIR"] = data["ENV"].pop("WRITE_WEBDIR")
-    if "TEXTEDITOR" in data["ENV"]:
-        del data["ENV"]["TEXTEDITOR"]
+    rename_key(data["ENV"], "CWD", "PWD")
+    rename_key(data["ENV"], "WRITE_TMPDIR", "WRITEABLE_TMPDIR")
+    rename_key(data["ENV"], "WRITE_WEBDIR", "WRITEABLE_WEBDIR")
+
+    remove_key(data["ENV"], "TEXTEDITOR")
     # bind environment vars
     session["Env"] = data["ENV"]
     # add some env vars from old SRV object:
@@ -80,17 +75,7 @@ def load(path):
         else:
             session["Env"]["PLATFORM"] = "unix"
 
-    # EDITOR replaces old TEXTEDITOR
-    try:
-        session["Conf"]["EDITOR"] = session["Conf"]["TEXTEDITOR"]
-        del session["Conf"]["TEXTEDITOR"]
-    except:
-        pass
-    # BROWSER replaces old WEBBROWSER
-    try:
-        session["Conf"]["BROWSER"] = session["Conf"]["WEBBROWSER"]
-        del session["Conf"]["WEBBROWSER"]
-    except:
-        pass
+    rename_key(session["Conf"], "TEXTEDITOR", "EDITOR")
+    rename_key(session["Conf"], "WEBBROWSER", "BROWSER")
 
     return session
