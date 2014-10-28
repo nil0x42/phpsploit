@@ -99,6 +99,8 @@ class Settings(objects.VarContainer):
         # This fix creates a non-failing version of user agent default value
         if name == "HTTP_USER_AGENT" and \
                 (name not in self.keys() or value == "%%DEFAULT%%"):
+            if value == "%%DEFAULT%%":
+                value = DEFAULT_HTTP_USER_AGENT
             try:
                 value = metatype(value, setter)
             except ValueError:
