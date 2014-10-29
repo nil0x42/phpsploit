@@ -143,7 +143,11 @@ class Path(str):
         args.append(self)
 
         old = self.read(bin_mode=True)
-        subprocess.call(args)
+        try:
+            subprocess.call(args)
+        except OSError:
+            print("[-] Invalid EDITOR setting (use `set EDITOR <value>`)")
+            raise
         new = self.read(bin_mode=True)
         return new != old
 
