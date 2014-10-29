@@ -14,19 +14,18 @@ class PhpCode(Code("php")):
 
     """
     def __new__(cls, string):
-        pattern = ("^\s*(?:<\?(?:[pP][hH][pP])?\s+)?\s*("
-                   "[^\<\s].{4,}?)\s*;?\s*(?:\?\>)?\s*$")
+        pattern = ("^(?:<\?(?:[pP][hH][pP])?\s+)?\s*("
+                   "[^\<\s].{4,}?)\s*;?\s*(?:\?\>)?$")
         # disable check if code is multiline
-        if string.splitlines() == 1:
+        string = string.strip()
+        if len(string.splitlines()) == 1:
             try:
                 # regex validates and parses the string
-                php = re.match(pattern, string).group(1)
+                string = re.match(pattern, string).group(1)
             except:
                 raise ValueError('«%s» is not PHP code' % string)
-        else:
-            php = string
 
-        return super().__new__(cls, php)
+        return super().__new__(cls, string)
 
     def _code_value(self):
         return "<?php %s; ?>" % self.__call__()
