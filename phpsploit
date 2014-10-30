@@ -51,9 +51,11 @@ def rand_message():
 
 
 # run `cmd` into `interface`, with syntax error handling
-def cmdrun(interface, cmdobj):
+def cmdrun(interface, cmdobj, show_err=False):
     try:
         retval = interface.interpret(cmdobj)
+        if retval != 0 and show_err:
+            interface.interpret("corectl stack-traceback")
     except (SyntaxWarning, SyntaxError) as err:
         retval = interface.onexception(err)
     return retval
@@ -123,7 +125,7 @@ interface = ui.interface.Shell()
 if opt['config'] is None:
     opt['config'] = core.userdir + "config"
 
-if cmdrun(interface, "source -e '%s'" % opt['config']) != 0:
+if cmdrun(interface, "source -e '%s'" % opt['config'], show_err=True) != 0:
     print()
     parser.error("%r: couldn't load config file." % opt['config'])
 elif interactive and ui.output.isatty():
