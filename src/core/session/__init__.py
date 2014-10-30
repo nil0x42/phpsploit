@@ -104,7 +104,9 @@ class Session(objects.MetaDict):
         # deco = "\n" + colorize("%Blue", "=" * len(title)) + "\n"
         deco = "\n" + colorize("%Blue", "=" * 68) + "\n"
         data = deco + title + deco
-        for obj in self.values():
+        ordered_keys = ["Conf", "Env", "Alias"]
+        for name in ordered_keys:
+            obj = self[name]
             if isinstance(obj, objects.MetaDict):
                 try:
                     data += str(obj) + "\n"
@@ -130,7 +132,10 @@ class Session(objects.MetaDict):
         except OSError as e:
             if str(e) != "Not a gzipped file":
                 raise e
-            data = backwards.v2.session.load(file)
+            try:
+                data = backwards.v2.session.load(file)
+            except:
+                data = backwards.v1.session.load(file)
         # get Session() obj from raw session value
         session = self._obj_value(data)
         # bind new session's File to current file
