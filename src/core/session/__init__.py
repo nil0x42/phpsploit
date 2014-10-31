@@ -114,7 +114,7 @@ class Session(objects.MetaDict):
                     pass
         return data
 
-    def __call__(self, file=None):
+    def __call__(self, file=None, fatal_errors=True):
         """Load and return the session object stored in `file`.
         if `file` is None, current session (self) is returned.
 
@@ -137,13 +137,13 @@ class Session(objects.MetaDict):
             except:
                 data = backwards.v1.session.load(file)
         # get Session() obj from raw session value
-        session = self._obj_value(data)
+        session = self._obj_value(data, fatal_errors=fatal_errors)
         # bind new session's File to current file
         session.File = file
         return session
 
-    def load(self, file=None):
-        return (self(file))
+    def load(self, file=None, fatal_errors=True):
+        return (self(file, fatal_errors=fatal_errors))
 
     def update(self, obj=None, update_history=False):
         """Update current session with `obj`.
@@ -169,7 +169,11 @@ class Session(objects.MetaDict):
         for key, value in obj.items():
             if isinstance(self[key], dict):
                 # self[key].clear()
-                self[key].update(value)
+                try:
+                    self[key].update(value)
+                except Exception as e:
+                    print("lol", e)
+                    raise
             elif key == "Hist":
                 if update_history and file is not None:
                     self._history_update(value)
@@ -219,28 +223,38 @@ class Session(objects.MetaDict):
                 rawdump[object] = rawvar(obj[object])
         return rawdump
 
-    def _obj_value(self, raw=None):
-        def update_obj(obj_val, raw_val):
+    def _obj_value(self, raw=None, fatal_errors=True):
+        def update_obj(obj_val, raw_val, fatal_errors=True):
             # ensure first loaded item is "Conf" (settings)
             items = list(obj_val.keys())
             items.remove("Conf")
             items.insert(0, "Conf")
             # load all session items, except Hist, which
             # is loaded at the end.
-            for key in items:
-                if isinstance(obj_val[key], dict):
-                    obj_val[key].update(raw_val[key])
-                elif key == "Hist":
-                    obj_val[key] += raw_val[key]
-                elif key != "Hist":
-                    obj_val[key] = raw_val[key]
+            for component in items:
+                if isinstance(obj_val[component], dict):
+                    for key, val in raw_val[component].items():
+                        try:
+                            obj_val[component][key] = val
+                        except Exception as err:
+                            comp_name = "session.%s.%s" % (component, key)
+                            msg_prefix = "[-] Cannot set %s" % comp_name
+                            if fatal_errors:
+                                print("%s:" % msg_prefix)
+                                raise
+                            else:
+                                print("%s: %s" % (msg_prefix, err))
+                elif component == "Hist":
+                    obj_val[component] += raw_val[component]
+                elif component != "Hist":
+                    obj_val[component] = raw_val[component]
             return obj_val
 
         obj = Session()
         obj = update_obj(obj, self._raw_value(self))
         if raw is not None:
             assert raw.keys() == obj.keys()
-            obj = update_obj(obj, raw)
+            obj = update_obj(obj, raw, fatal_errors=False)
         return obj
 
     def dump(self, file=None, ask_confirmation=True):

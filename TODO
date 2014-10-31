@@ -3,10 +3,6 @@ Interface:
 Settings:
 
 Sessions:
-  * Loading a session should not fail is one setting is not more setable.
-    For example, an old session which uses a TMPPATH that do not exists
-    in current environment, must display the load error but continue loading
-    the rest of the session file instead of aborting.
   * Add retrocompatibility with `phpsploit v1` sessions (ticket #13).
   * when connecting to a target with `exploit`, if the session has changes,
     show the diff and ask user for confirmation to know if writeable env
