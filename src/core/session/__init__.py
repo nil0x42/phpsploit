@@ -232,7 +232,9 @@ class Session(objects.MetaDict):
             # load all session items, except Hist, which
             # is loaded at the end.
             for component in items:
-                if isinstance(obj_val[component], dict):
+                if component == "Env":
+                    obj_val[component].update(raw_val[component])
+                elif isinstance(obj_val[component], dict):
                     for key, val in raw_val[component].items():
                         try:
                             obj_val[component][key] = val
