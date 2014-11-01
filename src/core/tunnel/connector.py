@@ -10,13 +10,16 @@ class Request:
         pass
 
     def open(self):
-        payload = Path(core.basedir, 'data/tunnel/connector.php').phpcode()
-
+        # instanciate and configure payload handler.
         socket = handler.Request()
         socket.is_first_payload = True
         socket.errmsg_request = "Could not connect to TARGET"
         socket.errmsg_response = "TARGET does not seem to be backdoored"
+        # send the `connector.php` payload through created tunnel (socket).
+        payload = Path(core.basedir, 'data/tunnel/connector.php').phpcode()
         socket.open(payload)
+        # build phpsploit session's environment variables from
+        # connector.php's returned array.
         self.socket = socket
         raw_vars = self._get_vars(socket.read())
         self.environ = self._build_env(raw_vars)
@@ -45,6 +48,7 @@ class Request:
         written at self.CNF['SRV'] on the interface's core.
 
         """
+        # return first argument which is not empty
         def choose(options, default=''):
             for choice in options:
                 if choice in raw_vars:
@@ -52,6 +56,7 @@ class Request:
                         return(raw_vars[choice])
             return default
 
+        # get env from connector's returned array
         env = {}
 
         env['CLIENT_ADDR'] = choose(['REMOTE_ADDR', 'REMOTE_HOST'])

