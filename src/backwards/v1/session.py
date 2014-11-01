@@ -51,6 +51,9 @@ def load(path):
         tmp = data["SETTINGS"]["BACKDOOR"]
         tmp = tmp.replace("%%POSTVAR%%", "%%PASSKEY%%")
         data["SETTINGS"]["BACKDOOR"] = tmp
+    # $TARGET
+    if "OPENER" in data and "URL" in data["OPENER"]:
+        data["SETTINGS"]["TARGET"] = data["OPENER"]["URL"]
 
     session["Conf"] = data["SETTINGS"]
 
