@@ -7,7 +7,7 @@ generated with a framework version < 2.1.4.
 """
 
 import pickle
-from backwards.utils import rename_key
+from ..utils import rename_key
 
 
 def load(path):

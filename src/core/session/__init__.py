@@ -24,12 +24,12 @@ import difflib
 
 import ui.input
 import objects
-import backwards
 from ui.color import colorize, decolorize
 
 from . import settings
 from . import environment
 from . import history
+from . import compat
 
 SESSION_FILENAME = "phpsploit.session"
 
@@ -133,9 +133,9 @@ class Session(objects.MetaDict):
             if str(e) != "Not a gzipped file":
                 raise e
             try:
-                data = backwards.v2.session.load(file)
+                data = compat.v2.session.load(file)
             except:
-                data = backwards.v1.session.load(file)
+                data = compat.v1.session.load(file)
         # get Session() obj from raw session value
         session = self._obj_value(data, fatal_errors=fatal_errors)
         # bind new session's File to current file

@@ -8,7 +8,7 @@ generated with a framework version between versions
 """
 
 import pickle
-from backwards.utils import rename_key, remove_key
+from ..utils import rename_key, remove_key
 
 
 def load(path):
