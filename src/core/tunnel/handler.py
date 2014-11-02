@@ -461,6 +461,7 @@ class Request:
             content = content.encode()
 
         # add the user settings specified headers, and get their real values.
+        headers.update({"Host": self.hostname})
         headers.update(self.set_headers)
         headers = get_headers(headers)
 
