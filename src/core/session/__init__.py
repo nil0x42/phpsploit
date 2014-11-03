@@ -53,6 +53,7 @@ class Session(objects.MetaDict):
         self.Alias = objects.VarContainer(title="Command Aliases")
         self.Cache = objects.VarContainer(title="HTTP Response Cache")
         self.Hist = history.History()
+        self.Compat = {}
         self.File = None
 
     def _isattr(self, name):
@@ -167,13 +168,10 @@ class Session(objects.MetaDict):
             return super().update(obj)
 
         for key, value in obj.items():
-            if isinstance(self[key], dict):
-                # self[key].clear()
-                try:
+            if key == "Compat":
+                self[key] = value
+            elif isinstance(self[key], dict):
                     self[key].update(value)
-                except Exception as e:
-                    print("lol", e)
-                    raise
             elif key == "Hist":
                 if update_history and file is not None:
                     self._history_update(value)
@@ -224,34 +222,33 @@ class Session(objects.MetaDict):
         return rawdump
 
     def _obj_value(self, raw=None, fatal_errors=True):
-        def update_obj(obj_val, raw_val, fatal_errors=True):
-            # ensure first loaded item is "Conf" (settings)
-            items = list(obj_val.keys())
-            items.remove("Conf")
-            items.insert(0, "Conf")
-            # load all session items, except Hist, which
-            # is loaded at the end.
-            for component in items:
-                if component == "Env":
-                    obj_val[component].update(raw_val[component])
-                elif isinstance(obj_val[component], dict):
-                    for key, val in raw_val[component].items():
+        def update_obj(obj, new, fatal_errors=True):
+            elems = obj.keys()
+            if "Conf" in elems:
+                elems.remove("Conf")
+                elems.insert(0, "Conf")
+            if "Env" in elems:
+                elems.remove("Env")
+                obj["Env"].update(new["Env"])
+            if "Hist" in elems:
+                elems.remove("Hist")
+                obj["Hist"] += new["Hist"]
+            for elem in elems:
+                if isinstance(obj[elem], dict):
+                    for key, value in new[elem].items():
                         try:
-                            obj_val[component][key] = val
-                        except Exception as err:
-                            comp_name = "session.%s.%s" % (component, key)
-                            msg_prefix = "[-] Cannot set %s" % comp_name
+                            obj[elem][key] = value
+                        except Exception as error:
+                            item_repr = "session.%s.%s" % (elem, key)
+                            msg_prefix = "[-] Cannot set %s" % item_repr
                             if fatal_errors:
                                 print("%s:" % msg_prefix)
                                 raise
                             else:
-                                print("%s: %s" % (msg_prefix, err))
-                elif component == "Hist":
-                    obj_val[component] += raw_val[component]
-                elif component != "Hist":
-                    obj_val[component] = raw_val[component]
-            return obj_val
-
+                                print("%s: %s" % (msg_prefix, error))
+                else:
+                    obj[elem] = new[elem]
+            return obj
         obj = Session()
         obj = update_obj(obj, self._raw_value(self))
         if raw is not None:
