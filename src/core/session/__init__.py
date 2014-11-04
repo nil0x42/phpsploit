@@ -223,7 +223,7 @@ class Session(objects.MetaDict):
 
     def _obj_value(self, raw=None, fatal_errors=True):
         def update_obj(obj, new, fatal_errors=True):
-            elems = obj.keys()
+            elems = list(obj.keys())
             if "Conf" in elems:
                 elems.remove("Conf")
                 elems.insert(0, "Conf")
