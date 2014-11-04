@@ -68,7 +68,7 @@ if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
 
 parser = argparse.ArgumentParser()
 parser.formatter_class = help_format
-parser.description = 'A furtive tunnel based php webshell'
+parser.description = "The stealth post-exploitation framework"
 parser.add_argument('-v', '--version',
                     help="output version information and exit",
                     action="store_true")
@@ -76,10 +76,10 @@ parser.add_argument('-c', '--config',
                     help="use alternative configuration file",
                     metavar="<FILE>")
 parser.add_argument('-l', '--load',
-                    help="load the given phpsploit session file",
+                    help="load the given session file",
                     metavar="<SESSION>")
 parser.add_argument('-t', '--target',
-                    help="use the given URL as phpsploit target",
+                    help="use the given URL as remote target",
                     metavar="<URL>")
 parser.add_argument('-s', '--source',
                     help="execute commands file (disables interactive mode)",
