@@ -1,22 +1,23 @@
 import re
 
-ANSI = {"reset"  : "\x1b[0m",   # reset everything
-        "bold"   : "\x1b[1m",   # bold/bright style
-        "dim"    : "\x1b[2;3m", # dim||italic style
-        "lined"  : "\x1b[4m",   # underlined
-        "blink"  : "\x1b[5m",   # blinking style
-        "invert" : "\x1b[7m",   # invert forgound/backgroun
-        "basic"  : "\x1b[22m",  # set normal style
+ANSI = {"reset":  "\x1b[0m",    # reset everything
+        "bold":   "\x1b[1m",    # bold/bright style
+        "dim":    "\x1b[2;3m",  # dim||italic style
+        "lined":  "\x1b[4m",    # underlined
+        "blink":  "\x1b[5m",    # blinking style
+        "invert": "\x1b[7m",    # invert forgound/backgroun
+        "basic":  "\x1b[22m",   # set normal style
         # COLOR CODES
-        "black"  : "\x1b[30m",  # black color
-        "red"    : "\x1b[31m",  # red color
-        "green"  : "\x1b[32m",  # green color
-        "yellow" : "\x1b[33m",  # yellow color
-        "blue"   : "\x1b[34m",  # blue color
-        "pink"   : "\x1b[35m",  # pink/magenta
-        "cyan"   : "\x1b[36m",  # cyan color
-        "white"  : "\x1b[37m",  # white color
-        "normal" : "\x1b[39m"}  # default color
+        "black":  "\x1b[30m",   # black color
+        "red":    "\x1b[31m",   # red color
+        "green":  "\x1b[32m",   # green color
+        "yellow": "\x1b[33m",   # yellow color
+        "blue":   "\x1b[34m",   # blue color
+        "pink":   "\x1b[35m",   # pink/magenta
+        "cyan":   "\x1b[36m",   # cyan color
+        "white":  "\x1b[37m",   # white color
+        "normal": "\x1b[39m"}   # default color
+
 
 def colorize(*args):
     """Takes single or multiple strings as argument, and colorize them.
@@ -55,9 +56,9 @@ def colorize(*args):
     'Hello world !'
 
     """
-    colors = 0 # the number of color code args
-    strings = 0 # the number of standard strin args
-    result = [] # the final result
+    colors = 0  # the number of color code args
+    strings = 0  # the number of standard strin args
+    result = []  # the final result
 
     for idx, arg in enumerate(args):
         # try to do a CamelCase split to check if arg is an ansi color code
@@ -68,7 +69,7 @@ def colorize(*args):
         # if the arg is an ansi color code:
         if not [e for e in split if e not in ANSI] and arg.startswith('%'):
             # add the corresponding ANSI codes
-            result.append( ''.join([ANSI[c] for c in split]) )
+            result.append(''.join([ANSI[c] for c in split]))
             colors += 1
 
         # if the arg is a standard string:
@@ -93,7 +94,6 @@ def colorize(*args):
     return ''.join(result)
 
 
-
 def decolorize(string):
     """Returns a colorless version of the given string.
     Based on a regular expression that removes any standard ANSI code.
@@ -105,4 +105,3 @@ def decolorize(string):
     """
     regex = "\x01?\x1b\[((?:\d|;)*)([a-zA-Z])\x02?"
     return re.sub(regex, "", str(string))
-
