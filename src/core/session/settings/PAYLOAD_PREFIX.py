@@ -1,13 +1,14 @@
 """
-This setting aims to provide a way to deeply
-customize special cases while executing payloads.
+This variable contains php code which is interpreted
+on each http request, just before payload execution.
 
-The PAYLOAD_PREFIX's contains a PHP code that will
-be executed just before at the start of all sent
-php payloads.
+This setting can be used for example in order to
+override a php configuration option with a value
+that extends execution scope, or aniything you want
+to be executed anytime.
 
 NOTE: If you do not understand what you're doing,
-      please do not change this setting.
+      keep this setting with default value.
 """
 import core
 import objects
