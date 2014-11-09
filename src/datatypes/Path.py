@@ -1,5 +1,7 @@
 import os
 
+from core import encoding
+
 
 class Path(str):
     """File or directory path. (extends str)
@@ -185,7 +187,7 @@ class Path(str):
                 return data
             except UnicodeDecodeError:
                 bytestring = self.read(bin_mode=True)
-                return bytestring.decode(errors="replace")
+                return encoding.decode(bytestring)
         elif bin_mode:
             return open(self, 'rb').read()
 
@@ -219,7 +221,7 @@ class Path(str):
         if bin_mode:
             # if bin_mode, convert str() to bytes()
             if isinstance(data, str):
-                data = data.encode()
+                data = encoding.encode(data)
             # otherwise, try to convert to bytes()
             elif not isinstance(data, bytes):
                 data = bytes(data)

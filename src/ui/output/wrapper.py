@@ -32,6 +32,7 @@ import re
 from io import StringIO
 
 import ui.output
+from core import encoding
 from ..color import colorize, decolorize
 
 
@@ -115,7 +116,7 @@ class Stdout:
         try:
             self.outfile.write(line)
         except UnicodeEncodeError:
-            buf = line.encode(errors="replace")
+            buf = encoding.encode(line)
             self.outfile.buffer.write(buf)
 
     def write(self, string):
