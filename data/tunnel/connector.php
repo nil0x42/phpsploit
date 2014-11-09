@@ -64,12 +64,13 @@ if (!$R['WEB_ROOT'])
             $tmp = str_replace("/", $sep, $rel);
             $len = strlen($tmp);
             if($tmp == substr($abs, -$len))
-                $R['WEB_ROOT']=substr($abs, 0, -$len);
+                $R['WEB_ROOT'] = substr($abs, 0, -$len);
         }
     }
 }
 
-$R['WEB_ROOT'] = @realpath($R['WEB_ROOT']);
+if (($x = @realpath($R['WEB_ROOT'])) !== False)
+    $R['WEB_ROOT'] = $x;
 
 
 // Determine WRITEABLE_WEBDIR.
