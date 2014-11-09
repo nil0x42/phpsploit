@@ -30,15 +30,15 @@ type = objects.buffers.MultiLineBuffer
 
 
 def setter(value):
-    value = str(value).lower()
+    value = str(value)
     reserved_headers = ['host', 'accept-encoding', 'connection',
                         'user-agent', 'content-type', 'content-length']
     if not value:
         raise ValueError("can't be an empty string")
     if not re.match("^[a-zA-Z0-9_]+$", value):
         raise ValueError("only chars from set «a-Z0-9_» are allowed")
-    if re.match('^zz[a-z]{2}$', value) or \
-       value.replace('_', '-') in reserved_headers:
+    if re.match('^zz[a-z]{2}$', value.lower()) or \
+       value.lower().replace('_', '-') in reserved_headers:
         raise ValueError("reserved header name: «{}»".format(value))
     return value
 
