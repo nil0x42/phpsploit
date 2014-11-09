@@ -33,6 +33,7 @@ class Environment(objects.VarContainer):
     """
     readonly = ["ADDR", "CLIENT_ADDR", "HOST", "HTTP_SOFTWARE",
                 "PATH_SEP", "PHP_VERSION", "WEB_ROOT"]
+    item_deleters = ["NONE"]
 
     def __init__(self, value={}, readonly=[]):
         self.readonly += readonly

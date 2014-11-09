@@ -13,7 +13,13 @@ class VarContainer(objects.MetaDict):
     >>> del obj['KEY']
     >>> obj['KEY'] = "None"
 
+    NOTES:
+    Setting the key to None or "" (empty str) deletes it only according
+    to `self.item_deleters`.
+    This attribute can be set to something else in order to change behavior.
+
     """
+    item_deleters = ["", "NONE"]
 
     def __init__(self, value={}, title=None):
         super().__init__(value, title)
@@ -30,7 +36,7 @@ class VarContainer(objects.MetaDict):
         """
         # delete item if its value is empty or None:
         if isinstance(value, (str, type(None))) and \
-           str(value).lower() in ["", "none"]:
+                str(value).upper() in self.item_deleters:
             # don't try to delete unexisting item
             if name not in self.keys():
                 return
