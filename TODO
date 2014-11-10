@@ -6,16 +6,21 @@ Sessions:
   * Add retrocompatibility with `phpsploit v1` sessions (ticket #13).
   * when connecting to a target with `exploit`, if the session has changes,
     show the diff and ask user for confirmation to know if writeable env
-    vars can be removed
+    vars can be removed.
+  * session saving shall ask user confirmation if session changed.
 
 Core:
   * Before exiting framework, if the session has changed, compared to
     binded phpsploit session file, we must prompt user for confirmation.
+  * on framework exit, user shall receive a warning if current session
+    has changed, recomending him to save it before exiting.
 
 Commands:
   * remote shell @exit needs a -f opt to bypass leave confirmation in case of
     unsaved session.
   * Add a `bind` core command to bind the prompt to a plugin.
+  * Add `corectl debug-http-request` command for watching payload construction
+    and responses steps within a debug buffer displayed on $EDITOR.
 
 Plugins:
   * Write a "plugins/network/scan/plugin.py" small ip scanner, to be able to
