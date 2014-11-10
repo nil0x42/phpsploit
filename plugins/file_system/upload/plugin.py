@@ -88,7 +88,7 @@ if not os.path.isfile(local_abspath):
     sys.exit("Can't upload %s: Not a file" % local_abspath)
 
 try:
-    data = open(local_abspath, 'r').read()
+    data = open(local_abspath, 'rb').read()
 except OSError as e:
     sys.exit("Can't upload %s: %s" % (e.filename, e.strerror))
 
@@ -96,7 +96,7 @@ except OSError as e:
 payload = server.payload.Payload("payload.php")
 payload['TARGET'] = abspath
 payload['NAME'] = local_basename
-payload['DATA'] = base64.b64encode(data.encode()).decode()
+payload['DATA'] = base64.b64encode(data)
 payload['FORCE'] = force
 
 for iteration in [1, 2]:
