@@ -25,11 +25,13 @@ import difflib
 import ui.input
 import objects
 from ui.color import colorize, decolorize
+from core import encoding
 
 from . import settings
 from . import environment
 from . import history
-from . import compat
+
+from . import compat_session
 
 SESSION_FILENAME = "phpsploit.session"
 
@@ -93,11 +95,12 @@ class Session(objects.MetaDict):
         return value
 
     def __setitem__(self, name, value):
-        # use grandparent class (bypass parent's None feature)
-        # setting Env item has special wrap
         if name == "Env":
+            # Assuming that value can be set as a dict(),
+            # we use special wrapper for setting value
+            # as an Environment() instance.
             value = environment.Environment(value)
-        dict.__setitem__(self, name, value)
+        super().__setitem__(name, value)
 
     def __str__(self):
         """Gives a nice string representation of current session"""
@@ -129,14 +132,16 @@ class Session(objects.MetaDict):
             file = os.path.truepath(file, SESSION_FILENAME)
         # get unpickled `data` from `file`
         try:
-            data = pickle.load(gzip.open(file))
-        except OSError as e:
-            if str(e) != "Not a gzipped file":
-                raise e
-            try:
-                data = compat.v2.session.load(file)
-            except:
-                data = compat.v1.session.load(file)
+            data = pickle.load(gzip.open(file),
+                               encoding=encoding.default_encoding,
+                               errors=encoding.default_errors)
+            if "Compat" not in data.keys():
+                data["Compat"] = {}
+        except OSError as error:
+            if str(error) == "Not a gzipped file":
+                data = compat_session.load(file)
+            else:
+                raise error
         # get Session() obj from raw session value
         session = self._obj_value(data, fatal_errors=fatal_errors)
         # bind new session's File to current file
