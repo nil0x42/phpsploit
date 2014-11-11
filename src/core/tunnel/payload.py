@@ -5,6 +5,7 @@ import phpserialize
 
 import core
 from core import session
+from core import encoding
 from datatypes import Path
 from .exceptions import BuildError
 
@@ -29,29 +30,34 @@ def phpserialize_recursive_dict_to_list(python_var):
 
 
 def py2php(python_var):
-    """Convert a python object into php code string.
+    """Convert a python object into php serialized code string.
     """
-    serialized = phpserialize.dumps(python_var).decode()
+    serialized = phpserialize.dumps(python_var,
+                                    charset=encoding.default_encoding,
+                                    errors=encoding.default_errors)
+    serialized = encoding.decode(serialized)
     encoded = Encode(serialized).php_loader()
     raw_php_var = 'unserialize(%s)' % encoded
     return raw_php_var
 
 
-def php2py(raw_php_var, bin_mode=False):
+def php2py(raw_php_var):
     """Convert a php code string into python object.
     """
-    # if bin_mode, raw_php_varis already bytes()..
-    if not bin_mode:
-        raw_php_var = raw_php_var.encode()
-    python_var = phpserialize.loads(raw_php_var, decode_strings=True)
+    python_var = phpserialize.loads(raw_php_var,
+                                    charset=encoding.default_encoding,
+                                    errors=encoding.default_errors,
+                                    decode_strings=True)
     python_var = phpserialize_recursive_dict_to_list(python_var)
     return python_var
 
 
 class Encode:
-    """Take a php code string, and encode it into
+    """Take a php code string, and convert it into
     an encoded payload, for easily mergind it into
     an existing php payload.
+    This class also provides payload size minification
+    by using gzip compression.
 
     USAGE
     =====
@@ -131,16 +137,25 @@ class Encode:
                 self.compressed = True
         self.data = self.data.decode()
         self.rawlength = len(self.data)
-        # patch to get the real urlencoded length of base64
-        self.length = self.rawlength
-        self.length += self.data.count('/') * 2
-        self.length += self.data.count('+') * 2
-        self.length += self.data.count('=') * 2
+        self.length = self.get_real_transport_length(self.data)
 
     def php_loader(self):
         """Returns the php_loader for encoded phpcode string.
         """
         return self.decoder % self.data
+
+    def get_real_transport_length(self, payload):
+        """Get real length the given data payload takes
+        while transported via HTTP with urlencoding.
+        Indeed, base64 payloads contain 3 types of chars which
+        are urlencoded, as urlencoding makes the encoded char 3
+        times larger, we should add it to length.
+        """
+        length = len(payload)
+        length += payload.count('/') * 2
+        length += payload.count('+') * 2
+        length += payload.count('=') * 2
+        return length
 
 
 class Build:
