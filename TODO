@@ -3,7 +3,6 @@ Interface:
 Settings:
 
 Sessions:
-  * Add retrocompatibility with `phpsploit v1` sessions (ticket #13).
   * when connecting to a target with `exploit`, if the session has changes,
     show the diff and ask user for confirmation to know if writeable env
     vars can be removed.
@@ -30,7 +29,7 @@ Plugins:
 
 Documentation:
   * Simplify the manpage to summarize only commands and how to get started
-  * When all this done, the 'rtfm' core command can be removed
+  * When all this is done, the 'rtfm' core command can be removed
   * Add autocompletion for `help set <SETTING>` commands
 
 Network Stealth:

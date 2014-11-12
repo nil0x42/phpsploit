@@ -70,7 +70,8 @@ class Tunnel:
     def send(self, raw_payload):
         assert self.active
         assert self.socket
-        request = handler.Request()
+        # request = handler.Request()
+        request = handler.new_request()
         request.open(raw_payload)
         return request
 

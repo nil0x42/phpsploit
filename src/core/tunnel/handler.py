@@ -227,7 +227,7 @@ class Request:
             # if the currently built request is not the first http query
             # sent to the server, it means that it works as it is. Therefore,
             # additionnal payload warnings and verifications are useless.
-            return forwarder
+            return {self.passkey: forwarder}
 
         err = None
         # if the base64 payload is not enquoted by REQ_HEADER_PAYLOAD
@@ -256,7 +256,7 @@ class Request:
                    "defaultly act escaping them in request headers.")
 
         self.payload_forwarder_error = err
-        return forwarder
+        return {self.passkey: forwarder}
 
     def build_get_headers(self, php_payload):
         """this function takes the main payload data as argument
@@ -315,7 +315,7 @@ class Request:
         # the header that acts as payload forwarder
         forwarder = self.build_forwarder(method, php_payload.decoder)
 
-        headers = {self.passkey: forwarder}  # headers dictionnary
+        headers = forwarder  # headers dictionnary
         content = None  # post data content, None on GET requests
 
         if not self.can_add_headers(headers):
@@ -613,7 +613,7 @@ class Request:
             try:
                 print('[*] Large payload: %s bytes' % php_payload.length)
                 self.load_multipart()
-            except:
+            except KeyboardInterrupt:
                 print('')
                 raise BuildError('Payload construction aborted')
 
@@ -784,18 +784,20 @@ class Request:
         except:
             pass
 
-        # response = b_response.decode(errors="replace")
         # convert the response data into python variable
         try:
-            response = payload.php2py(b_response, bin_mode=True)
+            response = payload.php2py(b_response)
         except:
             phpErrors = self.get_php_errors(response['data'])
             if phpErrors:
                 return phpErrors
             raise
 
+        # import pprint
+        # pprint.pprint("------------- PYTHON RESPONSE DICT -------------")
+        # pprint.pprint(response)
         # check that the received type is a dict
-        if type(response).__name__ != 'dict':
+        if not isinstance(response, dict):
             raise ResponseError('Decoded response is not a dict()')
         # then check it is in the good format,
         # aka {'__RESULT__':'DATA'} OR {'__ERROR__': 'ERR'}
@@ -855,3 +857,17 @@ def get_headers(headers):
         if hasattr(val, "__call__"):
             headers[key] = val()
     return headers
+
+
+def new_request():
+    """Wrapper for Request() method which returns
+    backwards compatibility handler if needed.
+
+    """
+    from . import compat_handler
+    if "id" in session.Compat and session.Compat["id"] == "v1":
+        request = compat_handler.Request_V1_x()
+        request.passkey = session.Compat["passkey"]
+    else:
+        request = Request()
+    return request

@@ -91,25 +91,40 @@ class Loader_V1_x(AbstractSessionLoader):
             result["HTTP_USER_AGENT"] = "%%DEFAULT%%"
 
         # $PASSKEY
-        rename_key(result, "POSTVAR", "PASSKEY")
-        if "%%HASHKEY%%" in result["PASSKEY"]:
-            value = result["PASSKEY"]
-            result["PASSKEY"] = value.replace("%%HASHKEY%%",
-                                              old_session["ENV_HASH"])
+        remove_key(result, "POSTVAR")
+        # rename_key(result, "POSTVAR", "PASSKEY")
+        # if "%%HASHKEY%%" in result["PASSKEY"]:
+        #     value = result["PASSKEY"]
+        #     result["PASSKEY"] = value.replace("%%HASHKEY%%",
+        #                                       old_session["ENV_HASH"])
 
         # $BACKDOOR
-        if "%%POSTVAR%%" in result["BACKDOOR"]:
-            value = result["BACKDOOR"]
-            if "'%%POSTVAR%%'" in value or '"%%POSTVAR%%"' in value:
-                value = value.replace("%%POSTVAR%%", "%%PASSKEY%%")
-            else:
-                value = value.replace("%%POSTVAR%%", "'%%PASSKEY%%'")
-            result["BACKDOOR"] = value
+        remove_key(result, "BACKDOOR")
+        # if "%%POSTVAR%%" in result["BACKDOOR"]:
+        #     value = result["BACKDOOR"]
+        #     if "'%%POSTVAR%%'" in value or '"%%POSTVAR%%"' in value:
+        #         value = value.replace("%%POSTVAR%%", "%%PASSKEY%%")
+        #     else:
+        #         value = value.replace("%%POSTVAR%%", "'%%PASSKEY%%'")
+        #     result["BACKDOOR"] = value
 
         # $TARGET
         if "OPENER" in old_session.keys():
             if "URL" in old_session["OPENER"].keys():
                 result["TARGET"] = old_session["OPENER"]["URL"]
+
+        return result
+
+    def set_Compat(self, old_session):
+        result = {}
+        # Compat $id
+        result["id"] = "v1"
+
+        # Compat $passkey
+        passkey = old_session["SETTINGS"]["POSTVAR"]
+        if "%%HASHKEY%%" in passkey:
+            result["passkey"] = passkey.replace("%%HASHKEY%%",
+                                                old_session["ENV_HASH"])
 
         return result
 

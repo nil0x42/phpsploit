@@ -1,10 +1,11 @@
-### Version 2.2.1b *(IN DEVELOPMENT)*
+### Version 2.3.0 *(IN DEVELOPMENT)*
 - Fix issue #9 (small bug in api.payload.Payload())
 - `lrun` command is now able to change PWD (issue #10)
 - Remove deprecated `lcd` and `lpwd` commands.
 - Fix some small bugs and documentation misspells.
 - Fix issue #6 (*_proxy env var handling through http tunnel).
 - All settings can now be reset with `set <VAR> %%DEFAULT%%`
+- Add full backward compatibility with older phpsploit session files.
 
 ### Version 2.2.0b *(2014-08-09)*
 - **Rewritten the whole PhpSploit framework** in python 3 with new skeleton.

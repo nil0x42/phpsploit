@@ -18,6 +18,7 @@ from core import session, tunnel, plugins
 import datatypes
 from datatypes import Path
 from ui.color import colorize
+import ui.input
 
 
 class Shell(shnake.Shell):
@@ -58,6 +59,11 @@ class Shell(shnake.Shell):
         return cmds[-1] + argv[1:]
 
     def onecmd(self, argv):
+        if "id" in session.Compat and session.Compat["id"] == "v1":
+            print("[-] Warning: You are using a v1-compatible session file")
+            print("[-]          please upgrade $TARGET with new $BACKDOOR")
+            print("[-]          and run `session upgrade` when done.")
+            print("")
         print("[#] %s: Running..." % debug_cmdrepr(argv))
         return super().onecmd(argv)
 
@@ -332,7 +338,7 @@ class Shell(shnake.Shell):
     ####################
     # COMMAND: session #
     def complete_session(self, text, *ignored):
-        keys = ['save', 'diff', 'load']
+        keys = ['save', 'diff', 'load', 'upgrade']
         # load argument is not available from remote shell:
         if self.__class__.__name__ == "MainShell":
             keys.append('load')
@@ -344,6 +350,7 @@ class Shell(shnake.Shell):
         SYNOPSIS:
             session [load|diff] [<FILE>]
             session save [-f] [<FILE>]
+            session upgrade
 
         DESCRIPTION:
             The `session` core command handles phpsploit sessions.
@@ -372,6 +379,14 @@ class Shell(shnake.Shell):
             * session load [<FILE>]
                 Try to load <FILE> as the current session. If unset,
                 FILE is implicitly set to "./phpsploit.session".
+            * session upgrade
+                If current session file is in v1-compatible mode,
+                the request handler is limited to POST method and does
+                not supports multi request and stealth modules.
+                This command shall be used to upgrade current session
+                AFTER you upgraded the remote $TARGET with new-style
+                phpsploit backdoor (which can be obtained with
+                `exploit --get-backdoor` command).
 
         EXAMPLES:
             > session load /tmp/phpsploit.session
@@ -404,6 +419,22 @@ class Shell(shnake.Shell):
         # session diff [<FILE>]
         elif argv[1] == 'diff':
             session.diff(argv[2], display_diff=True)
+        # session upgrade
+        elif argv[1] == 'upgrade':
+            if "id" in session.Compat:
+                print("[*] You are about to upgrade phpsploit session.")
+                print("[*] Please ensure that you have correctly upgraded")
+                print("[*] the remote backdoor into target URL.")
+                print("[*] After session upgrade, phpsploit assumes that")
+                print("[*] an up-to-date backdoor is active on $TARGET.")
+                cancel = ui.input.Expect(False)
+                if not cancel("Do you really want to upgrade session now ?"):
+                    session.Compat = {}
+                    print("[*] Session correctly upgraded")
+                else:
+                    print("[-] Session upgrade aborted")
+            else:
+                print("[-] Session already up-to-date")
         # sesion [<FILE>]
         else:
             print(session(argv[1]))

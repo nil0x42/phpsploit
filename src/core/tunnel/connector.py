@@ -11,7 +11,7 @@ class Request:
 
     def open(self):
         # instanciate and configure payload handler.
-        socket = handler.Request()
+        socket = handler.new_request()
         socket.is_first_payload = True
         socket.errmsg_request = "Could not connect to TARGET"
         socket.errmsg_response = "TARGET does not seem to be backdoored"
@@ -22,7 +22,12 @@ class Request:
         # connector.php's returned array.
         self.socket = socket
         raw_vars = self._get_vars(socket.read())
+        # import pprint
+        # pprint.pprint("------------- RAW ENVIRONMENT--------------")
+        # pprint.pprint(raw_vars)
         self.environ = self._build_env(raw_vars)
+        # pprint.pprint("------------- ENVIRONMENT --------------")
+        # pprint.pprint(self.environ)
         return True
 
     def close(self):
@@ -52,8 +57,8 @@ class Request:
         def choose(options, default=''):
             for choice in options:
                 if choice in raw_vars:
-                    if raw_vars[choice].strip():
-                        return(raw_vars[choice])
+                    if raw_vars[choice].strip() not in ["", "None"]:
+                        return raw_vars[choice]
             return default
 
         # get env from connector's returned array
