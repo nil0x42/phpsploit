@@ -1,8 +1,7 @@
-import os
 from shnake import parse
-from ui.color import colorize
 
 from .Code import Code
+
 
 class ShellCmd(Code("sh")):
     """ShellCmd is an executable program or shell command. (extends str)
@@ -16,7 +15,7 @@ class ShellCmd(Code("sh")):
     """
     def __new__(cls, executable):
         try:
-            cmds = parse(executable)
+            parse(executable)
         except SyntaxError:
             raise ValueError("«%s» is not a valid shell command" % executable)
 

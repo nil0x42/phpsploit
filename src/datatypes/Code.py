@@ -8,6 +8,7 @@ except ImportError:
 else:
     use_pygments = True
 
+
 def Code(language):
 
     class ColoredCode(str):
@@ -40,10 +41,10 @@ def Code(language):
         def __str__(self):
             string = self._code_value()
             if use_pygments:
-                return pygments.highlight(string, self.lexer, self.formatter).strip()
+                return pygments.highlight(string,
+                                          self.lexer,
+                                          self.formatter).strip()
             else:
                 return string
 
-
     return ColoredCode
-
