@@ -44,13 +44,13 @@ PhpSploit dedicated datatypes obey the following conventions:
 
 """
 
-from .ByteSize    import ByteSize
-from .Boolean     import Boolean
-from .Path        import Path
-from .WebBrowser  import WebBrowser
-from .Interval    import Interval
-from .Proxy       import Proxy
-from .Url         import Url
-from .Code        import Code
-from .PhpCode     import PhpCode
-from .ShellCmd    import ShellCmd
+from .ByteSize import ByteSize
+from .Boolean import Boolean
+from .Path import Path
+from .WebBrowser import WebBrowser
+from .Interval import Interval
+from .Proxy import Proxy
+from .Url import Url
+from .Code import Code
+from .PhpCode import PhpCode
+from .ShellCmd import ShellCmd
