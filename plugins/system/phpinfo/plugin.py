@@ -76,9 +76,9 @@ tty_cols = ui.output.columns()
 
 for category in phpinfo:
 
-    header = " " + ("_" * (tty_cols - 2)) + " "
-    header += '|' + (' ' * (tty_cols - 2)) + '|'
-    header += '|' + category.center(tty_cols - 2) + '|'
+    header = " " + ("_" * (tty_cols - 2)) + " \n"
+    header += '|' + (' ' * (tty_cols - 2)) + '|\n'
+    header += '|' + category.center(tty_cols - 2) + '|\n'
     header += '|' + ('_' * (tty_cols - 2)) + '|'
     print(colorize("\n", "%BoldBlue", header))
 
