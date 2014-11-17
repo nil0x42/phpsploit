@@ -126,7 +126,14 @@ class Shell(shnake.Shell):
         if tunnel:
             tunnel.close()
         else:
-            # XXX: Must do task in 'TODO' file, line 12.
+            try:
+                session_changed = session.diff(None)
+            except:
+                session_changed = True
+            if session_changed:
+                msg = "Do you really want to exit without saving session ?"
+                if ui.input.Expect(False)(msg):
+                    return False
             exit()
 
     ####################

@@ -9,10 +9,6 @@ Sessions:
   * session saving shall ask user confirmation if session changed.
 
 Core:
-  * Before exiting framework, if the session has changed, compared to
-    binded phpsploit session file, we must prompt user for confirmation.
-  * on framework exit, user shall receive a warning if current session
-    has changed, recomending him to save it before exiting.
 
 Commands:
   * remote shell @exit needs a -f opt to bypass leave confirmation in case of
