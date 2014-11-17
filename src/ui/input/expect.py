@@ -5,6 +5,34 @@ from ..color import colorize
 from ..output import isatty
 
 
+# DIRTY REDEF OF isolate_io_context() decorator...
+# got a dependency loop, bad designe perhaps...
+def isolate_io_context(function):
+    def wrapper(*args, **kwargs):
+        try:
+            import readline
+            handle_readline = True
+        except:
+            handle_readline = False
+
+        # backup phpsploit I/O context
+        if handle_readline:
+            old_readline_completer = readline.get_completer()
+            readline.set_completer((lambda x: x))
+        old_stdout = sys.stdout
+        # function's stdout is the default one
+        sys.stdout = sys.__stdout__
+        # execute function with fresh context
+        retval = function(*args, **kwargs)
+        # restore phpsploit I/O context
+        if handle_readline:
+            readline.set_completer(old_readline_completer)
+        sys.stdout = old_stdout
+        # return function result
+        return retval
+    return wrapper
+
+
 class Expect:
     """Expect some user input, and provide response related to the
     instance configuration variables.
@@ -95,6 +123,7 @@ class Expect:
         self.append_choices = bool(append_choices)
         self.skip_interrupt = bool(skip_interrupt)
 
+    @isolate_io_context
     def __call__(self, question=None):
 
         # use custom question, or fallback to the default one.
@@ -169,9 +198,9 @@ class Expect:
             # start timeout that calls illegal lambda (raising TypeError)
             signal.signal(signal.SIGALRM, lambda: 0)
             signal.alarm(timeout)
-            sys.stdout.write(question)
+            # sys.stdout.write(question)
             try:
-                response = input().strip()
+                response = input(question).strip()
             except BaseException as e:
                 print()
                 # if skip interrupt, just reloop, otherwise, raise
