@@ -28,6 +28,7 @@ def isolate_io_context(function):
         # backup phpsploit I/O context
         if handle_readline:
             old_readline_completer = readline.get_completer()
+            readline.set_completer((lambda x: x))
         old_stdout = sys.stdout
         # function's stdout is the default one
         sys.stdout = sys.__stdout__
