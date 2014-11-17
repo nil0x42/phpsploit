@@ -28,36 +28,28 @@ AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
-if self.argc not in [2,3]:
-    api.exit(self.help)
+import sys
 
-parent = 0
+from api import plugin
+from api import server
+from api import environ
 
-if self.argv[1] == '-p':
-    if self.argc == 2:
-        api.exit(self.help)
-    parent = 1
-    relPath = self.argv[2]
+if len(plugin.argv) == 2 and plugin.argv[1] != '-p':
+    relpath = plugin.argv[1]
+elif len(plugin.argv) == 3 and plugin.argv[1] == '-p':
+    relpath = plugin.argv[2]
 else:
-    if self.argc == 3:
-        api.exit(self.help)
-    relPath = self.argv[1]
+    sys.exit(plugin.help)
 
-absPath  = rpath.abspath(relPath)
+abspath = server.path.abspath(relpath)
 
-if parent:
-    query = {'ROOT' : rpath.rootdir(absPath), 'ELEMS' : [x for x in absPath.split(rpath.separator)[1:] if x]}
-    http.send(query, 'parent')
-
+if plugin.argv[1] == '-p':
+    payload = server.payload.Payload("parent.php")
+    drive, path = server.path.splitdrive(abspath)
+    payload['DRIVE'] = drive
+    payload['PATH_ELEMS'] = [x for x in path.split(environ['PATH_SEP']) if x]
 else:
-    query = {'DIR' : absPath}
-    http.send(query)
+    payload = server.payload.Payload("payload.php")
+    payload['DIR'] = abspath
 
-errs = {'exists':   'File exists',
-        'noright':  'Permission denied',
-        'noexists': 'No such file or directory'}
-
-if http.error in errs:
-    api.exit(P_err+self.name+': Error creating '+quot('%1')+': '+errs[http.error], http.response)
-
-if http.response != 'ok': api.exit(P_err+'Unknown error: '+str(http.response))
+payload.send()

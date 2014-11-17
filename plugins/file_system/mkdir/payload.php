@@ -1,11 +1,23 @@
 <?
 
-if (!@file_exists($Q['DIR'])){
-    if (@mkdir($Q['DIR'])) return 'ok';
-    else{
-        $dirname = substr($Q['DIR'],0,strrpos($Q['DIR'],$Q['SEPARATOR'])+1);
-        if (@file_exists($dirname)) return error('noright',$Q['DIR']);
-        else return error('noexists',$Q['DIR']);}}
-else return error('exists',$Q['DIR']);
+// simple mkdir
+
+$file = $PHPSPLOIT['DIR'];
+$parent = dirname($file);
+$errmsg = "cannot create directory '%s': %s";
+
+if (file_exists($file))
+    return error($errmsg, $file, "File exists");
+
+if (mkdir($file))
+    return 'OK';
+
+if (!file_exists($parent))
+    return error($errmsg, $file, "No such file or directory");
+
+if (!is_dir($parent))
+    return error($errmsg, $file, "Not a directory");
+
+return error($errmsg, $file, "Permission denied");
 
 ?>
