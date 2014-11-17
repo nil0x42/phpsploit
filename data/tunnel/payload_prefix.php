@@ -10,7 +10,7 @@
 // Enable php error display.
 ini_set('display_errors', '1');
 
-// Report all errors types, except `NOTICE` messages.
-ini_set('error_reporting', E_ALL ^ E_NOTICE);
+// Report all errors types, except `NOTICE` and `WARNING` messages.
+ini_set('error_reporting', E_ALL ^ (E_NOTICE | E_WARNING));
 
 ?>
