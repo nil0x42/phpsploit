@@ -133,7 +133,8 @@ class Expect:
             question = self.question
         # auto prepend question magic tag: "[?]" (if non empty):
         if question:
-            question = '[?] ' + question.lstrip()
+            tag = colorize("%BoldPink", '[?] ')
+            question = tag + question.lstrip()
 
         expect = self.expect
         default = ''
