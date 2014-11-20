@@ -1,3 +1,4 @@
+import os
 import sys
 import signal
 
@@ -6,8 +7,8 @@ from ..output import isatty
 
 
 # DIRTY REDEF OF isolate_io_context() decorator...
-# got a dependency loop, bad designe perhaps...
-def isolate_io_context(function):
+# got a dependency loop, bad design perhaps...
+def isolate_readline_context(function):
     def wrapper(*args, **kwargs):
         try:
             import readline
@@ -19,15 +20,11 @@ def isolate_io_context(function):
         if handle_readline:
             old_readline_completer = readline.get_completer()
             readline.set_completer((lambda x: x))
-        old_stdout = sys.stdout
-        # function's stdout is the default one
-        sys.stdout = sys.__stdout__
         # execute function with fresh context
         retval = function(*args, **kwargs)
         # restore phpsploit I/O context
         if handle_readline:
             readline.set_completer(old_readline_completer)
-        sys.stdout = old_stdout
         # return function result
         return retval
     return wrapper
@@ -123,7 +120,7 @@ class Expect:
         self.append_choices = bool(append_choices)
         self.skip_interrupt = bool(skip_interrupt)
 
-    @isolate_io_context
+    @isolate_readline_context
     def __call__(self, question=None):
 
         # use custom question, or fallback to the default one.
@@ -133,8 +130,7 @@ class Expect:
             question = self.question
         # auto prepend question magic tag: "[?]" (if non empty):
         if question:
-            tag = colorize("%BoldPink", '[?] ')
-            question = tag + question.lstrip()
+            question = "[?] " + question.lstrip()
 
         expect = self.expect
         default = ''
@@ -199,9 +195,14 @@ class Expect:
             # start timeout that calls illegal lambda (raising TypeError)
             signal.signal(signal.SIGALRM, lambda: 0)
             signal.alarm(timeout)
-            # sys.stdout.write(question)
+            sys.stdout.write(question)
+            sys.stdout.flush()
             try:
-                response = input(question).strip()
+                response = sys.stdin.readline()
+                if os.linesep in response:
+                    response = response.replace(os.linesep, "")
+                else:
+                    raise EOFError
             except BaseException as e:
                 print()
                 # if skip interrupt, just reloop, otherwise, raise
