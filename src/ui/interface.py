@@ -111,11 +111,22 @@ class Shell(shnake.Shell):
 
     #################
     # COMMAND: exit #
+    def complete_exit(self, text, *ignored):
+        keys = ["--force"]
+        return [x for x in keys if x.startswith(text)]
+
     def do_exit(self, argv):
         """Quit current shell interface
 
         SYNOPSIS:
-            exit
+            exit [--force]
+
+        OPTIONS:
+            --force
+                When called to leave the framework, this
+                option forces exit, avoiding warning message
+                if current session has not been saved to a file,
+                or has changed since last save.
 
         DESCRIPTION:
             If current phpsploit session is connected to $TARGET,
@@ -123,17 +134,25 @@ class Shell(shnake.Shell):
             Otherwise, if the interface is not connected, this
             command leaves the phpsploit framework.
         """
+        if len(argv) == 2 and argv[1] == "--force":
+            force_exit = True
+        elif len(argv) == 1:
+            force_exit = False
+        else:
+            self.interpret("help exit")
+
         if tunnel:
             tunnel.close()
         else:
-            try:
-                session_changed = session.diff(None)
-            except:
-                session_changed = True
-            if session_changed:
-                msg = "Do you really want to exit without saving session ?"
-                if ui.input.Expect(False)(msg):
-                    return False
+            if force_exit is False:
+                try:
+                    session_changed = session.diff(None)
+                except:
+                    session_changed = True
+                if session_changed:
+                    msg = "Do you really want to exit without saving session ?"
+                    if ui.input.Expect(False)(msg):
+                        return False
             exit()
 
     ####################
@@ -257,6 +276,10 @@ class Shell(shnake.Shell):
 
     ####################
     # COMMAND: exploit #
+    def complete_exploit(self, text, *ignored):
+        keys = ["--get-backdoor"]
+        return [x for x in keys if x.startswith(text)]
+
     def do_exploit(self, argv):
         """Spawn a shell from target server
 
