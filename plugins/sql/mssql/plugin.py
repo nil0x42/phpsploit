@@ -7,24 +7,23 @@ SYNOPSIS:
     mssql "<SQL COMMAND>"
 
 DESCRIPTION:
-    The mssql plugin is a simulation of the unix standard mysql
-    client, it works exactly the same as the mysql plugin, but
-    adapted to handle "Microsoft SQL Server" databases.
-    - The "connect" argument, used to estabilish a connection
-    with the remote mssql server, acts writing a MSSQL_CRED
-    environment variable in case of success, this variable is
-    automatically used as credentials for next mssql commands.
-    - The "use" argument can be used to select a default
-    database to explicitly use for next mssql queries, writing
-    it into the MSSQL_BASE environment variable.
-    - Any other argument string is considered as a single mssql
-    query, execpt for ending "\G" strings, which ask to use
-    tabular format display mode.
+    This plugin handles "Microsoft SQL Server" interactions
+    through a mysql-like client approach.
+    - The 'connect' argument estabilishes a connection with
+    given credentials, which are then stored on `MSSQL_CRED`
+    environment variable in order to be persistent between
+    plugin calls in current session.
+    - The 'use' argument can be used to choose a default
+    database (stored in MSSQL_BASE environment variable).
+    - Any other case assumes that the arguments are an SQL
+    command, and result is returned.
+    - A command that ends with '\G' will use tabular
+    display mode.
 
 WARNING:
     Considering the PhpSploit's input parser, commands which
     contain quotes, semicolons, and other chars that could be
-    interpreted by the framework MUST be enquoted to be
+    interpreted by the framework SHALL be enquoted to be
     interpreted as a single argument. For example:
       > run echo 'foo bar' > /tmp/foobar; cat /etc/passwd
     In this case, quotes and semicolons will be interpreted by
@@ -40,7 +39,7 @@ EXAMPLES:
       - Use the "master" database as default one
     > mssql SELECT * FROM sysusers
       - Print the whole "sysusers" table from "master"
-    > mssql "SELECT * FROM sysusers\G"
+    > mssql "SELECT * FROM sysusers\\\\G"
       - Same as above, using tabular format (mysql client like)
 
 ENVIRONMENT:
@@ -53,136 +52,156 @@ AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
+import sys
 import time
 
-clock = time.time()
-
-api.isshell()
-
-if self.argc < 2:
-    api.exit(self.help)
-
-def getCreds(s):
-    r = dict()
-    r['USER'] = s[:s.find('@')]
-    r['HOST'] = s[s.find('@')+1:]
-    r['PASS'] = ''
-    if '*' in s:
-        r['HOST'] = s[s.find('@')+1:s.find('*')]
-        r['PASS'] = s[s.find('*')+1:]
-    return(r)
-
-# CONNECT
-if self.argv[1].lower() == 'connect':
-    if self.argc < 3:
-        api.exit(self.help)
-    if self.argv[2].count('@') != 1:
-        api.exit(P_err+'Invalid connection credentials')
-    rawCreds = self.argv[2]
-    if self.argc > 3:
-        if self.argv[3] == '-p':
-            rawCreds+= '*'+(' '.join(self.argv[4:]))
-
-    creds = getCreds(rawCreds)
-    http.send(creds, 'connect')
-
-    if http.error:
-        api.exit(P_err+http.error)
-
-    if 'MSSQL_CRED' not in api.env:
-        api.env['MSSQL_CRED'] = ''
-    if rawCreds != api.env['MSSQL_CRED']:
-        try: del api.env['MSSQL_BASE']
-        except: pass
-        api.env['MSSQL_CRED'] = rawCreds
-
-    success = P_inf+"SUCCESS: Access granted for user '%s'@'%s' (using password: %s)"
-    api.exit(success % (creds['USER'],creds['HOST'],['YES','NO'][not creds['PASS']]))
-
-if not 'MSSQL_CRED' in api.env:
-    api.exit(P_err+"Not connected to any server, use the 'connect' argument")
-
-query = getCreds(api.env['MSSQL_CRED'])
-
-self.argv[-1] = self.argv[-1].strip().rstrip(';').strip()
-if not self.argv[-1]: del self.argv[-1]
-self.argc = len(self.argv)
-
-# USE
-if self.argv[1].lower() == 'use':
-    if self.argc != 3:
-        api.exit(self.help)
-    query['BASE'] = self.argv[2]
-    http.send(query, 'setdb')
-
-    if http.error:
-        api.exit(P_err+http.error)
-
-    api.env['MSSQL_BASE'] = query['BASE']
-    api.exit(P_inf+'Database changed')
+from api import plugin
+from api import server
+from api import environ
 
 
-# MSSQL QUERIES
-if 'MSSQL_BASE' in api.env:
-    query['BASE'] = api.env['MSSQL_BASE']
+def load_credentials(raw_creds):
+    """Return a dictionnary of credentials
+    elements from raw format.
+    """
+    result = {}
+    result['USER'] = raw_creds[:raw_creds.find('@')]
+    result['HOST'] = raw_creds[raw_creds.find('@')+1:]
+    result['PASS'] = ''
+    if '*' in raw_creds:
+        result['HOST'] = raw_creds[raw_creds.find('@')+1:raw_creds.find('*')]
+        result['PASS'] = raw_creds[raw_creds.find('*')+1:]
+    return result
 
-#query['QUERY'] = ' '.join([x.replace(' ','\\ ').replace("\\'",'\'').replace('\\"','\"') for x in self.argv[1:]])
-query['QUERY'] = self.args.strip().rstrip(';').strip()
-
-showtype = 'column'
-if query['QUERY'].endswith('\\G'):
-    query['QUERY'] = query['QUERY'][:-2].strip()
-    showtype = 'line'
+if len(plugin.argv) < 2:
+    sys.exit(plugin.help)
 
 
-http.send(query)
+# `mssql connect <USERNAME>@<HOSTNAME> [-p <PASSWORD>]`
+# Connect to a mssql server with credentials.
+# This comment creates or updates the MSSQL_CRED
+# environment variable.
+if plugin.argv[1].lower() == "connect":
+    if len(plugin.argv) < 3:
+        sys.exit(plugin.help)
+    if plugin.argv[2].count('@') != 1:
+        sys.exit("[-] Invalid connection credentials")
+    raw_creds = plugin.argv[2]
+    if len(plugin.argv) > 3:
+        if plugin.argv[3] == "-p":
+            password = ' '.join(plugin.argv[4:])
+            raw_creds += '*' + password
+    creds = load_credentials(raw_creds)
+    payload = server.payload.Payload("connect.php")
+    payload.update(creds)
+    payload.send()
+    if "MSSQL_CRED" not in environ:
+        environ["MSSQL_CRED"] = ""
+    if raw_creds != environ["MSSQL_CRED"]:
+        if "MSSQL_BASE" in environ:
+            del environ["MSSQL_BASE"]
+        environ["MSSQL_CRED"] = raw_creds
 
-if http.error:
-    api.exit(P_err+http.error)
+    msg = ("[*] SUCCESS: Access granted for user"
+           " '%s'@'%s' (using password: %s)")
+    msg %= creds["USER"], creds["HOST"], ['YES', 'NO'][not creds['PASS']]
+    print(msg)
+    sys.exit(0)
 
-clock  = '(%s sec)' % str(round(time.time()-clock,2))+P_NL
-num    = str(http.response[1])
-plural = ['','s'][num!='1']
+# check and load MSSQL_CRED environment variable
+if "MSSQL_CRED" not in environ:
+    sys.exit("[-] Not connected to any server, use `mssql connect` before")
+creds = load_credentials(environ["MSSQL_CRED"])
 
-# SET QUERIES
-if http.response[0] == 'set':
-    api.exit(P_inf+'Query OK, %s row%s affected %s' % (num,plural,clock))
+# format last mssql token correctly
+plugin.argv[-1] = plugin.argv[-1].strip().rstrip(';').strip()
+if plugin.argv[-1] == "":
+    del plugin.argv[-1]
 
-# GET QUERIES
-if num == '0':
-    api.exit(P_inf+'Empty set'+clock)
 
-fields = http.response[2][0]
-rows   = http.response[2][1:]
+# `mssql use <DATABASE>`
+# Select a default database for further mssql queries.
+if plugin.argv[1].lower() == "use":
+    if len(plugin.argv) != 3:
+        sys.exit(plugin.help)
+    # prepare and send payload
+    payload = server.payload.Payload("setdb.php")
+    payload.update(creds)
+    payload["BASE"] = plugin.argv[2]
+    payload.send()
+    # update MSSQL_BASE and exit properly
+    environ["MSSQL_BASE"] = plugin.argv[2]
+    print("[*] Database changed")
+    sys.exit(0)
 
-if showtype == 'line':
-    fieldSpace = len(max(fields, key=len))
-    fields = [(' '*(fieldSpace-len(x)))+x for x in fields]
-    i=1
+
+# `mssql "<SQL COMMAND>"`
+# Run an SQL command.
+sql_query = " ".join(plugin.argv[1:]).rstrip(';').strip()
+if sql_query.endswith('\\G'):
+    sql_query = sql_query[:-2].strip()
+    display_mode = "line"
+else:
+    display_mode = "column"
+# prepare and send payload
+payload = server.payload.Payload("payload.php")
+payload.update(creds)
+payload["QUERY"] = sql_query
+if "MSSQL_BASE" in environ:
+    payload["BASE"] = environ["MSSQL_BASE"]
+start_time = time.time()
+response = payload.send()
+end_time = time.time()
+
+elapsed_time = "(%s sec)" % str(round(end_time - start_time, 2))
+query_type = response[0]
+affected_rows = response[1]
+plural = 's' if affected_rows == 1 else ''
+
+# Query type: SET
+if query_type == "SET":
+    msg = "[*] Query OK, %d row%s affected %s"
+    print(msg % (affected_rows, plural, elapsed_time))
+    sys.exit(0)
+
+# Query type: GET
+if affected_rows == 0:
+    sys.exit("[*] Empty set %s" % elapsed_time)
+
+fields = response[2][0]
+rows = response[2][1:]
+
+if display_mode == "line":
+    field_space = len(max(fields, key=len))
+    fields = [(' ' * (field_space - len(x))) + x for x in fields]
+    header = "*************************** %d. row ***************************"
+    i = 1
     for row in rows:
-        print ('*'*27)+' '+str(i)+'. row '+('*'*27)
-        i2 = 0
-        for f in fields:
-            print f+': '+str(row[i2])
-            i2+=1
-        i+=1
+        print(header % i)
+        j = 0
+        for field in fields:
+            print("%s: %s" % (field, row[j]))
+            j += 1
+        i += 1
 
-elif showtype=='column':
-    columns = [[x] for x in fields]
+elif display_mode == "column":
+    columns = [[field] for field in fields]
     for row in rows:
-        for x in range(len(fields)):
-            columns[x].append(str(row[x]))
-    colsLen = [len(max(x, key=len)) for x in columns]
+        for i in range(len(fields)):
+            columns[i].append(str(row[i]))
+    cols_len = [len(max(column, key=len)) for column in columns]
+    delimiter = '+-' + ('-+-'.join(['-' * i for i in cols_len])) + '-+'
+    for row_no in range(len(columns[0])):
+        row = []
+        for field_no in range(len(fields)):
+            value = columns[field_no][row_no]
+            fill = ' ' * (cols_len[field_no] - len(columns[field_no][row_no]))
+            row.append(value + fill)
+        if row_no < 2:
+            print(delimiter)
+        print('| ' + (' | '.join(row)) + ' |')
+    print(delimiter)
 
-    separator = '+-'+('-+-'.join(['-'*x for x in colsLen]))+'-+'
-
-    for rowno in range(len(columns[0])):
-        row = list()
-        for x in range(len(fields)):
-            row.append(columns[x][rowno]+(' '*(colsLen[x]-len(columns[x][rowno]))))
-        if rowno < 2: print separator
-        print '| '+(' | '.join(row))+' |'
-    print separator
-
-
-print '%s row%s in set %s' % (num,plural,clock)
+msg = "%s row%s in set %s"
+print(msg % (affected_rows, plural, elapsed_time))
+sys.exit(0)

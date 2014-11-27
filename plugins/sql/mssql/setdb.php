@@ -1,13 +1,24 @@
 <?php
 
-$connect = @mssql_connect($Q['HOST'],$Q['USER'],$Q['PASS']);
-if (!$connect) return error('ERROR '.mssql_errno().': '.mssql_error());
+// Establish connection
+$host = $PHPSPLOIT["HOST"];
+$user = $PHPSPLOIT["USER"];
+$pass = $PHPSPLOIT["PASS"];
+$conn = @mssql_connect($host, $user, $pass);
+if (!$conn)
+    return error("ERROR: %s: %s", @mssql_errno(), @mssql_error());
 
-$select = @mssql_select_db($Q['BASE'],$connect);
-if (!$select) return error('ERROR '.mssql_errno().': '.mssql_error());
 
-//@mssql_close($connect); // commented due to a bug in rare servers (bug found in iis6.0/php5.2.11
+// Select database
+$base = $PHPSPLOIT["BASE"];
+$select = @mssql_select_db($base, $conn);
+if (!$select)
+    return error("ERROR: %s: %s", @mssql_errno(), @mssql_error());
 
-return('ok');
+//@mssql_close($connect);
+// NOTE:
+// commented due to a bug in rare servers (bug found in iis6.0/php5.2.11)
+
+return "OK";
 
 ?>

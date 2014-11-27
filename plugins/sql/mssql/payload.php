@@ -1,31 +1,51 @@
 <?php
 
-$connect = @mssql_connect($Q['HOST'],$Q['USER'],$Q['PASS']);
-if (!$connect) return error('ERROR '.mssql_errno().': '.mssql_error());
+// Establish connection
+$host = $PHPSPLOIT["HOST"];
+$user = $PHPSPLOIT["USER"];
+$pass = $PHPSPLOIT["PASS"];
+$conn = @mssql_connect($host, $user, $pass);
+if (!$conn)
+    return error("ERROR: %s: %s", @mssql_errno(), @mssql_error());
 
-if (@$Q['BASE']){
-    $select = @mssql_select_db($Q['BASE'],$connect);
-    if (!$select) return error('ERROR '.mssql_errno().': '.mssql_error());}
 
-$query = mssql_query($Q['QUERY'],$connect);
-if (!$query) return error('ERROR '.mssql_errno().': '.mssql_error());
+// Select database (if any)
+if (isset($PHPSPLOIT["BASE"]))
+{
+    $select = @mssql_select_db($PHPSPLOIT['BASE'], $conn);
+    if (!$select)
+        return error("ERROR: %s: %s", @mssql_errno(), @mssql_error());
+}
 
+
+// Send query
+$query = mssql_query($PHPSPLOIT['QUERY'], $conn);
+if (!$query)
+    return error("ERROR: %s: %s", @mssql_errno(), @mssql_error());
+
+
+// Query type: GET (information gathering)
 $rows = @mssql_num_rows($query);
-$result = False;
-if (is_int($rows)){
-    if ($rows>0){
+if (is_int($rows))
+{
+    if ($rows > 0)
+    {
         $result = array();
-        $x = mssql_fetch_array($query, MSSQL_ASSOC);
-        $result[] = array_keys($x);
-        $result[] = array_values($x);
-        while ($line = mssql_fetch_array($query, MSSQL_ASSOC)){
-            $result[] = array_values($line);}
+        $obj = mssql_fetch_array($query, MSSQL_ASSOC);
+        $result[] = array_keys($obj);
+        $result[] = array_values($obj);
+        while ($line = mssql_fetch_array($query, MSSQL_ASSOC))
+            $result[] = array_values($line);
+        return array('GET', $rows, $result);
+    }
+}
 
-    return array('get',$rows, $result);}}
 
+// Query type: SET (write into the database)
 $rows = @mssql_rows_affected();
-if (is_int($rows)) return array('set',$rows);
+if (is_int($rows))
+    return array('SET', $rows);
 
-return error('ERROR '.mssql_errno().': '.mssql_error());
+return error("ERROR: %s: %s", @mssql_errno(), @mssql_error());
 
 ?>
