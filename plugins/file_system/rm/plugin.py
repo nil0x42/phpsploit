@@ -19,38 +19,34 @@ AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
-if self.argc not in [2,3]:
-    api.exit(self.help)
+import sys
+
+from api import plugin
+from api import server
+
+if len(plugin.argv) not in [2, 3]:
+    sys.exit(plugin.help)
 
 recurse = 0
 
-if self.argv[1] == '-r':
-    if self.argc == 2:
-        api.exit(self.help)
+if plugin.argv[1] == "-r":
+    if len(plugin.argv) == 2:
+        sys.exit(plugin.help)
     recurse = 1
-    relPath = self.argv[2]
+    rel_path = plugin.argv[2]
 else:
-    if len(self.argv) == 3:
-        api.exit(self.help)
-    relPath = self.argv[1]
+    if len(plugin.argv) == 3:
+        sys.exit(plugin.help)
+    rel_path = plugin.argv[1]
 
-absPath  = rpath.abspath(relPath)
-dirname  = rpath.dirname(absPath)
-basename = rpath.basename(absPath)
-
-query = {'FILE' : absPath}
+abs_path = server.path.abspath(rel_path)
+dirname = server.path.dirname(abs_path)
+basename = server.path.basename(abs_path)
 
 if recurse:
-    api.exit(P_err+"Recursive remote is not available yet !")
+    sys.exit("Recursive mode is not yet available.")
 
-else:
-    http.send(query, 'single')
+payload = server.payload.Payload("single.php")
+payload["FILE"] = abs_path
 
-    errs = {'noexists': 'No such file or directory',
-            'notafile': 'Not a file',
-            'noright':  'Permission denied'}
-
-    if http.error in errs:
-        api.exit(P_err+self.name+': Impossible to delete %s: %s' % (quot(absPath), errs[http.error]))
-
-    if http.response != 'ok': api.exit('Unknow error: '+str(http.response))
+payload.send()
