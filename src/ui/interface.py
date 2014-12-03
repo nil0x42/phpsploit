@@ -808,7 +808,7 @@ class Shell(shnake.Shell):
             return self.interpret("help backlog")
 
         backlog = Path()
-        backlog.write(self.stdout.backlog)
+        backlog.write(self.stdout.backlog, bin_mode=True)
         backlog.edit()
         return
 
