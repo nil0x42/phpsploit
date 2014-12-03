@@ -492,11 +492,6 @@ class Request:
             response['error'] = err
         except KeyboardInterrupt:
             response['error'] = 'HTTP Request interrupted'
-        # except:
-        #     etype = str(sys.exc_info()[0])
-        #     etype = etype[(etype.find("'") + 1):-2]
-        #     evalue = str(sys.exc_info()[1])
-        #     response['error'] = 'Unexpected error %s : %s' % (etype, evalue)
 
         return response
 
@@ -559,7 +554,7 @@ class Request:
                 return True
             return False
 
-        # raises BuildError if it fails
+        # this raises BuildError if it fails
         request = self.Build(php_payload)
 
         response = self.Send(request)
@@ -722,7 +717,7 @@ class Request:
                 if error == 'HTTP Request interrupted':
                     return multiReqError
                 # on multipart reqs, all except last MUST return the string 1
-                if not error and response['data'] != '1':
+                if not error and response['data'] != b'1':
                     error = 'Execution error'
 
                 # if the current request failed
@@ -796,6 +791,7 @@ class Request:
         # import pprint
         # pprint.pprint("------------- PYTHON RESPONSE DICT -------------")
         # pprint.pprint(response)
+
         # check that the received type is a dict
         if not isinstance(response, dict):
             raise ResponseError('Decoded response is not a dict()')
