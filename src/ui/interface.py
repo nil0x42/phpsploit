@@ -623,6 +623,10 @@ class Shell(shnake.Shell):
             "Accept-Language" http header to the specified value.
             Of course, this applies to any future HTTP request.
 
+            - The default value of a setting can be restored by setting
+            its value to the magic string "%%DEFAULT%%", e.g:
+              > set REQ_MAX_HEADERS %%DEFAULT%%
+
             NOTE: The 'set' operating scope is limited to the current
             phpsploit session. It means that persistant settings value
             changes must be defined by hand in the user
