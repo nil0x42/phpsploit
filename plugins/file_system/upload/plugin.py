@@ -109,6 +109,8 @@ for iteration in [1, 2]:
         question = "Remote destination %s already exists, overwrite it ?"
         if ui.input.Expect(False)(question % uploaded_file):
             sys.exit("File transfer aborted")
+        else:
+            continue
 
     print("[*] Upload complete: %s -> %s" % (local_abspath, uploaded_file))
     sys.exit(0)
