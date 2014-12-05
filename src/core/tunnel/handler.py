@@ -705,7 +705,7 @@ class Request:
         # considering that the multiReqLst can be empty, is means that the
         # following loop is only executer on multipart payloads.
         for curReqNum in range(len(multiReqLst)):
-            multiReqError = ('Send Error: Multipart transfer interrupted\n'
+            interrupt_err = ('Send Error: Multipart transfer interrupted\n'
                              'The remote temporary payload «%s» must be '
                              'manually removed.' % self.tmpdir)
             sent = False
@@ -715,23 +715,30 @@ class Request:
                 error = response['error']
                 # keyboard interrupt imediately leave with error
                 if error == 'HTTP Request interrupted':
-                    return multiReqError
+                    return interrupt_err
                 # on multipart reqs, all except last MUST return the string 1
                 if not error and response['data'] != b'1':
                     error = 'Execution error'
 
                 # if the current request failed
                 if error:
-                    msg = "(Press Enter or wait 1 minut for the next try)"
+                    msg = " (Press Enter or wait 1 minut for the next try)"
                     sys.stdout.write(colorize("\n[-] ", error, "%White", msg))
-                    ui.input.Expect(None, timeout=60)()
+                    waitkey = ui.input.Expect(None)
+                    waitkey.timeout = 60
+                    waitkey.skip_interrupt = False
+                    try:
+                        waitkey()
+                    except (KeyboardInterrupt, EOFError):
+                        return interrupt_err
+
                 # if the request has been corretly executed, wait the
                 # REQ_INTERVAL setting, and then go to the next request
                 else:
                     try:
                         time.sleep(session.Conf.REQ_INTERVAL())
                     except:
-                        return multiReqError
+                        return interrupt_err
                     sent = True
 
         # if it was a multipart payload, print status for last request
