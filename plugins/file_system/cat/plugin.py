@@ -27,6 +27,8 @@ AUTHOR:
 import sys
 import base64
 
+from core import encoding
+
 from api import plugin
 from api import server
 
@@ -41,5 +43,5 @@ payload['FILE'] = absolute_path
 
 response = payload.send()
 
-decoded = base64.b64decode(response)
-sys.stdout.buffer.write(decoded)
+data = encoding.decode(base64.b64decode(response))
+print(data)
