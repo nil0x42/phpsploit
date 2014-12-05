@@ -21,10 +21,12 @@ def isolate_readline_context(function):
             old_readline_completer = readline.get_completer()
             readline.set_completer((lambda x: x))
         # execute function with fresh context
-        retval = function(*args, **kwargs)
+        try:
+            retval = function(*args, **kwargs)
         # restore phpsploit I/O context
-        if handle_readline:
-            readline.set_completer(old_readline_completer)
+        finally:
+            if handle_readline:
+                readline.set_completer(old_readline_completer)
         # return function result
         return retval
     return wrapper

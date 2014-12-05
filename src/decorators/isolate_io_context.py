@@ -33,11 +33,13 @@ def isolate_io_context(function):
         # function's stdout is the default one
         sys.stdout = sys.__stdout__
         # execute function with fresh context
-        retval = function(*args, **kwargs)
+        try:
+            retval = function(*args, **kwargs)
         # restore phpsploit I/O context
-        if handle_readline:
-            readline.set_completer(old_readline_completer)
-        sys.stdout = old_stdout
+        finally:
+            if handle_readline:
+                readline.set_completer(old_readline_completer)
+            sys.stdout = old_stdout
         # return function result
         return retval
     return wrapper
