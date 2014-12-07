@@ -1,4 +1,6 @@
 Interface:
+  * BUG: changing terminal size (SIGWINCH) makes readline prompt buggy
+    on muliline commands.
 
 Settings:
 
