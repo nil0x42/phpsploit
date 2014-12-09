@@ -769,7 +769,8 @@ class Request:
             if response['error']:
                 return response['error']
             # elif no data, nothing can be parsed
-            print("[-] Server response coudn't be unparsed")
+            print("[-] Server response coudn't be unparsed"
+                  " (maybe invalid PASSKEY ?)")
             # print payload forwarder error (if any)
             if self.payload_forwarder_error:
                 print("[*] If you are sure that the target is anyway "
