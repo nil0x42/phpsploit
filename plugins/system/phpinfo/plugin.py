@@ -68,7 +68,7 @@ def tablify(vals):
 if len(plugin.argv) != 1:
     sys.exit(plugin.help)
 
-phpinfo = server.payload.Payload("payload.php").send()
+phpinfo = server.payload.Payload("array_format.php").send()
 if not phpinfo:
     sys.exit("Payload failed to dump phpinfo() array")
 
