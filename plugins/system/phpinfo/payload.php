@@ -1,10 +1,10 @@
 <?php
 
-function phpinfo_array($return=false){
+function phpinfo_array()
+{
     ob_start();
     phpinfo(-1);
     $pi = preg_replace(
-
     array('#^.*<body>(.*)</body>.*$#ms',
           '#<h2>PHP License</h2>.*$#ms',
           '#<h1>Configuration</h1>#',
@@ -27,7 +27,6 @@ function phpinfo_array($return=false){
           '#</tr>#',
           '#<br />#',
           '#Copyright#'),
-
     array('$1',
           '',
           '',
@@ -50,22 +49,29 @@ function phpinfo_array($return=false){
           '%E%',
           ' ',
           ' Copyright'),
-
     ob_get_clean());
 
     $sections = explode('<h2>', strip_tags($pi, '<h2><th><td>'));
     unset($sections[0]);
 
     $pi = array();
-    foreach($sections as $section){
+    foreach($sections as $section)
+    {
         $n = substr($section, 0, strpos($section, '</h2>'));
-        preg_match_all(
-            '#%S%(?:<td>(.*?)</td>)?(?:<td>(.*?)</td>)?(?:<td>(.*?)</td>)?%E%#',
-            $section, $askapache, PREG_SET_ORDER);
+        $regex = '#%S%(?:<td>(.*?)</td>)?(?:<td>(.*?)' .
+                 '</td>)?(?:<td>(.*?)</td>)?%E%#';
+        preg_match_all($regex, $section, $askapache, PREG_SET_ORDER);
         foreach($askapache as $m)
-            $pi[$n][$m[1]]=(!isset($m[3])||$m[2]==$m[3])?$m[2]:array_slice($m,2);}
+        {
+            if (!isset($m[3]) || $m[2] == $m[3])
+                $pi[$n][$m[1]] = $m[2];
+            else
+                $pi[$n][$m[1]] = array_slice($m, 2);
+        }
+    }
 
-    return $pi;}
+    return $pi;
+}
 
 return phpinfo_array();
 
