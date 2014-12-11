@@ -12,6 +12,8 @@ Sessions:
 
 Core:
   * Add a way to get return code of previkous command (like bash's '$?')
+  * Provide bzip2 payload encoding (php >= 4.0.4, with bzcompress())
+    We need smaller payloads !
 
 Commands:
   * Add a `bind` core command to bind the prompt to a plugin.
