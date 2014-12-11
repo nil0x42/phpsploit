@@ -11,7 +11,7 @@ Sessions:
   * session saving shall ask user confirmation if session changed.
 
 Core:
-  * Add a was to get return code of previkous command (like bash's '$?')
+  * Add a way to get return code of previkous command (like bash's '$?')
 
 Commands:
   * Add a `bind` core command to bind the prompt to a plugin.
