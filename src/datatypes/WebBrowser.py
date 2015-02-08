@@ -15,6 +15,7 @@ class WebBrowser(str):
 
     """
     def __new__(cls, name):
+        # a boring Mas OS/X case ..
         blacklist = ['macosx']
         lst = [x for x in webbrowser._browsers.keys() if x not in blacklist]
         fmt = ", ".join(lst)
@@ -25,6 +26,9 @@ class WebBrowser(str):
                 name = webbrowser.get().name
             else:
                 name = webbrowser.get(name).name
+        # another boring Mac OS/X case ..
+        except AttributeError:
+            return str.__new__(cls, "default")
         except:
             raise ValueError("Can't bind to «%s» browser" % name)
         return str.__new__(cls, name)
