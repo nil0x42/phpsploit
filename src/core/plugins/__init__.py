@@ -14,6 +14,7 @@ import objects
 from core import session
 from datatypes import Path
 from decorators import readonly_settings
+import utils.path
 
 from .Plugin import Plugin
 from .exceptions import BadPlugin
@@ -132,7 +133,7 @@ class Plugins(objects.MetaDict):
                 abspath = Path(root_dir, basename, mode='drx')()
             except:
                 if not basename.startswith("README"):
-                    path = os.path.truepath(root_dir, basename)
+                    path = utils.path.truepath(root_dir, basename)
                     if os.path.isdir(path):
                         reason = "Permission denied"
                     else:

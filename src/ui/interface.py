@@ -19,6 +19,7 @@ import datatypes
 from datatypes import Path
 from ui.color import colorize
 import ui.input
+import utils.path
 
 
 class Shell(shnake.Shell):
@@ -550,7 +551,7 @@ class Shell(shnake.Shell):
             source_file = argv[2]
         else:
             return self.interpret("help source")
-        source_file = os.path.truepath(source_file)
+        source_file = utils.path.truepath(source_file)
         data = open(source_file, 'r').read()
         ret = self.interpret(data, fatal_errors=abort_on_error)
         return ret

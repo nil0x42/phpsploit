@@ -7,6 +7,8 @@ configuration directory and elements.
 
 import os
 import errno
+
+import utils.path
 from . import basedir
 from datatypes import Path
 
@@ -36,7 +38,7 @@ class UserDir:
             self.choices.insert(0, "$XDG_CONFIG_HOME/phpsploit")
 
         # normalize choices paths
-        self.choices = [os.path.truepath(c) for c in self.choices]
+        self.choices = [utils.path.truepath(c) for c in self.choices]
 
         # set self.path if user directory already exist
         for choice in self.choices:
@@ -65,19 +67,19 @@ class UserDir:
     def fill(self):
         """Add user configuration dir's default content."""
         # put default config if not exists
-        config = os.path.truepath(self.path, "config")
+        config = utils.path.truepath(self.path, "config")
         if not os.path.isfile(config):
             default_config = open(basedir + "data/config/config").read()
             open(config, "w").write(default_config)
 
         # overwrite ./README
         readme = open(basedir + "data/config/README").read()
-        open(os.path.truepath(self.path, "README"), "w").write(readme)
+        open(utils.path.truepath(self.path, "README"), "w").write(readme)
 
         # mkdirs
         dirs = ["plugins"]
         for elem in dirs:
-            elem = os.path.truepath(self.path, elem)
+            elem = utils.path.truepath(self.path, elem)
             try:
                 os.mkdir(elem)
             except (OSError, IOError) as e:
