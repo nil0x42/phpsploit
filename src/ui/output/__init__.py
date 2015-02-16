@@ -8,7 +8,7 @@ Stuff:
 
 * Wrapper(): (file)
     Enable stdout/stdin file wrapping with PhpSploit dedicated
-    output fiel wrappers, providing nice features.
+    output file wrappers, providing nice features.
 
 * isatty(): (bool)
     is current output a tty ?
@@ -27,25 +27,19 @@ Stuff:
 
 """
 
+import os
 import sys
-from os import environ
-
-from shutil import get_terminal_size
+import shutil
 
 from . import wrapper
 
-
+# file wrapper for stdout
 Wrapper = wrapper.Stdout
 
 # is output a tty ?
 isatty = sys.__stdout__.isatty
 
-# get current terminal size
-size = lambda: tuple(get_terminal_size(fallback=(79, 24)))
-columns = lambda: size()[0]
-lines = lambda: size()[1]
-
-
+# get supported colors from terminal
 def colors():
     """Returns the number of colors actually supported by current
     output. Actually, possible values are:
@@ -56,7 +50,22 @@ def colors():
     if not isatty():
         return 0
     try:
-        assert '256' in environ['TERM']
+        assert '256' in os.environ['TERM']
         return 256
     except:
         return 8
+
+# get current terminal size
+if os.name == "nt":
+    _default_terminal_size = (79, 24)
+else:
+    _default_terminal_size = (80, 24)
+
+def size():
+    if hasattr(shutil, "get_terminal_size"):
+        return tuple(shutil.get_terminal_size(fallback=_default_terminal_size))
+    else:
+        return _default_terminal_size
+
+columns = lambda: size()[0]
+lines = lambda: size()[1]

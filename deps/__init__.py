@@ -20,7 +20,6 @@ DEPENDENCIES = [('phpserialize',           'phpserialize-1.3'),
                 ('colorama_patched',       '.'),
                 ('socks',                  'SocksiPy-branch-1.02'),
                 ('os_path_truepath_patch', '.'),
-                ('shutil_update',          '.'),
                 ('pyparsing',              'pyparsing-2.0.2'),
                 ('shnake',                 'shnake-0.4')]
 
@@ -33,15 +32,14 @@ for module, dirname in DEPENDENCIES:
         __import__(module)
     # else, fallback to the provided packages.
     except ImportError:
-        abspath = os.path.join(sys.path[0], __name__, dirname, module)
-        if not os.path.isdir(abspath):
-            abspath += ".py"
+        abspath = os.path.join(sys.path[0], __name__, dirname)
+        sys.path.append(abspath)
         try:
-            imp.load_package(module, abspath)
+            __import__(module)
         # if any dependency fails to load, exit with error.
-        except ImportError:
+        except ImportError as e:
             dependency_error(module)
-        except IOError as e:
+        except (OSError, IOError) as e:
             if e.errno == errno.ENOENT:
                 dependency_error(module)
             else:

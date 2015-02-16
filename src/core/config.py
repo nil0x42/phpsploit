@@ -80,8 +80,8 @@ class UserDir:
             elem = os.path.truepath(self.path, elem)
             try:
                 os.mkdir(elem)
-            except IOError as e:
-                if e.errno != errno.EEXIST and not os.path.isdir(elem):
+            except (OSError, IOError) as e:
+                if e.errno != errno.EEXIST or not os.path.isdir(elem):
                     raise e
 
 
