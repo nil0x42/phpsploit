@@ -6,6 +6,7 @@ configuration directory and elements.
 """
 
 import os
+import errno
 from . import basedir
 from datatypes import Path
 
@@ -79,8 +80,8 @@ class UserDir:
             elem = os.path.truepath(self.path, elem)
             try:
                 os.mkdir(elem)
-            except FileExistsError as e:
-                if not os.path.isdir(elem):
+            except IOError as e:
+                if e.errno != errno.EEXIST and not os.path.isdir(elem):
                     raise e
 
 
