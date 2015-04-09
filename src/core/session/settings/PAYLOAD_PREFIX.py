@@ -4,8 +4,9 @@ on each http request, just before payload execution.
 
 This setting can be used for example in order to
 override a php configuration option with a value
-that extends execution scope, or aniything you want
-to be executed anytime.
+that extends execution scope.
+
+The code will be executed before ANY payload execution.
 
 NOTE: If you do not understand what you're doing,
       keep this setting with default value.
