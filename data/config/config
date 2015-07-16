@@ -11,7 +11,7 @@
 
 
 ### Those aliases are enabled by default for retrocompatibility
-### purposes. Feel free to remove them if you don't use them !
+### purposes. Those aliases can be removed without impacting the framework.
 alias target    "set TARGET"
 alias load      "session load"
 alias save      "session save"
@@ -22,11 +22,9 @@ alias lpwd      "lrun pwd"
 
 ### Some configuration examples you may want to add:
 
-## set your own PASSKEY to prevent other phpsploit users use your backdoors.
+## Change the PASSKEY to prevent others phpsploit users from using your backdoor
 # set PASSKEY "YourPassKey"
 
-## Better use the best editor within phpsploit ;)
+## For vim addicts: don't change your habits !
 # set EDITOR "vim"
-
-## An useful shortcut, aliasing `edit` command with your prefered editor..
-# alias vim     "edit"
+# alias vim "edit"
