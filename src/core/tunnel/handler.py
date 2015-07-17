@@ -857,6 +857,7 @@ def get_headers(headers):
     specified header values, such as random line values.
 
     """
+    headers = dict((k.lower().replace('_','-'),v) for k,v in headers.items())
     for key, val in headers.items():
         if hasattr(val, "__call__"):
             headers[key] = val()
