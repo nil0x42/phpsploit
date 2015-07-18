@@ -355,7 +355,7 @@ class Request:
 
         rawData = php_payload.data
         baseNum = self.maxsize[method]
-        maxFlaw = max(100, (self.maxsize[method] / 100))
+        maxFlaw = max(100, int(self.maxsize[method] / 100))
 
         builtReqLst = list()
 
@@ -381,7 +381,7 @@ class Request:
                     if maxRange <= minRange:
                         maxRange = minRange * 2
                     # set testSize to the current range's average
-                    testSize = minRange + ((maxRange - minRange) / 2)
+                    testSize = minRange + int((maxRange - minRange) / 2)
 
                 # try to build a payload containing the testSize data
                 testPayload = encode(forwarder, rawData[:testSize])
@@ -467,6 +467,7 @@ class Request:
 
         # erect the final request structure
         request = urllib.request.Request(self.target, content, headers)
+
         try:
             # send request with custom opener and decapsulate it's response
             resp = self.opener.open(request)
@@ -617,10 +618,7 @@ class Request:
         for m in self.methods:
             sys.stdout.write('\rBuilding %s method...\r' % m)
             sys.stdout.flush()
-            try:
-                request[m] = self.build_request(mode[m], m, php_payload)
-            except:
-                raise BuildError('Payload construction aborted')
+            request[m] = self.build_request(mode[m], m, php_payload)
 
         # if the default method can't be built, use the other as default
         if not request[self.default_method]:
