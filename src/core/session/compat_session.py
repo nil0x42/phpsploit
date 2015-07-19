@@ -125,6 +125,8 @@ class Loader_V1_x(AbstractSessionLoader):
         if "%%HASHKEY%%" in passkey:
             result["passkey"] = passkey.replace("%%HASHKEY%%",
                                                 old_session["ENV_HASH"])
+        else:
+            result["passkey"] = passkey
 
         return result
 
