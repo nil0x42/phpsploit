@@ -43,9 +43,9 @@ EXAMPLES:
 
 ENVIRONMENT:
     * MYSQL_CRED
-        Mysql's connection credentials
+        MySQL's connection credentials
     * MYSQL_BASE
-        Mysql's default database to use
+        MySQL's default database to use
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
@@ -84,7 +84,7 @@ if plugin.argv[1].lower() == "connect":
     if len(plugin.argv) < 3:
         sys.exit(plugin.help)
     if plugin.argv[2].count('@') != 1:
-        sys.exit("[-] Invalid connection credentials")
+        sys.exit("Invalid connection credentials")
     raw_creds = plugin.argv[2]
     if len(plugin.argv) > 3:
         if plugin.argv[3] == "-p":
@@ -109,7 +109,7 @@ if plugin.argv[1].lower() == "connect":
 
 # check and load MYSQL_CRED environment variable
 if "MYSQL_CRED" not in environ:
-    sys.exit("[-] Not connected to any server, use `mysql connect` before")
+    sys.exit("Not connected to any server, use `mysql connect` before")
 creds = load_credentials(environ["MYSQL_CRED"])
 
 # format last mysql token correctly
@@ -155,7 +155,7 @@ end_time = time.time()
 elapsed_time = "(%s sec)" % str(round(end_time - start_time, 2))
 query_type = response[0]
 affected_rows = response[1]
-plural = 's' if affected_rows == 1 else ''
+plural = '' if affected_rows == 1 else 's'
 
 # Query type: SET
 if query_type == "SET":
@@ -165,7 +165,8 @@ if query_type == "SET":
 
 # Query type: GET
 if affected_rows == 0:
-    sys.exit("[*] Empty set %s" % elapsed_time)
+    print("[*] Empty set %s" % elapsed_time)
+    sys.exit(0)
 
 fields = response[2][0]
 rows = response[2][1:]
@@ -184,7 +185,7 @@ if display_mode == "line":
         i += 1
 
 elif display_mode == "column":
-    columns = [[field] for field in fields]
+    columns = [[str(field)] for field in fields]
     for row in rows:
         for i in range(len(fields)):
             columns[i].append(str(row[i]))

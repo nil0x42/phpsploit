@@ -28,16 +28,13 @@ if (!$query)
 $rows = @mysql_num_rows($query);
 if (is_int($rows))
 {
-    if ($rows > 0)
-    {
-        $result = array();
-        $obj = mysql_fetch_array($query, MYSQL_ASSOC);
-        $result[] = array_keys($obj);
-        $result[] = array_values($obj);
-        while ($line = mysql_fetch_array($query, MYSQL_ASSOC))
-            $result[] = array_values($line);
-        return array('GET', $rows, $result);
-    }
+    $result = array();
+    $obj = mysql_fetch_array($query, MYSQL_ASSOC);
+    $result[] = array_keys($obj);
+    $result[] = array_values($obj);
+    while ($line = mysql_fetch_array($query, MYSQL_ASSOC))
+        $result[] = array_values($line);
+    return array('GET', $rows, $result);
 }
 
 
