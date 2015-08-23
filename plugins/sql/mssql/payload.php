@@ -28,16 +28,13 @@ if (!$query)
 $rows = @mssql_num_rows($query);
 if (is_int($rows))
 {
-    if ($rows > 0)
-    {
-        $result = array();
-        $obj = mssql_fetch_array($query, MSSQL_ASSOC);
-        $result[] = array_keys($obj);
-        $result[] = array_values($obj);
-        while ($line = mssql_fetch_array($query, MSSQL_ASSOC))
-            $result[] = array_values($line);
-        return array('GET', $rows, $result);
-    }
+    $result = array();
+    $obj = mssql_fetch_array($query, MSSQL_ASSOC);
+    $result[] = array_keys($obj);
+    $result[] = array_values($obj);
+    while ($line = mssql_fetch_array($query, MSSQL_ASSOC))
+        $result[] = array_values($line);
+    return array('GET', $rows, $result);
 }
 
 

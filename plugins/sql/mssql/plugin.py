@@ -156,7 +156,7 @@ end_time = time.time()
 elapsed_time = "(%s sec)" % str(round(end_time - start_time, 2))
 query_type = response[0]
 affected_rows = response[1]
-plural = 's' if affected_rows == 1 else ''
+plural = '' if affected_rows == 1 else 's'
 
 # Query type: SET
 if query_type == "SET":
@@ -185,7 +185,7 @@ if display_mode == "line":
         i += 1
 
 elif display_mode == "column":
-    columns = [[field] for field in fields]
+    columns = [[str(field)] for field in fields]
     for row in rows:
         for i in range(len(fields)):
             columns[i].append(str(row[i]))
