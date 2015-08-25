@@ -25,7 +25,7 @@ if (!$conn)
 if (!$conn)
 {
     $err = @oci_error();
-    return error("ERROR: %s: %s", $err["code"], $err["message"]);
+    return error("ERROR: ocilogon(): %s", $err["message"]);
 }
 
 // Send query
@@ -33,14 +33,14 @@ $query = @ociparse($conn, $PHPSPLOIT['QUERY']);
 if (!$query)
 {
     $err = @oci_error();
-    return error("ERROR: %s: %s", $err["code"], $err["message"]);
+    return error("ERROR: ociparse(): %s", $err["message"]);
 }
 $statement_type = @ocistatementtype($query);
 
 if (!ociexecute($query))
 {
     $err = @oci_error($query);
-    return error("ERROR: %s: %s", $err["code"], $err["message"]);
+    return error("ERROR: ociexecute(): %s", $err["message"]);
 }
 
 if ($statement_type == "SELECT")
