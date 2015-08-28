@@ -81,11 +81,11 @@ class RandLineBuffer(MultiLineBuffer):
     def __call__(self, call=True):
         """Return a random object picked from choices.
         If callable, `obj()` is returned instead of `obj`, only
-        if call argument is set to True.
+        if `call` argument is set to True.
 
         """
         obj = random.choice(self.choices())
-        if call and hasattr(obj, "__call__"):
+        if call and callable(obj):
             return obj()
         return obj
 

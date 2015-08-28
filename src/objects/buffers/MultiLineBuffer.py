@@ -78,7 +78,7 @@ class MultiLineBuffer:
         """
         obj = self._getobj(self.buffer)
 
-        if call and hasattr(obj, "__call__"):
+        if call and callable(obj):
             return obj()
         return obj
 
