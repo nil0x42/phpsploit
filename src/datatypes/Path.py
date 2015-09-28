@@ -1,6 +1,7 @@
 import os
 
 from core import encoding
+import utils.path
 
 
 class Path(str):
@@ -69,7 +70,7 @@ class Path(str):
             # create the file with empty content
             open(path, "w").close()
         else:
-            path = os.path.truepath(*args)
+            path = utils.path.truepath(*args)
 
         if mode:
             mode += 'e'

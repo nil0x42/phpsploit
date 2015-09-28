@@ -857,7 +857,7 @@ def get_headers(headers):
     """
     headers = dict((k.lower().replace('_','-'),v) for k,v in headers.items())
     for key, val in headers.items():
-        if hasattr(val, "__call__"):
+        if callable(val):
             headers[key] = val()
     return headers
 

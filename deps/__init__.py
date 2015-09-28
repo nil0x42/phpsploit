@@ -19,7 +19,6 @@ DEPENDENCIES = [('phpserialize',           'phpserialize-1.3'),
                 ('colorama',               'colorama-0.2.5'),
                 ('colorama_patched',       '.'),
                 ('socks',                  'SocksiPy-branch-1.02'),
-                ('os_path_truepath_patch', '.'),
                 ('pyparsing',              'pyparsing-2.0.2'),
                 ('shnake',                 'shnake-0.4')]
 

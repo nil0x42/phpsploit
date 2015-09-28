@@ -4,6 +4,7 @@ import hashlib
 
 from . import MultiLineBuffer
 from ui.color import colorize
+import utils.path
 
 
 class RandLineBuffer(MultiLineBuffer):
@@ -59,7 +60,7 @@ class RandLineBuffer(MultiLineBuffer):
             self.buffer = value[1]
         # elif value is a file:// string
         elif value[7:] and value[:7].lower() == "file://":
-            self.file = os.path.truepath(value[7:])
+            self.file = utils.path.truepath(value[7:])
             try:
                 self.buffer = open(self.file, "r").read()
             except:
@@ -81,11 +82,11 @@ class RandLineBuffer(MultiLineBuffer):
     def __call__(self, call=True):
         """Return a random object picked from choices.
         If callable, `obj()` is returned instead of `obj`, only
-        if call argument is set to True.
+        if `call` argument is set to True.
 
         """
         obj = random.choice(self.choices())
-        if call and hasattr(obj, "__call__"):
+        if call and callable(obj):
             return obj()
         return obj
 

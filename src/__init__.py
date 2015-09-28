@@ -17,7 +17,9 @@ import deps
 import os
 import sys
 
-basedir = os.path.truepath(sys.path[0]) + os.sep
+from . import utils
+
+basedir = utils.path.truepath(sys.path[0]) + os.sep
 coredir = os.path.join(basedir, __name__) + os.sep
 
 # use current directory as main python path

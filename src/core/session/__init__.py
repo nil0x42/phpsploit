@@ -26,6 +26,7 @@ import ui.input
 import objects
 from ui.color import colorize, decolorize
 from core import encoding
+import utils.path
 
 from . import settings
 from . import environment
@@ -126,10 +127,10 @@ class Session(objects.MetaDict):
         # A None/empty call returns current session as it is
         if file is None:
             return self
-        file = os.path.truepath(file)
+        file = utils.path.truepath(file)
         # append default filename if is a directory
         if os.path.isdir(file):
-            file = os.path.truepath(file, SESSION_FILENAME)
+            file = utils.path.truepath(file, SESSION_FILENAME)
         # get unpickled `data` from `file`
         try:
             data = pickle.load(gzip.open(file),
@@ -269,11 +270,11 @@ class Session(objects.MetaDict):
             file = self.File
 
         # get file's absolute path
-        file = os.path.truepath(file)
+        file = utils.path.truepath(file)
 
         # if it is a directory, append default session file name
         if os.path.isdir(file):
-            file = os.path.truepath(file, SESSION_FILENAME)
+            file = utils.path.truepath(file, SESSION_FILENAME)
 
         # if file exists and differs from session's binded file,
         # then an user overwriting confirmation is required.

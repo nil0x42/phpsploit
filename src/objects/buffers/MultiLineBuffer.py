@@ -2,6 +2,7 @@ import os
 import hashlib
 
 from ui.color import colorize
+import utils.path
 
 
 class MultiLineBuffer:
@@ -56,7 +57,7 @@ class MultiLineBuffer:
             self.buffer = value[1]
         # elif value is a file:// string
         elif value[7:] and value[:7].lower() == "file://":
-            self.file = os.path.truepath(value[7:])
+            self.file = utils.path.truepath(value[7:])
             try:
                 self.buffer = open(self.file, "r").read()
             except:
@@ -78,7 +79,7 @@ class MultiLineBuffer:
         """
         obj = self._getobj(self.buffer)
 
-        if call and hasattr(obj, "__call__"):
+        if call and callable(obj):
             return obj()
         return obj
 
