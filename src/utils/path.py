@@ -1,17 +1,18 @@
-"""A small os.path module improvement.
+"""File path handling
 
-Add a truepath() function, which supports multipl path arguments,
-and automatically joins them with user dir and env vars expanded.
-
-The final result path is then normalized with os.path.realpath()
+The functions described here provide some aditional features
+unavailable in the os.path standard module.
 
 Author: nil0x42
 """
 
 import os
 
+
 def truepath(*elems):
-    """A fusion of join(), expandvars(), expanduser() and realpath()"""
+    """Joins the given path(s), expanding environment variables
+    and user directory ('~').
+    """
     expand = lambda s: os.path.expandvars(os.path.expanduser(s))
     elems = (expand(s) for s in elems)
     path = os.path.join(*elems)
