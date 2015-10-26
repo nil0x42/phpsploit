@@ -24,6 +24,8 @@ class Url(str):
             raise ValueError('«%s» is not a valid URL Link' % url)
 
         defaults = ['http', '', '80', '/', '']
+        if components[0].lower() == 'https':
+            defaults[2] = '443'
         for index, elem in enumerate(components):
             if elem is None:
                 components[index] = defaults[index]
