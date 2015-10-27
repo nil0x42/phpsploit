@@ -56,9 +56,9 @@ class Interval(tuple):
 
         if low is big:
             text = main %low
-            comment = ' (static interval)'
+            comment = '(fixed interval)'
         else:
             text = ' <= '.join((low, main %'x', big))
-            comment = ' (random interval)'
+            comment = '(random interval)'
 
-        return colorize('%Pink', text, '%DimWhite', comment)
+        return colorize('%Pink', text, " ", '%DimWhite', comment)

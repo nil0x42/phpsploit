@@ -72,6 +72,6 @@ class ByteSize(int):
         byteNames = ('bytes', 'KiB', 'MiB', 'GiB', 'TiB')
         result = number + " " + byteNames[index]
         if index > 0:
-            result += colorize('%DimWhite', " (%s bytes)" % self_str)
+            result += colorize(" ", '%DimWhite', "(%s bytes)" % self_str)
 
         return result
