@@ -4,6 +4,7 @@ import urllib
 from urllib.request import build_opener, ProxyHandler
 
 import socks
+from sockshandler import SocksiPyHandler
 
 from ui.color import colorize
 
@@ -47,9 +48,9 @@ class Proxy(str):
         """Build self._urllib_opener"""
 
         proxy = super().__str__()
-        self._urllib_opener = build_opener()
 
         if proxy == "None":
+            self._urllib_opener = build_opener()
             return
 
         components = list(re.match(self._match_regexp, proxy).groups())
@@ -57,17 +58,18 @@ class Proxy(str):
         self.components = components
 
         if self.scheme == "socks4":
-            handler = SocksiPyHandler(socks.PROXY_TYPE_SOCKS4,
-                                      self.host,
-                                      int(self.port))
+            socks4_handler = SocksiPyHandler(socks.PROXY_TYPE_SOCKS4,
+                    self.host,
+                    int(self.port))
+            self._urllib_opener = build_opener(socks4_handler)
         elif self.scheme == "socks5":
-            handler = SocksiPyHandler(socks.PROXY_TYPE_SOCKS5,
-                                      self.host,
-                                      int(self.port))
+            socks5_handler = SocksiPyHandler(socks.PROXY_TYPE_SOCKS5,
+                    self.host,
+                    int(self.port))
+            self._urllib_opener = build_opener(socks5_handler)
         else:
-            handler = ProxyHandler({'http': proxy, 'https': proxy})
-
-        self._urllib_opener.add_handler(handler)
+            proxy_handler = ProxyHandler({'http': proxy, 'https': proxy})
+            self._urllib_opener = build_opener(proxy_handler)
 
     def _raw_value(self):
         return super().__str__()
@@ -80,32 +82,3 @@ class Proxy(str):
             return "None"
         return colorize('%Cyan', self.scheme, '://', '%BoldWhite',
                         self.host, '%BasicCyan', ':', self.port)
-
-
-class SocksiPyConnection(http.client.HTTPConnection):
-    def __init__(self, version, addr, port=None, rdns=True,
-                 username=None, password=None, *args, **kwargs):
-        self.proxyargs = (version, addr, port, rdns, username, password)
-        http.client.HTTPConnection.__init__(self, *args, **kwargs)
-
-    def connect(self):
-        self.sock = socks.socksocket()
-        self.sock.setproxy(*self.proxyargs)
-        if isinstance(self.timeout, float):
-            self.sock.settimeout(self.timeout)
-        self.sock.connect((self.host, self.port))
-
-
-class SocksiPyHandler(urllib.request.HTTPHandler):
-    def __init__(self, *args, **kwargs):
-        self.args = args
-        self.kw = kwargs
-        urllib.request.HTTPHandler.__init__(self)
-
-    def http_open(self, req):
-        def build(host, port=None, strict=None, timeout=0):
-            con = SocksiPyConnection(*self.args, host=host, port=port,
-                                     strict=strict, timeout=timeout, **self.kw)
-            return con
-
-        return self.do_open(build, req)
