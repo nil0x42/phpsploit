@@ -50,6 +50,7 @@ import sys
 import os
 import base64
 
+import utils
 import ui.input
 
 from api import plugin
@@ -77,7 +78,7 @@ else:
 abspath = server.path.abspath(relpath)
 
 local_relpath = plugin.argv[arg1]
-local_abspath = os.path.abspath(local_relpath)
+local_abspath = utils.path.truepath(local_relpath)
 local_basename = os.path.basename(local_abspath)
 
 # check for errors
