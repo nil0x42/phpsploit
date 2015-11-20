@@ -14,6 +14,6 @@ if (($data = @file_get_contents($PHPSPLOIT['FILE'])) === False)
     return error("%s: Read permission denied", $PHPSPLOIT['FILE']);
 
 // Return the file data (in base64 format)
-return base64_encode($data);
+return array(filemtime($PHPSPLOIT["FILE"]), base64_encode($data));
 
 ?>
