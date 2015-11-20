@@ -129,7 +129,7 @@ output = payload.send()
 
 lines = output.splitlines()
 if not lines:
-    sys.exit("")
+    sys.exit("No output received")
 
 new_pwd = lines[-1]
 response = "\n".join(lines[:-1])
