@@ -1,7 +1,7 @@
 """A client for Oracle PL/SQL databases
 
 SYNOPSIS:
-    oracle connect <USERNAME>@<HOSTNAME>:<PORT>/<BASE> [-p <PASSWORD>]
+    oracle connect <USERNAME>@<HOSTNAME>:<PORT>/<CONNECTOR> [-p <PASSWORD>]
     oracle "<SQL COMMAND>"
 
 DESCRIPTION:
@@ -10,6 +10,8 @@ DESCRIPTION:
     given credentials, which are then stored on `ORACLE_CRED`
     environment variable in order to be persistent between
     plugin calls in current session.
+    - The <CONNECTOR> argument describes a 'SERVICE_NAME' OR an 'SID',
+    wich are both oracle connection paradygms.
     - Any other case assumes that the arguments are an SQL
     command, and result is returned.
     - A command that ends with '\G' will use tabular
@@ -62,7 +64,7 @@ def load_credentials(creds):
         result['USER'] = parsed[0]
         result['HOST'] = parsed[1]
         result['PORT'] = parsed[2]
-        result['BASE'] = parsed[3]
+        result['CONNECTOR'] = parsed[3]
         result['PASS'] = parsed[4]
     except:
         sys.exit("couldn't parse ORACLE_CRED credentials: %s" % creds)
