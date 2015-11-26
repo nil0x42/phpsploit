@@ -2,6 +2,7 @@ import re
 import copy
 
 import objects
+import utils
 
 
 class Environment(objects.VarContainer):
@@ -42,6 +43,9 @@ class Environment(objects.VarContainer):
         self.defaults = copy.copy(dict(self))
 
     def __setitem__(self, name, value):
+        # ensure the env var name has good syntax
+        if name == "" or not utils.ascii.isgraph(name):
+            raise KeyError("illegal name: '{}'".format(name))
         if name in self.readonly and name in self.keys():
             raise AttributeError("«{}» variable is read-only".format(name))
         if value == "%%DEFAULT%%":
