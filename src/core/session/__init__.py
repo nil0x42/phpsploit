@@ -139,7 +139,7 @@ class Session(objects.MetaDict):
             if "Compat" not in data.keys():
                 data["Compat"] = {}
         except OSError as error:
-            if str(error) == "Not a gzipped file":
+            if "not a gzipped file" in str(error).lower():
                 data = compat_session.load(file)
             else:
                 raise error
