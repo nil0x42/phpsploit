@@ -221,6 +221,9 @@ class Session(objects.MetaDict):
             if isinstance(obj[object], dict):
                 for var, value in obj[object].items():
                     rawdump[object][var] = rawvar(value)
+                if object == "Env":
+                    # HACK: store env defaults as __DEFAULTS__
+                    rawdump["Env"]["__DEFAULTS__"] = obj["Env"].defaults
             elif object == "Hist":
                 rawdump[object] = list(obj[object])
             else:
@@ -286,7 +289,8 @@ class Session(objects.MetaDict):
 
         # write it to the file
         self._history_update()
-        pickle.dump(self._raw_value(self), gzip.open(file, 'wb'))
+        raw = self._raw_value(self)
+        pickle.dump(raw, gzip.open(file, 'wb'))
 
 
 # instanciate main phpsploit session as core.session

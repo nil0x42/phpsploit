@@ -44,7 +44,7 @@ class Environment(objects.VarContainer):
 
     def __setitem__(self, name, value):
         # ensure the env var name has good syntax
-        if name == "" or not utils.ascii.isgraph(name):
+        if name in ["", "__DEFAULTS__"] or not utils.ascii.isgraph(name):
             raise KeyError("illegal name: '{}'".format(name))
         if name in self.readonly and name in self.keys():
             raise AttributeError("«{}» variable is read-only".format(name))
@@ -65,6 +65,10 @@ class Environment(objects.VarContainer):
     def update(self, dic):
         readonly = self.readonly
         self.readonly = []
+        if "__DEFAULTS__" in dic.keys():
+            self.defaults = copy.copy(dict(dic.pop("__DEFAULTS__")))
+        elif hasattr(dic, "defaults"):
+            self.defaults = copy.copy(dict(dic.defaults))
         for key, value in dic.items():
             # do not update if the key has been set to
             # another value than the default one.
