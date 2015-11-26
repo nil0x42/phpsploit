@@ -4,7 +4,7 @@ import objects
 class VarContainer(objects.MetaDict):
     """VarContainer() object (by nil0x42)
 
-    This class unherits objects.Metadict, and juste implements
+    This class unherits objects.Metadict, and just implements
     a specific flavour in the __setitem__() magic method:
 
     >>> obj = VarContainer()

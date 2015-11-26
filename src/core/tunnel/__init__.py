@@ -56,7 +56,7 @@ class Tunnel:
             print()
             print("Connected to %s server (%s)"
                   % (session.Env.PLATFORM.capitalize(), session.Env.HOST))
-            print("running PHP %s through %s"
+            print("running PHP %s on %s"
                   % (session.Env.PHP_VERSION, session.Env.HTTP_SOFTWARE))
             self.active = True
             return True
