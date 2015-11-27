@@ -14,7 +14,7 @@ import shnake
 import core
 import ui.output
 
-from core import session, tunnel, plugins
+from core import session, tunnel, plugins, encoding
 import datatypes
 from datatypes import Path
 from ui.color import colorize
@@ -159,7 +159,8 @@ class Shell(shnake.Shell):
     ####################
     # COMMAND: corectl #
     def complete_corectl(self, text, *ignored):
-        keys = ["stack-traceback", "reload-plugins", "python-console"]
+        keys = ["stack-traceback", "reload-plugins",
+                "python-console", "display-http-requests"]
         return [x for x in keys if x.startswith(text)]
 
     def do_corectl(self, argv):
@@ -179,6 +180,8 @@ class Shell(shnake.Shell):
             The `stack-traceback` tool displays the full python
             stack trace of the last thrown exception.
             This command is useful for debugging purposes.
+
+            NOTE: stack traceback is NOT saved in session files
 
         reload-plugins
             Reload all phpsploit plugins.
@@ -201,6 +204,14 @@ class Shell(shnake.Shell):
             of the python console:
             >>> import api
             >>> help(api)
+
+        display-http-requests
+            Display HTTP(s) request(s) for debugging
+
+            Shows all HTTP(s) request(s) that where sent in the last
+            remote command execution.
+
+            NOTE: http requests are NOT saved in session files
         """
         argv.append('')
 
@@ -230,6 +241,14 @@ class Shell(shnake.Shell):
             console.banner = "Phpsploit corectl: python console interpreter"
             console()
 
+        elif argv[1] == "display-http-requests":
+            for num, request in enumerate(tunnel.get_raw_requests(), 1):
+                print("#" * 78)
+                print("### REQUEST %d" % num)
+                print("#" * 78)
+                print(encoding.decode(request))
+            else:
+                print("[-] No HTTP(s) requests were sent up to now")
         else:
             self.interpret("help corectl")
 

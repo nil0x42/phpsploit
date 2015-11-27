@@ -75,6 +75,9 @@ class Tunnel:
         request.open(raw_payload)
         return request
 
+    def get_raw_requests(self):
+        return handler.global_raw_requests
+
 
 # instanciate main phpsploit tunnel as core.tunnel
 tunnel = Tunnel()

@@ -17,6 +17,9 @@ from ui.color import colorize
 from .exceptions import BuildError, RequestError, ResponseError
 from . import payload
 
+##############################################################################
+### disable ssl signed certificates vetrification, in order to be
+### able to use the phpsploit backdoor over non signed https targets.
 import ssl
 try:
     _create_unverified_https_context = ssl._create_unverified_context
@@ -26,6 +29,33 @@ except AttributeError:
 else:
     # Handle target environment that doesn't support HTTPS verification
     ssl._create_default_https_context = _create_unverified_https_context
+
+##############################################################################
+### custom http connection handlers: save raw plaintext http/https requests
+### into `global_raw_requests`.
+import http.client
+
+global_raw_requests = []
+
+class CustomHTTPConnection(http.client.HTTPConnection):
+    def send(self, s):
+        global global_raw_requests
+        global_raw_requests.append(s)
+        super().send(s)
+
+class CustomHTTPSConnection(http.client.HTTPSConnection):
+    def send(self, s):
+        global global_raw_request
+        global_raw_requests.append(s)
+        super().send(s)
+
+http.client.__HTTPConnection__ = http.client.HTTPConnection
+http.client.__HTTPSConnection__ = http.client.HTTPSConnection
+
+http.client.HTTPConnection = CustomHTTPConnection
+http.client.HTTPSConnection = CustomHTTPSConnection
+
+##############################################################################
 
 
 class Request:
@@ -699,6 +729,10 @@ class Request:
         and returns the unparsed and decapsulated phpsploit response
 
         """
+        # flush raw requests container
+        global global_raw_requests
+        global_raw_requests = []
+
         multiReqLst = request[:-1]
         lastRequest = request[-1]
 
