@@ -43,17 +43,18 @@ class CustomHTTPConnection(http.client.HTTPConnection):
         global_raw_requests.append(s)
         super().send(s)
 
-class CustomHTTPSConnection(http.client.HTTPSConnection):
-    def send(self, s):
-        global global_raw_request
-        global_raw_requests.append(s)
-        super().send(s)
+# TODO: intercept trafic on HTTPS requests too
+# class CustomHTTPSConnection(http.client.HTTPSConnection):
+#     def send(self, s):
+#         global global_raw_request
+#         global_raw_requests.append(s)
+#         super().send(s)
 
 http.client.__HTTPConnection__ = http.client.HTTPConnection
-http.client.__HTTPSConnection__ = http.client.HTTPSConnection
+# http.client.__HTTPSConnection__ = http.client.HTTPSConnection
 
 http.client.HTTPConnection = CustomHTTPConnection
-http.client.HTTPSConnection = CustomHTTPSConnection
+# http.client.HTTPSConnection = CustomHTTPSConnection
 
 ##############################################################################
 

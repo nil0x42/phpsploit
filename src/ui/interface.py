@@ -212,6 +212,7 @@ class Shell(shnake.Shell):
             remote command execution.
 
             NOTE: http requests are NOT saved in session files
+            WARNING: don't works with HTTPS requests (see issue #29 on github)
         """
         argv.append('')
 
