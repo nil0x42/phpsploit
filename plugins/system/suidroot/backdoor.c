@@ -14,7 +14,7 @@ int     main(int argc, char **argv)
     i = strlen(argv[0]);
     memset(argv[0], 0, i);
     if (sizeof(FAKE_CMD) <= i)
-        strcpy(argv[0], "[kthread]");
+        strcpy(argv[0], FAKE_CMD);
 
     // concat command list
     memset(buf, 0, BUF_SIZE);
