@@ -53,9 +53,9 @@ data = {"sep"  : "   ",
 number = len(http.response)
 title = "Found %s result%s matching %s in %s" % (str(number), ['','s'][number>1], pattern, absPath)
 
-print ''
-print title
-print '='*len(title)
-print ''
-print api.columnize(data)
-print ''
+print('')
+print(title)
+print('='*len(title))
+print('')
+print(api.columnize(data))
+print('')
