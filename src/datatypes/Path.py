@@ -68,7 +68,7 @@ class Path(str):
             path = session.Conf.TMPPATH() + rand_dir + filename
             os.makedirs(os.path.dirname(path))
             # create the file with empty content
-            open(path, "w").close()
+            open(path, 'w+').close()
         else:
             path = utils.path.truepath(*args)
 
@@ -212,6 +212,7 @@ class Path(str):
 
         if not bin_mode:
             try:
+
                 lines = data.splitlines()
                 data = os.linesep.join(lines)
                 open(self, 'w').write(data)
