@@ -67,12 +67,14 @@ for path in plugin.argv[1:] or [environ['PWD']]:
         response = lister.send()
     except server.payload.PayloadError as e:
         if e.args[0] == 'nodir':
-            sys.exit("cannot access %s: No such file or directory." % (path))
+            print("ls: cannot access %s: No such file or directory." % (path))
         if e.args[0] == 'noright':
-            sys.exit("cannot open %s: Permission denied." % (path))
+            print("ls: cannot open %s: Permission denied." % (path))
         if e.args[0] == 'nomatch':
-            sys.exit("cannot find %s: No matching elements." % (path))
+            print("ls: cannot find %s: No matching elements." % (path))
 
+        # try with the next item
+        continue
     target, regex, lines = response[0], response[1], response[2]
 
     # if at least one owner/group is not '?', use unix-like formatter

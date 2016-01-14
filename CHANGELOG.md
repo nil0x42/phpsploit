@@ -6,7 +6,9 @@
 - Fix issue #6 (*_proxy env var handling through http tunnel).
 - All settings can now be reset with `set <VAR> %%DEFAULT%%`
 - Add full backward compatibility with older phpsploit session files.
-
+- Fix issue #1 (the `ls` plugin leaves at first invalid path)
+- Fix no existing file in datatypes/Path
+- Fix issue #5 - Add a '--browser' option to `phpinfo` plugin for html display. 
 ### Version 2.2.0b *(2014-08-09)*
 - **Rewritten the whole PhpSploit framework** in python 3 with new skeleton.
 - The `system` have been renamed into `run`.
