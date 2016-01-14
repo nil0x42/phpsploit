@@ -1,7 +1,12 @@
 """Output information about PHP's configuration
 
 SYNOPSIS:
-    phpinfo
+    phpinfo [--browse]
+
+OPTIONS:
+    --browse  Display target's phpinfo() in web browser instead
+              of generating a tabular text format.
+
 
 DESCRIPTION:
     Dump the remote server's phpinfo() data in tabular
