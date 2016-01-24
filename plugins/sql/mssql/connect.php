@@ -6,7 +6,7 @@ $user = $PHPSPLOIT["USER"];
 $pass = $PHPSPLOIT["PASS"];
 $conn = @mssql_connect($host, $user, $pass);
 if (!$conn)
-    return error("ERROR: %s: %s", @mssql_errno(), @mssql_error());
+    return error("ERROR: %s", @mssql_get_last_message());
 
 //@mssql_close($connect);
 // NOTE:

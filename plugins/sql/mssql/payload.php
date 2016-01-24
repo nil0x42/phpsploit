@@ -6,7 +6,7 @@ $user = $PHPSPLOIT["USER"];
 $pass = $PHPSPLOIT["PASS"];
 $conn = @mssql_connect($host, $user, $pass);
 if (!$conn)
-    return error("ERROR: %s: %s", @mssql_errno(), @mssql_error());
+    return error("ERROR: %s", @mssql_get_last_message());
 
 
 // Select database (if any)
@@ -14,14 +14,14 @@ if (isset($PHPSPLOIT["BASE"]))
 {
     $select = @mssql_select_db($PHPSPLOIT['BASE'], $conn);
     if (!$select)
-        return error("ERROR: %s: %s", @mssql_errno(), @mssql_error());
+        return error("ERROR: %s", @mssql_get_last_message());
 }
 
 
 // Send query
 $query = mssql_query($PHPSPLOIT['QUERY'], $conn);
 if (!$query)
-    return error("ERROR: %s: %s", @mssql_errno(), @mssql_error());
+    return error("ERROR: %s", @mssql_get_last_message());
 
 
 // Query type: GET (information gathering)
@@ -43,6 +43,6 @@ $rows = @mssql_rows_affected();
 if (is_int($rows))
     return array('SET', $rows);
 
-return error("ERROR: %s: %s", @mssql_errno(), @mssql_error());
+return error("ERROR: %s", @mssql_get_last_message());
 
 ?>
