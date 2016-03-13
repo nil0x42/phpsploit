@@ -680,7 +680,7 @@ class Shell(shnake.Shell):
                 session.Conf[argv[1]] += " ".join(argv[3:])
         # `set <VAR> "value"`: just change VAR's "value"
         else:
-            session.Conf[argv[1]] = argv[2]
+            session.Conf[argv[1]] = " ".join(argv[2:])
 
     ################
     # COMMAND: env #
