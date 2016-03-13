@@ -19,18 +19,17 @@ class WebBrowser(str):
         blacklist = ['macosx']
         lst = [x for x in webbrowser._browsers.keys() if x not in blacklist]
         fmt = ", ".join(lst)
-        if name and name != "default" and name not in lst:
-            raise ValueError("available browsers: %s." % fmt)
         try:
             if name.lower() in ["", "default"]:
                 name = webbrowser.get().name
             else:
-                name = webbrowser.get(name).name
+                webbrowser.get(name)
         # another boring Mac OS/X case ..
         except AttributeError:
             return str.__new__(cls, "default")
         except:
-            raise ValueError("Can't bind to «%s» browser" % name)
+            raise ValueError("Can't bind to «%s». Try one of %s"
+                    % (name, fmt))
         return str.__new__(cls, name)
 
     def _raw_value(self):
@@ -46,5 +45,6 @@ class WebBrowser(str):
             return colorize('%Cyan', "default")
 
     def open(self, url):
-        browser = webbrowser.get(self)
-        browser.open(url)
+        browser = webbrowser.get(self._raw_value())
+        # try to open url in new browser tab
+        return browser.open_new_tab(url)

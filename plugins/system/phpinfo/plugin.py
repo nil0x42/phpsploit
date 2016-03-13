@@ -1,11 +1,11 @@
 """Output information about PHP's configuration
 
 SYNOPSIS:
-    phpinfo [--browse]
+    phpinfo [--browser]
 
 OPTIONS:
-    --browse  Display target's phpinfo() in web browser instead
-              of generating a tabular text format.
+    --browser  Display target's phpinfo() in web browser instead
+               of generating a tabular text format.
 
 
 DESCRIPTION:
@@ -71,19 +71,9 @@ def tablify(vals):
         footer = '+-' + ('-+-'.join(footer_fill)) + '-+'
     return result + footer
 
-def browser(html_string_buffer):
 
-    file= Path("phpinfo.html")
-    file.write(html_string_buffer)
-    file.browse()
-    del file
-
-if (len(plugin.argv) == 2) and plugin.argv[1] == "--browse":
-    phpinfo = server.payload.Payload("html_format.php").send()
-    browser(phpinfo)
-elif len(plugin.argv) > 1:
-    sys.exit(plugin.help)
-else:
+# `phpinfo` without arguments (tabular text output)
+if len(plugin.argv) == 1:
     phpinfo = server.payload.Payload("array_format.php").send()
     if not phpinfo:
         sys.exit("Payload failed to dump phpinfo() array")
@@ -173,3 +163,15 @@ else:
                 print('+' + ('-' * (tty_cols - 2)) + '+')
             print(tablify([lineify(elem, (tty_cols - 4))]))
     print()
+# `phpinfo --browser` (view html output in browser)
+elif len(plugin.argv) == 2 and plugin.argv[1] == "--browser":
+    html_output = server.payload.Payload("html_format.php").send()
+    tmp_file = Path(filename="phpinfo.html")
+    tmp_file.write(html_output)
+    if tmp_file.browse():
+        print("[*] Successfully opened %r in browser" % tmp_file)
+    else:
+        print("[-] Failed to open %r in web browser" % tmp_file)
+        print("[-] Try to change BROWSER environment variable")
+else:
+    sys.exit(plugin.help)

@@ -54,7 +54,6 @@ class Path(str):
             /tmp/baeW7OoChooF/code.php
 
         """
-
         # if not args, default to random tmp file path:
         if not args:
             import uuid
@@ -135,7 +134,6 @@ class Path(str):
         This boolean method returns True if the file has been
         correctly edited, and its content changed.
         """
-
         from core import session
         import subprocess
         import shlex
@@ -160,11 +158,9 @@ class Path(str):
         NOTE: For the moment, the method always returns True,
               therefore, it may chance in the future.
         """
-
         from core import session
 
-        session.Conf.BROWSER(call=False).open(self)
-        return True
+        return session.Conf.BROWSER(call=False).open(self)
 
     def read(self, bin_mode=False):
         """Read path file contents.
