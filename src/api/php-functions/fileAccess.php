@@ -14,9 +14,6 @@
 //      True
 //      >>> fileAccess("/etc/passwd", 'w')
 //      False
-//
-// TODO: It will be smart if the function could restore atime
-// (access time) on unix systems after testing for stealth purposes.
 
 function fileAccess($abspath, $mode)
 {
@@ -28,9 +25,12 @@ function fileAccess($abspath, $mode)
         $mode = 'a';
 
     // fopen() the given file path and return True in case of success
+    $old_mtime = @filemtime($abspath);
+    $old_atime = @fileatime($abspath);
     if ($h = @fopen($abspath, $mode))
     {
         fclose($h);
+        @touch($abspath, $old_mtime, $old_atime);
         return (True);
     }
     else
