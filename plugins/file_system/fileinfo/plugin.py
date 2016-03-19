@@ -66,11 +66,11 @@ else:
 
 result.append(['Absolute Path', absPath])
 
-print ''
-print 'File informations'
-print '================='
-print ''
+print ('')
+print ('File informations')
+print ('=================')
+print ('')
 for x in result:
-    print x[0]+(' '*(15-len(x[0])))+x[1]
+    print (x[0]+(' '*(15-len(x[0])))+x[1])
 
-print ''
+print ('')
