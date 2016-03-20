@@ -69,7 +69,7 @@ class Plugins(objects.MetaDict):
         plugin.argv = argv
         self.current_plugin = plugin
         try:
-            plugin.run(argv)
+            return plugin.run(argv)
         finally:
             self.current_plugin = DEFAULT_PLUGIN
 

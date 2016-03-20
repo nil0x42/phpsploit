@@ -69,17 +69,18 @@ class Plugin:
             ExecPlugin(self)
         except KeyboardInterrupt:
             raise KeyboardInterrupt
-        except SystemExit as exception:
+        except SystemExit as e:
+            retval = e.code
             try:
-                retval = exception.args[0]
-            except IndexError:
-                retval = 0
-            if isinstance(retval, str):
-                print("[-] %s: %s" % (self.name, retval))
-                return 1
+                assert isinstance(e.args[0], str)
+                errmsg = " ".join(e.args)
+                print("[-] %s: %s" % (self.name, errmsg))
+            except (IndexError, AssertionError):
+                pass
             return retval
         except server.payload.PayloadError as err:
             print("[-] %s: %s" % (self.name, err))
+            return 64
         except BaseException as err:
             msg = "Python runtime error (exception occured)"
             print("[-] %s: %s:" % (self.name, msg))
