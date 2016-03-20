@@ -331,25 +331,28 @@ class Shell(shnake.Shell):
         if len(argv) > 1:
             if argv[1] == "--get-backdoor":
                 print(obj)
-                return
+                return True
             else:
-                return self.interpret("help exploit")
+                self.interpret("help exploit")
+                return False
 
         print("[*] Current backdoor is: " + obj + "\n")
 
         if tunnel:
             m = ("[*] Use `set TARGET <VALUE>` to use another url as target."
                  "\n[*] To exploit a new server, disconnect from «{}» first.")
-            return print(m.format(session.Env.HOST))
+            print(m.format(session.Env.HOST))
+            return False
 
         elif session.Conf.TARGET() is None:
             m = ("To run a remote tunnel, the backdoor shown above must be\n"
                  "manually injected in a remote server executable web page.\n"
                  "Then, use `set TARGET <BACKDOORED_URL>` and run `exploit`.")
-            return print(colorize("%BoldCyan", m))
+            print(colorize("%BoldCyan", m))
+            return False
 
         else:
-            tunnel.open()  # it raises exception if fails
+            return tunnel.open()  # it raises exception if fails
 
     ##################
     # COMMAND: clear #
