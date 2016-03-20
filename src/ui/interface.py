@@ -243,13 +243,15 @@ class Shell(shnake.Shell):
             console()
 
         elif argv[1] == "display-http-requests":
-            for num, request in enumerate(tunnel.get_raw_requests(), 1):
+            requests = enumerate(tunnel.get_raw_requests(), 1)
+            if not requests:
+                print("[-] No HTTP(s) requests were sent up to now")
+                return
+            for num, request in requests:
                 print("#" * 78)
                 print("### REQUEST %d" % num)
                 print("#" * 78)
                 print(encoding.decode(request))
-            else:
-                print("[-] No HTTP(s) requests were sent up to now")
         else:
             self.interpret("help corectl")
 
