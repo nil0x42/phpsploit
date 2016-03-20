@@ -4,6 +4,7 @@ import importlib
 import traceback
 
 from datatypes import Path
+from ui.color import colorize
 
 from .exceptions import BadPlugin
 
@@ -70,13 +71,20 @@ class Plugin:
         except KeyboardInterrupt:
             raise KeyboardInterrupt
         except SystemExit as e:
-            retval = e.code
-            try:
-                assert isinstance(e.args[0], str)
-                errmsg = " ".join(e.args)
-                print("[-] %s: %s" % (self.name, errmsg))
-            except (IndexError, AssertionError):
-                pass
+            retval = e.args[0] if e.args else e.code
+            if not isinstance(retval, int):
+                lines = self.help.splitlines()
+                if len(lines) > 1 and str(retval) == self.help:
+                    print()
+                    print("[*] %s: %s" % (self.name, lines.pop(0)))
+                    for line in lines:
+                        if line == line.lstrip():
+                            line = colorize("%BoldWhite", line)
+                        print(line)
+                    print()
+                else:
+                    print("[-] %s: %s" % (self.name, retval))
+                retval = 1
             return retval
         except server.payload.PayloadError as err:
             print("[-] %s: %s" % (self.name, err))
