@@ -7,7 +7,6 @@ OPTIONS:
     --browser  Display target's phpinfo() in web browser instead
                of generating a tabular text format.
 
-
 DESCRIPTION:
     Dump the remote server's phpinfo() data in tabular
     text format.
