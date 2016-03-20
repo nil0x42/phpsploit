@@ -17,8 +17,7 @@ Core:
 
 Commands:
   * Add a `bind` core command to bind the prompt to a plugin.
-  * Add `corectl debug-http-request` command for watching payload construction
-    and responses steps within a debug buffer displayed on $EDITOR.
+  * Implement HTTP response display in `corectl display-http-requests` command
 
 Plugins:
   * Write a "plugins/network/scan/plugin.py" small ip scanner, to be able to
