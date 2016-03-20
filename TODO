@@ -11,7 +11,7 @@ Sessions:
   * session saving shall ask user confirmation if session changed.
 
 Core:
-  * Add a way to get return code of previkous command (like bash's '$?')
+  * Add a way to get return code of previous command (like bash's '$?')
   * Provide bzip2 payload encoding (php >= 4.0.4, with bzcompress())
     We need smaller payloads !
 
@@ -23,8 +23,6 @@ Commands:
 Plugins:
   * Write a "plugins/network/scan/plugin.py" small ip scanner, to be able to
     progressively gain access on controlled server's internal network.
-  * A `stat` plugin should be created with new API. This one will replace
-    the current and deprecated `fileinfo` plugin.
 
 Documentation:
   * Simplify the manpage to summarize only commands and how to get started

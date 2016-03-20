@@ -18,6 +18,7 @@ alias save      "session save"
 alias infect    "exploit"
 alias lcd       "lrun cd"
 alias lpwd      "lrun pwd"
+alias fileinfo  "stat"
 
 
 ### Some configuration examples you may want to add:
