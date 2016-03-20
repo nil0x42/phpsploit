@@ -40,7 +40,7 @@ class Tunnel:
                 new_hostname = socket.socket.hostname
                 if old_hostname != new_hostname:
                     question = ("TARGET hostname has changed, wish "
-                                "you reset environment ? (recommended)")
+                            "you reset environment ? (recommended)")
                     if ui.input.Expect(True)(question):
                         session.Env.clear()
                         print("[*] Environment correctly flushed")
@@ -51,13 +51,13 @@ class Tunnel:
             self.socket = socket
             self.hostname = socket.socket.hostname
             print("[*] Shell obtained by PHP (%s -> %s:%s)"
-                  % (session.Env.CLIENT_ADDR, session.Env.ADDR,
-                     session.Env.PORT))
+                    % (session.Env.CLIENT_ADDR, session.Env.ADDR,
+                        session.Env.PORT))
             print()
             print("Connected to %s server (%s)"
-                  % (session.Env.PLATFORM.capitalize(), session.Env.HOST))
+                    % (session.Env.PLATFORM.capitalize(), session.Env.HOST))
             print("running PHP %s on %s"
-                  % (session.Env.PHP_VERSION, session.Env.HTTP_SOFTWARE))
+                    % (session.Env.PHP_VERSION, session.Env.HTTP_SOFTWARE))
             self.active = True
             return True
 
