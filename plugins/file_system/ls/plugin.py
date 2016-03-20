@@ -50,6 +50,12 @@ from api import plugin
 from api import server
 from api import environ
 
+status = 0
+
+def abort(msg):
+    global status
+    status |= 1
+    print("[-] %s: %s" % (plugin.name, msg))
 
 for path in plugin.argv[1:] or [environ['PWD']]:
 
@@ -67,11 +73,11 @@ for path in plugin.argv[1:] or [environ['PWD']]:
         response = lister.send()
     except server.payload.PayloadError as e:
         if e.args[0] == 'nodir':
-            print("ls: cannot access %s: No such file or directory." % (path))
+            abort("cannot access %s: No such file or directory." % (path))
         if e.args[0] == 'noright':
-            print("ls: cannot open %s: Permission denied." % (path))
+            abort("cannot open %s: Permission denied." % (path))
         if e.args[0] == 'nomatch':
-            print("ls: cannot find %s: No matching elements." % (path))
+            abort("cannot find %s: No matching elements." % (path))
 
         # try with the next item
         continue
@@ -107,3 +113,5 @@ for path in plugin.argv[1:] or [environ['PWD']]:
         print("  ".join((val.ljust(width) for val, width in zip(row, widths))))
 
     print()
+
+sys.exit(status)
