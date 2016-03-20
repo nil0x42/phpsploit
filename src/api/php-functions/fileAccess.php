@@ -6,8 +6,9 @@
 //      $abspath (string):
 //          This variable must link to a regular file.
 //      $mode (char):
-//          Mode should be 'r' to test read access, and 'w'
-//          to check write access.
+//          'r': Check if readable
+//          'w': Check if writable
+//          'x': Check if executable
 //
 // EXAMPLE:
 //      >>> fileAccess("/etc/passwd", 'r')
@@ -21,8 +22,11 @@ function fileAccess($abspath, $mode)
     // will then pass 'w' as mode argument. Therefore, we just can't
     // allow this mode internally, because doing a fopen() with 'w' mode
     // will empty the file in case of success, which is clearly stupid.
-    if ($mode != 'r')
+    if ($mode != 'r' && $mode != 'x')
         $mode = 'a';
+
+    if ($mode == 'x')
+        return @is_executable($abspath);
 
     // fopen() the given file path and return True in case of success
     $old_mtime = @filemtime($abspath);
