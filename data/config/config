@@ -19,6 +19,7 @@ alias infect    "exploit"
 alias lcd       "lrun cd"
 alias lpwd      "lrun pwd"
 alias fileinfo  "stat"
+alias backdoor  "exploit --get-backdoor"
 
 
 ### Some configuration examples you may want to add:
