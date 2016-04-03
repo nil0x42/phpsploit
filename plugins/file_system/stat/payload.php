@@ -31,8 +31,10 @@ $r["ctime"] = date("Y-m-d H:i:s O", $r["ctime"]);
 
 if (extension_loaded("posix"))
 {
-    $r["posix_pwuid"] = posix_getpwuid($r["uid"])["name"];
-    $r["posix_grgid"] = posix_getgrgid($r["gid"])["name"];
+    $tmp = posix_getpwuid($r["uid"]);
+    $r["posix_pwuid"] = $tmp["name"];
+    $tmp = posix_getgrgid($r["gid"]);
+    $r["posix_grgid"] = $tmp["name"];
 }
 
 return $r;
