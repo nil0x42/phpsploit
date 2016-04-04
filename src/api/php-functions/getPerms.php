@@ -97,9 +97,20 @@ function getPerms($abspath, $perms_format="unix")
         elseif ($type == 'd')
         {
             if (dirAccess($abspath, 'r'))
+            {
                 $Rperm = 'r';
+                $Xperm = 'x';
+            }
             else
+            {
                 $Rperm = '-';
+                $Xperm = '-';
+            }
+
+            if (dirAccess($abspath, 'w'))
+                $Wperm = 'w';
+            else
+                $Wperm = '-';
         }
         $info = $Rperm . $Wperm . $Xperm;
     }
