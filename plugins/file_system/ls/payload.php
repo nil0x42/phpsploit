@@ -41,7 +41,7 @@ if (!dirAccess($lsdir,'r'))
 {
     if (@is_dir($lsdir))
         $ERROR = error('noright',substr($lsdir,0,-1));
-    elseif($PHPSPLOIT['PARSE'])
+    elseif ($PHPSPLOIT['PARSE'])
     {
         $split = strrpos($PHPSPLOIT['TARGET'], $PHPSPLOIT['SEPARATOR']) + 1;
         $lsdir = substr($PHPSPLOIT['TARGET'], 0, $split);
@@ -49,7 +49,10 @@ if (!dirAccess($lsdir,'r'))
     }
 }
 
-$dirname = (strstr(substr($lsdir, 0, -1), $PHPSPLOIT['SEPARATOR']) === FALSE) ? $lsdir : substr($lsdir, 0, -1);
+if (strstr(substr($lsdir, 0, -1), $PHPSPLOIT['SEPARATOR']) === FALSE)
+    $dirname = $lsdir;
+else
+    $dirname = substr($lsdir, 0, -1);
 
 if (dirAccess($lsdir, 'r'))
 {

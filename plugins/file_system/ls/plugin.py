@@ -63,7 +63,7 @@ for path in plugin.argv[1:] or [environ['PWD']]:
 
     lister = server.payload.Payload("payload.php")
     lister['TARGET'] = absolute_path
-    lister['SEPARATOR'] = "/"
+    lister['SEPARATOR'] = server.path.separator(absolute_path)
 
     lister['PARSE'] = 1
     if absolute_path == environ['HOME'] or path.endswith(environ['PATH_SEP']):
