@@ -1,5 +1,8 @@
 <?php
 
+!import(dirAccess)
+!import(fileAccess)
+
 $path = $PHPSPLOIT['FILE'];
 $follow_links = $PHPSPLOIT['FOLLOW_LINKS'];
 
@@ -22,6 +25,17 @@ if ($follow_links && is_link($path))
 @clearstatcache();
 if (!($r = @lstat($path)))
     return error("%s: Permission denied", $PHPSPLOIT['FILE']);
+
+if (is_dir($path))
+{
+    $r["readable"] = dirAccess($path, 'r') ? "Yes" : "No";
+    $r["writable"] = dirAccess($path, 'w') ? "Yes" : "No";
+}
+else
+{
+    $r["readable"] = fileAccess($path, 'r') ? "Yes" : "No";
+    $r["writable"] = fileAccess($path, 'w') ? "Yes" : "No";
+}
 
 $r["file_repr"] = $file_repr;
 

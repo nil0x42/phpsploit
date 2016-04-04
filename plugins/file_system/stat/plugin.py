@@ -115,6 +115,10 @@ if "posix_pwuid" in r.keys():
     println("UID Owner", "%d (%s)" % (r["uid"], r["posix_pwuid"]))
     println("GID Owner", "%d (%s)" % (r["gid"], r["posix_grgid"]))
 
+
+println("Readable", r["readable"])
+println("Writable", r["writable"])
+
 println("Accessed", r["atime"])
 println("Modified", r["mtime"])
 println("Changed", r["ctime"])
