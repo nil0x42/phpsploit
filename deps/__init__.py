@@ -21,7 +21,7 @@ DEPENDENCIES = [('phpserialize',           'phpserialize-1.3'),
                 # ('socks',                  'SocksiPy-branch-1.02'),
                 ('socks',                  'PySocks-1.4.2-61-g805d716'),
                 ('sockshandler',           'PySocks-1.4.2-61-g805d716'),
-                ('pyparsing',              'pyparsing-2.0.2'),
+                ('pyparsing',              'pyparsing-2.1.1'),
                 ('shnake',                 'shnake-0.4')]
 
 def dependency_error(module):
