@@ -37,13 +37,13 @@ def isabs(path):
 def abspath(path):
     """Return an absolute path."""
     if not isabs(path):
-        slash = '/'
+        separator = '/'
         if '/' not in path and '\\' in path:
-            slash = '\\'
-        elems = path.split(slash)
+            separator = '\\'
+        elems = path.split(separator)
         oldPath = _split_path(session.Env.PWD)
         path = oldPath['root']
-        path += oldPath['slash'].join(oldPath['elems'] + elems)
+        path += oldPath['separator'].join(oldPath['elems'] + elems)
     return _sanitize_path(path)
 
 
@@ -55,6 +55,11 @@ def dirname(path):
 def basename(path):
     """Return the final component of a pathname"""
     return _split_path(path)['basename']
+
+
+def separator(path):
+    """Return the path  of a pathname"""
+    return _split_path(path)['separator']
 
 
 def splitdrive(path):
@@ -82,27 +87,27 @@ def _split_path(path):
     if path.startswith('/'):
         platform = 'nix'
         root = '/'
-        slash = '/'
+        separator = '/'
     # if win physical path (C:\)
     elif re.match(_windows_path_matcher, path):
         platform = 'win'
         root = path[:3]
-        slash = '\\'
+        separator = '\\'
     # if win network path (\\1.1.1.1)
     elif path.startswith('\\'):
         platform = 'win'
         root = '\\\\'
-        slash = '\\'
+        separator = '\\'
         path = root + path.lstrip('\\')
     else:
         raise ValueError("%s: Could not parse non-standard path" % path)
-    dirname = slash.join(path.split(slash)[:-1]) + slash
-    basename = path.split(slash)[-1]
-    elems = path[len(root):].split(slash)
+    dirname = separator.join(path.split(separator)[:-1]) + separator
+    basename = path.split(separator)[-1]
+    elems = path[len(root):].split(separator)
     result = {'platform': platform,
               'root': root,
               'elems': elems,
-              'slash': slash,
+              'separator': separator,
               'dirname': dirname,
               'basename': basename}
     return result
@@ -125,4 +130,4 @@ def _sanitize_path(path):
             result = info['elems']
         else:
             result.append(x)
-    return info['root'] + info['slash'].join(result)
+    return info['root'] + info['separator'].join(result)
