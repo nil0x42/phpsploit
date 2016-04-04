@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# Copyright Jonathan Hartley 2013. BSD 3-Clause license, see LICENSE file.
 
 # print grid of all colors and brightnesses
 # uses stdout.write to write chars with no newline nor spaces between them

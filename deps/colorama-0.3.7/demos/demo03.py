@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# Copyright Jonathan Hartley 2013. BSD 3-Clause license, see LICENSE file.
+
 # Demonstrate the different behavior when autoreset is True and False.
 
 from __future__ import print_function

@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# Copyright Jonathan Hartley 2013. BSD 3-Clause license, see LICENSE file.
+
 # Simple demo of changing foreground, background and brightness.
 
 from __future__ import print_function
@@ -19,3 +21,5 @@ print(Style.DIM + 'dim, '
     + Style.BRIGHT + 'bright, '
     + Style.NORMAL + 'normal'
     , end=' ')
+print()
+
