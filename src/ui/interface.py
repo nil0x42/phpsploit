@@ -901,7 +901,7 @@ class Shell(shnake.Shell):
             """print the formated command's docstring"""
             # reject empty docstrings (description + empty line)
             if len(docLines) < 2:
-                return None
+                return False
             docLines.pop(0)  # remove the description line
             while not docLines[0].strip():
                 docLines.pop(0)  # remove heading empty lines
@@ -924,7 +924,11 @@ class Shell(shnake.Shell):
             doc = get_doc(argv[1])
             # if the given argument is not a command, return nohelp err
             if not doc:
-                return print(self.nohelp % argv[1])
+                if argv[1] in session.Alias:
+                    return self.interpret("alias %s" % argv[1])
+                else:
+                    print(self.nohelp % argv[1])
+                    return False
 
             # print the heading help line, which contain description
             print("\n[*] " + argv[1] + ": " + get_description(doc) + "\n")
@@ -932,9 +936,9 @@ class Shell(shnake.Shell):
             # call the help_<command> method, otherwise, print it's docstring
             try:
                 getattr(self, 'help_' + argv[1])()
+                return True
             except:
-                doc_help(doc)
-            return
+                return doc_help(doc)
         # get help about settings (e.g.: `help set BACKDOOR`)
         elif len(argv) == 3 and argv[1] == "set":
             setting = argv[2]
