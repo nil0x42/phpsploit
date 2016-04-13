@@ -30,13 +30,16 @@ function dirAccess($abspath, $mode)
         else
             return (False);
     }
-    elseif ($mode == 'w')
+    elseif ($mode == 'w' || $mode == 'a')
     {
+        $old_mtime = @filemtime($abspath);
+        $old_atime = @fileatime($abspath);
         $rand = $abspath . uniqid('/pspapi_');
         if ($h = @fopen($rand, 'a'))
         {
             fclose($h);
             unlink($rand);
+            @touch($abspath, $old_mtime, $old_atime);
             return (True);
         }
         else
