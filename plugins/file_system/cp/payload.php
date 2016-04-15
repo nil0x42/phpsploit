@@ -5,6 +5,10 @@
 $src = $PHPSPLOIT['SRC'];
 $dst = $PHPSPLOIT['DST'];
 
+// backup source mtime to copy the same for destination later
+$src_mtime = @filemtime($src);
+$src_atime = @fileatime($src);
+
 // check source file access and get source file's buffer
 if (!@file_exists($src))
     return error("cannot stat '%s': No such file or directory", $src);
@@ -26,7 +30,11 @@ if (!@file_exists($dst))
 {
     $file = @fopen($dst, 'w');
     if ($file !== False && @fwrite($file, $buffer) !== False)
+    {
+        @fclose($dst);
+        @touch($dst, $src_mtime, $src_atime);
         return array($src, $dst);
+    }
     $dir = substr($dst, 0, (strrpos($dst, $PHPSPLOIT['PATH_SEP']) + 1));
     if (@is_dir($dir))
         $msg = "Permission denied";
@@ -45,6 +53,9 @@ if (!$PHPSPLOIT['FORCE'])
 
 // try to write source buffer to destination file
 $file = @fopen($dst, 'w');
-if ($file !== False && @fwrite($file, $buffer) !== False)
-    return array($src, $dst);
-return error("cannot create regular file '%s': Permission denied", $dst);
+if ($file === False || @fwrite($file, $buffer) === False)
+    return error("cannot create regular file '%s': Permission denied", $dst);
+
+@fclose($dst);
+@touch($dst, $src_mtime, $src_atime);
+return array($src, $dst);
