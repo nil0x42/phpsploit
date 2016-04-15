@@ -46,6 +46,7 @@ reader_response = reader.send()
 file = Path(filename=path_filename)
 
 if reader_response == "NEW_FILE":
+    file_mtime = None
     print("[*] Creating new file: %s" % absolute_path)
 else:
     # writting bytes() obj to file in binary mode
