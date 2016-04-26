@@ -12,20 +12,18 @@ AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
 """
 
-if self.argc != 2:
-    api.exit(self.help)
+import sys
 
-relPath  = self.argv[1]
-absPath  = rpath.abspath(relPath)
+from api import plugin
+from api import server
 
-http.send({'DIR' : absPath})
+if len(plugin.argv) != 2:
+    sys.exit(plugin.help)
 
-errs = {'noexists': 'No such file or directory',
-        'notempty': 'The directory is not empty',
-        'noright':  'Permission denied',
-        'notadir':  'Not a directory'}
+rel_path = plugin.argv[1]
+abs_path = server.path.abspath(rel_path)
 
-if http.error in errs:
-    api.exit(P_err+self.name+': Failed to remove %s: %s' % (quot(absPath), errs[http.error]))
+payload = server.payload.Payload("payload.php")
+payload["DIR"] = abs_path
 
-if http.response != 'ok': api.exit(P_err+'Unknow error: '+str(http.response))
+payload.send()
