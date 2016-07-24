@@ -16,6 +16,7 @@
 //      $abspath (string):
 //          This variable should be an existing absolute file path
 
+!import(can_change_mtime)
 !import(fileAccess)
 !import(dirAccess)
 
@@ -89,10 +90,13 @@ function getPerms($abspath, $perms_format="unix")
             else
                 $Rperm = '-';
 
-            if (fileAccess($abspath, 'w'))
-                $Wperm = 'w';
-            else
-                $Wperm = '-';
+            if (can_change_mtime($abspath))
+            {
+                if (fileAccess($abspath, 'w'))
+                    $Wperm = 'w';
+                else
+                    $Wperm = '-';
+            }
         }
         elseif ($type == 'd')
         {
@@ -107,10 +111,13 @@ function getPerms($abspath, $perms_format="unix")
                 $Xperm = '-';
             }
 
-            if (dirAccess($abspath, 'w'))
-                $Wperm = 'w';
-            else
-                $Wperm = '-';
+            if (can_change_mtime($abspath))
+            {
+                if (dirAccess($abspath, 'w'))
+                    $Wperm = 'w';
+                else
+                    $Wperm = '-';
+            }
         }
         $info = $Rperm . $Wperm . $Xperm;
     }
