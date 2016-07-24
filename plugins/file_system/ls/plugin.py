@@ -68,19 +68,12 @@ for path in plugin.argv[1:] or [environ['PWD']]:
     lister['PARSE'] = 1
     if absolute_path == environ['HOME'] or path.endswith(environ['PATH_SEP']):
         lister['PARSE'] = 0
-
     try:
         response = lister.send()
     except server.payload.PayloadError as e:
-        if e.args[0] == 'nodir':
-            abort("cannot access %s: No such file or directory." % (path))
-        if e.args[0] == 'noright':
-            abort("cannot open %s: Permission denied." % (path))
-        if e.args[0] == 'nomatch':
-            abort("cannot find %s: No matching elements." % (path))
-
-        # try with the next item
+        abort(e.args[0])
         continue
+
     target, regex, lines = response[0], response[1], response[2]
 
     # if at least one owner/group is not '?', use unix-like formatter

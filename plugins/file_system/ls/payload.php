@@ -40,7 +40,7 @@ $ERROR = '';
 if (!dirAccess($lsdir,'r'))
 {
     if (@is_dir($lsdir))
-        $ERROR = error('noright',substr($lsdir,0,-1));
+        $ERROR = error("cannot open %s: Permission denied", substr($lsdir,0,-1));
     elseif ($PHPSPLOIT['PARSE'])
     {
         $split = strrpos($PHPSPLOIT['TARGET'], $PHPSPLOIT['SEPARATOR']) + 1;
@@ -58,7 +58,7 @@ if (dirAccess($lsdir, 'r'))
 {
     $R = array($dirname, $regex, printLst($lsdir, $regex));
     if (!count($R[2]))
-        return error('nomatch', $dirname, $regex);
+        return error("%s: no elements matching '%s'", $dirname, $regex);
     else
         return $R;
 }
@@ -66,9 +66,9 @@ if (dirAccess($lsdir, 'r'))
 elseif (!$ERROR)
 {
     if (@is_dir($lsdir))
-        return error('noright', $dirname);
+        return error("cannot open %s: Permission denied", $dirname);
     else
-        return error('nodir', $dirname);
+        return error("cannot access %s: No such file or directory.", $dirname);
 }
 
 else
