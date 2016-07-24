@@ -344,8 +344,8 @@ class Shell(cmd.Cmd):
         returns 1.
 
         """
-        if code is None:
-            code = 0
+        if code is None or isinstance(code, bool):
+            code = 1 if code is False else 0
         if isinstance(code, tuple):
             code = ': '.join(str(e) for e in code)
         if not isinstance(code, int):

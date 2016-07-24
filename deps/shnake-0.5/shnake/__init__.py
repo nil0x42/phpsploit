@@ -1,4 +1,4 @@
-_version__ = "0.2"
+_version__ = "0.5"
 __author__ = "nil0x42 <http://goo.gl/kb2wf>"
 
 from .lexer import Lexer, lex

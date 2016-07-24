@@ -1,3 +1,7 @@
+### Version 0.5 *(2016-07-24)*
+- fix return_errcode() handler for boolean values.
+- make lexer source code PEP8 compliant.
+
 ### Version 0.4 *(2014-10-25)*
 - `command not found` now returns 127, just like bash
 - interpret() now supports bash's 'set -e' like behavior,

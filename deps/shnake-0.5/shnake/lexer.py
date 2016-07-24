@@ -9,6 +9,7 @@ import re
 
 __author__ = "nil0x42 <http://goo.gl/kb2wf>"
 
+
 class Lexer:
     """Bash-like string lexer based on pyparsing.
 
@@ -45,50 +46,51 @@ class Lexer:
         ParserElement.setDefaultWhitespaceChars("\t ")
 
         EOF = StringEnd()
-        EOL = ~EOF + LineEnd() # EOL must not match on EOF
+        EOL = ~EOF + LineEnd()  # EOL must not match on EOF
 
         escape = Literal("\\")
         comment = pythonStyleComment
         junk = ZeroOrMore(comment | EOL).suppress()
 
-        ## word (i.e: single argument string)
+        # word (i.e: single argument string)
         word = Suppress(escape + EOL + Optional(comment)) \
-        | Combine(OneOrMore( escape.suppress() + Regex(".") |
-                             QuotedString("'", escChar='\\', multiline=True) |
-                             QuotedString('"', escChar='\\', multiline=True) |
-                             Regex("[^ \t\r\n\f\v\\\\$&<>();\|\'\"`]+") |
-                             Suppress(escape + EOL) ))
+            | Combine(OneOrMore(
+                escape.suppress() + Regex(".") |
+                QuotedString("'", escChar='\\', multiline=True) |
+                QuotedString('"', escChar='\\', multiline=True) |
+                Regex("[^ \t\r\n\f\v\\\\$&<>();\|\'\"`]+") |
+                Suppress(escape + EOL)))
 
-        ## redirector (aka bash file redirectors, such as "2>&1" sequences)
+        # redirector (aka bash file redirectors, such as "2>&1" sequences)
         fd_src = Regex("[0-2]").setParseAction(lambda t: int(t[0]))
         fd_dst = Suppress("&") + fd_src
         # "[n]<word" || "[n]<&word" || "[n]<&digit-"
         fd_redir = (Optional(fd_src, 0) + Literal("<")
-                    |Optional(fd_src, 1) + Literal(">"))\
-                   +(word | (fd_dst + Optional("-")))
+                    | Optional(fd_src, 1) + Literal(">")) + \
+                   (word | (fd_dst + Optional("-")))
         # "&>word" || ">&word"
-        full_redir = (oneOf("&> >&") + word)\
-                     .setParseAction(lambda t:("&" ,">", t[-1]))
+        obj = (oneOf("&> >&") + word)
+        full_redir = obj.setParseAction(lambda t: ("&", ">", t[-1]))
         # "<<<word" || "<<[-]word"
         here_doc = Regex("<<(<|-?)") + word
         # "[n]>>word"
-        add_to_file = Optional(fd_src | Literal("&"), 1) + \
-                      Literal(">>") + word
+        add_to_file = (Optional(fd_src | Literal("&"), 1)
+                       + Literal(">>")
+                       + word)
         # "[n]<>word"
         fd_bind = Optional(fd_src, 0) + Literal("<>") + word
 
-        redirector = (fd_redir | full_redir | here_doc
-                      | add_to_file | fd_bind)\
-                     .setParseAction(lambda token: tuple(token))
+        obj = (fd_redir | full_redir | here_doc | add_to_file | fd_bind)
+        redirector = obj.setParseAction(lambda token: tuple(token))
 
-        ## single command (args/redir list)
+        # single command (args/redir list)
         command = Group(OneOrMore(redirector | word))
 
-        ## logical operators (section splits)
+        # logical operators (section splits)
         semicolon = Suppress(";") + junk
         connector = (oneOf("&& || |") + junk) | semicolon
 
-        ## pipeline, aka logical block of interconnected commands
+        # pipeline, aka logical block of interconnected commands
         pipeline = junk + Group(command +
                                 ZeroOrMore(connector + command) +
                                 Optional(semicolon))
@@ -96,7 +98,6 @@ class Lexer:
         # define object attributes
         self.LEXER = pipeline.ignore(comment) + EOF
         self.parseException = ParseException
-
 
     def __call__(self, string, line=1):
         try:
@@ -115,7 +116,7 @@ class Lexer:
 
             if char in "\"\'":
                 err = "unexpected EOF while looking for matching %r"
-                raise SyntaxWarning(err %char)
+                raise SyntaxWarning(err % char)
 
             elif (index + 1) == len(string) and char == "\\":
                 err = "unexpected EOF after escaped newline '\\\\n'"
@@ -133,7 +134,7 @@ class Lexer:
                     err = re.sub("line:(\d+)", "line:"+str(lineNr), err)
                 except:
                     pass
-                raise SyntaxError(err %char)
+                raise SyntaxError(err % char)
 
             raise error
 
