@@ -2,6 +2,7 @@
 
 !import(dirAccess)
 !import(fileAccess)
+!import(can_change_mtime)
 
 $path = $PHPSPLOIT['FILE'];
 $follow_links = $PHPSPLOIT['FOLLOW_LINKS'];
@@ -42,6 +43,11 @@ $r["file_repr"] = $file_repr;
 $r["atime"] = date("Y-m-d H:i:s O", $r["atime"]);
 $r["mtime"] = date("Y-m-d H:i:s O", $r["mtime"]);
 $r["ctime"] = date("Y-m-d H:i:s O", $r["ctime"]);
+
+if (can_change_mtime($path))
+    $r["mtime"] .= " [MUTABLE!]";
+else
+    $r["mtime"] .= " [IMMUTABLE]";
 
 if (extension_loaded("posix"))
 {
