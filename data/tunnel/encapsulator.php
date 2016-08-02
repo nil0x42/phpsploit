@@ -1,6 +1,6 @@
 <?php
 
-// backup current php config to restore it after payload execution
+// backup php configuration state for later restoration.
 $orig_conf = ini_get_all();
 foreach ($orig_conf as $key => $val)
 {
@@ -11,9 +11,9 @@ foreach ($orig_conf as $key => $val)
 }
 
 // %%PAYLOAD%% is replaced by $PAYLOAD_PREFIX configuration setting.
-// This feature allow executing something in php each time the
+// This feature allows executing something in php each time the
 // payload is executed, because any sent request is encapsulated
-// through this file (encapsulator.php).
+// through this file.
 %%PAYLOAD_PREFIX%%
 
 // container for dynamic input variables, transmitted from plugins
@@ -36,13 +36,13 @@ function payload()
     %%PAYLOAD%%
 }
 
-// handle payload result and output it's gzipper content.
+// handle payload result and output it's gzipped content.
 $result = payload();
 if (@array_keys($result) !== array('__ERROR__'))
     $result = array('__RESULT__' => $result);
 echo gzcompress(serialize($result));
 
-// restore original php config, as they was pefore payload execution
+// restore backed php configuration state.
 foreach ($orig_conf as $key => $val)
     @ini_set($key, $val);
 
