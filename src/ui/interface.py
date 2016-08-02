@@ -148,8 +148,11 @@ class Shell(shnake.Shell):
             if force_exit is False:
                 try:
                     session_changed = session.diff(None)
-                except:
-                    session_changed = True
+                except OSError:
+                    if tunnel.has_been_active():
+                        session_changed = True
+                    else:
+                        session_changed = False
                 if session_changed:
                     msg = "Do you really want to exit without saving session ?"
                     if ui.input.Expect(False)(msg):
@@ -461,9 +464,15 @@ class Shell(shnake.Shell):
         # session save [<FILE>]
         if argv[1] == 'save':
             if argv[2] == '-f':
-                return session.dump(argv[3], ask_confirmation=False)
+                path = argv[3]
+                ask_confirmation = False
             else:
-                return session.dump(argv[2])
+                path = argv[2]
+                ask_confirmation = True
+            session.dump(path, ask_confirmation=ask_confirmation)
+            path = session.File if path is None else path
+            session.File = path
+            print("[*] Session saved into %r" % path)
         # session load [<FILE>]
         elif argv[1] == 'load':
             try:

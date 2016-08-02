@@ -78,6 +78,9 @@ class Tunnel:
     def get_raw_requests(self):
         return handler.global_raw_requests
 
+    def has_been_active(self):
+        return bool(self.hostname)
+
 
 # instanciate main phpsploit tunnel as core.tunnel
 tunnel = Tunnel()
