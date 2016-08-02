@@ -21,6 +21,8 @@ from ui.color import colorize
 import ui.input
 import utils.path
 
+READLINE_COMPLETER_DELIMS = ' \t\n`~!@#$%^&*()=+[{]}\\|;:\'",<>/?'
+
 
 class Shell(shnake.Shell):
 
@@ -37,6 +39,7 @@ class Shell(shnake.Shell):
         try:
             import readline
             readline.set_history_length(core.MAX_HISTORY_SIZE)
+            readline.set_completer_delims(READLINE_COMPLETER_DELIMS)
         except ImportError:
             pass
 
