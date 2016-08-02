@@ -1,4 +1,5 @@
-import re
+import re # usd by colorize(), decolorize()
+import difflib # used by diff()
 
 ANSI = {"reset":  "\x1b[0m",    # reset everything
         "bold":   "\x1b[1m",    # bold/bright style
@@ -105,3 +106,20 @@ def decolorize(string):
     """
     regex = "\x01?\x1b\[((?:\d|;)*)([a-zA-Z])\x02?"
     return re.sub(regex, "", str(string))
+
+
+def diff(old, new, display=True):
+    if not isinstance(old, list):
+        old = decolorize(str(old)).splitlines()
+    if not isinstance(new, list):
+        new = decolorize(str(new)).splitlines()
+
+    line_types = {' ': '%Reset', '-': '%Red', '+': '%Green', '?': '%Pink'}
+
+    if display:
+        for line in difflib.Differ().compare(old, new):
+            if line.startswith('?'):
+                continue
+            print(colorize(line_types[line[0]], line))
+
+    return old != new

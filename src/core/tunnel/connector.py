@@ -22,12 +22,7 @@ class Request:
         # connector.php's returned array.
         self.socket = socket
         raw_vars = self._get_vars(socket.read())
-        # import pprint
-        # pprint.pprint("------------- RAW ENVIRONMENT--------------")
-        # pprint.pprint(raw_vars)
         self.environ = self._build_env(raw_vars)
-        # pprint.pprint("------------- ENVIRONMENT --------------")
-        # pprint.pprint(self.environ)
         return True
 
     def close(self):

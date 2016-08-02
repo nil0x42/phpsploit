@@ -13,6 +13,7 @@ Usage:
 
 from core import session
 import ui.input
+import ui.color
 
 from . import handler
 from . import connector
@@ -35,18 +36,29 @@ class Tunnel:
         socket = connector.Request()
         if socket.open():
             # handler for environment reset if needed
-            if self.socket:
-                old_hostname = self.socket.socket.hostname
+            if session.Env.ADDR and session.Env.HOST:
+                old_hostname = session.Env.HOST
                 new_hostname = socket.socket.hostname
                 if old_hostname != new_hostname:
-                    question = ("TARGET hostname has changed, wish "
-                            "you reset environment ? (recommended)")
-                    if ui.input.Expect(True)(question):
-                        session.Env.clear()
-                        print("[*] Environment correctly flushed")
-                    else:
-                        print("[-] Keeping previous environment")
+                    tmp_session = session.deepcopy()
+                    tmp_session.Env.clear()
+                    tmp_session.Env.update(socket.environ)
 
+                    ui.color.diff(session.Env, tmp_session.Env)
+                    print()
+
+                    question = ("TARGET hostname has changed, are you "
+                                "sure you want to reset environment "
+                                "as shown above ?")
+                    if ui.input.Expect(False)(question):
+                        print("[*] %s: Exploitation aborted"
+                                % (tmp_session.Env.HOST, tmp_session.Env.ADDR))
+                        self.close()
+                        return False
+                    else:
+                        print("[*] Environment correctly reset")
+
+            session.Env.clear()
             session.Env.update(socket.environ)
             self.socket = socket
             self.hostname = socket.socket.hostname

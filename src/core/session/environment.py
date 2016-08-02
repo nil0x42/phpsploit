@@ -74,6 +74,7 @@ class Environment(objects.VarContainer):
             # another value than the default one.
             if key in self.keys() \
                     and key not in readonly \
+                    and key in self.defaults.keys() \
                     and self[key] != self.defaults[key]:
                 continue
             super().update({key: value})

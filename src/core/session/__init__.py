@@ -184,7 +184,14 @@ class Session(objects.MetaDict):
             else:
                 self[key] = value
 
-    def diff(self, file, display_diff=False):
+    def deepcopy(self, target=None):
+        """create a deep copy of current session
+        """
+        if target is None:
+            target = self
+        return self._obj_value(self._raw_value(target))
+
+    def diff(self, file=None, display_diff=False):
         """This function returns True is the given `file` is
         a phpsploit session which differs from current session.
         Otherwise, False is returned.
@@ -192,9 +199,12 @@ class Session(objects.MetaDict):
         Additionally, if `display_diff` is set, the session
         differences will be displayed in common unix `diff` style.
         """
-        # non-failing copy.deepcopy(self) equivalent:
-        diff = self._obj_value(self._raw_value(self))
-        diff.update(file)
+        if isinstance(file, Session):
+            diff = self.deepcopy(file)
+        else:
+            diff = self.deepcopy()
+            diff.update(file)
+
         diff = decolorize(diff).splitlines()
         orig = decolorize(self).splitlines()
 
