@@ -129,11 +129,11 @@ class Plugins(objects.MetaDict):
         pattern = "^[a-zA-Z0-9_]+$"
         elems = []
         for basename in os.listdir(root_dir):
+            path = utils.path.truepath(root_dir, basename)
             try:
                 abspath = Path(root_dir, basename, mode='drx')()
             except:
                 if not basename.startswith("README"):
-                    path = utils.path.truepath(root_dir, basename)
                     if os.path.isdir(path):
                         reason = "Permission denied"
                     else:
@@ -143,6 +143,8 @@ class Plugins(objects.MetaDict):
                 continue
             if re.match(pattern, basename):
                 elems.append((basename, abspath))
+            elif basename.endswith(".DISABLED"):
+                continue
             else:
                 reason = "Directory don't match '%s'" % pattern
                 print("[#] %s: «%s»: %s" % (errmsg, path, reason))
