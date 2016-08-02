@@ -198,17 +198,19 @@ class Session(objects.MetaDict):
         diff = decolorize(diff).splitlines()
         orig = decolorize(self).splitlines()
 
-        retval = diff != orig
-
         if display_diff:
             color = {' ': '%Reset', '-': '%Red', '+': '%Green', '?': '%Pink'}
-            for line in difflib.Differ().compare(orig, diff):
+            if file is None:
+                difflines = difflib.Differ().compare(diff, orig)
+            else:
+                difflines = difflib.Differ().compare(orig, diff)
+            for line in difflines:
                 # dont be too much verbose...
                 if line.startswith('?'):
                     continue
                 print(colorize(color[line[0]], line))
 
-        return retval
+        return diff != orig
 
     def _raw_value(self, obj):
         # get raw value (dict) which represents
