@@ -36,7 +36,7 @@ class Tunnel:
         socket = connector.Request()
         if socket.open():
             # handler for environment reset if needed
-            if session.Env.ADDR and session.Env.HOST:
+            if {"ADDR", "HOST"}.issubset(session.Env):
                 old_hostname = session.Env.HOST
                 new_hostname = socket.socket.hostname
                 if old_hostname != new_hostname:
