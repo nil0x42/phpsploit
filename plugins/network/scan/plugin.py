@@ -29,7 +29,7 @@ if len(plugin.argv) < 2:
 
 
 # Load port -> service database
-with open(os.path.dirname(__file__) + '/ports.json') as database_ports:
+with open(os.path.join(plugin.path, "ports.json")) as database_ports:
     ports = json.load(database_ports)
 
 # Send payload
