@@ -58,7 +58,6 @@ class Tunnel:
                     else:
                         print("[*] Environment correctly reset")
 
-            session.Env.clear()
             session.Env.update(socket.environ)
             self.socket = socket
             self.hostname = socket.socket.hostname
