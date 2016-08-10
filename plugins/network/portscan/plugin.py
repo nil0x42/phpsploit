@@ -1,7 +1,7 @@
 """TCP port scanner
 
 SYNOPSIS:
-    scan <address> [-p <PORT>] [-t <TIMEOUT>]
+    portscan <address> [-p <PORT>] [-t <TIMEOUT>]
       -p  single or range of port(s) to scan
           * single : -p port
           * range  : -p min-max
@@ -13,13 +13,13 @@ DESCRIPTION:
     NOTE: 
 
 EXAMPLES:
-    > scan 192.168.1.10
+    > portscan 192.168.1.10
       - find open port from 20 to 10000
-    > scan 192.168.1.10 -p 50
+    > portscan 192.168.1.10 -p 50
       - find open port 50
-    > scan 192.168.1.10 -p 50-100
+    > portscan 192.168.1.10 -p 50-100
       - find open port from 50 to 100
-    > scan 192.168.1.10 -t 0.5
+    > portscan 192.168.1.10 -t 0.5
       - scan with 0.5 second timeout per socket
 
 AUTHOR:
