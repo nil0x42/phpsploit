@@ -1,4 +1,5 @@
 import argparse
+import sys
 from api import plugin
 import ui.output
 
@@ -25,7 +26,20 @@ def parse(args):
     return options
 
 def parse_port(input):
-    if '-' in input:
-        return input.split('-')
+    if input.count('-') == 1:
+        data = input.split('-')
     else:
-        return (input, input)
+        data = [input, input]
+
+    try:
+        data = [int(x) for x in data]
+    except:
+        sys.exit("Illegal port specifications")
+
+    if min(data) < 0 or max(data) > 65535:
+        sys.exit("Ports specified must be between 0 and 65535 inclusive")
+    if data[0] > data[1]:
+        sys.exit("Your port range %d-%d is backwards. Did you mean %d-%d?"
+                 % (data[0], data[1], data[1], data[0]))
+
+    return data
