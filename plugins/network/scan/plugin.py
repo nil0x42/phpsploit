@@ -1,11 +1,16 @@
-"""Find open ports
+"""TCP port scanner
 
 SYNOPSIS:
-    > scan <address> [-p <PORT>] [-t <TIMEOUT>]
-      -p  Single or range port(s) to scan
+    scan <address> [-p <PORT>] [-t <TIMEOUT>]
+      -p  single or range of port(s) to scan
           * single : -p port
           * range  : -p min-max
-      -t  Timeout socket
+      -t  socket timeout
+
+DESCRIPTION:
+    Scan a single port or range of ports.
+
+    NOTE: 
 
 EXAMPLES:
     > scan 192.168.1.10
@@ -20,14 +25,16 @@ EXAMPLES:
 AUTHOR:
     Shiney <http://goo.gl/D6g4wl>
 """
-import sys
-import time
 
+import sys
 import os
+import time
+import json
+
 from api import plugin
 from api import server
 
-import json
+from ui.color import colorize
 import plugin_args
 
 if len(plugin.argv) < 2:
@@ -41,19 +48,39 @@ payload['IP'] = opt['address']
 payload['PORT_MIN'] = opt['port'][0]
 payload['PORT_MAX'] = opt['port'][1]
 payload['TIMEOUT'] = opt['timeout']
-print(opt['timeout'])
-open_ports = payload.send()
 
+result = payload.send()
+
+# unshuffle port list
+result.sort(key=lambda x: x[0])
 
 # Load port -> service database
 with open(os.path.join(plugin.path, "ports.json")) as database_ports:
-    ports = json.load(database_ports)
-# Print result
-print(' ' * 3 + ' PORT ' + ' ' * 2 + ' PROBABLE SERVICE')
-print('-' * 25)
-for open_port in open_ports:
-    print("%8s | %s" % (open_port, ports[str(open_port)] if str(open_port) in ports else ' '))
+    known_services = json.load(database_ports)
 
-sys.exit(0)
+# don't display most common error if frequent (nmap flavour)
+main_err = [None, None]
+errors = [tuple(x[1:]) for x in result if len(x) == 3]
+if len(errors) > max(20, len(result) / 2):
+    main_err = max(set(errors), key=errors.count)
+    main_err_count = errors.count(main_err)
+    if main_err_count == len(result):
+        print("All %d scanned ports failed with error %d: %s\n"
+                % (main_err_count, main_err[0], main_err[1]))
+        sys.exit(0)
+    print("Not shown: %d (%s)\n" % (main_err_count, main_err[1]))
 
-
+# display each port with information
+print("PORT   INFORMATION")
+print("----   -----------")
+for elem in result:
+    port_num = str(elem[0])
+    info = ""
+    if len(elem) == 1:
+        info = colorize("%Green", "open")
+        if port_num in known_services.keys():
+            info += " (%s)" % known_services[port_num]
+    elif len(elem) == 3 and elem[1] != main_err[0]:
+        info = colorize("%Red", elem[2])
+    if info:
+        print("{:<5}  {}".format(port_num, info))
