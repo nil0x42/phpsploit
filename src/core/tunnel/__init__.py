@@ -39,20 +39,19 @@ class Tunnel:
             if {"ADDR", "HOST"}.issubset(session.Env):
                 old_hostname = session.Env.HOST
                 new_hostname = socket.socket.hostname
-                if old_hostname != new_hostname:
-                    tmp_session = session.deepcopy()
-                    tmp_session.Env.clear()
-                    tmp_session.Env.update(socket.environ)
-
+                tmp_session = session.deepcopy()
+                tmp_session.Env.clear()
+                tmp_session.Env.update(socket.environ)
+                if session.Env.signature() != tmp_session.Env.signature():
                     ui.color.diff(session.Env, tmp_session.Env)
                     print()
 
-                    question = ("TARGET hostname has changed, are you "
+                    question = ("TARGET server have changed, are you "
                                 "sure you want to reset environment "
                                 "as shown above ?")
                     if ui.input.Expect(False)(question):
-                        print("[*] %s: Exploitation aborted"
-                                % (tmp_session.Env.HOST, tmp_session.Env.ADDR))
+                        print("[-] %s (%s): Exploitation aborted"
+                                % (tmp_session.Env.ADDR, tmp_session.Env.HOST))
                         self.close()
                         return False
                     else:

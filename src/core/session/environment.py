@@ -83,3 +83,12 @@ class Environment(objects.VarContainer):
     def clear(self):
         self.defaults = {}
         super().clear()
+
+    def signature(self):
+        """returns remote server signature hash for comparison
+        """
+        signature = ()
+        for var in ["ADDR", "HTTP_SOFTWARE", "PATH_SEP", "PLATFORM", "USER"]:
+            if var in self.keys():
+                signature += (self[var],)
+        return hash(signature)
