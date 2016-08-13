@@ -202,7 +202,11 @@ class Session(objects.MetaDict):
         if isinstance(file, Session):
             diff = self.deepcopy(file)
         else:
-            diff = self.deepcopy()
+            if file is None:
+                diff = Session()
+                diff.File = self.File
+            else:
+                diff = self.deepcopy()
             diff.update(file)
 
         diff = decolorize(diff).splitlines()
