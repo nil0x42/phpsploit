@@ -73,6 +73,9 @@ def load_credentials(raw_creds):
         result['PASS'] = raw_creds[raw_creds.find('*')+1:]
     return result
 
+def sql_str_repr(row):
+    return "NULL" if row is None else str(row)
+
 if len(plugin.argv) < 2:
     sys.exit(plugin.help)
 
@@ -180,7 +183,7 @@ if display_mode == "line":
         print(header % i)
         j = 0
         for field in fields:
-            print("%s: %s" % (field, row[j]))
+            print("%s: %s" % (field, sql_str_repr(row[j])))
             j += 1
         i += 1
 
@@ -188,7 +191,7 @@ elif display_mode == "column":
     columns = [[str(field)] for field in fields]
     for row in rows:
         for i in range(len(fields)):
-            columns[i].append(str(row[i]))
+            columns[i].append(sql_str_repr(row[i]))
     cols_len = [len(max(column, key=len)) for column in columns]
     delimiter = '+-' + ('-+-'.join(['-' * i for i in cols_len])) + '-+'
     for row_no in range(len(columns[0])):
