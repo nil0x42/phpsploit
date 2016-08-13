@@ -65,7 +65,7 @@ else:
 cmd_list = []
 
 # This small hack enables STDERR display on unix platforms
-if not environ['PLATFORM'].startswith("win"):
+if not environ['PLATFORM'].lower().startswith("win"):
     cmd_list.append('exec 2>&1')
 
 # Change directory to $PWD before commands execution
@@ -79,19 +79,34 @@ payload = server.payload.Payload("payload.php")
 payload['CMD'] = cmd_sep.join(cmd_list)
 
 # Patch for unix platforms to update $PWD if changed (1/2)
-if not environ['PLATFORM'].startswith("win"):
-    payload['CMD'] += cmd_sep + "pwd"
+if not environ['PLATFORM'].lower().startswith("win"):
+    payload['CMD'] += cmd_sep + "echo AzXB `pwd` AzXB"
 
-response = payload.send().splitlines()
+print("[#] raw command: %r" % payload['CMD'])
 
-# Patch for unix platforms to update $PWD if changed (1/2)
-if not environ['PLATFORM'].startswith("win"):
-    if len(response):
-        if response[-1].startswith('/'):
-            environ['PWD'] = response[-1].strip()
-            response = response[:-1]
-    else:
-        response = []
+output = payload.send()
+lines = output.splitlines()
 
-for line in response:
-    print(line)
+if environ['PLATFORM'].lower().startswith("win"):
+    for line in lines:
+        print(line)
+    sys.exit(0)
+
+if not lines:
+    sys.exit("No output received")
+
+new_pwd = lines.pop()
+
+try:
+    assert new_pwd.startswith("AzXB ")
+    assert new_pwd.endswith(" AzXB")
+    new_pwd = new_pwd[5:-5]
+    assert server.path.isabs(new_pwd)
+    environ['PWD'] = new_pwd
+    for line in lines:
+        print(line)
+except AssertionError:
+    print("[-] Couldn't retrieve new $PWD.")
+    print("[-] Raw output:")
+    print(output)
+    sys.exit(1)
