@@ -9,7 +9,7 @@ and maybe more.
 ### Python Version ###
 
 Only compatible with python >= 3.x
-*Mostly tested with python 3.4.x*
+*Mostly tested with python 3.5.x*
 
 
 ### Optional dependencies ###
