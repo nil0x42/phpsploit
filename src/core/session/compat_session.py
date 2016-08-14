@@ -239,4 +239,4 @@ def load(session_path):
             return old_session_load(session_path)
         except:
             pass
-    raise Exception("Not a deprecated session file")
+    raise Exception("Not a phpsploit session file")
