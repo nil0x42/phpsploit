@@ -872,9 +872,6 @@ class Shell(shnake.Shell):
             - For detailed help, the command should be given as
               argument.
 
-            NOTE: A plugin command may also be called with "--help"
-            as argument, resulting to the same as "help <plugin>".
-
         EXAMPLES:
             > help
               - Display the full help, sorted by category
