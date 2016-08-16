@@ -76,11 +76,14 @@ cmd_list.append(" ".join(plugin.argv[1:]))
 
 # Prepare payload
 payload = server.payload.Payload("payload.php")
-payload['CMD'] = cmd_sep.join(cmd_list)
+payload['CMD'] = cmd_sep.join(cmd_list).strip()
+
+if not payload["CMD"].endswith(";"):
+    payload["CMD"] += " ; "
 
 # Patch for unix platforms to update $PWD if changed (1/2)
 if not environ['PLATFORM'].lower().startswith("win"):
-    payload['CMD'] += cmd_sep + "echo AzXB `pwd` AzXB"
+    payload['CMD'] += "echo ; echo AzXB `pwd` AzXB"
 
 print("[#] raw command: %r" % payload['CMD'])
 
@@ -103,6 +106,8 @@ try:
     new_pwd = new_pwd[5:-5]
     assert server.path.isabs(new_pwd)
     environ['PWD'] = new_pwd
+    if lines and not lines[-1]:
+        lines.pop(-1)
     for line in lines:
         print(line)
 except AssertionError:

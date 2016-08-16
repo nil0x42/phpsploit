@@ -115,7 +115,7 @@ command = 'cd ' + environ['SUIDROOT_PWD'] + command
 # token to make sure new pwd is known
 if not command.endswith(";"):
     command += " ; "
-command += 'echo suid `pwd` suid' 
+command += "echo ; echo suid `pwd` suid"
 
 # build the payload to send the command to run on system
 payload = server.payload.Payload("payload.php")
@@ -139,6 +139,8 @@ try:
     new_pwd = new_pwd[5:-5]
     assert server.path.isabs(new_pwd)
     environ['SUIDROOT_PWD'] = new_pwd
+    if lines and not lines[-1]:
+        lines.pop(-1)
     for line in lines:
         print(line)
 except AssertionError:
