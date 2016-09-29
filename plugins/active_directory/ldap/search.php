@@ -32,5 +32,21 @@ if(!$datas) {
     return error('Something went wrong. Check your credentials.');
 }
 
+
+// Fix for printing
+function clearNode(&$node) {
+    foreach($node as $key => &$val) {
+        if(!is_array($val)) {
+            if(!ctype_print($val)) {
+                $val = base64_encode($val);
+            }
+        } else {
+            clearNode($val);
+        }
+    }
+}
+
+clearNode($datas);
+
 return $datas;
 ?>

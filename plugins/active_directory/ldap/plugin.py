@@ -29,21 +29,12 @@ AUTHOR:
 """
 
 import sys
-import string
-import base64
 
 from api import plugin
 from api import server
 from api import environ
 import objects
 from ui.color import colorize
-
-# in order to print binary
-def printable_var(v):
-    if all(c in string.printable for c in v):
-        return v
-    else:
-        return base64.encodebytes(v)
 
 def print_node(node):
     if 'dn' in node:
@@ -54,10 +45,9 @@ def print_node(node):
     for key, val in node.items():
         if isinstance(val, dict):
             del val['count']
-            values = val.values()
-            line = "   %s :  %s" % (colorize('%Bold', "%20s" % key), ' | '.join(map(printable_var, values)))
+            line = "   %s :  %s" % (colorize('%Bold', "%20s" % key), ' | '.join(val.values()))
             print(line)
-    print('')
+    print()
 
 
 if len(plugin.argv) < 2:
