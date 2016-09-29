@@ -43,7 +43,7 @@ def printable_var(v):
     if all(c in string.printable for c in v):
         return v
     else:
-        return base64.b64encode(v)
+        return base64.encodebytes(v)
 
 def print_node(node):
     if 'dn' in node:
