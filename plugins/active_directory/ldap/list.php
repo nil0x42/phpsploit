@@ -9,7 +9,7 @@ if(!$ldapConnexion = ldap_connect($PHPSPLOIT['HOST'])) {
 ldap_set_option($ldapConnexion, LDAP_OPT_PROTOCOL_VERSION, $PHPSPLOIT['VERSION']);
 
 // Authentication or anonymous
-if($PHPSPLOIT['LOGIN'] and $PHPSPLOIT['PASS']) {
+if($PHPSPLOIT['LOGIN'] != " " and $PHPSPLOIT['PASS'] != " ") {
     $isAuth = ldap_bind($ldapConnexion, $PHPSPLOIT['LOGIN'], $PHPSPLOIT['PASS']);
 } else {
     $isAuth = ldap_bind($ldapConnexion);
