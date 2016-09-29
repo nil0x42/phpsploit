@@ -28,5 +28,9 @@ $datas  = ldap_get_entries($ldapConnexion, $result);
 
 ldap_close($ldapConnexion);
 
+if(!$datas) {
+    return error('Something went wrong. Check your credentials.');
+}
+
 return $datas;
 ?>

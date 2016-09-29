@@ -5,12 +5,27 @@ SYNOPSIS:
 
 DESCRIPTION:
     > ldap connect <host> <login> <password>
-
+        Connect to service
+    > ldap list <dn>
+        List node
+    > ldap search <dn> <filter>
+        Find node based on filter
+    > ldap set
+        List env var
+    > ldap set <key> <val>
+        Set env var
 EXAMPLES:
+    > ldap connect 10.0.0.100
+      - Connect anonymously
     > ldap connect 10.0.0.100 "cn=admin,dc=example,dc=org" admin
       - Connect to 10.0.0.100 as "admin" with password "admin"
+    > ldap list "dc=example,dc=org"
+    > ldap search "dc=example,dc=org" "userpassword=*"
+    > ldap set VERSION 3
+      - Set LDAP protocol V3
 
 AUTHOR:
+    Shiney <http://goo.gl/D6g4wl>
 """
 
 import sys
@@ -55,13 +70,13 @@ if plugin.argv[1].lower() == "set":
 
 # Connecting to service
 if plugin.argv[1].lower() == "connect":
-    if len(plugin.argv[1]) < 4:
+    if 3 < len(plugin.argv) < 5:
         sys.exit("Missing parameter")
     environ['LDAP'] = objects.VarContainer(title="LDAP settings")
 
-    environ['LDAP']['HOST'] = plugin.argv[2]
-    environ['LDAP']['LOGIN'] = plugin.argv[3]
-    environ['LDAP']['PASS'] = plugin.argv[4]
+    environ['LDAP']['HOST']    = plugin.argv[2]
+    environ['LDAP']['LOGIN']   = plugin.argv[3] if len(plugin.argv) > 3 else " "
+    environ['LDAP']['PASS']    = plugin.argv[4] if len(plugin.argv) > 4 else " "
     environ['LDAP']['VERSION'] = 3
     sys.exit(0)
 # check and load MYSQL_CRED environment variable
