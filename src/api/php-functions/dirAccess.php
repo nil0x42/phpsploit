@@ -37,13 +37,16 @@ function dirAccess($abspath, $mode)
         $rand = $abspath . uniqid('/pspapi_');
         if ($h = @fopen($rand, 'a'))
         {
-            fclose($h);
-            unlink($rand);
-            @touch($abspath, $old_mtime, $old_atime);
-            return (True);
+            @fclose($h);
+            $result = True;
         }
         else
-            return (False);
+        {
+            $result = False;
+        }
+        @unlink($rand);
+        @touch($abspath, $old_mtime, $old_atime);
+        return ($result);
     }
     else
         return (False);
