@@ -78,11 +78,10 @@ cmd_list.append(" ".join(plugin.argv[1:]))
 payload = server.payload.Payload("payload.php")
 payload['CMD'] = cmd_sep.join(cmd_list).strip()
 
-if not payload["CMD"].endswith(";"):
-    payload["CMD"] += " ; "
-
 # Patch for unix platforms to update $PWD if changed (1/2)
 if not environ['PLATFORM'].lower().startswith("win"):
+    if not payload["CMD"].endswith(";"):
+        payload["CMD"] += " ; "
     payload['CMD'] += "echo ; echo AzXB `pwd` AzXB"
 
 print("[#] raw command: %r" % payload['CMD'])
