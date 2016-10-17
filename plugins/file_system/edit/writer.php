@@ -11,7 +11,9 @@ $data = base64_decode($PHPSPLOIT['DATA']);
 if (@fwrite($file, $data) === False)
     return error("%s: Could not write to file", $PHPSPLOIT['FILE']);
 
-if ($PHPSPLOIT['MTIME'] !== NULL)
+@fclose($file);
+
+if ($PHPSPLOIT['MTIME'])
 {
     if (!touch($PHPSPLOIT['FILE'], $PHPSPLOIT['MTIME']))
         return "MTIME_FAILED";
