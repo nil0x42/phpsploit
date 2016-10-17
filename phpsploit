@@ -124,6 +124,8 @@ interface = ui.interface.Shell()
 
 if opt['config'] is None:
     opt['config'] = core.userdir + "config"
+    if sys.platform.startswith("win"):
+        opt['config'] = opt['config'].replace("\\", "\\\\")
 
 if cmdrun(interface, "source -e '%s'" % opt['config'], show_err=True) != 0:
     print()
