@@ -16,16 +16,12 @@ Interface:
     on muliline commands.
 
 Sessions:
-  * when connecting to a target with `exploit`, if the session has changes,
-    show the diff and ask user for confirmation to know if writeable env
-    vars can be removed.
-  * session saving shall ask user confirmation if session changed.
+  * n/a
 
 Settings:
   * n/a
 
 Commands:
-  * Add a `bind` core command to bind the prompt to a plugin.
   * Implement HTTP response display in `corectl display-http-requests` command
 
 Plugins:

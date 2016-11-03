@@ -32,7 +32,7 @@ class Shell(shnake.Shell):
     nohelp = "[-] No help for: %s"
     error = "[!] %s"
 
-    binded_plugin = None
+    binded_command = None
 
     def __init__(self):
         super().__init__()
@@ -52,6 +52,12 @@ class Shell(shnake.Shell):
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
         # Reset backlog before each command except backlog
+        if self.binded_command:
+            if len(argv) == 1 and argv[0] == "exit":
+                # self.binded_command = None
+                pass
+            else:
+                argv.insert(0, self.binded_command)
         if len(argv) and argv[0] != "backlog":
             self.stdout.backlog = ""
         # Alias Handler
@@ -85,9 +91,9 @@ class Shell(shnake.Shell):
             # if remote shell, add target hostname to prompt
             prompt_elems += ["%Reset", "(", "%BoldRed",
                              tunnel.hostname, "%Reset", ")"]
-            if self.binded_plugin:
-                # If a plugin is binded to the prompt
-                prompt_elems += ["%ResetBoldWhite", " ", self.binded_plugin]
+        if self.binded_command:
+            # If a command is binded to the prompt
+            prompt_elems += ["%ResetBoldWhite", " #", self.binded_command]
         prompt_elems += ["%Reset", " > "]
         self.prompt = colorize(*prompt_elems)
 
@@ -145,7 +151,9 @@ class Shell(shnake.Shell):
         else:
             self.interpret("help exit")
 
-        if tunnel:
+        if self.binded_command:
+            self.binded_command = None
+        elif tunnel:
             tunnel.close()
         else:
             if force_exit is False:
@@ -549,13 +557,14 @@ class Shell(shnake.Shell):
         # AND getting new $PWD by redirecting the `pwd`
         # command to a temporary file.
         else:
-            tmpfile = Path()
-            postcmd = " ; pwd >'%s' 2>&1" % tmpfile
-            subprocess.call(cmd + postcmd, shell=True)
-            try:
-                os.chdir(tmpfile.read())
-            finally:
-                del tmpfile
+            if argv[1] != "exit":
+                tmpfile = Path()
+                postcmd = " ; pwd >'%s' 2>&1" % tmpfile
+                subprocess.call(cmd + postcmd, shell=True)
+                try:
+                    os.chdir(tmpfile.read())
+                finally:
+                    del tmpfile
 
     ###################
     # COMMAND: source #
@@ -820,6 +829,37 @@ class Shell(shnake.Shell):
 
         # `alias <NAME> <VALUE>`
         session.Alias[argv[1]] = " ".join(argv[2:])
+
+
+    ##################
+    # COMMAND: bind #
+    def complete_bind(self, text, *ignored):
+        result = super().completenames(text, ignored)
+        result = [x for x in result if x != "bind"]
+        if tunnel:
+            result += plugins.keys()
+        return ([x for x in list(set(result)) if x.startswith(text)])
+
+    def do_bind(self, argv):
+        """attach a command to prompt
+
+        SYNOPSIS:
+            bind [<COMMAND>]
+
+        DESCRIPTION:
+            Binds the phpsploit command prompt to a specific
+            command, so you don't need to re-type the command
+            name each time if you are currently only using it.
+
+            NOTE: press Ctrl-D or type exit to leave from a binded
+            command.
+        """
+        if len(argv) != 2 or argv[1] not in self.complete_bind("", ""):
+            return self.interpret("help bind")
+
+        self.binded_command = argv[1]
+        print("[-] Type exit to leave binded %r subshell" % argv[1])
+
 
     ####################
     # COMMAND: backlog #
