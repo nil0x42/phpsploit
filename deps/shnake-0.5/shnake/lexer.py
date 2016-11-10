@@ -127,7 +127,8 @@ class Lexer:
 
             else:
                 err = "unexpected token %r "
-                err += str(error)[str(error).find("("):]
+                # err += str(error)[str(error).find("("):]
+                err += str(error)[str(error).rfind("(at char "):]
                 try:
                     lineNr = int(re.findall("line:(\d+)", err)[0])
                     lineNr += line - 1
