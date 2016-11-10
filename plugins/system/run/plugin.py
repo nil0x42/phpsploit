@@ -80,7 +80,7 @@ payload['CMD'] = cmd_sep.join(cmd_list).strip()
 
 # Patch for unix platforms to update $PWD if changed (1/2)
 if not environ['PLATFORM'].lower().startswith("win"):
-    if not payload["CMD"].endswith(";"):
+    if payload["CMD"][-1] not in ";&":
         payload["CMD"] += " ; "
     payload['CMD'] += "echo ; echo AzXB `pwd` AzXB"
 
