@@ -1066,7 +1066,7 @@ def debug_cmdrepr(argv):
             continue
         argrepr = repr(arg)
         sep = argrepr[0], argrepr[-1]
-        argrepr = colorize("%DimCyan", argrepr[1:-1])
+        argrepr = argrepr[1:-1].join(colorize("%DimCyan", "%Reset"))
         cmdrepr.append(sep[0] + argrepr + sep[1])
     args = " ".join(cmdrepr)
     return colorize("%BoldCyan", "CMD(", "%Reset", args, "%BoldCyan", ")")
