@@ -47,6 +47,7 @@ def php2py(raw_php_var):
     python_var = phpserialize.loads(raw_php_var,
                                     charset=encoding.default_encoding,
                                     errors=encoding.default_errors,
+                                    object_hook=phpserialize.phpobject,
                                     decode_strings=True)
     python_var = phpserialize_recursive_dict_to_list(python_var)
     return python_var
