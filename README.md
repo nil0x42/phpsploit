@@ -47,10 +47,15 @@ through a tiny **polymorphic backdoor**:
 
 
 ---------------------------------------------------------------------
-#### Supported platforms:####
+#### Supported platforms (as attacker):####
 * GNU/Linux
 * Mac OS X
-* Windows (experimental)
+
+#### Supported platforms (as target):####
+* GNU/Linux
+* BSD Like
+* Mac OS X
+* Windows NT
 
 
 ## [Get started now !] ##
