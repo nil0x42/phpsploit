@@ -13,7 +13,7 @@ import core
 import objects
 from core import session
 from datatypes import Path
-from decorators import readonly_settings
+from decorators.readonly_settings import readonly_settings
 import utils.path
 
 from .Plugin import Plugin

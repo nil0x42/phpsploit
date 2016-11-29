@@ -10,7 +10,7 @@ import traceback
 from sys import exit  # alias exit() to prevent I/O bug due to fd closure.
 
 from ui.color import colorize
-from decorators import isolate_io_context
+from decorators.isolate_io_context import isolate_io_context
 
 
 class Console:

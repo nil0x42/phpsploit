@@ -5,31 +5,7 @@ import signal
 from ..color import colorize
 from ..output import isatty
 
-
-# DIRTY REDEF OF isolate_io_context() decorator...
-# got a dependency loop, bad design perhaps...
-def isolate_readline_context(function):
-    def wrapper(*args, **kwargs):
-        try:
-            import readline
-            handle_readline = True
-        except:
-            handle_readline = False
-
-        # backup phpsploit I/O context
-        if handle_readline:
-            old_readline_completer = readline.get_completer()
-            readline.set_completer((lambda x: x))
-        # execute function with fresh context
-        try:
-            retval = function(*args, **kwargs)
-        # restore phpsploit I/O context
-        finally:
-            if handle_readline:
-                readline.set_completer(old_readline_completer)
-        # return function result
-        return retval
-    return wrapper
+from decorators.isolate_readline_context import isolate_readline_context
 
 
 class Expect:
