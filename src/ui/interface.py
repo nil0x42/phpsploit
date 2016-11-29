@@ -381,7 +381,7 @@ class Shell(shnake.Shell):
             is interesting for visibility purposes only.
         """
         if ui.output.isatty():
-            return os.system('cls' if os.name == 'nt' else 'clear')
+            return os.system('clear')
 
     #################
     # COMMAND: rtfm #
@@ -396,14 +396,8 @@ class Shell(shnake.Shell):
             command is used for display. Otherwise, a text version
             of the man page is displayed in phpsploit interface.
         """
-        txtMan = lambda: print(Path(core.basedir, 'man/phpsploit.txt').read())
-        if os.name == 'nt':
-            txtMan()
-        else:
-            cmd = 'man ' + Path(core.basedir, 'man/phpsploit.1')
-            return_value = os.system(cmd)
-            if return_value is not 0:
-                txtMan()
+        if os.system('man ' + Path(core.basedir, 'man/phpsploit.1')) != 0:
+            print(Path(core.basedir, 'man/phpsploit.txt').read())
 
     ####################
     # COMMAND: session #
@@ -524,14 +518,14 @@ class Shell(shnake.Shell):
             lrun command [arg1 [arg2 [...] ] ]
 
         DESCRIPTION:
-            Execute a shell command in your own operating system.
-            This command works like the `exec` command in unix
-            shells.
-
-            NOTE: This core command shouldn't be confused with the
-            `run` plugin, which does the same thing in the
-            remotely exploited system.
-
+                Execute a shell command in your own operating system.
+                This command works like the `exec` command in unix
+                shells.
+             
+                NOTE: This core command shouldn't be confused with the
+                `run` plugin, which does the same thing in the
+                remotely exploited system.
+             
         EXAMPLES:
             > lrun ls -la /
             > lrun htop
@@ -541,30 +535,14 @@ class Shell(shnake.Shell):
 
         cmd = " ".join(argv[1:])
 
-        # on windows, we do not handle interactive commands
-        if sys.platform.startswith("win"):
-            postcmd = " & echo %CD%"
-            output = subprocess.getoutput(cmd + postcmd)
-            lines = output.splitlines()
-            if os.path.isabs(lines[-1]):
-                os.chdir(lines[-1])
-                if not lines[:-1]:
-                    return
-                output = os.linesep.join(lines[:-1])
-            return print(output)
-
-        # on unix, we are able to handle interactive commands
-        # AND getting new $PWD by redirecting the `pwd`
-        # command to a temporary file.
-        else:
-            if argv[1] != "exit":
-                tmpfile = Path()
-                postcmd = " ; pwd >'%s' 2>&1" % tmpfile
-                subprocess.call(cmd + postcmd, shell=True)
-                try:
-                    os.chdir(tmpfile.read())
-                finally:
-                    del tmpfile
+        if argv[1] != "exit":
+            tmpfile = Path()
+            postcmd = " ; pwd >'%s' 2>&1" % tmpfile
+            subprocess.call(cmd + postcmd, shell=True)
+            try:
+                os.chdir(tmpfile.read())
+            finally:
+                del tmpfile
 
     ###################
     # COMMAND: source #

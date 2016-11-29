@@ -16,10 +16,9 @@ wtf
 >>> sys.stdout.backlog = ""        # enable stdout's backlog
 
 As shown in the example above, the wrapper provides a nice backlog
-feature. Considering it's original design, aka enhancing the output
-experience for the PhpSploit Framework, it also provides dynamic
-cross-platform pattern coloration. For example, if a line begins with
-"[-] ", it is automatically colored to bright red.
+feature. It also provides magic output transformation on information
+tags. For example, if a line begins with "[-] ", it is automatically
+colored to bright red.
 
 NOTE: Ansi escape codes (terminal colors) are automatically removed
 when writting to the backlog.
@@ -180,9 +179,5 @@ def process_tags(line):
     # colorize «*» patterns from tagged line:
     dye = lambda obj: colorize('%White', "« " + obj.group(1) + " »")
     line = re.sub('«(.+?)»', dye, line)
-
-    # replace angle quotes by double quotes on windws term
-    if sys.platform.startswith('win'):
-        line = re.sub('«|»', '"', line)
 
     return line

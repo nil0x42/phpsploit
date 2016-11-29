@@ -56,10 +56,7 @@ def colors():
         return 8
 
 # get current terminal size
-if os.name == "nt":
-    _default_terminal_size = (79, 24)
-else:
-    _default_terminal_size = (80, 24)
+_default_terminal_size = (80, 24)
 
 def size():
     if hasattr(shutil, "get_terminal_size"):
