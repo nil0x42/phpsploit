@@ -46,18 +46,15 @@ class Stdout:
     setting the instance's backlog attribute to an empty string.
 
     NOTE: See module's help for more informations.
-
-    NEW: __init__ now also provides a middle proxy from colorama, that
-    provides ansi color conversion from ANSI to win terminal codes.
-
     """
 
     def __init__(self, outfile=sys.__stdout__, backlog=False):
         # get original stdout
         self._orig_outfile = outfile
 
-        # use the colorama wrapper (ansi to win auto convert) as outfile
-        self.outfile = colorama_wrap(self._orig_outfile)
+        # just in case we wrap at runtime o the future,
+        # as we did with `colorama_wrapper` in the past
+        self.outfile = self._orig_outfile
 
         # handle back logging
         self._backlog = StringIO()
@@ -189,12 +186,3 @@ def process_tags(line):
         line = re.sub('«|»', '"', line)
 
     return line
-
-
-def colorama_wrap(outfile=sys.__stdout__):
-    """Returns an colorama wrap file that acts as an stdout proxy
-    between userspace and given output file
-
-    """
-    from colorama.initialise import wrap_stream
-    return wrap_stream(outfile, None, None, False, True)

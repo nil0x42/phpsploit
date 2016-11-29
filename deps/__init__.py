@@ -16,8 +16,6 @@ import imp
 import errno
 
 DEPENDENCIES = [('phpserialize',           'phpserialize-1.3'),
-                ('colorama',               'colorama-0.3.7'),
-                ('colorama_patched',       '.'),
                 ('socks',                  'PySocks-1.4.2-74-g10fb5b2'),
                 ('sockshandler',           'PySocks-1.4.2-74-g10fb5b2'),
                 ('pyparsing',              'pyparsing-2.1.1'),
