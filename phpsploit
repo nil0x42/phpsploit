@@ -13,6 +13,11 @@ except:
     sys.exit('PhpSploit must be run with the provided script')
 del __file__
 
+# F*ck windows users
+if sys.platform.lower().startswith('win'):
+    sys.exit('If you use Windows NT, you should be '
+             'a TARGET rather than an attacker ...')
+
 import src  # spread phpsploit sources
 
 import random
