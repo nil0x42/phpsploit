@@ -24,9 +24,6 @@ the following syntax:
     - PHP code portions MUST be compatible with at least php 4.3.0.
 
 Finally, your contribution must be submited by a pull request on github.
-Otherwise, your patch can be sent to the main developper's E-Mail whith the
-"git format-patch" feature. For more infos about it, see:
-    - https://github.com/bard/sameplace/wiki/Getting-started-with-git
 
 
 Writing PhpSploit plugins:
@@ -40,10 +37,7 @@ and comply with the syntax of the built-in plugins. Help lines must not exceed
 64 characters, to maintain good readability.
 
 To submit your plugin, a compressed archive can be sent to the main developper
-by E-Mail.
-
-#NOTE: A PhpSploit plugin development guide, as well as a documentation for
-the plugin script API will be available soon.
+by E-Mail, or by a pull-request on github
 
 
 Enhancing documentation:
