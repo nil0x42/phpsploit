@@ -1,6 +1,9 @@
 """
 Default directory to use for writing
-temporary files.
+temporary files on attacker machine.
+
+Used as base path for files being edited
+with `edit` plugin.
 """
 import tempfile
 
