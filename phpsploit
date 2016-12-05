@@ -10,28 +10,30 @@ import os
 try:
     from __main__ import __file__
 except:
-    sys.exit('PhpSploit must be run with the provided script')
+    sys.exit('[-] PhpSploit must be run with the provided script')
 del __file__
 
 # F*ck windows users
 if sys.platform.lower().startswith('win'):
-    sys.exit('If you use Windows NT, you should be '
+    sys.exit('[-] If you use Windows NT, you should be '
              'a TARGET rather than an attacker ...')
 
-import src  # spread phpsploit sources
+try:
+    import src  # spread phpsploit sources
+    
+    import random
+    import argparse
+    import subprocess as sp
+    
+    import core
+    import ui.input
+    import ui.output
+    import ui.interface
+    from datatypes import Path
+    from ui.color import colorize
+except KeyboardInterrupt:
+    sys.exit("\r[-] PhpSploit initialization interrupted")
 
-import random
-import argparse
-import subprocess as sp
-
-import core
-import ui.input
-import ui.output
-import ui.interface
-from datatypes import Path
-from ui.color import colorize
-
-# Parse argument list:
 
 
 def help_format(prog):
@@ -66,11 +68,12 @@ def cmdrun(interface, cmdobj, show_err=False):
     return retval
 
 
-# This makes phpsploit usable as shellbang for scripting
+# This makes phpsploit usable as shebang for scripting
 if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
     sys.argv.insert(1, "--source")
 
 
+# Parse argument list:
 parser = argparse.ArgumentParser()
 parser.formatter_class = help_format
 parser.description = "The stealth post-exploitation framework"
