@@ -36,9 +36,10 @@ through a tiny **polymorphic backdoor**:
     - http/https/socks4/socks5 **Proxy support**
 
 * **Convenient**: A robust interface with many crucial features
+    - Detailed help for any command or option (type `help`)
     - *Cross-platform* on both the client and the server.
     - Powerful interface with completion and multi-command support
-    - Session saving/loading feature, with persistent history
+    - Session saving/loading feature & persistent history
     - Multi-request support for large payloads (such as uploads)
     - Provides a powerful, highly configurable settings engine
     - Each setting, such as user-agent has a *polymorphic mode*
@@ -47,11 +48,11 @@ through a tiny **polymorphic backdoor**:
 
 
 ---------------------------------------------------------------------
-#### Supported platforms (as attacker):####
+#### Supported platforms (as attacker): ####
 * GNU/Linux
 * Mac OS X
 
-#### Supported platforms (as target):####
+#### Supported platforms (as target): ####
 * GNU/Linux
 * BSD Like
 * Mac OS X
