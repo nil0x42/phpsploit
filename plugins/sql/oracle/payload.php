@@ -3,7 +3,7 @@
 if (!function_exists("oci_connect"))
     return error("ERROR: PECL OCI8 >= 1.1.0 required");
 
-// Establish connection
+// Establish connection (for deprecated ORACLE_CRED)
 function oracle_login($info, $connector, $serv_type)
 {
     $conn_str = '( DESCRIPTION =
@@ -18,15 +18,32 @@ function oracle_login($info, $connector, $serv_type)
     return ($c);
 }
 
-$conn = False;
-if ($conn === False)
-    $conn = oracle_login($PHPSPLOIT, "SERVICE_NAME", "POOLED");
-if ($conn === False)
-    $conn = oracle_login($PHPSPLOIT, "SERVICE_NAME", "DEDICATED");
-if ($conn === False)
-    $conn = oracle_login($PHPSPLOIT, "SID", "POOLED");
-if ($conn === False)
-    $conn = oracle_login($PHPSPLOIT, "SID", "DEDICATED");
+# DEFAULT CONNECT
+if (isset($PHPSPLOIT['CONNSTR']))
+{
+    $user = $PHPSPLOIT["USER"];
+    $pass = $PHPSPLOIT["PASS"];
+    $connstr = $PHPSPLOIT["CONNSTR"];
+    $charset = $PHPSPLOIT["CHARSET"];
+    
+    if ($charset)
+        $conn = @ocilogon($user, $pass, $connstr, $charset);
+    else
+        $conn = @ocilogon($user, $pass, $connstr);
+}
+# DEPRECATED CONNECT
+else
+{
+    $conn = False;
+    if ($conn === False)
+        $conn = oracle_login($PHPSPLOIT, "SERVICE_NAME", "POOLED");
+    if ($conn === False)
+        $conn = oracle_login($PHPSPLOIT, "SERVICE_NAME", "DEDICATED");
+    if ($conn === False)
+        $conn = oracle_login($PHPSPLOIT, "SID", "POOLED");
+    if ($conn === False)
+        $conn = oracle_login($PHPSPLOIT, "SID", "DEDICATED");
+}
 
 if ($conn === False)
 {

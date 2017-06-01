@@ -1,7 +1,8 @@
 """A client for Oracle PL/SQL databases
 
 SYNOPSIS:
-    oracle connect <USERNAME>@<HOSTNAME>:<PORT>/<CONNECTOR> [-p <PASSWORD>]
+    oracle connect <USER> <PASSWORD> "<CONNSTR>"
+    oracle connect <USER> <PASSWORD> "<CONNSTR>" [<CHARSET>]
     oracle "<SQL COMMAND>"
 
 DESCRIPTION:
@@ -10,10 +11,9 @@ DESCRIPTION:
     given credentials, which are then stored on `ORACLE_CRED`
     environment variable in order to be persistent between
     plugin calls in current session.
-    - The <CONNECTOR> argument describes a 'SERVICE_NAME' OR an 'SID',
-    wich are both oracle connection paradygms.
-    - Any other case assumes that the arguments are an SQL
-    command, and result is returned.
+    - The <CONNSTR> contains the Oracle instance to connect to
+    as an `Easy Connect String` as documented here:
+        https://docs.oracle.com/database/121/NETAG/naming.htm#NETAG255
     - A command that ends with '\G' will use tabular
     display mode.
 
@@ -28,10 +28,12 @@ WARNING:
       > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
 
 EXAMPLES:
-    > oracle connect root@10.0.0.100:1524/db.victim.com -p god
-      - Connect to 10.0.0.100:1524/db.victim.com as "root" with password "god"
-    > oracle SELECT owner, table_name FROM all_tables
-      - Print the tables list
+    > oracle connect SYS s3cr3t "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=sales-server)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=sales.us.example.com)))"
+      - Connect without defining <CHARSET>
+    > oracle connect SYS s3cr3t "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=sales-server)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=sales.us.example.com)))" WE8ISO8859P1
+      - Connect with defined <CHARSET>
+    > oracle "SELECT owner, table_name FROM all_tables\\\\G"
+      - Run SQL command
     > oracle "SELECT owner, table_name FROM all_tables\\\\G"
       - Same as above, using tabular format (mysql client like)
 
@@ -58,16 +60,29 @@ def load_credentials(creds):
     elements from raw format.
     """
     result = {}
+    # old method (retrocompat)
     try:
-        parsed = re.findall("(.+?)@(.+?):(\d+)/([^*]+)(?:\*(.+))?", creds)[0]
-        assert len(parsed) == 5
+        regexp = "^USER=(.+?);PASS=(.+?);CONNSTR=(.+?)(?:;CHARSET=(.+))?$"
+        parsed = re.findall(regexp, creds)[0]
+        assert len(parsed) == 4
         result['USER'] = parsed[0]
-        result['HOST'] = parsed[1]
-        result['PORT'] = parsed[2]
-        result['CONNECTOR'] = parsed[3]
-        result['PASS'] = parsed[4]
+        result['PASS'] = parsed[1]
+        result['CONNSTR'] = parsed[2]
+        result['CHARSET'] = parsed[3]
     except:
-        sys.exit("couldn't parse ORACLE_CRED credentials: %s" % creds)
+        try:
+            regexp = "(.+?)@(.+?):(\d+)/([^*]+)(?:\*(.+))?"
+            parsed = re.findall(regexp, creds)[0]
+            assert len(parsed) == 5
+            result['USER'] = parsed[0]
+            result['HOST'] = parsed[1]
+            result['PORT'] = parsed[2]
+            result['CONNECTOR'] = parsed[3]
+            result['PASS'] = parsed[4]
+            print("[-] Deprecated ORACLE_CRED env var scheme, run "
+                  "`oracle connect` again to update it.")
+        except:
+            sys.exit("couldn't parse ORACLE_CRED credentials: %s" % creds)
     return result
 
 def sql_str_repr(row):
@@ -77,30 +92,35 @@ if len(plugin.argv) < 2:
     sys.exit(plugin.help)
 
 
-# `oracle connect <USERNAME>@<HOSTNAME> [-p <PASSWORD>]`
+# `oracle connect <USER> <PASSWORD> "<CONNSTR>" [<CHARSET>]`
 # Connect to a oracle server with credentials.
 # This comment creates or updates the ORACLE_CRED
 # environment variable.
 if plugin.argv[1].lower() == "connect":
-    if len(plugin.argv) < 3:
+    if len(plugin.argv) == 5:
+        plugin.argv.append('')
+    elif len(plugin.argv) != 6:
         sys.exit(plugin.help)
-    raw_creds = plugin.argv[2]
-    if len(plugin.argv) > 3:
-        if plugin.argv[3] == "-p":
-            password = ' '.join(plugin.argv[4:])
-            raw_creds += '*' + password
+
+    print(plugin.argv[2:5])
+    raw_creds = "USER=%s;PASS=%s;CONNSTR=%s" % tuple(plugin.argv[2:5])
+    if plugin.argv[5]:
+        raw_creds += ";CHARSET=" + plugin.argv[5]
+
     creds = load_credentials(raw_creds)
+
     payload = server.payload.Payload("connect.php")
     payload.update(creds)
     payload.send()
+
     if "ORACLE_CRED" not in environ:
         environ["ORACLE_CRED"] = ""
     if raw_creds != environ["ORACLE_CRED"]:
         environ["ORACLE_CRED"] = raw_creds
 
     msg = ("[*] SUCCESS: Access granted for user"
-           " '%s'@'%s' (using password: %s)")
-    msg %= creds["USER"], creds["HOST"], ['YES', 'NO'][not creds['PASS']]
+           " '%s' (using password: %s)")
+    msg %= creds["USER"], ['YES', 'NO'][not creds['PASS']]
     print(msg)
     sys.exit(0)
 
