@@ -12,7 +12,6 @@ dependency name, while the second provides it's directory path.
 
 import os
 import sys
-import imp
 import errno
 
 DEPENDENCIES = [('phpserialize',           'phpserialize-1.3'),
