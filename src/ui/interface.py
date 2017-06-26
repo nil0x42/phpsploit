@@ -942,6 +942,10 @@ class Shell(shnake.Shell):
             for line in docLines:
                 if line == line.lstrip():
                     line = colorize("%BoldWhite", line)
+                elif line.startswith("    * "):
+                    line = colorize("    * ", "%Yellow", line[6:])
+                elif line.startswith("    > "):
+                    line = colorize("    > ", "%Cyan", line[6:])
                 result += line + "\n"
 
             print(result)
