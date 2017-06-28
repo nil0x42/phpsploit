@@ -1,6 +1,7 @@
 import os
 import sys
 import importlib
+import importlib.machinery
 import traceback
 
 from datatypes import Path
