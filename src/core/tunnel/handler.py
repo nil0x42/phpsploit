@@ -338,8 +338,9 @@ class Request:
         payload data with PASSKEY as variable name
 
         """
-        post_data = {self.passkey: data}
-        return urllib.parse.urlencode(post_data)
+        post_data = urllib.parse.urlencode({self.passkey: data})
+        post_data += "&" + session.Conf.REQ_POST_DATA()
+        return post_data
 
     def build_single_request(self, method, php_payload):
         """build a single request from the given http method and

@@ -62,6 +62,7 @@ class Settings(objects.VarContainer):
         self.REQ_MAX_HEADER_SIZE = "4 KiB"
         self.REQ_MAX_POST_SIZE = "4 MiB"
         self.REQ_ZLIB_TRY_LIMIT = "20 MiB"
+        self.REQ_POST_DATA = ""
 
         # payload prefix
         self.PAYLOAD_PREFIX = "%%DEFAULT%%"
