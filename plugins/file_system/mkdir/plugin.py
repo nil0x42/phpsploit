@@ -22,7 +22,7 @@ EXAMPLES:
     > mkdir /srv/www/data/img/thumb/
       - Create the 'thumb' directory if it's parent exists
     > mkdir /srv/www/data/img/thumb/
-      - Create the 'thumb' direcroty even if parent don't exist
+      - Create the 'thumb' directory even if parent don't exist
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>

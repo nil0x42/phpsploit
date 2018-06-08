@@ -17,7 +17,7 @@ EXAMPLES:
     > cat "C:\\Users\\granny\\Desktop\\bank account.TXT"
       - Don't be evil with grannies!
         NOTE: since gannies use spaces in file names, the path
-        string must be enquoted to be considered as a single
+        string must be quoted to be considered as a single
         argument.
 
 AUTHOR:

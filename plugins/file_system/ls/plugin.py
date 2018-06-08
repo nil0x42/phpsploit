@@ -13,7 +13,7 @@ DESCRIPTION:
     - Ending the argument string with a path separator (for
     example, '/tmp/' instead of '/tmp') explicitly indicates
     that the given path is the exact directory location you
-    want to list, so it disables the pattern feature mentionned
+    want to list, so it disables the pattern feature mentioned
     above.
 
     NOTE: If the plugin receives multiple arguments, each

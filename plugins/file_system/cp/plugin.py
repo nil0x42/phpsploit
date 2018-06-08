@@ -16,7 +16,7 @@ DESCRIPTION:
     - In the case the destination is a directory, the file will
     be copied into it, keeping it's original file name.
     - Unless the '-f' option has been set, the copy process
-    aborts if the detination file already exists, and asks for
+    aborts if the destination file already exists, and asks for
     an confirmation to overwrite the file.
 
     NOTE: Unlike the standard GNU's 'cp' tool, this plugin can
