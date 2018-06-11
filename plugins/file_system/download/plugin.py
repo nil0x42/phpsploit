@@ -28,7 +28,7 @@ EXAMPLES:
     > download -f /etc/passwd ./hacked-etcpasswd.txt
       - Download the current remote passwd file and force copy
     > download /srv/www/inc/sql.php
-      - Downalod the sql.php file to the current local directory
+      - Download the sql.php file to the current local directory
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>

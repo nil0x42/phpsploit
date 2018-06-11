@@ -28,7 +28,7 @@ DESCRIPTION:
 WARNING:
     Considering phpsploit's input parser, commands which
     contain quotes, semicolons, and other chars that could be
-    interpreted by the framework MUST be enquoted to be
+    interpreted by the framework MUST be quoted to be
     interpreted as a single argument. For example:
       > run echo 'foo bar' > /tmp/foobar; cat /etc/passwd
     In this case, quotes and semicolons will be interpreted by
@@ -41,7 +41,7 @@ EXAMPLES:
     > run ls -la /etc
       - List any file in the /etc/ directory on *nix systems
     > run "cat /etc/passwd | grep root; ls /tmp"
-      - Just a multi command, which must be enquoted because
+      - Just a multi command, which must be quoted because
         of the semicolon (see WARNING)
 
 AUTHOR:

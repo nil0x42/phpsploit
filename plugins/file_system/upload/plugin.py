@@ -16,7 +16,7 @@ DESCRIPTION:
     - In the case the destination is a directory, the file will
     be copied into it keeping it's original file name.
     - Unless the '-f' option has been set, the upload process
-    aborts if the detination file already exists, and asks for
+    aborts if the destination file already exists, and asks for
     a confirmation to overwrite the file.
 
     NOTE: For the moment, only a single file can be uploaded
@@ -40,7 +40,7 @@ EXAMPLES:
       - Upload your index.php to the remote server's current
         working directory. If your location is a web root path
         which already contains an index.php, then you must
-        anwser to the confirmation request.
+        answer to the confirmation request.
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>

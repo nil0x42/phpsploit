@@ -6,7 +6,7 @@ SYNOPSIS:
 DESCRIPTION:
     This command is an enhancement of the 'cat' plugin. Instead
     of simply writing the content to standard output, it opens
-    the remote file content with your prefered text editor,
+    the remote file content with your preferred text editor,
     which if defined by the EDITOR setting.
     - Once opened with the local text editor, the file can be
     edited. When leaving the text editor, the plugin checks if

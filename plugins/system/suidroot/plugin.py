@@ -6,7 +6,7 @@ SYNOPSIS:
 
 DESCRIPTION:
     This plugin provides a simple way to install a setuid(2)
-    backdoor, and use it for presistent privilege escalation
+    backdoor, and use it for persistent privilege escalation
     through phpsploit.
 
     NOTES:
@@ -22,11 +22,11 @@ DESCRIPTION:
 WARNING:
     Considering the PhpSploit's input parser, commands which
     contain quotes, semicolons, and other chars that could be
-    interpreted by the framework MUST be enquoted to be
+    interpreted by the framework MUST be quoted to be
     interpreted as a single argument. For example:
       > run echo 'foo bar' > /tmp/foobar; cat /etc/passwd
     In this case, quotes and semicolons will be interpreted by
-    the framwework, so the correct syntax is:
+    the framework, so the correct syntax is:
       > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
 
 EXAMPLES:

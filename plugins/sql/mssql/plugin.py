@@ -9,7 +9,7 @@ SYNOPSIS:
 DESCRIPTION:
     This plugin handles "Microsoft SQL Server" interactions
     through a mysql-like client approach.
-    - The 'connect' argument estabilishes a connection with
+    - The 'connect' argument establishes a connection with
     given credentials, which are then stored on `MSSQL_CRED`
     environment variable in order to be persistent between
     plugin calls in current session.
@@ -27,7 +27,7 @@ WARNING:
     interpreted as a single argument. For example:
       > run echo 'foo bar' > /tmp/foobar; cat /etc/passwd
     In this case, quotes and semicolons will be interpreted by
-    the framwework, so the correct syntax is:
+    the framework, so the correct syntax is:
       > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
 
 EXAMPLES:
