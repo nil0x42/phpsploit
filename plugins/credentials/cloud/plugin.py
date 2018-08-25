@@ -17,8 +17,9 @@ AUTHOR:
     Jose <https://twitter.com/jnazario>
 """
 
-import sys
+import itertools
 import os
+import sys
 import time
 import json
 
@@ -51,7 +52,7 @@ else:
 if opt["platform"]:
     SEARCH_FOR = FILES[opt["platform"]]
 else:
-    SEARCH_FOR = FILES["aws"] + FILES["google"] + FILES["azure"]
+    SEARCH_FOR = list(itertools.chain(*FILES.values()))
 
 # Send payload
 payload = server.payload.Payload("cloudcredgrab.php")
