@@ -52,7 +52,7 @@ else:
 if opt["platform"]:
     SEARCH_FOR = FILES[opt["platform"]]
 else:
-    SEARCH_FOR = list(itertools.chain(*FILES.values()))
+    SEARCH_FOR = list(itertools.chain.from_iterable(FILES.values()))
 
 # Send payload
 payload = server.payload.Payload("cloudcredgrab.php")
