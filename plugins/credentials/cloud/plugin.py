@@ -62,7 +62,7 @@ payload['SEARCH_FOR'] = SEARCH_FOR
 result = payload.send()
 
 if len(results) < 1:
-    print(colorize("%Red", "[-] No results found")
+    print(colorize("%Red", "[-] No results found"))
 else:
     for filename in results:
         print(colorize("%Green", "[+] Found {0}".format(filename)))
