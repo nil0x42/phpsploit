@@ -56,7 +56,7 @@ else:
 
 # Send payload
 payload = server.payload.Payload("cloudcredgrab.php")
-payload['USER'] = opt['USER'] or "all"
+payload['USER'] = opt['user'] or "all"
 payload['SEARCH_FOR'] = SEARCH_FOR
 
 result = payload.send()

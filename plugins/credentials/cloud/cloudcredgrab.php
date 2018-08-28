@@ -1,7 +1,7 @@
 <?php
 error_reporting(0);
 
-$user = $PHPSPLOIT['user'];
+$user = $PHPSPLOIT['USER'];
 
 if ($user === "any") {
     if (stat("C:\\Users")) {
