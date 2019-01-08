@@ -1,4 +1,4 @@
-"""Ascii functions
+"""String functions
 
 Author: nil0x42
 """

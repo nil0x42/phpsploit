@@ -44,7 +44,7 @@ class Environment(objects.VarContainer):
 
     def __setitem__(self, name, value):
         # ensure the env var name has good syntax
-        if name in ["", "__DEFAULTS__"] or not utils.ascii.isgraph(name):
+        if name in ["", "__DEFAULTS__"] or not utils.string.isgraph(name):
             raise KeyError("illegal name: '{}'".format(name))
         if name in self.readonly and name in self.keys():
             raise AttributeError("«{}» variable is read-only".format(name))
