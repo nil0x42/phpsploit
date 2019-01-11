@@ -83,7 +83,7 @@ class Settings(objects.VarContainer):
             # HTTP_* settings have a RandLineBuffer metatype
             metatype = objects.buffers.RandLineBuffer
             # setter = self._set_HTTP_header
-            setter = lambda x: str(x)
+            setter = str
             info = self._get_HTTP_header_info(name[5:])
             # allow removal of custom HTTP_ settings, except for user agent.
             if name != "HTTP_USER_AGENT" and \
@@ -140,13 +140,12 @@ class Settings(objects.VarContainer):
         return str(value)
 
     def _get_HTTP_header_info(self, name):
-        result = ("Defines the value of '%s'\n"
-                  "http header for any sent request.\n") % name
+        hdr_name = name.replace("_", "-").title()
+        result = "Define a value for %r HTTP Header field\n" % hdr_name
         if name != "USER_AGENT":
-            result += ("\n"
-                       "This setting is dynamic and can be removed\n"
-                       "with the `set HTTP_%s None` command.")
-        result = result.replace("%s", name)
+            result += ("\nThis setting is dynamic and can be removed\n"
+                       "by assigning 'None' magic string to it:\n"
+                       "> set HTTP_%s None") % name
         return result
 
     def format_docstring(self, name, metatype, info):

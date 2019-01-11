@@ -1,11 +1,11 @@
 """
-The default directory to use for saving and
-loading phpsploit sessions.
+Default directory to save and load phpsploit session files.
 
-For example, if $SAVEPATH is '/dev/shm', running
-`session load foo.session` will implicitly try to get
-the session file '/dev/shm/foo.session.
-This feature also works with the `session save` command.
+* EXAMPLE:
+If SAVEPATH is '/dev/shm', running `session load foo.session`
+will implicitly try to load '/dev/shm/foo.session.
+
+This setting also affetcs the `session save` command.
 """
 import tempfile
 

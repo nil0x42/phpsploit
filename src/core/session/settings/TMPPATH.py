@@ -1,9 +1,8 @@
 """
-Default directory to use for writing
-temporary files on attacker machine.
+Default phpsploit temporary directory.
 
-Used as base path for files being edited
-with `edit` plugin.
+* USE CASES:
+Used as base path for files edited with `edit` plugin.
 """
 import tempfile
 

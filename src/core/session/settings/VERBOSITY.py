@@ -1,7 +1,5 @@
 """
-Bollean variable.
-
-Increases verbosity if is True.
+Enable or Disable phpsploit framework verbosity.
 """
 import objects
 import datatypes

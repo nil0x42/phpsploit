@@ -8,8 +8,7 @@ that extends execution scope.
 
 The code will be executed before ANY payload execution.
 
-NOTE: If you do not understand what you're doing,
-      keep this setting with default value.
+* Only edit PAYLOAD_PREFIX if you really understand what you're doing
 """
 import core
 import objects

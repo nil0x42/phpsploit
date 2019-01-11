@@ -1,16 +1,10 @@
 """
-User's prefered web browser.
+Set attacker's default Web Browser in phpsploit's context.
 
-This setting can be overridden if automatic
-detection of system's web browser fails,
-or if you want to use another one for
-commands that needs to know what web browser
-to use.
-
-USE CASES:
-  * The `phpinfo` plugin's '--browser' option
-    uses this setting to display server's
-    phpinfo() output.
+* USE CASES:
+The '--browser' option of `phpinfo` plugin uses this setting
+to display remote server's informations locally:
+> phpinfo --browser
 """
 import objects
 import datatypes
