@@ -34,7 +34,7 @@ class Shell(shnake.Shell):
     nohelp = "[-] No help for: %s"
     error = "[!] %s"
 
-    binded_command = None
+    bind_command = None
 
     def __init__(self):
         self.last_exception = None
@@ -56,12 +56,12 @@ class Shell(shnake.Shell):
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
         # Reset backlog before each command except backlog
-        if self.binded_command:
+        if self.bind_command:
             if len(argv) == 1 and argv[0] == "exit":
-                # self.binded_command = None
+                # self.bind_command = None
                 pass
             else:
-                argv.insert(0, self.binded_command)
+                argv.insert(0, self.bind_command)
         if argv and argv[0] != "backlog":
             self.stdout.backlog = ""
         # Alias Handler
@@ -95,9 +95,9 @@ class Shell(shnake.Shell):
             # if remote shell, add target hostname to prompt
             prompt_elems += ["%Reset", "(", "%BoldRed",
                              tunnel.hostname, "%Reset", ")"]
-        if self.binded_command:
+        if self.bind_command:
             # If a command is binded to the prompt
-            prompt_elems += ["%ResetBoldWhite", " #", self.binded_command]
+            prompt_elems += ["%ResetBoldWhite", " #", self.bind_command]
         prompt_elems += ["%Reset", " > "]
         self.prompt = colorize(*prompt_elems)
 
@@ -155,9 +155,10 @@ class Shell(shnake.Shell):
             force_exit = False
         else:
             self.interpret("help exit")
+            return False
 
-        if self.binded_command:
-            self.binded_command = None
+        if self.bind_command:
+            self.bind_command = None
         elif tunnel:
             tunnel.close()
         else:
@@ -652,24 +653,27 @@ class Shell(shnake.Shell):
               keeps the old one otherwise.
 
         BEHAVIOR
-            - Settings are pre declared at start. It means that new ones
+            - Common settings are pre declared at start. And custom ones
             cannot be declared.
 
-            - The convention above does not apply for settings whose name
-            starts with "HTTP_", because this kind of variable are
-            automatically used as custom headers on http requests. For
-            example, `set HTTP_ACCEPT_LANGUAGE "en-CA"` will set the
-            "Accept-Language" http header to the specified value.
-            Of course, this applies to any future HTTP request.
+            - HTTP Header settings are dynamic, they must start with 'HTTP_'
+            and allow the user to define a custom HTTP Header.
+            # Example:
+            # Set "Accept-Language" header to "en-CA" for future HTTP Requests:
+            > set HTTP_ACCEPT_LANGUAGE "en-CA"
+            # Assigning "None" magic string deletes the header setting:
+            > set HTTP_ACCEPT_LANGUAGE "None"
 
             - The default value of a setting can be restored by setting
-            its value to the magic string "%%DEFAULT%%", e.g:
-              > set REQ_MAX_HEADERS %%DEFAULT%%
+            its value to "%%DEFAULT%%" magic string, e.g:
+            > set REQ_MAX_HEADERS %%DEFAULT%%
+
+            * For detailed setting help, run `help set <SETTING>`, example:
+            > help set BACKDOOR
 
             NOTE: The 'set' operating scope is limited to the current
             phpsploit session. It means that persistant settings value
-            changes must be defined by hand in the user
-            configuration file.
+            changes must be defined by hand in phpsploit config file.
         """
         # `set [<PATTERN>]` display concerned settings list
         if len(argv) < 3:
@@ -845,17 +849,31 @@ class Shell(shnake.Shell):
             bind [<COMMAND>]
 
         DESCRIPTION:
-            Binds the phpsploit command prompt to a specific
-            command, so you don't need to re-type the command
-            name each time if you are currently only using it.
+            Bind phpsploit prompt to COMMAND.
+            Every line executed will then be executed as if it was
+            the arguments of COMMAND.
+            This is useful for plugins like `run` or `mysql`, when you
+            are working from them and don't want to re-type the plugin
+            name again and again ..
 
             NOTE: press Ctrl-D or type exit to 'unbind' from current command.
+
+        DEMO:
+            phpsploit(127.0.0.1) > run type ls
+            ls is /bin/ls
+            phpsploit(127.0.0.1) > type ls
+            [-] Unknown Command: type
+            phpsploit(127.0.0.1) > bind run
+            [-] Type exit to leave binded 'run' subshell
+            # now shell is bound to `run`, so we just need to execute `type ls`
+            phpsploit(127.0.0.1) #run > type ls
+            ls is /bin/ls
         """
         if len(argv) != 2 or argv[1] not in self.complete_bind("", ""):
             self.interpret("help bind")
         else:
-            self.binded_command = argv[1]
-            print("[-] Type exit to leave binded %r subshell" % argv[1])
+            self.bind_command = argv[1]
+            print("[-] Type exit to leave bound %r subshell" % argv[1])
 
 
     ####################
@@ -874,7 +892,7 @@ class Shell(shnake.Shell):
             it does not contains any ANSI terminal color codes.
 
         OPTIONS:
-            --save $file
+            --save <FILE>
                 Write previous command's output to the given
                 file instead of opening it with $EDITOR.
         """
@@ -895,6 +913,7 @@ class Shell(shnake.Shell):
 
         SYNOPSIS:
             help [<COMMAND>]
+            help set <SETTING>
 
         DESCRIPTION:
             Display help message for any command, including plugins.
@@ -909,8 +928,8 @@ class Shell(shnake.Shell):
         EXAMPLES:
             > help
               - Display the full help, sorted by category
-            > help clear
-              - Display the help for the "clear" command
+            > help exit
+              - Display the help for the `exit` command
             > help set BACKDOOR
               - Display help about the "BACKDOOR" setting
         """
@@ -961,6 +980,10 @@ class Shell(shnake.Shell):
                     line = colorize("    * ", "%Yellow", line[6:])
                 elif line.startswith("    > "):
                     line = colorize("    > ", "%Cyan", line[6:])
+                elif line.startswith("    # "):
+                    line = colorize("%Dim", line)
+                elif line.startswith("    -") and line[5] != " ":
+                    line = colorize("%Green", line)
                 result += line + "\n"
 
             print(result)
@@ -989,7 +1012,7 @@ class Shell(shnake.Shell):
             setting = argv[2]
             try:
                 doc = getattr(session.Conf, setting).docstring
-            except (KeyError, AttributeError):
+            except KeyError:
                 print("[-] %s: No such configuration setting" % setting)
                 return
             print("\n[*] Help for '%s' setting\n" % setting)
