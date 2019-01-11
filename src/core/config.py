@@ -9,7 +9,7 @@ import os
 import errno
 
 import utils.path
-from . import basedir
+from . import BASEDIR
 from datatypes import Path
 
 
@@ -29,7 +29,7 @@ class UserDir:
         same order than the previous. Mkdir is not recursive,
         meaning that parent must already exist.
 
-        If no userdir can be determined, a ValueError concerning
+        If no USERDIR can be determined, a ValueError concerning
         last possible choice (~/.phpsploit/) is raised.
 
         """
@@ -69,11 +69,11 @@ class UserDir:
         # put default config if not exists
         config = utils.path.truepath(self.path, "config")
         if not os.path.isfile(config):
-            default_config = open(basedir + "data/config/config").read()
+            default_config = open(BASEDIR + "data/config/config").read()
             open(config, "w").write(default_config)
 
         # overwrite ./README
-        readme = open(basedir + "data/config/README").read()
+        readme = open(BASEDIR + "data/config/README").read()
         open(utils.path.truepath(self.path, "README"), "w").write(readme)
 
         # mkdirs
@@ -88,4 +88,4 @@ class UserDir:
 
 
 # define user directory path
-userdir = UserDir().path
+USERDIR = UserDir().path

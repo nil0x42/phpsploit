@@ -67,7 +67,7 @@ class Request:
 
     # a stupid function designed to not exceed the 78 chars limit in the code
     def load_phpfile(filepath):
-        file = Path(core.basedir, "data/tunnel", filepath, mode='fr')
+        file = Path(core.BASEDIR, "data/tunnel", filepath, mode='fr')
         return file.phpcode()
 
     # specific php code templates which are injected in the main evil

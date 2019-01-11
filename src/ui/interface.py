@@ -4,19 +4,20 @@ Unheriting the shnake's Shell class, the PhpSploit shell interface
 provides interactive use of commands.
 
 """
+# pylint: disable=too-many-lines
+# pylint: disable=too-many-public-methods
+
 import os
-import sys
 import traceback
 import subprocess
 
 import shnake
 
 import core
-import ui.output
-
 from core import session, tunnel, plugins, encoding
 import datatypes
 from datatypes import Path
+import ui.output
 from ui.color import colorize
 import ui.input
 import utils.path
@@ -25,6 +26,7 @@ READLINE_COMPLETER_DELIMS = ' \t\n`~!@#$%^&*()=+[{]}\\|;:\'",<>/?'
 
 
 class Shell(shnake.Shell):
+    """PhpSploit shell interface"""
 
     prompt = colorize('%Lined', 'phpsploit', '%Reset', ' > ')
 
@@ -35,10 +37,11 @@ class Shell(shnake.Shell):
     binded_command = None
 
     def __init__(self):
+        self.last_exception = None
         super().__init__()
         try:
             import readline
-            readline.set_history_length(core.MAX_HISTORY_SIZE)
+            readline.set_history_length(session.Hist.MAX_SIZE)
             readline.set_completer_delims(READLINE_COMPLETER_DELIMS)
         except ImportError:
             pass
@@ -49,6 +52,7 @@ class Shell(shnake.Shell):
         plugins.blacklist = self.get_names(self, "do_")
         plugins.reload(verbose=False)
 
+    # pylint: disable=arguments-differ
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
         # Reset backlog before each command except backlog
@@ -58,7 +62,7 @@ class Shell(shnake.Shell):
                 pass
             else:
                 argv.insert(0, self.binded_command)
-        if len(argv) and argv[0] != "backlog":
+        if argv and argv[0] != "backlog":
             self.stdout.backlog = ""
         # Alias Handler
         try:
@@ -116,12 +120,13 @@ class Shell(shnake.Shell):
         """Fallback to plugin command (if any)"""
         if tunnel and argv[0] in plugins.keys():
             return plugins.run(argv)
-        else:
-            return super().default(argv)
+        return super().default(argv)
 
     #################
     # COMMAND: exit #
-    def complete_exit(self, text, *ignored):
+    @staticmethod
+    def complete_exit(text, *_):
+        """autocompletion for `exit` command"""
         keys = ["--force"]
         return [x for x in keys if x.startswith(text)]
 
@@ -156,23 +161,23 @@ class Shell(shnake.Shell):
         elif tunnel:
             tunnel.close()
         else:
-            if force_exit is False:
+            if not force_exit:
                 try:
                     session_changed = session.diff(None)
                 except OSError:
-                    if tunnel.has_been_active():
-                        session_changed = True
-                    else:
-                        session_changed = False
+                    session_changed = bool(tunnel.has_been_active())
                 if session_changed:
                     msg = "Do you really want to exit without saving session ?"
                     if ui.input.Expect(False)(msg):
                         return False
             exit()
+        return True # make pylint happy
 
     ####################
     # COMMAND: corectl #
-    def complete_corectl(self, text, *ignored):
+    @staticmethod
+    def complete_corectl(text, *_):
+        """autocompletion for `corectl` command"""
         keys = ["stack-traceback", "reload-plugins",
                 "python-console", "display-http-requests"]
         return [x for x in keys if x.startswith(text)]
@@ -210,12 +215,12 @@ class Shell(shnake.Shell):
         python-console
             Run a python interpreter.
 
-            The python console interpreter is a good gateway
-            for deep debugging, or to get help about a phpsploit
-            module, class, object, such as the plugin developpers
-            API.
+            The python console interpreter is a good gateway for deep
+            debugging, or to get help about a phpsploit module, class,
+            object, such as the plugin developpers API.
+
             For help with the API, run the following commands inside
-            of the python console:
+            the python console:
             >>> import api
             >>> help(api)
 
@@ -231,28 +236,29 @@ class Shell(shnake.Shell):
         argv.append('')
 
         if argv[1] == "stack-traceback":
-            try:
-                e = self.last_exception
-                e = traceback.format_exception(type(e), e, e.__traceback__)
+            if self.last_exception:
+                exc = self.last_exception
+                exc = traceback.format_exception(type(exc),
+                                                 exc,
+                                                 exc.__traceback__)
                 # a small patch for traceback from plugins, remove trash lines
-                for index, line in enumerate(e):
+                for idx, line in enumerate(exc):
                     if ('File "<frozen importlib._bootstrap>"' in line
                             and '_call_with_frames_removed' in line):
-                        e = e[(index + 1):]
+                        exc = exc[(idx + 1):]
                         header = "Traceback (most recent call last):"
-                        e.insert(0, header + os.linesep)
+                        exc.insert(0, header + os.linesep)
                         break
-                e = colorize("%Red", "".join(e))
-            except:
-                e = "[-] Exception stack is empty"
-            print(e)
+                print(colorize("%Red", "".join(exc)))
+            else:
+                print("[-] Exception stack is empty")
 
         elif argv[1] == "reload-plugins":
             plugins.reload(verbose=True)
 
         elif argv[1] == "python-console":
-            import ui.console
-            console = ui.console.Console()
+            from ui import console
+            console = console.Console()
             console.banner = "Phpsploit corectl: python console interpreter"
             console()
 
@@ -297,11 +303,11 @@ class Shell(shnake.Shell):
 
         try:
             count = int(argv[1])
-        except:
+        except ValueError:
             return self.interpret("help history")
 
         last = readline.get_current_history_length()
-        while last > core.MAX_HISTORY_SIZE:
+        while last > session.Hist.MAX_SIZE:
             readline.remove_history_item(0)
             last -= 1
         first = last - count
@@ -313,7 +319,9 @@ class Shell(shnake.Shell):
 
     ####################
     # COMMAND: exploit #
-    def complete_exploit(self, text, *ignored):
+    @staticmethod
+    def complete_exploit(text, *_):
+        """autocompletion for `exploit` command"""
         keys = ["--get-backdoor"]
         return [x for x in keys if x.startswith(text)]
 
@@ -346,9 +354,8 @@ class Shell(shnake.Shell):
             if argv[1] == "--get-backdoor":
                 print(obj)
                 return True
-            else:
-                self.interpret("help exploit")
-                return False
+            self.interpret("help exploit")
+            return False
 
         print("[*] Current backdoor is: " + obj + "\n")
 
@@ -358,19 +365,20 @@ class Shell(shnake.Shell):
             print(m.format(session.Env.HOST))
             return False
 
-        elif session.Conf.TARGET() is None:
+        if session.Conf.TARGET() is None:
             m = ("To run a remote tunnel, the backdoor shown above must be\n"
                  "manually injected in a remote server executable web page.\n"
                  "Then, use `set TARGET <BACKDOORED_URL>` and run `exploit`.")
             print(colorize("%BoldCyan", m))
             return False
 
-        else:
-            return tunnel.open()  # it raises exception if fails
+        return tunnel.open()  # it raises exception if fails
 
     ##################
     # COMMAND: clear #
-    def do_clear(self, argv):
+    @staticmethod
+    # pylint: disable=unused-argument
+    def do_clear(argv):
         """Clear the terminal screen
 
         SYNOPSIS:
@@ -381,11 +389,13 @@ class Shell(shnake.Shell):
             is interesting for visibility purposes only.
         """
         if ui.output.isatty():
-            return os.system('clear')
+            os.system('clear')
 
     #################
     # COMMAND: rtfm #
-    def do_rtfm(self, argv):
+    @staticmethod
+    # pylint: disable=unused-argument
+    def do_rtfm(argv):
         """Read the fine manual
 
         SYNOPSIS:
@@ -396,19 +406,21 @@ class Shell(shnake.Shell):
             command is used for display. Otherwise, a text version
             of the man page is displayed in phpsploit interface.
         """
-        if os.system('man ' + Path(core.basedir, 'man/phpsploit.1')) != 0:
-            print(Path(core.basedir, 'man/phpsploit.txt').read())
+        if os.system('man ' + Path(core.BASEDIR, 'man/phpsploit.1')) != 0:
+            print(Path(core.BASEDIR, 'man/phpsploit.txt').read())
 
     ####################
     # COMMAND: session #
-    def complete_session(self, text, *ignored):
+    def complete_session(self, text, *_):
+        """autocompletion for `session` command"""
         keys = ['save', 'diff', 'load', 'upgrade']
         # load argument is not available from remote shell:
         if self.__class__.__name__ == "MainShell":
             keys.append('load')
         return [x for x in keys if x.startswith(text)]
 
-    def do_session(self, argv):
+    @staticmethod
+    def do_session(argv):
         """phpsploit session handler
 
         SYNOPSIS:
@@ -421,28 +433,28 @@ class Shell(shnake.Shell):
             Sessions can be considered as phpsploit instances. They
             handle current configuration settings, environment vars,
             command aliases, and remote tunnel attributes (if any).
+            They can be saved to a file for further use.
 
         USAGE:
             * session [<FILE>]
                 Show a nice colored representation of FILE session
-                content. If unset, FILE is implicly set to current
-                instance's session.
+                content. If called without argument, current session
+                if displayed.
             * session diff [<FILE>]
-                Shows a textual representation of the differences
-                between FILE and current session state. If FILE is
-                not set, $SAVEFILE setting is used. If $SAVEFILE is
-                not set, the session's state when framework started
-                is used as comparator.
+                Show a textual representation of the differences
+                between FILE and current session. If FILE is not set,
+                the diff between session's original and current states
+                if shown.
             * session save [-f] [<FILE>]
-                Dumps the current session instance into the given file.
-                If FILE is unset, then the session is saved to $SAVEFILE
-                setting, if $SAVEFILE does not exist, then the file path
-                "$SAVEPATH/phpsploit.session" is implicitly used.
-                NOTE: The '-f' option, is used, saves the session without
-                      asking user confirmation is file already exists.
+                Save current session state in FILE.
+                If FILE is not set, the session is saved to it's original
+                path location. It still not bound to a file, default location
+                is '$SAVEPATH/phpsploit.session'.
+                NOTE: The '-f' option, if used, saves the session without
+                      asking user confirmation if file already exists.
             * session load [<FILE>]
-                Try to load <FILE> as the current session. If unset,
-                FILE is implicitly set to "./phpsploit.session".
+                Try to load session from FILE.
+                It unset, try to load session from './phpsploit.session'
             * session upgrade
                 If current session file is in v1-compatible mode,
                 the request handler is limited to POST method and does
@@ -456,7 +468,7 @@ class Shell(shnake.Shell):
             > session load /tmp/phpsploit.session
               - Load /tmp/phpsploit.session.
             > session save
-              - Save current state to session's source file ($SAVEFILE).
+              - Save current state to session file.
 
         WARNING:
             The `session load` action can't be used through a remote
@@ -521,17 +533,18 @@ class Shell(shnake.Shell):
                 Execute a shell command in your own operating system.
                 This command works like the `exec` command in unix
                 shells.
-             
+
                 NOTE: This core command shouldn't be confused with the
                 `run` plugin, which does the same thing in the
                 remotely exploited system.
-             
+
         EXAMPLES:
             > lrun ls -la /
             > lrun htop
         """
         if len(argv) == 1:
-            return self.interpret("help lrun")
+            self.interpret("help lrun")
+            return
 
         cmd = " ".join(argv[1:])
 
@@ -582,7 +595,8 @@ class Shell(shnake.Shell):
 
     ################
     # COMMAND: set #
-    def complete_set(self, text, *_):
+    @staticmethod
+    def complete_set(text, *_):
         """Use settings as `set` completers (case insensitive)"""
         result = []
         for key in session.Conf.keys():
@@ -590,7 +604,8 @@ class Shell(shnake.Shell):
                 result.append(key)
         return result
 
-    def do_set(self, argv):
+    @staticmethod
+    def do_set(argv):
         """View and edit settings
 
         SYNOPSIS:
@@ -603,14 +618,14 @@ class Shell(shnake.Shell):
             value, that can be manually modified.
 
             > set
-            - Display all current settings
+              - Display all current settings
 
             > set <STRING>
-            - Display all settings whose name starts with STRING.
+              - Display all settings whose name starts with STRING.
 
             > set <NAME> "value"
-            - Change the NAME setting to "value". If the value is not valid,
-            no changes are made.
+              - Change the NAME setting to "value". If the value is not valid,
+              no changes are made.
 
             > set <NAME> "file:///path/to/file"
               - Set NAME setting's value into a RandLine buffer whose value
@@ -635,7 +650,6 @@ class Shell(shnake.Shell):
               time the setting's value is called, a try is made to load the
               file's content as new buffer if it exists/is valid, and
               keeps the old one otherwise.
-
 
         BEHAVIOR
             - Settings are pre declared at start. It means that new ones
@@ -688,15 +702,17 @@ class Shell(shnake.Shell):
 
     ################
     # COMMAND: env #
-    def complete_env(self, text, *ignored):
+    @staticmethod
+    def complete_env(text, *_):
         """Use env vars as `env` completers (case insensitive)"""
         result = []
-        for key in session.Env.keys():
+        for key in session.Env:
             if key.startswith(text.upper()):
                 result.append(key)
         return result
 
-    def do_env(self, argv):
+    @staticmethod
+    def do_env(argv):
         """Environment variables handler
 
         SYNOPSIS:
@@ -752,23 +768,26 @@ class Shell(shnake.Shell):
             values. Setting a value is simply interpreted as a string,
             apart for the special "None" value, which deletes the variable.
         """
-        # `env [<PATTERN>]` display concerned settings list
         if len(argv) < 3:
-            return print(session.Env((argv + [""])[1]))
-
-        # `env <NAME> <VALUE>`
-        session.Env[argv[1]] = " ".join(argv[2:])
+            # `env [<PATTERN>]` display concerned settings list
+            print(session.Env((argv + [""])[1]))
+        else:
+            # `env <NAME> <VALUE>`
+            session.Env[argv[1]] = " ".join(argv[2:])
 
     ##################
     # COMMAND: alias #
-    def complete_alias(self, text, *ignored):
+    @staticmethod
+    def complete_alias(text, *_):
+        """autocompletion for `alias` command"""
         result = []
         for key in session.Alias.keys():
             if key.startswith(text):
                 result.append(key)
         return result
 
-    def do_alias(self, argv):
+    @staticmethod
+    def do_alias(argv):
         """Define command aliases
 
         SYNOPSIS:
@@ -801,22 +820,23 @@ class Shell(shnake.Shell):
             values. Setting a value is simply interpreted as a string,
             apart for the special "None" value, which removes the variable.
         """
-        # `alias [<PATTERN>]` display concerned settings list
         if len(argv) < 3:
-            return print(session.Alias((argv+[""])[1]))
-
-        # `alias <NAME> <VALUE>`
-        session.Alias[argv[1]] = " ".join(argv[2:])
+            # `alias [<PATTERN>]` display concerned settings list
+            print(session.Alias((argv+[""])[1]))
+        else:
+            # `alias <NAME> <VALUE>`
+            session.Alias[argv[1]] = " ".join(argv[2:])
 
 
     ##################
     # COMMAND: bind #
     def complete_bind(self, text, *ignored):
+        """autocompletion for `bind` command"""
         result = super().completenames(text, ignored)
         result = [x for x in result if x != "bind"]
         if tunnel:
             result += plugins.keys()
-        return ([x for x in list(set(result)) if x.startswith(text)])
+        return [x for x in list(set(result)) if x.startswith(text)]
 
     def do_bind(self, argv):
         """attach a command to prompt
@@ -829,14 +849,13 @@ class Shell(shnake.Shell):
             command, so you don't need to re-type the command
             name each time if you are currently only using it.
 
-            NOTE: press Ctrl-D or type exit to leave from a binded
-            command.
+            NOTE: press Ctrl-D or type exit to 'unbind' from current command.
         """
         if len(argv) != 2 or argv[1] not in self.complete_bind("", ""):
-            return self.interpret("help bind")
-
-        self.binded_command = argv[1]
-        print("[-] Type exit to leave binded %r subshell" % argv[1])
+            self.interpret("help bind")
+        else:
+            self.binded_command = argv[1]
+            print("[-] Type exit to leave binded %r subshell" % argv[1])
 
 
     ####################
@@ -859,18 +878,15 @@ class Shell(shnake.Shell):
                 Write previous command's output to the given
                 file instead of opening it with $EDITOR.
         """
-        if len(argv) > 1:
-            if len(argv) == 3 and argv[1] == "--save":
-                file = Path(argv[2])
-                file.write(self.stdout.backlog)
-                del file
-                return
-            return self.interpret("help backlog")
+        if len(argv) == 1:
+            backlog = Path()
+            backlog.write(self.stdout.backlog, bin_mode=True)
+            backlog.edit()
+        elif len(argv) == 3 and argv[1] == "--save":
+            Path(argv[2]).write(self.stdout.backlog)
+        else:
+            self.interpret("help backlog")
 
-        backlog = Path()
-        backlog.write(self.stdout.backlog, bin_mode=True)
-        backlog.edit()
-        return
 
     #################
     # COMMAND: help #
@@ -908,38 +924,37 @@ class Shell(shnake.Shell):
         def get_doc(cmd):
             """return the docstring lines list of specific command"""
             # try to get the doc from the plugin method
-            try:
+            doc = None
+            if cmd in plugins:
                 doc = plugins[cmd].help
-            except:
-                try:
-                    doc = getattr(self, 'do_' + cmd).__doc__
-                except:
-                    return []
+            elif hasattr(self, "do_" + cmd):
+                doc = getattr(self, "do_" + cmd).__doc__
+            if not doc:
+                doc = ""
             return doc.strip().splitlines()
 
-        def get_description(docLines):
+        def get_description(doc_lines):
             """return the command description (1st docstring line)"""
-            try:
-                return docLines[0].strip()
-            except:
-                return colorize("%Yellow", "No description")
+            if doc_lines:
+                return doc_lines[0].strip()
+            return colorize("%Yellow", "No description")
 
-        def doc_help(docLines):
+        def doc_help(doc_lines):
             """print the formated command's docstring"""
             # reject empty docstrings (description + empty line)
-            if len(docLines) < 2:
+            if len(doc_lines) < 2:
                 return False
-            docLines.pop(0)  # remove the description line
-            while not docLines[0].strip():
-                docLines.pop(0)  # remove heading empty lines
+            doc_lines.pop(0)  # remove the description line
+            while not doc_lines[0].strip():
+                doc_lines.pop(0)  # remove heading empty lines
 
             # remove junk leading spaces (due to python indentation)
-            trash = len(docLines[0]) - len(docLines[0].lstrip())
-            docLines = [line[trash:].rstrip() for line in docLines]
+            trash = len(doc_lines[0]) - len(doc_lines[0].lstrip())
+            doc_lines = [line[trash:].rstrip() for line in doc_lines]
 
             # hilight lines with no leading spaces (man style)
             result = str()
-            for line in docLines:
+            for line in doc_lines:
                 if line == line.lstrip():
                     line = colorize("%BoldWhite", line)
                 elif line.startswith("    * "):
@@ -957,21 +972,20 @@ class Shell(shnake.Shell):
             if not doc:
                 if argv[1] in session.Alias:
                     return self.interpret("alias %s" % argv[1])
-                else:
-                    print(self.nohelp % argv[1])
-                    return False
+                print(self.nohelp % argv[1])
+                return False
 
             # print the heading help line, which contain description
             print("\n[*] " + argv[1] + ": " + get_description(doc) + "\n")
 
             # call the help_<command> method, otherwise, print it's docstring
-            try:
+            help_method = getattr(self, "help_" + argv[1], None)
+            if callable(help_method):
                 getattr(self, 'help_' + argv[1])()
                 return True
-            except:
-                return doc_help(doc)
+            return doc_help(doc)
         # get help about settings (e.g.: `help set BACKDOOR`)
-        elif len(argv) == 3 and argv[1] == "set":
+        if len(argv) == 3 and argv[1] == "set":
             setting = argv[2]
             try:
                 doc = getattr(session.Conf, setting).docstring
@@ -1030,7 +1044,9 @@ class Shell(shnake.Shell):
                 print('    ' + cmdName + spaceFill + description)
             print('')
 
-    def except_OSError(self, exception):
+    # pylint: disable=invalid-name
+    @staticmethod
+    def except_OSError(exception):
         """Fix OSError args, removing errno, and adding filename"""
         if isinstance(exception.errno, int):
             exception.args = (exception.strerror,)

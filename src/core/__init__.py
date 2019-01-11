@@ -3,17 +3,13 @@
 The most basic PhpSploit elements manager.
 It handles user configuration directory, and defines
 basic elements such as the following strings:
-    basedir -> /path/to/phpsploit/
-    coredir -> /path/to/phpsploit/core/
-    userdir -> /home/user/.phpsploit/
-
+    BASEDIR -> /path/to/phpsploit/
+    COREDIR -> /path/to/phpsploit/core/
+    USERDIR -> /home/user/.phpsploit/
 """
-# constant variables
-MAX_HISTORY_SIZE = 10000
-
 # constant directories
-from src import basedir, coredir
-from .config import userdir
+from src import BASEDIR, COREDIR
+from .config import USERDIR
 
 # session instance
 from .session import session

@@ -100,15 +100,15 @@ class MultiLineBuffer:
         if not self.file and len(self.buffer.splitlines()) == 1:
             return str(self._getobj(self.buffer.strip()))
 
-        # objID is file path OR buffer's md5sum
+        # obj_id is file path OR buffer's md5sum
         if self.file:
-            objID = self.file
+            obj_id = self.file
         else:
-            objID = hashlib.md5(self.buffer.encode('utf-8')).hexdigest()
+            obj_id = hashlib.md5(self.buffer.encode('utf-8')).hexdigest()
 
         lines_str = " (%s lines)" % len(self.buffer.splitlines())
         return colorize("%BoldBlack", "<", "%BoldBlue", "MultiLine",
-                        "%BasicCyan", "@", "%Bold", objID, "%BasicBlue",
+                        "%BasicCyan", "@", "%Bold", obj_id, "%BasicBlue",
                         lines_str, "%BoldBlack", ">")
 
     def __iadd__(self, new):
@@ -148,7 +148,7 @@ class MultiLineBuffer:
         """
         if item in [0, "file"]:
             return self.file
-        elif item in [1, "buffer"]:
+        if item in [1, "buffer"]:
             return self.buffer
         raise IndexError(self.__class__.__name__+" index out of range")
 

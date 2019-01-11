@@ -25,5 +25,5 @@ def setter(value):
 
 def default_value():
     file_relpath = "data/tunnel/payload_prefix.php"
-    file = datatypes.Path(core.basedir, file_relpath)
+    file = datatypes.Path(core.BASEDIR, file_relpath)
     return file.read()

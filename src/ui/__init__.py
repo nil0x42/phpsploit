@@ -65,9 +65,10 @@ True  # or False maybe...
 
 """
 
-from . import input
+from . import input as _input
 from . import output
 
 
-# returns True it both stdin and stdout are tty
-isatty = lambda: input.isatty() and output.isatty()
+def isatty():
+    """return True if both stdin & stdout are ttys"""
+    return _input.isatty() and output.isatty()

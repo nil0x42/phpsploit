@@ -6,7 +6,7 @@ import importlib
 import core
 import objects
 
-DEFAULT_HTTP_USER_AGENT = "file://"+core.basedir+"data/user_agents.lst"
+DEFAULT_HTTP_USER_AGENT = "file://"+core.BASEDIR+"data/user_agents.lst"
 
 
 class Settings(objects.VarContainer):

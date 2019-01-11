@@ -39,7 +39,7 @@ class VarContainer(objects.MetaDict):
                 str(value).upper() in self.item_deleters:
             # don't try to delete unexisting item
             if name not in self.keys():
-                return
+                return None
             return self.__delitem__(name)
 
         return super().__setitem__(name, value)

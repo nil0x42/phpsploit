@@ -10,6 +10,7 @@ from ui.color import colorize
 from .exceptions import BadPlugin
 
 
+# pylint: disable=too-few-public-methods
 class Plugin:
     """Phpsploit plugin class
 

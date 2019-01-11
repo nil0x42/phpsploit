@@ -16,7 +16,7 @@ class Request:
         socket.errmsg_request = "Could not connect to TARGET"
         socket.errmsg_response = "TARGET does not seem to be backdoored"
         # send the `connector.php` payload through created tunnel (socket).
-        payload = Path(core.basedir, 'data/tunnel/connector.php').phpcode()
+        payload = Path(core.BASEDIR, 'data/tunnel/connector.php').phpcode()
         socket.open(payload)
         # build phpsploit session's environment variables from
         # connector.php's returned array.

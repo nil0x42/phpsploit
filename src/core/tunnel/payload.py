@@ -169,7 +169,7 @@ class Build:
     The payload is also encapsulated through phpsploit standard
     encapsulator (./data/tunnel/encapsulator.php).
     """
-    encapsulator = Path(core.basedir, 'data/tunnel/encapsulator.php').phpcode()
+    encapsulator = Path(core.BASEDIR, 'data/tunnel/encapsulator.php').phpcode()
 
     def __init__(self, php_payload, parser):
 
@@ -227,7 +227,7 @@ class Build:
                 if libname not in self.loaded_phplibs:
                     try:
                         file_path = 'api/php-functions/%s.php' % libname
-                        lib = Path(core.coredir, file_path).phpcode()
+                        lib = Path(core.COREDIR, file_path).phpcode()
                     except ValueError:
                         raise BuildError('Php lib not found: ' + libname)
                     result += self.loadphplibs(lib) + '\n'
