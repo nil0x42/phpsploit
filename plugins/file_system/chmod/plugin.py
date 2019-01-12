@@ -1,4 +1,4 @@
-"""Change file mode bits
+r"""Change file mode bits
 
 SYNOPSIS:
     chmod [MODE] <REMOTE FILE>

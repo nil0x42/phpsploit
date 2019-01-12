@@ -1,12 +1,10 @@
 """Remove empty directory
 
 SYNOPSIS:
-    rmdir <REMOTE DIRECTORY>
+    rmdir <REMOTE-DIRECTORY>
 
 DESCRIPTION:
-    'rmdir' removes the given directory path if the operation
-    is permitted and the given directory is empty. Otherwise
-    an error is returned.
+    Remove REMOTE-DIRECTORY if it is empty.
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>

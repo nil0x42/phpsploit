@@ -1,26 +1,26 @@
-"""Download a remote file
+r"""Download a remote file
 
 SYNOPSIS:
-    download [-f] <REMOTE FILE> [<LOCAL DESTINATION>]
+    download [-f] <REMOTE-FILE> [<LOCAL-PATH>]
 
 OPTIONS:
-    -f      Overwrite destination without confirmation if it
-            already exists.
+    -f
+        overwrite LOCAL-PATH without user confirmation.
 
 DESCRIPTION:
     Download a remote file to your local system.
-    - In the case the destination is a directory, the file will
-    be copied into it keeping it's original file name.
-    - Unless the '-f' option has been set, the download process
-    aborts if the destination file already exists, and asks for
-    a confirmation to overwrite the file.
-    - If the LOCAL DESTINATION is not given, the plugin assumes
-    destination as the current local working directory (which
-    can be known with the 'lpwd' command)
+    - REMOTE-FILE must be readable.
+    - LOCAL-PATH must be a writable file or directory.
+    - If LOCAL-PATH is a directory, REMOTE-FILE will be downloaded
+    into it, preserving original file name.
+    - if LOCAL-PATH is not provided, REMOTE-FILE is downloaded
+    to attacker's current working directory (which can be known
+    with `lrun pwd` command).
+    - Unless '-f' option has been provided, user confirmation is
+    needed to overwrite LOCAL-PATH (if it already exists).
 
-    NOTE: For the moment, only a single file can be downloaded
-    at the time. Recursive directory downloads and multiple
-    file downloads are not available.
+LIMITATIONS:
+    Recursive directory and multiple file downloads are not available.
 
 EXAMPLES:
     > download C:\boot.ini /tmp/pentest/

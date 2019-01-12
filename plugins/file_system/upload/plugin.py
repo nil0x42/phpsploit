@@ -1,7 +1,7 @@
 """Upload a file
 
 SYNOPSIS:
-    upload [-f] <LOCAL_FILE> [<REMOTE_DESTINATION>]
+    upload [-f] <LOCAL-FILE> [<REMOTE-DESTINATION>]
 
 OPTIONS:
     -f      Overwrite destination without confirmation if it
@@ -9,27 +9,20 @@ OPTIONS:
 
 DESCRIPTION:
     Upload a local file to the remote server.
-    - If REMOTE_DESTINATION is specified, the file is uploaded
-    to this remote server destination, otherwise, the remote
-    current working directory is used (which can be known with
-    the 'pwd' command).
-    - In the case the destination is a directory, the file will
-    be copied into it keeping it's original file name.
-    - Unless the '-f' option has been set, the upload process
-    aborts if the destination file already exists, and asks for
-    a confirmation to overwrite the file.
+    - LOCAL-FILE must be readable.
+    - REMOTE-DESTINATION must be a writable file or directory.
+    - If REMOTE-DESTINATION is a directory, LOCAL-FILE will be
+    uploaded into it, preserving original file name.
+    - If REMOTE-DESTINATION is not provided, LOCAL-FILE is uploaded
+    to remote current working directory (which can be known with
+    the `pwd` command).
+    - Unless '-f' option has been provided, user confirmation is
+    needed to overwrite REMOTE-DESTINATION (if it already exists).
+    NOTE: If the user confirms REMOTE-DESTINATION overwrite,
+    another HTTP request will be sent to upload the file.
 
-    NOTE: For the moment, only a single file can be uploaded
-    at the time. Recursive directory uploads and multiple
-    file uploads are not available.
-
-WARNING:
-    Considering the user confirmation features when the
-    file which must be uploaded already exists in the remote
-    server, it means that another http request will be send
-    to validate overwriting.
-    To prevent this, the -f option must be used if you are not
-    afraid to overwrite an existing remote file.
+LIMITATIONS:
+    Recursive directory and multiple file uploads are not available.
 
 EXAMPLES:
     > upload /data/backdoors/r75.php /var/www/images/

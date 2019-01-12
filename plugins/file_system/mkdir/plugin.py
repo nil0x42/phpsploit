@@ -1,20 +1,20 @@
 """Create directory
 
 SYNOPSIS:
-    mkdir [-p] <REMOTE DIRECTORY>
+    mkdir [-p] <REMOTE-DIRECTORY>
 
 OPTIONS:
-    -p      No error if existing, make parent directories as
-            needed.
+    -p
+        no error if existing, make parent directories as needed.
 
 DESCRIPTION:
-    The 'mkdir' plugin creates the REMOTE DIRECTORY. It reports
-    an error if the path already exists, unless the '-p' option
-    is given and the path is a directory.
+    The 'mkdir' plugin creates REMOTE-DIRECTORY. It reports
+    an error if it already exists.
+    - Unless '-p' option is provided, parent directory must exist.
 
-    NOTE: Unlike the GNU's mkdir core util, this plugin only
-    supports single directory creation, no multiple path
-    arguments are supported, at least for the moment.
+LIMITATIONS:
+    Unlike GNU's mkdir core util, this plugin does not support
+    multiple path arguments.
 
 EXAMPLES:
     > mkdir includes
@@ -23,6 +23,8 @@ EXAMPLES:
       - Create the 'thumb' directory if it's parent exists
     > mkdir /srv/www/data/img/thumb/
       - Create the 'thumb' directory even if parent don't exist
+    > mkdir -p /var/www/a/b/c/d/e/f/g/h/
+      - Create 'h/' directory, and parent directories as needed.
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>

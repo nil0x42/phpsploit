@@ -1,21 +1,22 @@
 """Change file timestamps
 
 SYNOPSIS:
-    touch [OPTION]... <REMOTE_FILE>
+    touch [OPTION]... <REMOTE-FILE>
 
 OPTIONS:
     -t <STAMP>
         use YYYY[-mm[-dd[ HH[:MM[:SS]]]]] instead of current time
         NOTE: If partially defined (e.g: yyyy/mm only), other
-              values will be randomly chosen.
-    -r <REMOTE_REFERENCE_FILE>
-        use this file's times instead of current time
+              values will be randomly chosen, because random values
+              are always less suspicious than 00:00:00
+    -r <REF-FILE>
+        use this remote file's times instead of current time
 
 DESCRIPTION:
-    Update the access and modification times of <REMOTE FILE>
+    Update the access and modification times of REMOTE-FILE
     to the current time.
 
-    If <REMOTE FILE> does not exist, it is created empty
+    If REMOTE-FILE does not exist, it is created empty.
 
 EXAMPLES:
     > touch file.txt

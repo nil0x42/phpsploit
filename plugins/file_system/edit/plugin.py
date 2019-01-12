@@ -1,23 +1,23 @@
-"""Print a file content to standard output
+r"""Edit a remote file with local text editor
 
 SYNOPSIS:
-    edit <REMOTE FILE>
+    edit <REMOTE-FILE>
 
 DESCRIPTION:
-    This command is an enhancement of the 'cat' plugin. Instead
-    of simply writing the content to standard output, it opens
-    the remote file content with your preferred text editor,
-    which if defined by the EDITOR setting.
-    - Once opened with the local text editor, the file can be
-    edited. When leaving the text editor, the plugin checks if
-    the content has changed, and automatically uploads the new
-    file content to the remote server.
-    - The plugin will automatically try to reset file modification
-    time ot it previous value, for counter forensics purposes.
+    Open and Edit REMOTE-FILE content with your favorite editor.
+
+    - After editing the file (and only if it changed), the plugin
+    uploads the new file content to the remote server.
+
+    - After applying changes to remote file, the plugin automatically
+    restores it's original timestamp to improve stealth.
+
+    * Change default phpsploit text editor (vim rocks):
+    > set EDITOR "vim"
 
 EXAMPLES:
     > edit ../includes/connect.inc.php
-      - Open the file with the EDITOR
+      - Open remote file within local text EDITOR
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>

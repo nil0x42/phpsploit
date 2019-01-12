@@ -4,11 +4,12 @@ SYNOPSIS:
     whoami
 
 DESCRIPTION:
-    Print the user name associated with the current remote
-    server access privileges.
+    Print the user name associated with current remote
+    server access rights.
 
-    NOTE: This plugin do not sends any http request, since the
-    displayed informations are taken from the api.server vars.
+    * PASSIVE PLUGIN:
+    No requests are sent to server, as current user
+    is known by $USER environment variable (`env USER`);
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>
