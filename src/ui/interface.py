@@ -407,8 +407,11 @@ class Shell(shnake.Shell):
             command is used for display. Otherwise, a text version
             of the man page is displayed in phpsploit interface.
         """
-        if os.system('man ' + Path(core.BASEDIR, 'man/phpsploit.1')) != 0:
-            print(Path(core.BASEDIR, 'man/phpsploit.txt').read())
+        man = Path(core.BASEDIR, 'man/phpsploit.1')
+        cmd = 'man phpsploit 2>/dev/null || man %r 2>/dev/null' % man
+        if os.system(cmd) != 0:
+            txt_man = Path(core.BASEDIR, 'man/phpsploit.txt')
+            print(txt_man.read())
 
     ####################
     # COMMAND: session #
