@@ -20,10 +20,10 @@ PHPSPLOIT
 \fBphpsploit\fR is a furtive tunnel \fIbased\fR php webshell: it was designed in order to help privilege escalation through a very small php backdoor, while remaining the most stealth, efficient, and adjustable as possible.
 
 .P
-It innovates by settling for a remotely stored micro backdoor that forwards to dynamic encoded HTTP headers, which act as dynamic payload. This feature is useful to bypass admins searching for suspicious lines in the server logs, because GET requests without arguments, are not as suspect as POST requests, or GET requests with suspicious arguments (eg: "?cmd=cat&edit=/etc/passwd").
+It innovates by settling for a remotely stored micro backdoor that forwards to dynamic encoded HTTP headers, which act as dynamic payload. This feature is usefull to bypass admins searching for suspicious lines in the server logs, because GET requests without arguments, are not as suspect as POST requests, or GET requests with suspicious arguments (eg: "?cmd=cat&edit=/etc/passwd").
 
 .P
-The \fBphpsploit\fR framework is plugin based, so users can easily make their own plugins, or edit the built\-in ones, with the \fIpspapi\fR (phpsploit API) that interacts with the target server through the framework.
+The \fBphpsploit\fR framework is plugin based, so users can easily make their own plugins, or edit the built\-in ones, with the \fIpspapi\fR (phpsploit API) that interracts with the target server through the framework.
 
 .P
 Its structure allows him to evolve and be easily adapted to all types of web exploitation scenarios, because every setting can be edited \fIglobally\fR (through user configuration file), or \fIlocally\fR, using the \fBset\fR command.
@@ -92,7 +92,7 @@ The \fBphpsploit\fR framework includes two shell interfaces.
 .IP \(bu 3
 The \fBMAIN SHELL\fR is the first shell interface, spawned when the framework starts. It is used to prepare a target exploitation. Through it, you can locally adjust the \fBSETTINGS\fR with the "\fBset\fR" command, and use the "\fBinfect\fR" command to get the micro\-backdoor that needs to be injected on the target.
 .IP \(bu 3
-The \fBREMOTE SHELL\fR interface starts when a target server was exploited. Its is used to interact with the backdoored URL.
+The \fBREMOTE SHELL\fR interface starts when a target server was exploited. Its is used to interract with the backdoored URL.
 .RE
 
 .P
@@ -100,7 +100,7 @@ The \fBREMOTE SHELL\fR interface starts when a target server was exploited. Its 
 
 .P
 The commands are auto\-completed on unix clients, and try to use \fBreadline\fR if available.
-They are divided into groups when shown with the "\fBhelp\fR" command:
+They are divided into groups when shown whith the "\fBhelp\fR" command:
 
 .RS
 .IP \(bu 3
@@ -157,7 +157,7 @@ Drop a shell from target server
 .SH REMOTE SHELL
 
 .P
-When you run the \fBexploit\fR command, you enter the remote shell, and directly interacts with the remotely backdoored server through the \fBphpsploit\fR plugins.
+When you run the \fBexploit\fR command, you enter the remote shell, and directly interracts with the remotely backdoored server through the \fBphpsploit\fR plugins.
 Typing \fBhelp\fR will show the available commands.
 \fBCore Commands\fR are all the \fBphpsploit\fR remote shell built\-in commands.
 
@@ -166,13 +166,13 @@ Typing \fBhelp\fR will show the available commands.
 
 .TP
 \fBenv\fR
-This command interacts with the environment variables, for more informations, please read the \fBREMOTE ENVIRONMENT\fR section.
+This command interracts with the environment variables, for more informations, please read the \fBREMOTE ENVIRONMENT\fR section.
 .TP
 \fBlastcmd\fR
 Allows user to show or save the last command output
 .TP
 \fBreload\fR
-Reloads the commands list, useful if you have edited one plugin during an exploitation session
+Reloads the commands list, usefull if you have edited one plugin during an exploitation session
 .TP
 \fBshell\fR
 Various command plugins, such as \fIsystem\fR, \fImysql\fR and \fIsuidroot\fR can be used as frontend shell. For example, "\fB> shell system\fR" will spawn the "\fBsystem\fR" command as default prompt, making all typed lines to be executed by this plugin.
@@ -196,7 +196,7 @@ If a command has been edited during an exploitation session, use the "\fBreload\
 The \fBphpsploit\fR settings are available from the interface, they can be viewed, and edited with the \fBset\fR command.
 
 .P
-When a new session is opened, all \fIsettings\fR are set to their default values, specified in the phpsploit's user configuration file. Editing this file allows you to specify your own default values, a very useful feature for polymorphic backdoor, or custom HTTP headers. To get more informations about the configuration directory, please go to the \fBFILES\fR section.
+When a new session is opened, all \fIsettings\fR are set to their default values, specified in the phpsploit's user configuration file. Editing this file allows you to specify your own default values, a very usefull feature for polymorphic backdoor, or custom HTTP headers. To get more informations about the configuration directory, please go to the \fBFILES\fR section.
 
 .TP
 \fBTARGET\fR
@@ -225,7 +225,7 @@ This var is interesting for customisation, assuming it is used as main header fo
 
 .TP
 \fBPROXY\fR
-With this setting, you can specify an \fIHTTP Proxy\fR, matching the pattern \fBaddress:port\fR, to send \fBphpsploit\fR's requests through it. Be careful, a non\-working \fBPROXY\fR will make the requests unreachable. To disable the proxy, set it's value to \fBNone\fR.
+With this setting, you can specify an \fIHTTP Proxy\fR, matching the pattern \fBaddress:port\fR, to send \fBphpsploit\fR's requests through it. Be carrefull, a non\-working \fBPROXY\fR will make the requests unreachable. To disable the proxy, set it's value to \fBNone\fR.
 
 .RS
 \fBDefault value: None\fR
@@ -249,7 +249,7 @@ This is the default http METHOD that will be used to send payloads, so it's valu
 
 .TP
 \fBREQ_HEADER_PAYLOAD\fR
-This setting is the dynamic payload forwarder, when a request is send by the \fBphpsploit\fR framework, a dynamic \fIHTTP HEADER\fR will be sent on each request, the header's name is the \fBPASSKEY\fR setting, and the value is the  \fBREQ_HEADER_PAYLOAD\fR value, for more informations about how \fBphpsploit\fR builds requests, please read the \fBREQUEST BUILDING\fR section.
+This setting is the dynamic payload forwarder, when a request is send by the \fBphpsploit\fR framework, a dynamic \fIHTTP HEADER\fR will be sent on eaceh request, the header's name is the \fBPASSKEY\fR setting, and the value is the  \fBREQ_HEADER_PAYLOAD\fR value, for more informations about how \fBphpsploit\fR builds requests, please read the \fBREQUEST BUILDING\fR section.
 
 .RS
 \fBDefault value: eval(base64_decode(%%BASE64%%))\fR
@@ -257,7 +257,7 @@ This setting is the dynamic payload forwarder, when a request is send by the \fB
 
 .TP
 \fBREQ_INTERVAL\fR
-This setting can be useful for large payloads, sent with a big amount of requests, for example, when using the \fBupload\fR's remote shell command, when seending a big file to the server.
+This setting can be usefull for large payloads, sent with a big amount of requests, for example, when using the \fBupload\fR's remote shell command, when seending a big file to the server.
 It's used to add a delay between each request with a simple syntax. Using a number as value (ex: 20) will wait this exact numer of seconds, but you cal also specify a tuple of numbers, for example, the default value will make the builder wait a random number of seconds between \fB1\fR and \fB10\fR before each request. To disable it, just set it to \fI0\fR.
 
 .RS
@@ -290,7 +290,7 @@ It's used to add a delay between each request with a simple syntax. Using a numb
 
 .TP
 \fBREQ_ZLIB_TRY_LIMIT\fR
-On the \fBphpsploit\fR's request builder, when the payload can't be sent in one single request because he is too large, the framework will start a lot of computing functions to calculate how much requests are needed for each \fIhttp method\fR, and to decrease the number of needed requests, he will each time try to compress the payload with \fBZLIB\fR, this feature is useful to decrease the number of requests. But, the bigger the base payload, the slower the needed computation time. Assuming this, you can with this setting specify a maximum payload size, from which the manufacturer will not longer try to compress the cuted payload. That will increase the number of needed requests, but shalt the computation time acceptable. More powerfull your computer, more this value can be increased.
+On the \fBphpsploit\fR's request builder, when the payload can't be sent in one single request because he is too large, the framework will start a lot of computering functions to calculate how much requests are needed for each \fIhttp method\fR, and to decrease the number of needed requests, he will each time try to compress the payload with \fBZLIB\fR, this feature is usefull to descrease the number of requests. But, the bigger the base payload, the slower the needed computation time. Assuming this, you can with this setting specify a maximum payload size, from which the manufacturer will not longer try to compress the cuted payload. That will increase the number of needed requests, but shalt the computation time acceptable. More powerfull your computer, more this value can be increased.
 
 .RS
 \fBDefault value: 5Mb\fR
@@ -315,13 +315,13 @@ Note that the \fBHTTP_USER_AGENT\fR setting is included by default, but it is po
 .RE
 
 .P
-\fIFile objects\fR can be used for HTTP_* settings, the syntax is \fBfile:///full/path/to/file.txt\fR, these objects will pick an random line in file for each http request. This facilitates polymorphic requests generation, and therefore, stealth. A file object is by default used for the \fBHTTP_USER_AGENT\fR setting.
+\fIFile objects\fR can be used for HTTP_* settings, the syntax is \fBfile:///full/path/to/file.txt\fR, these objects will pick an random line in file for each http request. This facilitates polymorphic requests generation, and therefore, stealth. A file object is defaultly used for the \fBHTTP_USER_AGENT\fR setting.
 
 .SH REMOTE ENVIRONMENT
 
 .P
 The remote environment variables are available from the \fBREMOTE SHELL\fR.
-They are useful to store server related informations, and \fBPSPAPI\fR plugins have write access to them.
+They are usefull to store server related informations, and \fBPSPAPI\fR plugins have write access to them.
 
 .P
 User can show, edit or delete them with the "\fBenv\fR" command, through the \fBREMOTE SHELL\fR instance.
@@ -330,7 +330,7 @@ User can show, edit or delete them with the "\fBenv\fR" command, through the \fB
 Be very careful while manually editing these variables, because wrong values can render inoperative certain commands.
 
 .P
-There is a list of \fBREMOTE ENVIRONMENT\fR variables used by default by \fBphpsploit\fR core and built\-in plugins:
+There is a list of \fBREMOTE ENVIRONMENT\fR variables defaultly used by \fBphpsploit\fR core and built\-in plugins:
 
 .TP
 \fBCWD\fR
@@ -342,7 +342,7 @@ This variable contains the absolute path to the remote web root directory.
 
 .TP
 \fBWRITE_TMPDIR\fR
-This variable imperatively needs to contain the absolute path to a writeable remote directory. It is essential for multirequest payloads execution, that stores full payload parts into this path.
+This variable imperatively needs to conatain the absolute path to a writeable remote directory. It is essential for multirequest payloads execution, that stores full payload parts into this path.
 
 .TP
 \fBWRITE_WEBDIR\fR
@@ -384,7 +384,7 @@ The \fBBASE64 PAYOLOAD\fR is automatically generated for each request, he is the
 .IP \(bu 3
 \fBFor POST request\fR, this payload executes the $POST['%%\fBPASSKEY\fR%%'] php variable, who is used as \fBREAL PAYLOAD\fR when usgin this http method.
 .IP \(bu 3
-\fBFor GET requests\fR, it acts concatenating the list of dynamic \fBphpsploit\fR headers alphabetically reordrered, each containing the split \fBREAL PAYLOAD\fR.
+\fBFor GET requests\fR, it acts concatenating the list of dynamic \fBphpsploit\fR headers alphabetically reordrered, each containing the splitted \fBREAL PAYLOAD\fR.
 .RE
 
 .P
@@ -392,9 +392,9 @@ The \fBBASE64 PAYOLOAD\fR is automatically generated for each request, he is the
 
 .RS
 .IP \(bu 3
-The \fBREAL PAYLOAD\fR contains a large amount of \fIzlib compressed\fR then \fIbase64 encoded\fR php code, who is dynamically generated by the \fBphppsloit\fR framework's optimization functions.
+The \fBREAL PAYLOAD\fR contains a large amout of \fIzlib compressed\fR then \fIbase64 encoded\fR php code, who is dynamically generated by the \fBphppsloit\fR framework's optimization functions.
 .IP \(bu 3
-Unencoded (done by default by the \fBBASE64 PAYLOAD\fR), he is the \fBBASE PAYLOAD\fR passed through \fBENCAPSULATION\fR.
+Unencoded (defaultly done by the \fBBASE64 PAYLOAD\fR), he is the \fBBASE PAYLOAD\fR passed through \fBENCAPSULATION\fR.
 .RE
 
 .P
@@ -460,4 +460,4 @@ If you want to contribute to \fBphpsploit\fR, submit a plugin, patch, or anythin
 This software is under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 
 .\" man code generated by txt2tags 2.6 (http://txt2tags.org)
-.\" cmdline: txt2tags -t man -i /home/nil/dev/phpsploit/framework/misc/user-manual.txt2tags -o /home/nil/dev/phpsploit/doc/MANUAL
+.\" cmdline: txt2tags -q -t man -i man.txt2tags -o phpsploit.1
