@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Run this script to create a new release of phpsploit
+
 SCRIPTDIR="$(realpath `dirname $0`)"
 cd `git rev-parse --show-toplevel`
 
@@ -32,10 +34,21 @@ fi
 
 
 # check existence of `github_changelog_generator` tool
+# needed to generate CHANGELOG.md
 gh_changelog_gen="github_changelog_generator"
 if ! which "$gh_changelog_gen" >/dev/null; then
     >&2 echo -e "\n${RED}[-] Please install '$gh_changelog_gen':${NC}"
     >&2 echo -e "    ${GREEN}sudo gem install ${gh_changelog_gen}${NC}"
+    exit 1
+fi
+
+
+# check existence of `txt2tags` tool
+# needed to run ./man/update-man.sh
+txt2tags="txt2tags"
+if ! which "$txt2tags" >/dev/null; then
+    >&2 echo -e "\n${RED}[-] Please install '$txt2tags':${NC}"
+    >&2 echo -e "    ${GREEN}sudo apt install ${txt2tags}${NC}"
     exit 1
 fi
 
@@ -103,6 +116,10 @@ git add ./phpsploit
 # generate CHANGELOG.md
 github_changelog_generator --future-release ${TAG}
 git add ./CHANGELOG.md
+
+# update man page
+./man/update-man.sh
+git add ./man/
 
 # create commit
 git commit -m "$MSG"
