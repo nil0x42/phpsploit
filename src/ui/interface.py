@@ -610,73 +610,61 @@ class Shell(shnake.Shell):
 
     @staticmethod
     def do_set(argv):
-        """View and edit settings
+        """view and edit configuration settings
 
         SYNOPSIS:
-            set [<NAME> [+] ["<VALUE>"]]
+            set [<VAR> [+] ["<VALUE>"]]
 
         DESCRIPTION:
-            phpsploit configuration settings manager.
-            The settings are a collection of core variables that affect
-            the framework's core behavior. Any setting takes a default
-            value, that can be manually modified.
+            Settings are a collection of editable variables that affect
+            phpsploit's core behavior.
+            - Their value is bound to current session.
+            - To permanently change a setting's value at start, it
+            must be defined by hand on phpsploit config file.
 
             > set
-              - Display all current settings
+              - Display current settings
 
             > set <STRING>
-              - Display all settings whose name starts with STRING.
+              - Display settings whose name starts with STRING
 
-            > set <NAME> "value"
-              - Change the NAME setting to "value". If the value is not valid,
-              no changes are made.
+            > set <VAR> <VALUE>
+              - Assign VALUE to VAR setting (only if it's a valid value)
 
-            > set <NAME> "file:///path/to/file"
-              - Set NAME setting's value into a RandLine buffer whose value
-              binds to the external file "/path/to/file". It means that the
-              setting's effective value is dynamic, and on each call to it,
-              the file's content will be loaded if available, and the
-              value is a random line from the file/buffer.
+            > set <VAR> %%DEFAULT%%
+              - Reset VAR's default value with '%%DEFAULT%%' magic string
 
-            > set <NAME> +
-              - Open the setting value for edition as a multiline buffer
-              with EDITOR. The buffer can then be edited, and once saved,
-              the setting will take the buffer's value, except if there are
-              no valid lines.
+            > set <VAR> "file:///path/to/file"
+              - Bind VAR's value to a local file content
 
-            > set <NAME> + "value"
-              - Add "value" as a setting possible choice. It converts the
-              current setting into a RandLine buffer if it was not already.
+            > set <VAR> +
+              - Open VAR's value in text editor. This is useful to edit
+              values with multiple lines
 
-            > set <NAME> + "file:///path/to/file"
-              - Rebind NAME setting to the given file path, even if it does
-              not exist at the moment it had been set. It means that each
-              time the setting's value is called, a try is made to load the
-              file's content as new buffer if it exists/is valid, and
-              keeps the old one otherwise.
+            > set <VAR> + <LINE>
+              - Add LINE to the end of VAR's value
 
-        BEHAVIOR
-            - Common settings are pre declared at start. And custom ones
-            cannot be declared.
+            > set <VAR> + "file:///path/to/file"
+              - Re-bind VAR to a local file path.
+              Even if path doesn't exist, the setting will take the value of
+              the file if it founds it. Otherwise, previous buffer value is
+              kept as long as the file path is unreachable
 
-            - HTTP Header settings are dynamic, they must start with 'HTTP_'
-            and allow the user to define a custom HTTP Header.
-            # Example:
-            # Set "Accept-Language" header to "en-CA" for future HTTP Requests:
+        Defining HTTP Headers:
+            You can define custom http request header fields by hand.
+
+            Settings starting with 'HTTP_' are automagically treated as
+            HTTP Request Headers values.
+
+            By default, only the "User-Agent" Header is defined. It is bound
+            by default to a local file containing common HTTP User Agents.
+            (`help set HTTP_USER_AGENT`)
+
+            * Examples:
             > set HTTP_ACCEPT_LANGUAGE "en-CA"
-            # Assigning "None" magic string deletes the header setting:
-            > set HTTP_ACCEPT_LANGUAGE "None"
-
-            - The default value of a setting can be restored by setting
-            its value to "%%DEFAULT%%" magic string, e.g:
-            > set REQ_MAX_HEADERS %%DEFAULT%%
-
-            * For detailed setting help, run `help set <SETTING>`, example:
-            > help set BACKDOOR
-
-            NOTE: The 'set' operating scope is limited to the current
-            phpsploit session. It means that persistant settings value
-            changes must be defined by hand in phpsploit config file.
+              - Define "Accept-Language" http request header field.
+            > set HTTP_ACCEPT_LANGUAGE None
+              - Remove HTTP_ACCEPT_LANGUAGE header with magic value 'None'.
         """
         # `set [<PATTERN>]` display concerned settings list
         if len(argv) < 3:
