@@ -882,17 +882,14 @@ class Shell(shnake.Shell):
     ####################
     # COMMAND: backlog #
     def do_backlog(self, argv):
-        """Show last command's output with $EDITOR
+        """open last command output in text editor
 
         SYNOPSIS:
             backlog [--save <FILE>]
 
         DESCRIPTION:
-            Opens previous command output into the user
-            prefered text editor ($EDITOR setting).
-
-            NOTE: Last command buffer is colorless. It means that
-            it does not contains any ANSI terminal color codes.
+            Open last command output with text EDITOR (`help set EDITOR`).
+            Ansi terminal colors are automatically stripped from buffer.
 
         OPTIONS:
             --save <FILE>
