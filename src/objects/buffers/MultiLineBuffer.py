@@ -6,7 +6,7 @@ import utils.path
 
 
 class MultiLineBuffer:
-    """The MultilineLineBuffer() class provides advanced
+    r"""The MultilineLineBuffer() class provides advanced
     session Dict item setter.
 
     It provides multines buffers, which can be dynamically binded to
@@ -15,7 +15,7 @@ class MultiLineBuffer:
     If a tuple() of list() is given as argument, it's first item will be
     used as object `file` (aka originating file path), and the second
     item as the buffer (which can be multiline).
-    EX: MultiLineBuffer( ('/tmp/filepath.txt', 'line1\\nline2\\n') )
+    EX: MultiLineBuffer( ('/tmp/filepath.txt', 'line1\nline2\n') )
 
     If argument is a string whose name starts with "file://", it
     will be assumed a file path was given, putting `file` to this path,
@@ -43,6 +43,12 @@ class MultiLineBuffer:
     _raw_value() converts the object into a tuple whose first item is
         self.file, while the second is the buffer.
 
+    """
+    desc = r"""
+    {var} is a MultiLineBuffer. It supports multi-line buffers.
+
+    * To edit/show buffer with text editor, run this command:
+    > set {var} +
     """
 
     def __init__(self, value, setfunc=(lambda x: x)):

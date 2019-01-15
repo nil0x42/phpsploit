@@ -6,6 +6,8 @@ import importlib
 import core
 import objects
 
+from ui.color import colorize
+
 DEFAULT_HTTP_USER_AGENT = "file://"+core.BASEDIR+"data/user_agents.lst"
 
 
@@ -148,12 +150,18 @@ class Settings(objects.VarContainer):
                        "> set HTTP_%s None") % name
         return result
 
-    def format_docstring(self, name, metatype, info):
-        info = info.strip()
-        doc = "\nDESCRIPTION:\n"
-        doc += "\n".join(["    " + ln for ln in info.splitlines()])
-        doc += ("\n"
-                "\n"
-                "TYPE:\n"
-                "    %r\n") % metatype
-        return doc
+    def format_docstring(self, name, metatype, desc):
+        indent = lambda buf: buf.strip().replace("\n", "\n    ")
+
+        doc = ("\n"
+               "DESCRIPTION:\n"
+               "    {description}\n"
+               "\n"
+               "BUFFER TYPE:\n"
+               "    {objtype!r}\n"
+               "\n"
+               "    {typedesc}")
+        typedesc = metatype.desc.format(var=colorize("%Lined", name))
+        return doc.format(description=indent(desc),
+                          objtype=metatype,
+                          typedesc=typedesc.strip())

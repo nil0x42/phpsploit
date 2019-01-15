@@ -47,6 +47,20 @@ class RandLineBuffer(MultiLineBuffer):
         self.file, while the second is the buffer.
 
     """
+    desc = r"""
+    {var} is a RandLineBuffer. It supports multiple values.
+
+    If {var} contains multiple lines (choices), a random
+    one is used as value each time the setting is used.
+
+    * EXAMPLE:
+    The HTTP_USER_AGENT setting has multiple strings as default value.
+    Each time an HTTP request is sent, a random User-Agent is used from
+    the list of choices (run `set HTTP_USER_AGENT` to show setting).
+
+    * To edit/show buffer with text editor, run this command:
+    > set {var} +
+    """
 
     def __init__(self, value, setfunc=(lambda x: x)):
         self._getobj = setfunc
