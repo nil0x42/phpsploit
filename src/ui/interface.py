@@ -30,7 +30,7 @@ class Shell(shnake.Shell):
 
     prompt = colorize('%Lined', 'phpsploit', '%Reset', ' > ')
 
-    nocmd = "[-] Unknown Command: %s"
+    _nocmd = "[-] Unknown Command: %s"
     nohelp = "[-] No help for: %s"
     error = "[!] %s"
 
@@ -55,6 +55,11 @@ class Shell(shnake.Shell):
     # pylint: disable=arguments-differ
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
+        # Make 'nocmd' error message verbose if tunnel is connected
+        self.nocmd = self._nocmd
+        if tunnel:
+            msg = "use `run` plugin to run remote command"
+            self.nocmd += colorize("%Dim", " (%s)" % msg)
         # Reset backlog before each command except backlog
         if self.bind_command:
             if len(argv) == 1 and argv[0] == "exit":
