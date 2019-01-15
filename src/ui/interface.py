@@ -671,9 +671,13 @@ class Shell(shnake.Shell):
             > set HTTP_ACCEPT_LANGUAGE None
               - Remove HTTP_ACCEPT_LANGUAGE header with magic value 'None'.
         """
-        # `set [<PATTERN>]` display concerned settings list
+        # `set [<STRING>]` display concerned settings list
         if len(argv) < 3:
-            print(session.Conf((argv+[""])[1]))
+            string = (argv+[""])[1]
+            print(session.Conf(string))
+            if string not in session.Conf:
+                string = "<VAR>"
+            print("[*] For detailed help, run `help set %s`" % string)
 
         # buffer edit mode
         elif argv[2] == "+":
