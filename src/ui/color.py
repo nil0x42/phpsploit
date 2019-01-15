@@ -3,10 +3,10 @@ import difflib # used by diff()
 
 ANSI = {"reset":  "\x1b[0m",    # reset everything
         "bold":   "\x1b[1m",    # bold/bright style
-        "dim":    "\x1b[2;3m",  # dim||italic style
-        "lined":  "\x1b[4m",    # underlined
+        "dim":    "\x1b[2;3m",  # dim or italic style
+        "lined":  "\x1b[4m",    # underline
         "blink":  "\x1b[5m",    # blinking style
-        "invert": "\x1b[7m",    # invert forgound/backgroun
+        "invert": "\x1b[7m",    # invert foreground/backgroung
         "basic":  "\x1b[22m",   # set normal style
         # COLOR CODES
         "black":  "\x1b[30m",   # black color
