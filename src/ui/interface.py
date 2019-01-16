@@ -108,13 +108,16 @@ class Shell(shnake.Shell):
 
         return retval
 
-    def completenames(self, text, *ignored):
+    def completenames(self, text, line, *_):
         """Add aliases and plugins for completion"""
-        result = super().completenames(text, ignored)
-        result += session.Alias.keys()
+        argv = line.split()
+        if (len(argv) == 2 and line and line[-1] == " ") or len(argv) > 2:
+            return []
+        result = super().completenames(text, line, *_)
+        result += list(session.Alias)
         if tunnel:
-            result += plugins.keys()
-        return ([x for x in list(set(result)) if x.startswith(text)])
+            result += list(plugins)
+        return [x for x in list(set(result)) if x.startswith(text)]
 
     def onexception(self, exception):
         """Add traceback handler to onexception"""
@@ -130,8 +133,11 @@ class Shell(shnake.Shell):
     #################
     # COMMAND: exit #
     @staticmethod
-    def complete_exit(text, *_):
+    def complete_exit(text, line, *_):
         """autocompletion for `exit` command"""
+        argv = line.split()
+        if (len(argv) == 2 and line[-1] == " ") or len(argv) > 2:
+            return []
         keys = ["--force"]
         return [x for x in keys if x.startswith(text)]
 
@@ -182,8 +188,11 @@ class Shell(shnake.Shell):
     ####################
     # COMMAND: corectl #
     @staticmethod
-    def complete_corectl(text, *_):
+    def complete_corectl(text, line, *_):
         """autocompletion for `corectl` command"""
+        argv = line.split()
+        if (len(argv) == 2 and line[-1] == " ") or len(argv) > 2:
+            return []
         keys = ["stack-traceback", "reload-plugins",
                 "python-console", "display-http-requests"]
         return [x for x in keys if x.startswith(text)]
@@ -287,8 +296,7 @@ class Shell(shnake.Shell):
         """Command line history
 
         SYNOPSIS:
-            history
-            history <[COUNT]>
+            history [<COUNT>]
 
         DESCRIPTION:
             Returns a formatted string giving the event number and
@@ -298,10 +306,10 @@ class Shell(shnake.Shell):
             If [COUNT] is specified, only the [COUNT] most recent
             events are displayed.
 
-            > history 10
-              - Display last 10 commands of the history.
             > history
               - Display the full history of events.
+            > history 10
+              - Display last 10 commands of the history.
         """
         import readline
 
@@ -326,8 +334,11 @@ class Shell(shnake.Shell):
     ####################
     # COMMAND: exploit #
     @staticmethod
-    def complete_exploit(text, *_):
+    def complete_exploit(text, line, *_):
         """autocompletion for `exploit` command"""
+        argv = line.split()
+        if (len(argv) == 2 and line[-1] == " ") or len(argv) > 2:
+            return []
         keys = ["--get-backdoor"]
         return [x for x in keys if x.startswith(text)]
 
@@ -420,13 +431,21 @@ class Shell(shnake.Shell):
 
     ####################
     # COMMAND: session #
-    def complete_session(self, text, *_):
+    @staticmethod
+    def complete_session(text, line, *_):
         """autocompletion for `session` command"""
-        keys = ['save', 'diff', 'load', 'upgrade']
-        # load argument is not available from remote shell:
-        if self.__class__.__name__ == "MainShell":
-            keys.append('load')
-        return [x for x in keys if x.startswith(text)]
+        argv = line.split()
+        if (len(argv) == 2 and line[-1] != " ") or len(argv) == 1:
+            keys = ['save', 'diff', 'upgrade']
+            if tunnel:
+                keys.append("load")
+            return [x for x in keys if x.startswith(text)]
+        if (len(argv) == 2 and line[-1] == " ") \
+                or (len(argv) == 3 and line[-1] != " "):
+            if argv[1] in ["save", "load", "diff"]:
+                if os.path.isfile(session.File):
+                    return [session.File]
+        return []
 
     @staticmethod
     def do_session(argv):
@@ -480,9 +499,9 @@ class Shell(shnake.Shell):
               - Save current state to session file.
 
         WARNING:
-            The `session load` action can't be used through a remote
-            shell session. If it is the case, run `exit` to disconnect
-            from remote server before launching this command.
+            `session load` should NEVER be used while still connected
+            to a remote TARGET. If you want to load another session,
+            first run `exit` to disconnect from remote server.
         """
         # prevent argv IndexError
         argv += [None, None]
@@ -605,8 +624,11 @@ class Shell(shnake.Shell):
     ################
     # COMMAND: set #
     @staticmethod
-    def complete_set(text, *_):
+    def complete_set(text, line, *_):
         """Use settings as `set` completers (case insensitive)"""
+        argv = line.split()
+        if (len(argv) == 2 and line[-1] == " ") or len(argv) > 2:
+            return []
         result = []
         for key in session.Conf.keys():
             if key.startswith(text.upper()):
@@ -670,6 +692,8 @@ class Shell(shnake.Shell):
               - Define "Accept-Language" http request header field.
             > set HTTP_ACCEPT_LANGUAGE None
               - Remove HTTP_ACCEPT_LANGUAGE header with magic value 'None'.
+
+        Use `set help <VAR>` for detailed help about a setting.
         """
         # `set [<STRING>]` display concerned settings list
         if len(argv) < 3:
@@ -707,8 +731,11 @@ class Shell(shnake.Shell):
     ################
     # COMMAND: env #
     @staticmethod
-    def complete_env(text, *_):
+    def complete_env(text, line, *_):
         """Use env vars as `env` completers (case insensitive)"""
+        argv = line.split()
+        if (len(argv) == 2 and line[-1] == " ") or len(argv) > 2:
+            return []
         result = []
         for key in session.Env:
             if key.startswith(text.upper()):
@@ -782,8 +809,11 @@ class Shell(shnake.Shell):
     ##################
     # COMMAND: alias #
     @staticmethod
-    def complete_alias(text, *_):
+    def complete_alias(text, line, *_):
         """autocompletion for `alias` command"""
+        argv = line.split()
+        if (len(argv) == 2 and line[-1] == " ") or len(argv) > 2:
+            return []
         result = []
         for key in session.Alias.keys():
             if key.startswith(text):
@@ -834,9 +864,11 @@ class Shell(shnake.Shell):
 
     ##################
     # COMMAND: bind #
-    def complete_bind(self, text, *ignored):
+    def complete_bind(self, text, line, *_):
         """autocompletion for `bind` command"""
-        result = super().completenames(text, ignored)
+        result = self.completenames(text, line, *_)
+        if not result:
+            return []
         result = [x for x in result if x != "bind"]
         if tunnel:
             result += plugins.keys()
@@ -905,6 +937,17 @@ class Shell(shnake.Shell):
 
     #################
     # COMMAND: help #
+    def complete_help(self, text, line, *_):
+        """Use settings as `set` completers (case insensitive)"""
+        argv = line.split()
+        if argv[:2] == ["help", "set"]:
+            if (len(argv) == 2 and line[-1] == " ") \
+                    or (len(argv) == 3 and line[-1] != " "):
+                return [x for x in session.Conf if x.startswith(text)]
+            if len(argv) > 2 or line[-1] == " ":
+                return []
+        return self.completenames(text, line, *_)
+
     def do_help(self, argv):
         """Show commands help
 
