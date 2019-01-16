@@ -179,5 +179,7 @@ def process_tags(line):
     # colorize «*» patterns from tagged line:
     dye = lambda obj: colorize('%White', "« " + obj.group(1) + " »")
     line = re.sub('«(.+?)»', dye, line)
+    dye = lambda obj: '`' + colorize('%DimWhiteBold', obj.group(1)) + '`'
+    line = re.sub('`(.+?)`', dye, line)
 
     return line
