@@ -750,10 +750,11 @@ class Shell(shnake.Shell):
             env [<NAME> ["<VALUE>"|None]]
 
         DESCRIPTION:
-            The phpsploit environment variables are created once a
-            remote server tunnel is opened through the interface.
-            These variables are used by the core and a few plugins in
-            order to interract with the werbserver's current state.
+            Environment variables are meant to store informations
+            about remote server state.
+            - Their initial value is defined as soon as phpsploit
+            opens a remote connection (`exploit`).
+            - Plugins can read, write, and create environment variables.
 
             > env
             - Display all current env vars
@@ -761,43 +762,33 @@ class Shell(shnake.Shell):
             > env <STRING>
             - Display all env vars whose name starts with STRING.
 
-            > env <NAME> "<VALUE>"
+            > env <NAME> <VALUE>
             - Set NAME env variable's value to VALUE.
 
             > env <NAME> None
-            - Remove NAME environment variable.
+            - Remove NAME with 'None' magic string.
 
-        CASE STUDY:
-            The `PWD` environment variable changes each time the `cd`
-            command is used. It contains the current directory path of
-            the session. When a remote server exploitation session starts,
-            it is defaultly set to the server's HOME directory if,
-            available, otherwise, it is set to the root web directory.
-            This environment variable may be manually changed by using the
-            `env PWD "/other/path"`, but it is generally not recommended
-            since it can broke some plugins if the value is not a remote
-            accessible absolute path.
+        EXAMPLE:
+            `PWD` is used to persist 'current working directory' of remote
+            target. It allows plugins to use relative path arguments:
+            # set PWD to '/var/www':
+            > cd /var/www
+            # display '/var/www/index.php':
+            > cat index.php`
 
-        BEHAVIOR:
-            - At framework start, the env vars array is empty.
-
-            - Env vars array is filled once a remote server shell is
-            started through the phpsploit framework.
-
+        NOTES:
             - Some envionment variables, such as `PWD` and `WEB_ROOT` are
             crucial for remote session consistency. Be careful before
             manually editing them.
 
-            - Plugins that need persistent server based variables may and
+            - Plugins that need to store persistent informations may and
             must use env vars. For example, the `mysql` plugin creates a
-            `MYSQL_CRED` environment variable that contains remote
-            database connection credentials when using `mysql connect`,
-            it allows the plugin to not require setting user/pass/serv
-            informations on each remote sql command.
+            `MYSQL_CRED` environment variable, which contains remote
+            database connection credentials. So next calls to `mysql` can be
+            used to browse database without providing credentials each time.
 
-            - Unlike settings, env vars do not provide dynamic random
-            values. Setting a value is simply interpreted as a string,
-            apart for the special "None" value, which deletes the variable.
+            - Unlike Settings (`set` command), env vars are meant to store
+            basic strings.
         """
         if len(argv) < 3:
             # `env [<PATTERN>]` display concerned settings list
