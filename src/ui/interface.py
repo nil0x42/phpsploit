@@ -943,22 +943,20 @@ class Shell(shnake.Shell):
         """Show commands help
 
         SYNOPSIS:
-            help [<COMMAND>]
+            help
+            help <COMMAND>
             help set <SETTING>
 
         DESCRIPTION:
-            Display help message for any command, including plugins.
+            Get help for any core command or plugin.
 
-            - Without arguments, the whole available commands, sorted
-              by category, are displayed including a summary line for
-              each one.
-
-            - For detailed help, the command should be given as
-              argument.
+            If called without arguments, a list of available commands,
+            plugins, and aliases is displayed.
+            Otherwise, detailed help of given command is shown.
 
         EXAMPLES:
             > help
-              - Display the full help, sorted by category
+              - Show available commands, plugins, and aliases
             > help exit
               - Display the help for the `exit` command
             > help set BACKDOOR
