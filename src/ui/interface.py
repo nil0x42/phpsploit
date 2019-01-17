@@ -962,46 +962,34 @@ class Shell(shnake.Shell):
             > help set BACKDOOR
               - Display help about the "BACKDOOR" setting
         """
-        # If more than 1 argument, help to help !
-        if len(argv) > 2 and argv[1] != "set":
-            return self.interpret('help help')
-
-        # collect the command list from current shell
-        core_commands = self.get_names(self, "do_")
-
         def get_doc(cmd):
-            """return the docstring lines list of specific command"""
-            # try to get the doc from the plugin method
-            doc = None
+            """get lines from `cmd` docstring"""
+            doc = ""
             if cmd in plugins:
                 doc = plugins[cmd].help
             elif hasattr(self, "do_" + cmd):
                 doc = getattr(self, "do_" + cmd).__doc__
-            if not doc:
-                doc = ""
             return doc.strip().splitlines()
 
         def get_description(doc_lines):
-            """return the command description (1st docstring line)"""
+            """get formatted command help description"""
             if doc_lines:
                 return doc_lines[0].strip()
             return colorize("%Yellow", "No description")
 
         def doc_help(doc_lines):
-            """print the formated command's docstring"""
+            """print formated command's docstring"""
             # reject empty docstrings (description + empty line)
             if len(doc_lines) < 2:
                 return False
             doc_lines.pop(0)  # remove the description line
             while not doc_lines[0].strip():
                 doc_lines.pop(0)  # remove heading empty lines
-
             # remove junk leading spaces (due to python indentation)
             trash = len(doc_lines[0]) - len(doc_lines[0].lstrip())
             doc_lines = [line[trash:].rstrip() for line in doc_lines]
-
             # hilight lines with no leading spaces (man style)
-            result = str()
+            result = ""
             for line in doc_lines:
                 if line == line.lstrip():
                     line = colorize("%BoldWhite", line)
@@ -1014,86 +1002,73 @@ class Shell(shnake.Shell):
                 elif line.startswith("    -") and line[5] != " ":
                     line = colorize("%Green", line)
                 result += line + "\n"
-
             print(result)
 
-        # get full help on a single command
-        if len(argv) == 2:
-            doc = get_doc(argv[1])
-            # if the given argument is not a command, return nohelp err
-            if not doc:
-                if argv[1] in session.Alias:
-                    return self.interpret("alias %s" % argv[1])
-                print(self.nohelp % argv[1])
-                return False
-
-            # print the heading help line, which contain description
-            print("\n[*] " + argv[1] + ": " + get_description(doc) + "\n")
-
-            # call the help_<command> method, otherwise, print it's docstring
-            help_method = getattr(self, "help_" + argv[1], None)
-            if callable(help_method):
-                getattr(self, 'help_' + argv[1])()
-                return True
-            return doc_help(doc)
-        # get help about settings (e.g.: `help set BACKDOOR`)
-        if len(argv) == 3 and argv[1] == "set":
-            setting = argv[2]
+        # help set <VAR>
+        if len(argv) >= 3 and argv[1] == "set":
+            var = argv[2].upper()
             try:
-                doc = getattr(session.Conf, setting).docstring
+                doc = getattr(session.Conf, var).docstring
             except KeyError:
-                print("[-] %s: No such configuration setting" % setting)
-                return
-            print("\n[*] Help for '%s' setting\n" % setting)
-            doc_help(doc.splitlines())
-            return
+                print("[-] %s: No such setting (run `set` to list settings)" \
+                        % var)
+                return False
+            print("\n[*] Help for '%s' setting\n" % var)
+            return doc_help(doc.splitlines())
 
-        # display the whole list of commands, with their description line
+        # help <COMMAND>
+        if len(argv) >= 2:
+            doc = get_doc(argv[1])
+            if doc:
+                print("\n[*] %s: %s\n" % (argv[1], get_description(doc)))
+                # call help_COMMAND() or fallback to COMMAND's docstring
+                help_method = getattr(self, "help_" + argv[1], None)
+                if callable(help_method):
+                    return getattr(self, 'help_' + argv[1])()
+                return doc_help(doc)
+            # fallback to alias display
+            if argv[1] in session.Alias:
+                return self.interpret("alias %s" % argv[1])
+            print(self.nohelp % argv[1])
+            return False
 
-        # set maxLength to the longest command name, and at least 13
-        maxLength = max(13, len(max(core_commands, key=len)))
-
-        help = [('Core Commands', core_commands)]
-
-        # adds plugin category if we are connected to target
+        # help
+        core_commands = self.get_names(self, "do_")
+        full_help = [('Core Commands', core_commands)]
+        max_len = max(13, len(max(core_commands, key=len)))
+        # add plugins if connected to target
         if tunnel:
             for category in plugins.categories():
                 items = [p for p in plugins.values() if p.category == category]
                 items = [p.name for p in items]
-                # rescale maxLength in case of longer plugin names
-                maxLength = max(maxLength, len(max(items, key=len)))
-                help += [(category + ' Plugins', items)]
-
-        # Settle maxLength if there are command aliases
+                # rescale max_len in case of longer plugin names
+                max_len = max(max_len, len(max(items, key=len)))
+                full_help += [(category + " Plugins", items)]
+        # adapt max_len if there are command aliases
         aliases = list(session.Alias.keys())
         if aliases:
-            maxLength = max(maxLength, len(max(aliases, key=len)))
-            help += [("Command Aliases", aliases)]
-
-        # print commands help, sorted by groups
-        cmdColumn = ' ' * (maxLength - 5)
-        for groupName, groupCommands in help:
-
-            # display group (category) header block
-            underLine = '=' * len(groupName)
-            if groupName == "Command Aliases":
-                print("\n" + groupName + "\n" + underLine + "\n" +
-                      '    Alias  ' + cmdColumn + 'Value      ' + "\n" +
-                      '    -----  ' + cmdColumn + '-----      ' + "\n")
+            max_len = max(max_len, len(max(aliases, key=len)))
+            full_help += [("Command Aliases", aliases)]
+        # print full_help, group by group
+        cmd_col = ' ' * (max_len - 5)
+        for grp_name, grp_cmdlist in full_help:
+            underline = '=' * len(grp_name)
+            if grp_name == "Command Aliases":
+                print("\n" + grp_name + "\n" + underline + "\n"
+                      "    Alias  " + cmd_col + "Value\n"
+                      "    -----  " + cmd_col + "-----\n")
             else:
-                print("\n" + groupName + "\n" + underLine + "\n" +
-                      '    Command' + cmdColumn + 'Description' + "\n" +
-                      '    -------' + cmdColumn + '-----------' + "\n")
-
-            # display formated command/description pairs
-            groupCommands.sort()
-            for cmdName in groupCommands:
-                spaceFill = ' ' * (maxLength - len(cmdName) + 2)
-                if groupName == "Command Aliases":
-                    description = session.Alias[cmdName]
+                print("\n" + grp_name + "\n" + underline + "\n"
+                      "    Command" + cmd_col + "Description\n"
+                      "    -------" + cmd_col + "-----------\n")
+            grp_cmdlist.sort()
+            for cmd_name in grp_cmdlist:
+                spacing = ' ' * (max_len - len(cmd_name) + 2)
+                if grp_name == "Command Aliases":
+                    description = session.Alias[cmd_name]
                 else:
-                    description = get_description(get_doc(cmdName))
-                print('    ' + cmdName + spaceFill + description)
+                    description = get_description(get_doc(cmd_name))
+                print("    " + cmd_name + spacing + description)
             print('')
 
     # pylint: disable=invalid-name
