@@ -1,13 +1,53 @@
 #!/bin/bash
 
+set -e
+
 # RUN.sh:
 #   Run a test script or all tests contained in
 #   a given directory, in a recursive manner.
 
 
+#####
+# THIS CODE IS EXECUTED WHEN THIS SCRIPT
+# IS CALLED TO RUN A SINGLE TEST (from function execute_script())
+#####
+function print_env () {
+    str="$1"
+    colored=" = \033[1;33m"
+    str="${str/\=/$colored}"
+    echo -e "\033[1;33m[I]\033[0;33m $str\033[0m"
+}
+function faketty () {
+    # for some strange reason, `script` sets CRLF as newlines,
+    # so we remove them with perl
+    script -qefc "$(printf "%q " "$@")" /dev/null | \
+        perl -pe 's/\r\n/\n/'
+}
+if [ -n "$PHPSPLOIT_TEST" ]; then
+    yel="\033[0;34m"
+    print_env "Script Context:"
+    print_env "    PWD=$PWD"
+    print_env "    ROOTDIR=$ROOTDIR"
+    print_env "    TESTDIR=$TESTDIR"
+    print_env "    TMPDIR=$TMPDIR"
+    print_env "    TMPFILE=$TMPFILE"
+    print_env "Phpsploit Context:"
+    print_env "    PHPSPLOIT=$PHPSPLOIT"
+    print_env "    PHPSPLOIT_CONFIG_DIR=$PHPSPLOIT_CONFIG_DIR"
+    print_env "PHP Server Context:"
+    print_env "    WWWROOT=$WWWROOT"
+    print_env "    TARGET=$TARGET"
+    set -ve
+    # execute the `real` test script
+    . "$1"
+    exit 0
+fi
+export PHPSPLOIT_TEST=1
 
 
-BANNER=$(perl -E 'print "="x79 . "\r\t\t"')
+#####
+# MAIN TEST LAUNCHER
+#####
 
 function print_info () {
     echo -e "\033[1;34m[*]\033[0;36m $1\033[0m"
@@ -19,33 +59,31 @@ function print_bad () {
     echo -e "\033[1;31m[-]\033[0;31m $1\033[0m"
 }
 
-function print_inf2 () {
-    str="$1"
-    colored=" = \033[0;35m"
-    str="${str/\=/$colored}"
-    echo -e "\033[1;33m[I]\033[0;33m $str\033[0m"
+# change color of stderr output
+stderr_red_color()(set -o pipefail;"$@" 2>&1>&3|sed $'s,.*,\e[33;2m&\e[m,'>&2)3>&1
+
+# check dependencies
+errors=0
+function check_dependency () {
+    if ! which "$1" >/dev/null; then
+        print_bad "Missing dependency: $1"
+        (( ++errors ))
+    fi
 }
+check_dependency bash
+check_dependency php
+check_dependency nohup
+check_dependency readlink
+check_dependency dirname
+check_dependency perl
+check_dependency git
+check_dependency diff
+check_dependency tee
+check_dependency script
+check_dependency md5sum
+check_dependency grep
+[ $errors -eq 0 ] || exit 1
 
-
-if [ -n "$PHPSPLOIT_TEST" ]; then
-    yel="\033[0;34m"
-    print_inf2 "Script Context:"
-    print_inf2 "    PWD=$PWD"
-    print_inf2 "    ROOTDIR=$ROOTDIR"
-    print_inf2 "    TESTDIR=$TESTDIR"
-    print_inf2 "    TMPDIR=$TMPDIR"
-    print_inf2 "    TMPFILE=$TMPFILE"
-    print_inf2 "Phpsploit Context:"
-    print_inf2 "    PHPSPLOIT=$PHPSPLOIT"
-    print_inf2 "    PHPSPLOIT_CONFIG_DIR=$PHPSPLOIT_CONFIG_DIR"
-    print_inf2 "PHP Server Context:"
-    print_inf2 "    WWWROOT=$WWWROOT"
-    print_inf2 "    TARGET=$TARGET"
-    set -ve
-    . "$1"
-    exit 0
-fi
-export PHPSPLOIT_TEST=1
 
 function exit_help () {
     >&2 echo "$0:"
@@ -62,9 +100,9 @@ function exit_help () {
 export ROOTDIR="$(git rev-parse --show-toplevel)"
 
 # TESTDIR = /phpsploit/test/
-export TESTDIR="$(realpath `dirname $0`)"
+export TESTDIR="$(readlink -f `dirname $0`)"
 # testscript = /phpsploit/test/RUN.sh
-testscript="$(realpath $0)"
+testscript="$(readlink -f $0)"
 
 # TMPDIR = /phpsploit/test/tmp/
 export TMPDIR="$TESTDIR/tmp"
@@ -75,6 +113,7 @@ mkdir "$TMPDIR"
 export PHPSPLOIT_CONFIG_DIR="$TMPDIR/phpsploit-config"
 mkdir "$PHPSPLOIT_CONFIG_DIR"
 cat "$ROOTDIR/data/config/config" > "$PHPSPLOIT_CONFIG_DIR/config"
+echo "set VERBOSITY True" >> "$PHPSPLOIT_CONFIG_DIR/config"
 
 # PHPSPLOIT = call phpsploit abspath (uses PHPSPLOIT_CONFIG_DIR)
 export PHPSPLOIT="$ROOTDIR/phpsploit"
@@ -89,6 +128,7 @@ export TARGET="127.0.0.1:$(( ( RANDOM ) + 30000 ))"
 export WWWROOT="$TMPDIR/wwwroot"
 mkdir "$WWWROOT"
 $PHPSPLOIT -e 'exploit --get-backdoor' > "$WWWROOT/index.php"
+chmod +x "$WWWROOT/index.php"
 echo "set TARGET $TARGET" >> "$PHPSPLOIT_CONFIG_DIR/config"
 # run php server (killed on atexit())
 nohup php -S "$TARGET" -t "$WWWROOT" > "$WWWROOT/php.log" 2>&1 &
@@ -105,21 +145,23 @@ trap atexit EXIT
 
 tests=0
 errors=0
+banner()(python -c 'print("'"$1"'".center(70, "="))')
+
 
 # run a single test script _bash)
 # NOTE: only launched if is executable (chmod +x)
 function execute_script () {
-    if [ -f "$1" -a -x "$1" -a "`realpath $1`" != "`realpath $0`" ]; then
-        print_info "$BANNER"
+    if [ -f "$1" -a -x "$1" -a "`readlink -f $1`" != "`readlink -f $0`" ]; then
+        print_info "`banner`"
         print_info "RUNNING $1 ..."
-        print_info "$BANNER"
+        print_info "`banner`"
 
         # do script context
-        export SCRIPTDIR="$(realpath `dirname $1`)"
+        export SCRIPTDIR="$(readlink -f `dirname $1`)"
         cd "$SCRIPTDIR"
         export TMPFILE=`mktemp`
 
-        if bash "$testscript" "$1"; then
+        if stderr_red_color bash "$testscript" "$1"; then
             print_good "$1 succeeded"
         else
             print_bad "$1 failed !"
@@ -162,24 +204,31 @@ elif [ $# -eq 1 ]; then
         >&2 echo "No such file or directory: $1"
         exit 1
     fi
-    if [[ "`realpath $1`" != "$TESTDIR"/* ]]; then
+    if [[ "`readlink -f $1`" != "$TESTDIR"/* ]]; then
         >&2 echo "Invalid test location: $1"
         exit 1
     fi
-    execute_scripts "$1"
+    execute_scripts "`readlink -f $1`"
 else
     exit_help
 fi
 
+echo 'ps -fP $srv_pid'
+ps -fP $srv_pid
+echo 'cat "$WWWROOT/php.log"'
+cat "$WWWROOT/php.log"
+
 echo
 if [ $errors -eq 0 ]; then
-    print_info "$BANNER TESTS SUMMARY "
+    print_info "`banner ' TESTS SUMMARY '`"
     print_info "All tests ($tests) succeeded! "
-    print_info "$BANNER\n"
+    print_info "`banner`"
+    echo
     exit 0
 else
-    print_bad "$BANNER TESTS SUMMARY "
+    print_bad "`banner ' TESTS SUMMARY '`"
     print_bad "Some tests ($errors/$tests) failed! "
-    print_bad "$BANNER\n"
+    print_bad "`banner`"
+    echo
     exit 1
 fi

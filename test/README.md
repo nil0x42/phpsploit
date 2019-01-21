@@ -6,8 +6,3 @@
 # About:
     * The test launcher recursively runs all tests in subdirectories
     * Only executable scripts are run by test launcher (chmod +x).
-
-# Dependencies to run tests:
-    * bash
-    * php-cli
-    * nohup
