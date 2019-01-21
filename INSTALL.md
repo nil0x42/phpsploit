@@ -31,9 +31,10 @@ Only compatible with python >= 3.x
 
 ### Optional dependencies ###
 
-* readline:
-    `import readline`
-    Autocompletion and history surf in the interface.
+> * readline:
+>     `import readline`
+>     Autocompletion and history surf in the interface.
+>     (DISABLED: readline is already in standard library)
 
 * pygments:
     `import pygments`

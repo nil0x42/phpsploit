@@ -2,9 +2,6 @@
 
 $PHPSPLOIT -e 'exploit; env' | tee $TMPFILE
 
-# display output
-echo "$output"
-
 # check output contents
 < $TMPFILE grep -q '^Environment Variables$'
 < $TMPFILE grep -q '^=====================$'

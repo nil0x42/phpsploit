@@ -1,0 +1,26 @@
+# vi: ft=conf
+### mandatory dependencies
+##########################
+
+# Needed to communicate between Python and PHP remote execution
+phpserialize
+
+# A dependency of `shnake`. Used to parse command-line input
+pyparsing
+
+# Needed by the PROXY setting to support socks4/5 proxy types
+PySocks
+
+
+### optional dependencies
+##########################
+
+# Enable php code syntax coloration
+pygments
+
+# # Enhanced python console for use with `corectl python-console`
+# bpython
+#
+# # Enhanced python console for use with `corectl python-console`
+# IPython
+

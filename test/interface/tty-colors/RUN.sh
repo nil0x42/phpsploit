@@ -1,17 +1,24 @@
 #!/bin/bash
 
-# check color rendering of output wrapper
-
-function faketty () {
-    script -eqc "$1" /dev/null
-}
+# check that tty colors are rendered within a tty
+# and not rendered otherwise
 
 cmd="$PHPSPLOIT -s ./commands.phpsploit"
 
-# check raw output integrity
-$cmd > "$TMPFILE"
-diff --color=auto ./expected-raw-output.txt "$TMPFILE"
+###
+### check raw/colorless output
+###
+$cmd | tee $TMPFILE
+# assert NO ANSI colors present
+! grep -Pq '\033\[' $TMPFILE
 
-# check tty colored output integrity
-faketty "$cmd" > "$TMPFILE"
-diff --color=auto ./expected-tty-output.txt "$TMPFILE"
+###
+### check tty/colored output
+###
+faketty $cmd | tee $TMPFILE-2
+# assert ANSI colors present
+grep -Pq '\033\[' $TMPFILE-2
+
+# remove ANSI colors from file2, and check it's the same as file1
+sed -ri "s/\x01?\x1B\[(([0-9]+)(;[0-9]+)*)?m\x02?//g" $TMPFILE-2
+diff $TMPFILE $TMPFILE-2
