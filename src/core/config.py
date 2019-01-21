@@ -21,9 +21,10 @@ class UserDir:
     def __init__(self):
         """Return the PhpSploit user directory.
         The following try order is used:
-            0 - $XDG_CONFIG_HOME/phpsploit/ (only if env var exists)
-            1 - ~/.config/phpsploit/
-            2 - ~/.phpsploit/
+            0 - $PHPSPLOIT_CONFIG_DIR/ (only if env var exists)
+            1 - $XDG_CONFIG_HOME/phpsploit/ (only if env var exists)
+            2 - ~/.config/phpsploit/
+            3 - ~/.phpsploit/
 
         If no one exists, an mkdir is tried for each one in the
         same order than the previous. Mkdir is not recursive,
@@ -33,9 +34,11 @@ class UserDir:
         last possible choice (~/.phpsploit/) is raised.
 
         """
-        # if this env var exists, add first priority choice
         if os.environ.get("XDG_CONFIG_HOME"):
             self.choices.insert(0, "$XDG_CONFIG_HOME/phpsploit")
+
+        if os.environ.get("PHPSPLOIT_CONFIG_DIR"):
+            self.choices.insert(0, "$PHPSPLOIT_CONFIG_DIR/")
 
         # normalize choices paths
         self.choices = [utils.path.truepath(c) for c in self.choices]
