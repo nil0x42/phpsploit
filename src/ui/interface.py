@@ -121,7 +121,20 @@ class Shell(shnake.Shell):
 
     def onexception(self, exception):
         """Add traceback handler to onexception"""
-        self.last_exception = exception
+        exc = traceback.format_exception(type(exception),
+                                         exception,
+                                         exception.__traceback__)
+        # a small patch for traceback from plugins, remove trash lines
+        for idx, line in enumerate(exc):
+            if ('File "<frozen importlib._bootstrap>"' in line
+                    and '_call_with_frames_removed' in line):
+                exc = exc[(idx + 1):]
+                header = "Traceback (most recent call last):"
+                exc.insert(0, header + os.linesep)
+                break
+        self.last_exception = "".join(exc).splitlines()
+        for line in self.last_exception:
+            print(colorize("[#] ", "%Red", line))
         return super().onexception(exception)
 
     def default(self, argv):
@@ -251,24 +264,14 @@ class Shell(shnake.Shell):
         argv.append('')
 
         if argv[1] == "stack-traceback":
-            if self.last_exception:
-                exc = self.last_exception
-                exc = traceback.format_exception(type(exc),
-                                                 exc,
-                                                 exc.__traceback__)
-                # a small patch for traceback from plugins, remove trash lines
-                for idx, line in enumerate(exc):
-                    if ('File "<frozen importlib._bootstrap>"' in line
-                            and '_call_with_frames_removed' in line):
-                        exc = exc[(idx + 1):]
-                        header = "Traceback (most recent call last):"
-                        exc.insert(0, header + os.linesep)
-                        break
-                print(colorize("%Red", "".join(exc)))
-            else:
+            if not self.last_exception:
                 print("[-] Exception stack is empty")
+                return False
+            for line in self.last_exception:
+                print(colorize("%Red", line))
+            return True
 
-        elif argv[1] == "reload-plugins":
+        if argv[1] == "reload-plugins":
             plugins.reload(verbose=True)
 
         elif argv[1] == "python-console":
@@ -956,7 +959,9 @@ class Shell(shnake.Shell):
 
         EXAMPLES:
             > help
-              - Show available commands, plugins, and aliases
+              - List available commands, plugins, and aliases
+            > help help
+              - Get detailed help on `help` command
             > help exit
               - Display the help for the `exit` command
             > help set BACKDOOR
