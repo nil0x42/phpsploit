@@ -5,6 +5,8 @@ interactive shell-like connection over HTTP between client and web server.
 It is a post-exploitation tool capable to maintain access to a
 compromised web server for **privilege escalation** purposes.
 
+[![Build Status](https://travis-ci.org/nil0x42/phpsploit.svg?branch=master)](https://travis-ci.org/nil0x42/phpsploit)
+
 ![][picture]
 
 ---------------------------------------------------------------------
