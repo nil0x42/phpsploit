@@ -1,4 +1,4 @@
-"""A client for MySQL databases
+r"""A client for MySQL databases
 
 SYNOPSIS:
     mysql connect <USERNAME>@<HOSTNAME> [-p <PASSWORD>]
@@ -38,7 +38,7 @@ EXAMPLES:
       - Use the "information_schema" database as default one
     > mysql SELECT * FROM schemata
       - Print the whole schemata table from information_schema
-    > mysql "SELECT * FROM schemata\\\\G"
+    > mysql "SELECT * FROM schemata\\G"
       - Same as above, using tabular format (mysql client like)
 
 ENVIRONMENT:
