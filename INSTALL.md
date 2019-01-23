@@ -6,8 +6,8 @@ Compatible with GNU/Linux, and maybe Mac OS/X.
 
 ### Python Version ###
 
-Only compatible with python >= 3.x
-*Mostly tested with python 3.5.x*
+Compatible with python >= 3.4
+*(Mostly tested with python 3.5)*
 
 
 ### Dependencies (included in ./deps from now) ###
