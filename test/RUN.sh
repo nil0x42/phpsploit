@@ -84,6 +84,7 @@ check_dependency tee
 check_dependency script
 check_dependency md5sum
 check_dependency grep
+check_dependency tail
 [ $errors -eq 0 ] || exit 1
 
 
@@ -136,6 +137,7 @@ echo "set TARGET $TARGET" >> "$PHPSPLOIT_CONFIG_DIR/config"
 # run php server (killed on atexit())
 nohup php -S "$TARGET" -t "$WWWROOT" > "$WWWROOT/php.log" 2>&1 &
 srv_pid=$!
+sleep 2 # give php server some time to init properly
 
 
 # called at script exit
