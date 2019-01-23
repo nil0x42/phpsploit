@@ -554,7 +554,7 @@ class Request:
                 break
             # this condition basically considers current line as a php error
             if line.count(': ') > 1 and ' on line ' in line:
-                line = re.sub(' \[<a.*?a>\]', '', line)  # remove html link tag
+                line = re.sub(r' \[<a.*?a>\]', '', line)  # remove html link tag
                 line = re.sub('<.*?>', '', line)  # remove other html tags
                 line = line.replace(':  ', ': ')  # format double spaces
                 line = ' in '.join(line.split(' in ')[0:-1])  # del line info

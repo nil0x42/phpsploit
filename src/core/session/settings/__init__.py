@@ -8,7 +8,7 @@ import objects
 
 from ui.color import colorize
 
-DEFAULT_HTTP_USER_AGENT = "file://"+core.BASEDIR+"data/user_agents.lst"
+DEFAULT_HTTP_USER_AGENT = "file://" + core.BASEDIR + "data/user_agents.lst"
 
 
 class Settings(objects.VarContainer):
@@ -123,12 +123,13 @@ class Settings(objects.VarContainer):
     def _isattr(self, name):
         return re.match("^[A-Z][A-Z0-9_]+$", name)
 
-    def _load_settings(self):
+    @staticmethod
+    def _load_settings():
         settings = {}
         dirname = os.path.dirname(__file__)
         sys.path.insert(0, dirname)
         for file in os.listdir(dirname):
-            if not re.match("^[A-Z][A-Z0-9_]+\.py$", file):
+            if not re.match(r"^[A-Z][A-Z0-9_]+\.py$", file):
                 continue
             name = file[:-3]
             # help(type(importlib.import_module(name)))
@@ -150,7 +151,10 @@ class Settings(objects.VarContainer):
                        "> set HTTP_%s None") % name
         return result
 
-    def format_docstring(self, name, metatype, desc):
+    @staticmethod
+    def format_docstring(name, metatype, desc):
+        """formet help docstring per settings
+        """
         indent = lambda buf: buf.strip().replace("\n", "\n    ")
 
         doc = ("\n"

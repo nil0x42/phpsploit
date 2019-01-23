@@ -11,7 +11,7 @@ __author__ = "nil0x42 <http://goo.gl/kb2wf>"
 
 
 class Lexer:
-    """Bash-like string lexer based on pyparsing.
+    r"""Bash-like string lexer based on pyparsing.
 
     It implements a very basic bash inspired lexer that supports
     multicommands, logical operators, pipes, and standard file
@@ -58,7 +58,7 @@ class Lexer:
                 escape.suppress() + Regex(".") |
                 QuotedString("'", escChar='\\', multiline=True) |
                 QuotedString('"', escChar='\\', multiline=True) |
-                Regex("[^ \t\r\n\f\v\\\\$&<>();\|\'\"`]+") |
+                Regex("[^ \t\r\n\f\v\\\\$&<>();\\|\'\"`]+") |
                 Suppress(escape + EOL)))
 
         # redirector (aka bash file redirectors, such as "2>&1" sequences)
@@ -81,7 +81,7 @@ class Lexer:
         fd_bind = Optional(fd_src, 0) + Literal("<>") + word
 
         obj = (fd_redir | full_redir | here_doc | add_to_file | fd_bind)
-        redirector = obj.setParseAction(lambda token: tuple(token))
+        redirector = obj.setParseAction(tuple)
 
         # single command (args/redir list)
         command = Group(OneOrMore(redirector | word))
@@ -110,16 +110,16 @@ class Lexer:
                 char = string[index]
             except:
                 if string.strip() == "\\":
-                    err = "unexpected EOF after escaped newline '\\\\n'"
+                    err = r"unexpected EOF after escaped newline '\\n'"
                     raise SyntaxWarning(err)
                 return []
 
-            if char in "\"\'":
+            if char in "\"'":
                 err = "unexpected EOF while looking for matching %r"
                 raise SyntaxWarning(err % char)
 
             elif (index + 1) == len(string) and char == "\\":
-                err = "unexpected EOF after escaped newline '\\\\n'"
+                err = r"unexpected EOF after escaped newline '\\n'"
                 raise SyntaxWarning(err)
 
             elif string[index:index+2] in ["&&", "||"]:
@@ -130,9 +130,9 @@ class Lexer:
                 # err += str(error)[str(error).find("("):]
                 err += str(error)[str(error).rfind("(at char "):]
                 try:
-                    lineNr = int(re.findall("line:(\d+)", err)[0])
+                    lineNr = int(re.findall(r"line:(\d+)", err)[0])
                     lineNr += line - 1
-                    err = re.sub("line:(\d+)", "line:"+str(lineNr), err)
+                    err = re.sub(r"line:(\d+)", "line:"+str(lineNr), err)
                 except:
                     pass
                 raise SyntaxError(err % char)

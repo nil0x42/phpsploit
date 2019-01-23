@@ -102,13 +102,14 @@ def decolorize(string):
     Example:
     >>> decolorize('string \\x1b[2m\\x1b[32mcolor !\\x1b[0m')
     'string color !'
-
     """
-    regex = "\x01?\x1b\[((?:\d|;)*)([a-zA-Z])\x02?"
+    regex = "\x01?\x1b\\[((?:\\d|;)*)([a-zA-Z])\x02?"
     return re.sub(regex, "", str(string))
 
 
 def diff(old, new, display=True):
+    """Nice colored diff implementation
+    """
     if not isinstance(old, list):
         old = decolorize(str(old)).splitlines()
     if not isinstance(new, list):

@@ -14,8 +14,8 @@ class PhpCode(Code("php")):
 
     """
     def __new__(cls, string):
-        pattern = ("^(?:<\?(?:[pP][hH][pP])?\s+)?\s*("
-                   "[^\<\s].{4,}?)\s*;?\s*(?:\?\>)?$")
+        pattern = (r"^(?:<\?(?:[pP][hH][pP])?\s+)?\s*("
+                   r"[^\<\s].{4,}?)\s*;?\s*(?:\?\>)?$")
         # disable check if code is multiline
         string = string.strip()
         if len(string.splitlines()) == 1:
