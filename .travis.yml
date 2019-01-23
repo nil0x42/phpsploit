@@ -14,7 +14,6 @@ python:
   - "3.6-dev"  # 3.6 development branch
   - "3.7-dev"  # 3.7 development branch
   - "pypy3.5"
-  - "3.8"
   - "3.8-dev"
 
 # install dependencies

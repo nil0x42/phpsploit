@@ -11,11 +11,20 @@ set -e
 # THIS CODE IS EXECUTED WHEN THIS SCRIPT
 # IS CALLED TO RUN A SINGLE TEST (from function execute_script())
 #####
+function print_info () {
+    echo -e "\033[0m\033[1;34m[*]\033[0;36m $1\033[0m"
+}
+function print_good () {
+    echo -e "\033[0m\033[1;32m[+]\033[0;32m $1\033[0m"
+}
+function print_bad () {
+    echo -e "\033[0m\033[1;31m[-]\033[0;31m $1\033[0m"
+}
 function print_env () {
     str="$1"
-    colored=" = \033[1;33m"
+    colored=" = \033[0m\033[1;33m"
     str="${str/\=/$colored}"
-    echo -e "\033[1;33m[I]\033[0;33m $str\033[0m"
+    echo -e "\033[0m\033[1;33m[I]\033[0;33m $str\033[0m"
 }
 function faketty () {
     # for some strange reason, `script` sets CRLF as newlines,
@@ -23,18 +32,20 @@ function faketty () {
     script -qefc "$(printf "%q " "$@")" /dev/null | \
         perl -pe 's/\r\n/\n/'
 }
+function exit_script () {
+    [ $? -eq 0 ] && return # ignore if return value == 0
+    print_bad 'Displaying $TMPFILE*:'
+    tail -n+1 /dev/null $TMPFILE* | tail -n+3
+}
+trap exit_script EXIT
 if [ -n "$PHPSPLOIT_TEST" ]; then
-    yel="\033[0;34m"
-    print_env "Script Context:"
     print_env "    PWD=$PWD"
     print_env "    ROOTDIR=$ROOTDIR"
     print_env "    TESTDIR=$TESTDIR"
     print_env "    TMPDIR=$TMPDIR"
     print_env "    TMPFILE=$TMPFILE"
-    print_env "Phpsploit Context:"
     print_env "    PHPSPLOIT=$PHPSPLOIT"
     print_env "    PHPSPLOIT_CONFIG_DIR=$PHPSPLOIT_CONFIG_DIR"
-    print_env "PHP Server Context:"
     print_env "    WWWROOT=$WWWROOT"
     print_env "    TARGET=$TARGET"
     set -ve
@@ -49,18 +60,9 @@ export PHPSPLOIT_TEST=1
 # MAIN TEST LAUNCHER
 #####
 
-function print_info () {
-    echo -e "\033[1;34m[*]\033[0;36m $1\033[0m"
-}
-function print_good () {
-    echo -e "\033[1;32m[+]\033[0;32m $1\033[0m"
-}
-function print_bad () {
-    echo -e "\033[1;31m[-]\033[0;31m $1\033[0m"
-}
 
 # change color of stderr output
-stderr_red_color()(set -o pipefail;"$@" 2>&1>&3|sed $'s,.*,\e[33;2m&\e[m,'>&2)3>&1
+colored_stderr()(set -o pipefail;"$@" 2>&1>&3|sed $'s,.*,\e[33;2m&\e[m,'>&2)3>&1
 
 # check dependencies
 errors=0
@@ -114,6 +116,7 @@ export PHPSPLOIT_CONFIG_DIR="$TMPDIR/phpsploit-config"
 mkdir "$PHPSPLOIT_CONFIG_DIR"
 cat "$ROOTDIR/data/config/config" > "$PHPSPLOIT_CONFIG_DIR/config"
 echo "set VERBOSITY True" >> "$PHPSPLOIT_CONFIG_DIR/config"
+echo "alias true 'lrun true'" >> "$PHPSPLOIT_CONFIG_DIR/config"
 
 # PHPSPLOIT = call phpsploit abspath (uses PHPSPLOIT_CONFIG_DIR)
 export PHPSPLOIT="$ROOTDIR/phpsploit"
@@ -161,7 +164,7 @@ function execute_script () {
         cd "$SCRIPTDIR"
         export TMPFILE=`mktemp`
 
-        if stderr_red_color bash "$testscript" "$1"; then
+        if colored_stderr bash "$testscript" "$1"; then
             print_good "$1 succeeded"
         else
             print_bad "$1 failed !"
@@ -213,11 +216,6 @@ else
     exit_help
 fi
 
-echo 'ps -fP $srv_pid'
-ps -fP $srv_pid
-echo 'cat "$WWWROOT/php.log"'
-cat "$WWWROOT/php.log"
-
 echo
 if [ $errors -eq 0 ]; then
     print_info "`banner ' TESTS SUMMARY '`"
@@ -226,6 +224,12 @@ if [ $errors -eq 0 ]; then
     echo
     exit 0
 else
+    printf '\e[33;2m' # same color as in colored_stderr()
+    echo 'ps -fP $srv_pid'
+    ps -fP $srv_pid
+    echo 'cat "$WWWROOT/php.log"'
+    cat "$WWWROOT/php.log"
+
     print_bad "`banner ' TESTS SUMMARY '`"
     print_bad "Some tests ($errors/$tests) failed! "
     print_bad "`banner`"

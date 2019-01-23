@@ -5,20 +5,14 @@
 
 cmd="$PHPSPLOIT -s ./commands.phpsploit"
 
-###
-### check raw/colorless output
-###
-$cmd | tee $TMPFILE
-# assert NO ANSI colors present
-! grep -Pq '\033\[' $TMPFILE
+# raw output SHOULD NOT have ansi colors
+$cmd > $TMPFILE
+grep -Pq '\033\[' $TMPFILE && exit 1
 
-###
-### check tty/colored output
-###
-faketty $cmd | tee $TMPFILE-2
-# assert ANSI colors present
-grep -Pq '\033\[' $TMPFILE-2
+# tty output SHOULD have ansi colors
+faketty $cmd > $TMPFILE-2
+grep -Pq '\033\[' $TMPFILE-2 || exit 1
 
-# remove ANSI colors from file2, and check it's the same as file1
+# both should be equal after removing ansi colors
 sed -ri "s/\x01?\x1B\[(([0-9]+)(;[0-9]+)*)?m\x02?//g" $TMPFILE-2
-diff $TMPFILE $TMPFILE-2
+diff $TMPFILE $TMPFILE-2 || exit 1
