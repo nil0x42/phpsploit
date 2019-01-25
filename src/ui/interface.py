@@ -37,6 +37,7 @@ class Shell(shnake.Shell):
     bind_command = None
 
     def __init__(self):
+        self.nocmd = None
         self.last_exception = None
         super().__init__()
         try:
@@ -55,11 +56,10 @@ class Shell(shnake.Shell):
     # pylint: disable=arguments-differ
     def precmd(self, argv):
         """Handle pre command hooks such as session aliases"""
-        # Make 'nocmd' error message verbose if tunnel is connected
+        # Make 'nocmd' error message explicit if tunnel is connected
         self.nocmd = self._nocmd
         if tunnel:
-            msg = "use `run` plugin to run remote command"
-            self.nocmd += colorize("%Dim", " (%s)" % msg)
+            self.nocmd += " (use `run` plugin to run remote command)"
         # Reset backlog before each command except backlog
         if self.bind_command:
             if len(argv) == 1 and argv[0] == "exit":
@@ -139,8 +139,10 @@ class Shell(shnake.Shell):
 
     def default(self, argv):
         """Fallback to plugin command (if any)"""
-        if tunnel and argv[0] in plugins.keys():
-            return plugins.run(argv)
+        if argv[0] in plugins.keys():
+            if tunnel:
+                return plugins.run(argv)
+            self.nocmd = "[-] Must connect to run `%s` plugin (`help exploit`)"
         return super().default(argv)
 
     #################
@@ -1061,11 +1063,11 @@ class Shell(shnake.Shell):
             if grp_name == "Command Aliases":
                 print("\n" + grp_name + "\n" + underline + "\n"
                       "    Alias  " + cmd_col + "Value\n"
-                      "    -----  " + cmd_col + "-----\n")
+                      "    -----  " + cmd_col + "-----")
             else:
                 print("\n" + grp_name + "\n" + underline + "\n"
                       "    Command" + cmd_col + "Description\n"
-                      "    -------" + cmd_col + "-----------\n")
+                      "    -------" + cmd_col + "-----------")
             grp_cmdlist.sort()
             for cmd_name in grp_cmdlist:
                 spacing = ' ' * (max_len - len(cmd_name) + 2)
