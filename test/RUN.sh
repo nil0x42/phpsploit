@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -e
 
 # RUN.sh:
 #   Run a test script or all tests contained in
@@ -34,11 +33,34 @@ function faketty () {
 }
 function exit_script () {
     [ $? -eq 0 ] && return # ignore if return value == 0
+    files=$(find $TMPDIR -type f -name "`basename $TMPFILE`"'*')
     print_bad 'Displaying $TMPFILE*:'
-    tail -n+1 /dev/null $TMPFILE* | tail -n+3
+    for file in $files; do
+        echo "==> $file <=="
+        cat "$file"
+    done
+    # tail -n+1 /dev/null $files | tail -n+3
 }
-trap exit_script EXIT
+function FAIL () {
+    exit 1
+}
+function phpsploit_pipe () {
+    randstr=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13`
+    buf=$TMPDIR/buffer
+    echo "$@" >&8
+    echo "lrun echo $randstr" >&8 # delimiter
+    head -c 1 <&9 > $buf
+    while ! grep -q $randstr $buf; do
+        timeout 0.05 cat <&9 >> $buf
+    done
+    sed -i "/$randstr/d" $buf
+    cat $buf
+    # try to get retval from last cmd (needs VERBOSITY True)
+    ret=`tail -n1 $buf | grep '^\[\#.*eturned [0-9]\+' | awk '{print $NF}'`
+    [ -n "$ret" ] && return $ret
+}
 if [ -n "$PHPSPLOIT_TEST" ]; then
+    trap exit_script EXIT
     print_env "    PWD=$PWD"
     print_env "    ROOTDIR=$ROOTDIR"
     print_env "    TESTDIR=$TESTDIR"
@@ -48,17 +70,19 @@ if [ -n "$PHPSPLOIT_TEST" ]; then
     print_env "    PHPSPLOIT_CONFIG_DIR=$PHPSPLOIT_CONFIG_DIR"
     print_env "    WWWROOT=$WWWROOT"
     print_env "    TARGET=$TARGET"
-    set -ve
+    set -v
     # execute the `real` test script
-    . "$1"
+    . "$1" || true
     exit 0
 fi
 export PHPSPLOIT_TEST=1
 
 
+
 #####
 # MAIN TEST LAUNCHER
 #####
+set -e
 
 
 # change color of stderr output
@@ -134,16 +158,29 @@ mkdir "$WWWROOT"
 $PHPSPLOIT -e 'exploit --get-backdoor' > "$WWWROOT/index.php"
 chmod +x "$WWWROOT/index.php"
 echo "set TARGET $TARGET" >> "$PHPSPLOIT_CONFIG_DIR/config"
+
 # run php server (killed on atexit())
-nohup php -S "$TARGET" -t "$WWWROOT" > "$WWWROOT/php.log" 2>&1 &
+php -S "$TARGET" -t "$WWWROOT" > "$WWWROOT/php.log" 2>&1 &
 srv_pid=$!
 sleep 2 # give php server some time to init properly
+
+
+# ###
+# ### run background phpsploit with FIFOs (used through phpsploit_pipe())
+# ###
+mkfifo $TMPDIR/fifo-in $TMPDIR/fifo-out
+exec 8<>$TMPDIR/fifo-in
+exec 9<>$TMPDIR/fifo-out
+$PHPSPLOIT <&8 >&9 2>&1 &
+phpsploit_pid=$!
+
 
 
 # called at script exit
 function atexit () {
     # kill php server
     [ -n "$srv_pid" ] && kill $srv_pid
+    [ -n "$phpsploit_pid" ] && kill $phpsploit_pid
 }
 trap atexit EXIT
 
@@ -166,6 +203,7 @@ function execute_script () {
         cd "$SCRIPTDIR"
         export TMPFILE=`mktemp`
 
+        #if colored_stderr stdbuf -oL bash "$testscript" "$1"; then
         if colored_stderr bash "$testscript" "$1"; then
             print_good "$1 succeeded"
         else
