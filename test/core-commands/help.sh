@@ -75,6 +75,11 @@ settings=`phpsploit_pipe set | grep -E '^    [A-Z]{2,}' | awk '{print $1}'`
 for var in $settings; do
     phpsploit_pipe help set $var > $TMPFILE || FAIL
 
+    # issue #67:  `help set <VAR>`: display buffer type description
+    # Ref: https://github.com/nil0x42/phpsploit/issues/67
+    # check that all settings help have a buffer description
+    grep -Eq "$var is a (Multi|Rand)LineBuffer." $TMPFILE || FAIL
+
     # make sure a setting description is available
     desc_lines=`sed -e '1,/^[A-Z]\+/d' -e '/^[A-Z]\+/,$d' $TMPFILE | wc -l`
     [ $desc_lines -lt 2 ] && FAIL
