@@ -6,9 +6,9 @@
 stacktrace='Traceback (most recent call last)'
 
 # this SHOULD NOT contain stack trace:
-$PHPSPLOIT -e 'set VERBOSITY False; source /; true' > $TMPFILE
-grep -q "$stacktrace" $TMPFILE && exit 1
+$PHPSPLOIT -e 'set VERBOSITY False; source /' > $TMPFILE && FAIL
+grep -q "$stacktrace" $TMPFILE && FAIL
 
 # this SOULD contain stack trace:
-$PHPSPLOIT -e 'set VERBOSITY True; source /; true' > $TMPFILE
-grep -q "$stacktrace" $TMPFILE || exit 1
+$PHPSPLOIT -e 'set VERBOSITY True; source /' > $TMPFILE && FAIL
+grep -q "$stacktrace" $TMPFILE || FAIL
