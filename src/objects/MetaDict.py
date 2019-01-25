@@ -112,12 +112,15 @@ class MetaDict(dict):
 
         """
         # get matching vars list
+        sing_title = self.title
+        if sing_title.endswith("s"):
+            sing_title = sing_title[:-1]
         if not self.keys():
-            raise ValueError("No such " + self.title)
+            raise ValueError("No such " + sing_title)
         keys = [k for k in self.keys() if k.startswith(pattern)]
         if not keys:
-            msg = "No such {} matching «{}»"
-            raise ValueError(msg.format(self.title, pattern))
+            msg = "No {} matching «{}»"
+            raise ValueError(msg.format(sing_title, pattern))
 
         # process formatted string
         tpl = ("    {:%s}  {}\n") % max(8, len(max(keys, key=len)))
