@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-$PHPSPLOIT -e 'exploit; env' > $TMPFILE
+$PHPSPLOIT -e 'exploit; env' > $TMPFILE || FAIL
 
 # check output contents
 < $TMPFILE grep -q '^Environment Variables$'
