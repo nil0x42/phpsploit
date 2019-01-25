@@ -133,8 +133,7 @@ def main():
     # determine if the interface would run in interactive mode
     interactive = False
     if ui.input.isatty():
-        if (opt['eval'] is None and opt['source'] is None) \
-                or (opt['interactive'] and ui.input.isatty()):
+        if (not opt['eval'] and not opt['source']) or opt['interactive']:
             interactive = True
 
     # make this variable accessible from phpsploit core
@@ -178,9 +177,7 @@ def main():
     if opt['eval']:
         retval = cmdrun(iface, opt['eval'])
 
-    if not ui.input.isatty():
-        return cmdrun(iface, sys.stdin.read())
-    if interactive:
+    if interactive or not ui.input.isatty():
         iface.cmdloop()
         if ui.output.isatty():
             print(colorize("%DimWhite", '\n' + rand_message() + '\n'))

@@ -111,7 +111,7 @@ class Shell(cmd.Cmd):
         "ANSI" = "\x01ANSI\x02".
 
         """
-        if not self.stdout.isatty():
+        if not self.stdout.isatty() or not self.stdin.isatty():
             return input()
 
         # if not readline, return prompt as it is
