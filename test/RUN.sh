@@ -32,7 +32,9 @@ function faketty () {
         perl -pe 's/\r\n/\n/'
 }
 function exit_script () {
-    [ $? -eq 0 ] && return # ignore if return value == 0
+    ret=$?
+    [ -n "$phpsploit_pid" ] && kill $phpsploit_pid
+    [ $ret -eq 0 ] && return # ignore if return value == 0
     files=$(find $TMPDIR -type f -name "`basename $TMPFILE`"'*')
     print_bad 'Displaying $TMPFILE*:'
     for file in $files; do
@@ -60,6 +62,16 @@ function phpsploit_pipe () {
     [ -n "$ret" ] && return $ret
 }
 if [ -n "$PHPSPLOIT_TEST" ]; then
+    ###
+    ### run background phpsploit with FIFOs (used through phpsploit_pipe())
+    ###
+    rm $TMPDIR/fifo-in $TMPDIR/fifo-out
+    mkfifo $TMPDIR/fifo-in $TMPDIR/fifo-out
+    exec 8<>$TMPDIR/fifo-in
+    exec 9<>$TMPDIR/fifo-out
+    nohup $PHPSPLOIT <&8 >&9 2>&1 &
+    phpsploit_pid=$!
+
     trap exit_script EXIT
     print_env "    PWD=$PWD"
     print_env "    ROOTDIR=$ROOTDIR"
@@ -165,22 +177,10 @@ srv_pid=$!
 sleep 2 # give php server some time to init properly
 
 
-# ###
-# ### run background phpsploit with FIFOs (used through phpsploit_pipe())
-# ###
-mkfifo $TMPDIR/fifo-in $TMPDIR/fifo-out
-exec 8<>$TMPDIR/fifo-in
-exec 9<>$TMPDIR/fifo-out
-$PHPSPLOIT <&8 >&9 2>&1 &
-phpsploit_pid=$!
-
-
-
 # called at script exit
 function atexit () {
     # kill php server
     [ -n "$srv_pid" ] && kill $srv_pid
-    [ -n "$phpsploit_pid" ] && kill $phpsploit_pid
 }
 trap atexit EXIT
 

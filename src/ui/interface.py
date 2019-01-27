@@ -795,12 +795,16 @@ class Shell(shnake.Shell):
             - Unlike Settings (`set` command), env vars are meant to store
             basic strings.
         """
+        # `env [<NAME>]`
         if len(argv) < 3:
-            # `env [<PATTERN>]` display concerned settings list
+            if not session.Env:
+                print("[-] Must connect to spread env vars (`help exploit`)")
+                return False
             print(session.Env((argv + [""])[1]))
-        else:
-            # `env <NAME> <VALUE>`
-            session.Env[argv[1]] = " ".join(argv[2:])
+            return True
+        # `env <NAME> <VALUE>`
+        session.Env[argv[1]] = " ".join(argv[2:])
+        return True
 
     ##################
     # COMMAND: alias #
