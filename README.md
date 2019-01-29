@@ -1,5 +1,7 @@
 ### PhpSploit: *Furtive post-exploitation framework* ###
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b998fe23c25f40a78c6c35c722bb9fa0)](https://app.codacy.com/app/nil0x42/phpsploit?utm_source=github.com&utm_medium=referral&utm_content=nil0x42/phpsploit&utm_campaign=Badge_Grade_Dashboard)
+
 PhpSploit is a **remote control** framework, aiming to provide a **stealth**
 interactive shell-like connection over HTTP between client and web server.
 It is a post-exploitation tool capable to maintain access to a
