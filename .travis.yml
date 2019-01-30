@@ -1,25 +1,31 @@
 os: linux
 dist: xenial
 
-
-
 language:
   - python
 
 python:
   - "3.4"
   - "3.5"
-  - "3.5-dev"  # 3.5 development branch
+  - "3.5-dev"
   - "3.6"
-  - "3.6-dev"  # 3.6 development branch
-  - "3.7-dev"  # 3.7 development branch
+  - "3.6-dev"
+  - "3.7-dev"
   - "pypy3.5"
   - "3.8-dev"
 
+env:
+  - COVERAGE=True
+
 # install dependencies
 install:
-  - pip install -vr requirements.txt
+  - pip install coverage codecov
+  - pip install -r requirements.txt
 
 # run tests
 script:
   - ./test/RUN.sh
+
+# upload coverage report to codecov
+after_success:
+    - codecov
