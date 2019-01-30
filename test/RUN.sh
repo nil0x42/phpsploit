@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # RUN.sh:
 #   Run a test script or all tests contained in
 #   a given directory, in a recursive manner.
@@ -20,10 +19,8 @@ function print_bad () {
     echo -e "\033[0m\033[1;31m[-]\033[0;31m $1\033[0m"
 }
 function print_env () {
-    str="$1"
-    colored=" = \033[0m\033[1;33m"
-    str="${str/\=/$colored}"
-    echo -e "\033[0m\033[1;33m[I]\033[0;33m $str\033[0m"
+    [ -z "${!1}" ] && return
+    echo -e "\033[0m\033[1;33m[I]    \033[0;33m$1\033[0m = \033[1;33m${!1}\033[0m"
 }
 function faketty () {
     # for some strange reason, `script` sets CRLF as newlines,
@@ -65,7 +62,7 @@ if [ -n "$PHPSPLOIT_TEST" ]; then
     ###
     ### run background phpsploit with FIFOs (used through phpsploit_pipe())
     ###
-    rm $TMPDIR/fifo-in $TMPDIR/fifo-out
+    rm -f $TMPDIR/fifo-in $TMPDIR/fifo-out
     mkfifo $TMPDIR/fifo-in $TMPDIR/fifo-out
     exec 8<>$TMPDIR/fifo-in
     exec 9<>$TMPDIR/fifo-out
@@ -73,15 +70,19 @@ if [ -n "$PHPSPLOIT_TEST" ]; then
     phpsploit_pid=$!
 
     trap exit_script EXIT
-    print_env "    PWD=$PWD"
-    print_env "    ROOTDIR=$ROOTDIR"
-    print_env "    TESTDIR=$TESTDIR"
-    print_env "    TMPDIR=$TMPDIR"
-    print_env "    TMPFILE=$TMPFILE"
-    print_env "    PHPSPLOIT=$PHPSPLOIT"
-    print_env "    PHPSPLOIT_CONFIG_DIR=$PHPSPLOIT_CONFIG_DIR"
-    print_env "    WWWROOT=$WWWROOT"
-    print_env "    TARGET=$TARGET"
+    print_env PWD
+    print_env ROOTDIR
+    print_env TESTDIR
+    print_env SCRIPTDIR
+    print_env TMPDIR
+    print_env TMPFILE
+    print_env PHPSPLOIT
+    print_env PHPSPLOIT_CONFIG_DIR
+    print_env WWWROOT
+    print_env TARGET
+    print_env COVERAGE
+    print_env COVERAGE_FILE
+    print_env COVERAGE_RCFILE
     set -v
     # execute the `real` test script
     . "$1" || true
@@ -157,6 +158,13 @@ echo "alias true 'lrun true'" >> "$PHPSPLOIT_CONFIG_DIR/config"
 
 # PHPSPLOIT = call phpsploit abspath (uses PHPSPLOIT_CONFIG_DIR)
 export PHPSPLOIT="$ROOTDIR/phpsploit"
+# add 'coverage run' prefix if $COVERAGE is set
+if [ -n "$COVERAGE" ]; then
+    export COVERAGE_RCFILE="$ROOTDIR/.coveragerc"
+    export COVERAGE_FILE="$ROOTDIR/.coverage"
+    rm -f "$COVERAGE_FILE"
+    export PHPSPLOIT="coverage run --rcfile=$COVERAGE_RCFILE $PHPSPLOIT"
+fi
 
 ###
 ### build temp php server to be able to run 'exploit'
@@ -257,6 +265,12 @@ else
 fi
 
 echo
+if [ -n "$COVERAGE" ]; then
+    cd $ROOTDIR
+    find -name '.coverage*'
+    coverage combine
+    cd - > /dev/null
+fi
 if [ $errors -eq 0 ]; then
     print_info "`banner ' TESTS SUMMARY '`"
     print_info "All tests ($tests) succeeded! "
