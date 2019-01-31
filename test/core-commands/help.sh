@@ -35,7 +35,7 @@ done
 ###
 ### help <PLUGIN>
 ###
-plugins=`find $ROOTDIR/plugins/*/* -maxdepth 0 -exec basename {} ';'`
+plugins=`find $ROOTDIR/plugins/*/* -maxdepth 0 -exec basename {} ';' | grep -v '\'`
 for plugin in $plugins; do
     phpsploit_pipe help $plugin > $TMPFILE || FAIL
 
