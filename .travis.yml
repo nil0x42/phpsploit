@@ -29,3 +29,8 @@ script:
 # upload coverage report to codecov
 after_success:
     - codecov
+
+# only trigger build for pushes on master branch
+branches:
+  only:
+    - master
