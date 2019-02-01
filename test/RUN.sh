@@ -267,7 +267,8 @@ fi
 echo
 if [ -n "$COVERAGE" ]; then
     cd $ROOTDIR
-    find -name '.coverage*'
+    echo 'find -name ".coverage\.*"'
+    find -name ".coverage\.*"
     coverage combine
     cd - > /dev/null
 fi
