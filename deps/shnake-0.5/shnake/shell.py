@@ -191,7 +191,7 @@ class Shell(cmd.Cmd):
                   postcmd=None, interactive=False, fatal_errors=False):
         """Interpret `commands` as a list of commands.
         `commands` can be a multi command raw string or a preformated
-        commands list. If str, is is automatically parsed.
+        commands list. If str, it is automatically parsed.
 
         precmd, onecmd and postcmd funcs can be overwritten from arguments.
         If None, they default to their respective class methods.
