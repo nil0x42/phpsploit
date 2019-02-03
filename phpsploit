@@ -97,7 +97,7 @@ def cmdrun(iface, cmdobj, show_err=False):
     """
     try:
         retval = iface.interpret(cmdobj)
-        if retval != 0 and show_err:
+        if retval != 0 and show_err and iface.last_exception:
             iface.interpret("corectl stack-traceback")
     except (SyntaxWarning, SyntaxError) as err:
         retval = iface.onexception(err)
@@ -147,7 +147,8 @@ def main():
 
     if cmdrun(iface, "source -e '%s'" % opt['config'], show_err=True) != 0:
         print()
-        parser.error("\n%r: couldn't load config file." % opt['config'])
+        parser.error("%r: config file contains invalid commands."
+                     % opt['config'])
     elif interactive and ui.output.isatty():
         logo = Path(src.BASEDIR + "data/logo.ascii").read()
         cmdrun(iface, "clear")
@@ -161,17 +162,17 @@ def main():
     if opt['load']:
         if cmdrun(iface, "session load '%s'" % opt['load']) != 0:
             print()
-            parser.error("\n%r: couldn't load session file." % opt['load'])
+            parser.error("%r: invalid session file." % opt['load'])
 
     if opt['target']:
         if cmdrun(iface, "set TARGET '%s'" % opt['target']) != 0:
             print()
-            parser.error("\n%r: couldn't set target url." % opt['target'])
+            parser.error("%r: couldn't set target url." % opt['target'])
 
     if opt['source']:
         if cmdrun(iface, "source '%s'" % opt['source']) != 0:
             print()
-            parser.error("\n%r: couldn't read source file." % opt['source'])
+            parser.error("%r: couldn't read source file." % opt['source'])
 
     retval = 0
     if opt['eval']:
