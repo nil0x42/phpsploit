@@ -9,14 +9,21 @@
 # THIS CODE IS EXECUTED WHEN THIS SCRIPT
 # IS CALLED TO RUN A SINGLE TEST (from function execute_script())
 #####
+function FAIL () {
+    exit 1
+}
 function print_info () {
-    echo -e "\033[0m\033[1;34m[*]\033[0;36m $1\033[0m"
+    echo -e "\033[0m\033[1;34m[*]\033[0;36m $@\033[0m"
 }
 function print_good () {
-    echo -e "\033[0m\033[1;32m[+]\033[0;32m $1\033[0m"
+    echo -e "\033[0m\033[1;32m[+]\033[0;32m $@\033[0m"
 }
 function print_bad () {
-    echo -e "\033[0m\033[1;31m[-]\033[0;31m $1\033[0m"
+    echo -e "\033[0m\033[1;31m[-]\033[0;31m $@\033[0m"
+}
+function print_fail () {
+    print_bad "\033[1;31mERROR\033[0;31m: $@"
+    FAIL
 }
 function print_env () {
     [ -z "${!1}" ] && return
@@ -35,13 +42,10 @@ function exit_script () {
     files=$(find $TMPDIR -type f -name "`basename $TMPFILE`"'*')
     print_bad 'Displaying $TMPFILE*:'
     for file in $files; do
-        echo "==> $file <=="
+        echo -e "\n==> $file <=="
         cat "$file"
     done
     # tail -n+1 /dev/null $files | tail -n+3
-}
-function FAIL () {
-    exit 1
 }
 function phpsploit_pipe () {
     randstr=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13`
@@ -62,22 +66,26 @@ if [ -n "$PHPSPLOIT_TEST" ]; then
     ###
     ### run background phpsploit with FIFOs (used through phpsploit_pipe())
     ###
-    rm -f $TMPDIR/fifo-in $TMPDIR/fifo-out
-    mkfifo $TMPDIR/fifo-in $TMPDIR/fifo-out
-    exec 8<>$TMPDIR/fifo-in
-    exec 9<>$TMPDIR/fifo-out
-    nohup $PHPSPLOIT <&8 >&9 2>&1 &
-    phpsploit_pid=$!
+    if grep -q phpsploit_pipe $SCRIPTFILE; then
+        rm -f $TMPDIR/fifo-in $TMPDIR/fifo-out
+        mkfifo $TMPDIR/fifo-in $TMPDIR/fifo-out
+        exec 8<>$TMPDIR/fifo-in
+        exec 9<>$TMPDIR/fifo-out
+        nohup $PHPSPLOIT <&8 >&9 2>&1 &
+        phpsploit_pid=$!
+    fi
 
     trap exit_script EXIT
     print_env PWD
     print_env ROOTDIR
     print_env TESTDIR
     print_env SCRIPTDIR
+    print_env SCRIPTFILE
     print_env TMPDIR
     print_env TMPFILE
     print_env PHPSPLOIT
     print_env PHPSPLOIT_CONFIG_DIR
+    print_env RAW_PHPSPLOIT
     print_env WWWROOT
     print_env TARGET
     print_env COVERAGE
@@ -109,19 +117,22 @@ function check_dependency () {
         (( ++errors ))
     fi
 }
+check_dependency basename
 check_dependency bash
-check_dependency php
-check_dependency nohup
-check_dependency readlink
-check_dependency dirname
-check_dependency perl
-check_dependency git
 check_dependency diff
-check_dependency tee
-check_dependency script
-check_dependency md5sum
+check_dependency dirname
+check_dependency git
 check_dependency grep
+check_dependency md5sum
+check_dependency nohup
+check_dependency perl
+check_dependency php
+check_dependency printf
+check_dependency readlink
+check_dependency script
 check_dependency tail
+check_dependency tee
+check_dependency timeout
 [ $errors -eq 0 ] || exit 1
 
 
@@ -157,6 +168,7 @@ echo "set VERBOSITY True" >> "$PHPSPLOIT_CONFIG_DIR/config"
 echo "alias true 'lrun true'" >> "$PHPSPLOIT_CONFIG_DIR/config"
 
 # PHPSPLOIT = call phpsploit abspath (uses PHPSPLOIT_CONFIG_DIR)
+export RAW_PHPSPLOIT="$ROOTDIR/phpsploit"
 export PHPSPLOIT="$ROOTDIR/phpsploit"
 # add 'coverage run' prefix if $COVERAGE is set
 if [ -n "$COVERAGE" ]; then
@@ -209,6 +221,7 @@ function execute_script () {
         # do script context
         export SCRIPTDIR="$(readlink -f `dirname $1`)"
         cd "$SCRIPTDIR"
+        export SCRIPTFILE="$(readlink -f $1)"
         export TMPFILE=`mktemp`
 
         #if colored_stderr stdbuf -oL bash "$testscript" "$1"; then
