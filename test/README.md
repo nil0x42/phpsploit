@@ -1,4 +1,4 @@
-# UNIT TESTS
+# Phpsploit Functional Tests Suite
 
 # Usage:
     ./RUN.sh --help
