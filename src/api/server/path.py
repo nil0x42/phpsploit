@@ -3,66 +3,58 @@
 These functions are designed for use in phpsploit plugins,
 for normalizing and extracting server path components.
 
-This module is mostly inspired by the `os.path` standard
-python submodule.
+This module is highly inspired by `os.path` from standard library.
 """
-
-
 import re
-
 from core import session
 
 
-_windows_path_matcher = '[a-zA-Z]:\\\\'
+_WINPATH_REGEX = re.compile(r"[a-zA-Z]:\\")
 
 
-def getcwd():
-    """getcwd() -> path
-
-    Return a unicode string representing the current working directory.
-    """
+def getcwd() -> str:
+    """Return the current working directory"""
     return session.Env.PWD
 
 
-def isabs(path):
+def isabs(path: str) -> bool:
     """Test whether a path is absolute"""
-    if path.startswith('/') or path.startswith('\\'):
+    if path and path[0] in '/\\':
         return True
-    elif re.match(_windows_path_matcher, path):
+    if _WINPATH_REGEX.match(path):
         return True
-    else:
-        return False
+    return False
 
 
-def abspath(path):
+def abspath(path: str) -> str:
     """Return an absolute path."""
     if not isabs(path):
-        separator = '/'
+        sep = '/'
         if '/' not in path and '\\' in path:
-            separator = '\\'
-        elems = path.split(separator)
-        oldPath = _split_path(session.Env.PWD)
-        path = oldPath['root']
-        path += oldPath['separator'].join(oldPath['elems'] + elems)
+            sep = '\\'
+        elems = path.split(sep)
+        old_path = _split_path(session.Env.PWD)
+        path = old_path['root']
+        path += old_path['separator'].join(old_path['elems'] + elems)
     return _sanitize_path(path)
 
 
-def dirname(path):
+def dirname(path: str) -> str:
     """Return the directory component of a pathname"""
     return _split_path(path)['dirname']
 
 
-def basename(path):
+def basename(path: str) -> str:
     """Return the final component of a pathname"""
     return _split_path(path)['basename']
 
 
-def separator(path):
+def separator(path: str) -> str:
     """Return the path  of a pathname"""
     return _split_path(path)['separator']
 
 
-def splitdrive(path):
+def splitdrive(path: str) -> tuple:
     """Split a pathname into drive and path. On Posix, drive is always
     empty."""
     elems = _split_path(path)
@@ -72,62 +64,61 @@ def splitdrive(path):
 
 
 # Private function:
-# Return the absolute version of given path string.
-def _to_absolute_path(path):
+def _to_absolute_path(path: str) -> str:
+    """Return the absolute version of given path string"""
     if isabs(path):
         return path
     return abspath(path)
 
 
 # Private function:
-# Split the given path string into a dict of path elements.
-def _split_path(path):
+def _split_path(path: str) -> dict:
+    """Split given path string into path elements"""
     path = _to_absolute_path(path)
     # if linux
     if path.startswith('/'):
         platform = 'nix'
         root = '/'
-        separator = '/'
+        sep = '/'
     # if win physical path (C:\)
-    elif re.match(_windows_path_matcher, path):
+    elif re.match(_WINPATH_REGEX, path):
         platform = 'win'
         root = path[:3]
-        separator = '\\'
+        sep = '\\'
     # if win network path (\\1.1.1.1)
     elif path.startswith('\\'):
         platform = 'win'
         root = '\\\\'
-        separator = '\\'
+        sep = '\\'
         path = root + path.lstrip('\\')
     else:
-        raise ValueError("%s: Could not parse non-standard path" % path)
-    dirname = separator.join(path.split(separator)[:-1]) + separator
-    basename = path.split(separator)[-1]
-    elems = path[len(root):].split(separator)
-    result = {'platform': platform,
-              'root': root,
-              'elems': elems,
-              'separator': separator,
-              'dirname': dirname,
-              'basename': basename}
-    return result
+        raise ValueError("%s: Couldn't parse non-standard path" % path)
+    return {"platform": platform,
+            "root": root,
+            "elems": path[len(root):].split(sep),
+            "separator": sep,
+            "dirname": sep.join(path.split(sep)[:-1]) + sep,
+            "basename": path.split(sep)[-1]}
 
 
 # Private function:
-# Remove unneeded path elements.
-#   - example: '/foo/../bar/' becomes '/bar/'
 def _sanitize_path(path):
+    """Remove unneeded path elements
+
+    >>> _sanitize_path('/foo/../bar/')
+    /bar/
+    """
     info = _split_path(path)
     result = []
     elems = info['elems']
-    for x in elems:
-        if x in ['.', '']:
+    for elem in elems:
+        if elem in ['.', '']:
             pass
-        elif x == '..':
+        elif elem == '..':
             result = result[:-1]
-        elif x == '~':
+        elif elem == '~':
             info = _split_path(session.Env.HOME)
             result = info['elems']
         else:
-            result.append(x)
+            result.append(elem)
     return info['root'] + info['separator'].join(result)
