@@ -5,7 +5,7 @@ development API.
 
 CONTENTS:
 
-* plugin (type: Plugin() object)
+* plugin (type: api.plugin.Plugin())
     Contains current plugin attributes.
 
 * environ (type: dict)
