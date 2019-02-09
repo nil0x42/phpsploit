@@ -3,7 +3,7 @@
 import os
 import hashlib
 import random
-from abc import ABC, abstractmethod, abstractstaticmethod
+from abc import ABC, abstractmethod
 
 import utils.path
 from ui.color import colorize
@@ -185,9 +185,9 @@ class AbstractLineBuffer(ABC):
         if name == "buffer" and self.file:
             try:
                 buffer = open(self.file, 'r').read()
-                assert self._buffer_is_valid(buffer)
-                self.buffer = buffer
-            except (OSError, AssertionError):
+                if self._buffer_is_valid(buffer):
+                    self.buffer = buffer
+            except OSError:
                 pass
         return super().__getattribute__(name)
 
@@ -342,10 +342,10 @@ class RandLineBuffer(AbstractLineBuffer):
         result = []
         for line in buffer.splitlines():
             line = line.strip()
-            try:
-                assert line and not line.startswith('#')
-                usable_value = self._validator(line)
-            except: # pylint: disable=bare-except
-                continue
-            result.append(usable_value)
+            if line and not line.startswith('#'):
+                try:
+                    usable_value = self._validator(line)
+                except: # pylint: disable=bare-except
+                    continue
+                result.append(usable_value)
         return result

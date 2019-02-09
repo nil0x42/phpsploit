@@ -6,11 +6,11 @@ Used as base path for files edited with `edit` plugin.
 """
 import tempfile
 
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.MultiLineBuffer
+type = linebuf.MultiLineBuffer
 
 
 def setter(value):

@@ -25,10 +25,10 @@ backdoor without the knowledge of it's value.
 """
 import re
 
-import objects
+import linebuf
 
 
-type = objects.linebuf.MultiLineBuffer
+type = linebuf.MultiLineBuffer
 
 
 def setter(value):

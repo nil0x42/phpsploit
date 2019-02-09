@@ -36,10 +36,10 @@ to send HTTP requests
     suspicion, as this kind of request is not expected on
     most of URLs.
 """
-import objects
+import linebuf
 
 
-type = objects.linebuf.RandLineBuffer
+type = linebuf.RandLineBuffer
 
 
 def setter(value):

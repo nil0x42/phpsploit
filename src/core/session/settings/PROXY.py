@@ -17,11 +17,11 @@ PROXY SYNTAX: <SCHEME>://<ADDRESS>:<PORT>
 # To set a socks5 proxy to connect through Tor:
 > set PROXY socks5://127.0.0.1:9050
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.RandLineBuffer
+type = linebuf.RandLineBuffer
 
 
 def setter(value):

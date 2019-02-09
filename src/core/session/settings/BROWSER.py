@@ -6,11 +6,11 @@ The '--browser' option of `phpinfo` plugin uses this setting
 to display remote server's informations locally:
 > phpinfo --browser
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.RandLineBuffer
+type = linebuf.RandLineBuffer
 
 
 def setter(value):

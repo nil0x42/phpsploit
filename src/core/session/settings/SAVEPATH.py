@@ -9,11 +9,11 @@ This setting also affetcs the `session save` command.
 """
 import tempfile
 
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.MultiLineBuffer
+type = linebuf.MultiLineBuffer
 
 
 def setter(value):

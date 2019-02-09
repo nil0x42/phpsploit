@@ -11,11 +11,11 @@ The code will be executed before ANY payload execution.
 * Only edit PAYLOAD_PREFIX if you really understand what you're doing
 """
 import core
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.MultiLineBuffer
+type = linebuf.MultiLineBuffer
 
 
 def setter(value):

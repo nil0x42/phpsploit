@@ -5,7 +5,7 @@ import os
 import re
 
 import ui
-import objects
+import metadict
 import core
 from core import session
 from datatypes import Path
@@ -19,7 +19,7 @@ DEFAULT_PLUGIN = Plugin(core.BASEDIR +
                         "data/plugin-sample/category_name/plugin_example")
 
 
-class Plugins(objects.MetaDict):
+class Plugins(metadict.MetaDict):
     """Phpsploit plugins handler
 
     The Plugins() class represents the currently

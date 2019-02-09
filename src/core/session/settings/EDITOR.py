@@ -11,11 +11,11 @@ Set attacker's prefered text editor.
 """
 import os
 import sys
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.MultiLineBuffer
+type = linebuf.MultiLineBuffer
 
 
 def setter(value):

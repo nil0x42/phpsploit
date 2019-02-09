@@ -18,10 +18,10 @@ you may need to lower the default limit of this setting.
 * REFERENCES:
 http://httpd.apache.org/docs/2.2/mod/core.html#LimitRequestFieldSize
 """
-import objects
+import linebuf
 
 
-type = objects.linebuf.RandLineBuffer
+type = linebuf.RandLineBuffer
 
 
 def setter(value):

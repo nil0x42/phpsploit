@@ -16,11 +16,11 @@ NOTE: %%BASE64%% is a magic string that is replaced by the
 
 * Only edit REQ_HEADER_PAYLOAD if you understand what you're doing
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.RandLineBuffer
+type = linebuf.RandLineBuffer
 
 
 def setter(value):

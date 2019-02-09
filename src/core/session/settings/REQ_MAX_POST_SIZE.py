@@ -19,11 +19,11 @@ you may need to lower the default limit of this setting.
 http://httpd.apache.org/docs/2.2/mod/core.html#LimitRequestBody
 https://secure.php.net/manual/en/ini.core.php#ini.post-max-size
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.RandLineBuffer
+type = linebuf.RandLineBuffer
 
 def setter(value):
     value = datatypes.ByteSize(value)
