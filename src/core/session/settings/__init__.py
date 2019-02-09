@@ -70,8 +70,8 @@ class Settings(objects.VarContainer):
         self.PAYLOAD_PREFIX = "%%DEFAULT%%"
 
     def __setitem__(self, name, value):
-        # if the set value is a MultiLineBuffer instance, just do it!
-        if isinstance(value, objects.buffers.MultiLineBuffer):
+        # if the set value is a *LineBuffer instance, just do it!
+        if isinstance(value, objects.linebuf.AbstractLineBuffer):
             return super().__setitem__(name, value)
 
         name = name.replace('-', '_').upper()
@@ -83,7 +83,7 @@ class Settings(objects.VarContainer):
         # ensure the setting name is allowed
         if name[5:] and name[:5] == "HTTP_":
             # HTTP_* settings have a RandLineBuffer metatype
-            metatype = objects.buffers.RandLineBuffer
+            metatype = objects.linebuf.RandLineBuffer
             # setter = self._set_HTTP_header
             setter = str
             info = self._get_HTTP_header_info(name[5:])

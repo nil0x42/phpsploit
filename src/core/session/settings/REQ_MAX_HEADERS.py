@@ -21,7 +21,7 @@ http://httpd.apache.org/docs/2.2/mod/core.html#LimitRequestFieldSize
 import objects
 
 
-type = objects.buffers.RandLineBuffer
+type = objects.linebuf.RandLineBuffer
 
 
 def setter(value):

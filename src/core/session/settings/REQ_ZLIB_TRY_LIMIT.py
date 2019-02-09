@@ -18,7 +18,7 @@ import objects
 import datatypes
 
 
-type = objects.buffers.RandLineBuffer
+type = objects.linebuf.RandLineBuffer
 
 
 def setter(value):

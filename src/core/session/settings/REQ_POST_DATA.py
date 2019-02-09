@@ -20,7 +20,7 @@ import objects
 import datatypes
 
 
-type = objects.buffers.MultiLineBuffer
+type = objects.linebuf.MultiLineBuffer
 
 
 def setter(value):

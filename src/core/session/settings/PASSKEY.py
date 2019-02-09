@@ -28,7 +28,7 @@ import re
 import objects
 
 
-type = objects.buffers.MultiLineBuffer
+type = objects.linebuf.MultiLineBuffer
 
 
 def setter(value):
