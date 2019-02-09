@@ -42,21 +42,6 @@ function test_opt () {
     return "$retval"
 }
 
-# FAIL if any STDIN line can't be found in ARGV1 file
-#   - if ARGV2 exists, it's used instead of STDIN
-function assert_contains () {
-    if [ -n "$2" ]; then
-        local match="$2"
-        grep -q -- "$match" "$1" \
-            || print_fail "grep -q -- '$match' '$1'"
-    else
-        while IFS= read -r match; do 
-            grep -q -- "$match" "$1" \
-                || print_fail "grep -q -- '$match' '$1'"
-        done
-    fi
-}
-
 # make sure ARGV1 file outputs standard argparse cli error
 function assert_cli_error () {
 assert_contains $1 << EOF

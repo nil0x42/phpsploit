@@ -39,7 +39,7 @@ to send HTTP requests
 import objects
 
 
-type = objects.buffers.RandLineBuffer
+type = objects.linebuf.RandLineBuffer
 
 
 def setter(value):

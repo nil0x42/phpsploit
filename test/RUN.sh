@@ -35,6 +35,34 @@ function faketty () {
     script -qefc "$(printf "%q " "$@")" /dev/null | \
         perl -pe 's/\r\n/\n/'
 }
+# FAIL if any STDIN line can't be found in ARGV1 file
+#   - if ARGV2 exists, it's used instead of STDIN
+function assert_contains () {
+    if [ -n "$2" ]; then
+        local match="$2"
+        grep -q -- "$match" "$1" \
+            || print_fail "grep -q -- '$match' '$1'"
+    else
+        while IFS= read -r match; do 
+            grep -q -- "$match" "$1" \
+                || print_fail "grep -q -- '$match' '$1'"
+        done
+    fi
+}
+# FAIL if any STDIN line is present in ARGV1 file
+#   - if ARGV2 exists, it's used instead of STDIN
+function assert_not_contains () {
+    if [ -n "$2" ]; then
+        local match="$2"
+        ! grep -q -- "$match" "$1" \
+            || print_fail "! grep -q -- '$match' '$1'"
+    else
+        while IFS= read -r match; do 
+            ! grep -q -- "$match" "$1" \
+                || print_fail "! grep -q -- '$match' '$1'"
+        done
+    fi
+}
 function exit_script () {
     ret=$?
     [ -n "$phpsploit_pid" ] && kill $phpsploit_pid

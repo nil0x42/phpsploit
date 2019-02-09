@@ -11,5 +11,4 @@ Example:
 
 from . MetaDict       import MetaDict
 from . VarContainer   import VarContainer
-
-from . import buffers
+from . import linebuf
