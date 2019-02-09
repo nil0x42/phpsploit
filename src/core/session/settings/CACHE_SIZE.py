@@ -10,10 +10,10 @@ Changing this limit ensures that the session, if saved whith
 phpsploit's history uses this value to determine the maximum
 number of command lines to store in session file.
 """
-import objects
+import linebuf
 import datatypes
 
-type = objects.linebuf.MultiLineBuffer
+type = linebuf.MultiLineBuffer
 
 
 def setter(value):

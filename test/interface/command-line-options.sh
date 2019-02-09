@@ -215,7 +215,7 @@ assert_contains $TMPFILE << EOF
  TARGET .* http://$TARGET/$
 EOF
 
-### FAIL is called without argument
+### FAIL if called without argument
 test_opt --target > /dev/null 2> $TMPFILE && FAIL
 assert_cli_error $TMPFILE
 

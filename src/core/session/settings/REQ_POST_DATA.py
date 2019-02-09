@@ -16,11 +16,11 @@ This setting is useful only to specific cases where TARGET URL
 cannot work without it, if you don't need it, or don't know what
 you're doing, you should ignore this setting until you need it.
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.MultiLineBuffer
+type = linebuf.MultiLineBuffer
 
 
 def setter(value):

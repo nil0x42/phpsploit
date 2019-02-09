@@ -15,11 +15,11 @@ due to excess of consecutive HTTP requests.
 > set REQ_INTERVAL 3
 """
 
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.RandLineBuffer
+type = linebuf.RandLineBuffer
 
 
 def setter(value):

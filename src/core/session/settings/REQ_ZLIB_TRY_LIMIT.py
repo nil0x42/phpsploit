@@ -14,11 +14,11 @@ is no more processed by zlib compression. Payloads over this
 value will then be encoded without zlib compression, making them
 bigger, but also a lot faster to generate.
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.RandLineBuffer
+type = linebuf.RandLineBuffer
 
 
 def setter(value):

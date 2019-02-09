@@ -14,39 +14,36 @@ A session instance contains the following objects:
     * File  -> The default file that binds to session
     * Cache -> Remote server response cache
     * Hist  -> Readline history
-
 """
-
 import os
 import re
 import gzip
 import pickle
 import difflib
 
+import metadict
+import utils.path
 import ui.input
 from ui.color import colorize, decolorize
-import objects
 from core import encoding
-import utils.path
 
 from . import settings
 from . import environment
 from . import history
-
 from . import compat_session
 
 SESSION_FILENAME = "phpsploit.session"
 
 
-class Session(objects.MetaDict):
+class Session(metadict.MetaDict):
     """Phpsploit Session
-
     """
+
+    # pylint: disable=invalid-name
     def __init__(self):
         """Instanciate the phpsploit session, it handles configuration
         settings, environment variables, command aliases, http response
         cache and readline history (if readline is available).
-
         """
         # process parent class init
         super().__init__()
@@ -54,8 +51,8 @@ class Session(objects.MetaDict):
         # session objects declaration
         self.Conf = settings.Settings()
         self.Env = {}
-        self.Alias = objects.VarContainer(title="Command Aliases")
-        self.Cache = objects.VarContainer(title="HTTP Response Cache")
+        self.Alias = metadict.VarContainer(title="Command Aliases")
+        self.Cache = metadict.VarContainer(title="HTTP Response Cache")
         self.Hist = history.History()
         self.Compat = {}
         self.File = None

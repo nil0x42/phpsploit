@@ -1,15 +1,18 @@
+"""Advanced dict-like classes for processing phpsploit
+complex session objects.
+"""
+
 from ui.color import colorize
 
 
 class MetaDict(dict):
-    """Metadict() object (by nil0x42)
+    """MetaDict() object
 
-    Instanciate an advanced dict() like datatype, especially
-    made in order to extend PhpSploit session management taste.
+    An advanced dict() like class with advanced features,
+    for phpsploit session objects.
 
-    It may take a dict based object as argument to bind to it.
-    Otherwise, it instanciates itself as an empty dictionnary set.
-
+    Metadict() can be instanciated from a built-in dict().
+    Otherwise, it instanciates itself as en empty directory.
 
     Magic item access
     -----------------
@@ -32,9 +35,10 @@ class MetaDict(dict):
     dict's corresponding item name, like in the folowing
     concrete case:
     >>> obj = MetaDict({'Foo':'bar', 'baz':'qux'})
-    >>> `obj["Foo"]` == `obj.Foo` # those calls are identical
-    >>> `obj["baz"]` != `obj.baz` # "baz" != "baz".capitalize()
-
+    # items whose name _isattr() can be accessed as attributes:
+    >>> assert obj["Foo"]` == obj.Foo
+    # in this example, 'baz' doesn't match _isattr() (capitalize())
+    >>> assert obj["baz"] != obj.baz
 
     Dynamic block display
     ---------------------
@@ -55,48 +59,40 @@ class MetaDict(dict):
 
     """
 
-    def __init__(self, value={}, title=None):
-        # default title
-        self.title = "Metadict() object (by nil0x42)"
-        # update self dict with `value`
+    # pylint: disable=super-init-not-called
+    def __init__(self, value=None, title=None):
+        if value is None:
+            value = {}
         self.update(value)
 
-        # get object's title string
-        if title is not None:
-            self.title = str(title)
-        else:
-            try:
+        if title is None:
+            if self.__doc__:
                 self.title = self.__doc__.splitlines()[0].strip()
-            except:
+            else:
                 self.title = "%s() object" % self.__class__.__name__
+        else:
+            self.title = str(title)
 
     def __getattribute__(self, name):
-        # if _isattr(name), then call self getitem
         if name != "_isattr" and self._isattr(name):
             return self.__getitem__(name)
-
-        # otherwise call parent's getattribute
         return super().__getattribute__(name)
 
     def __setattr__(self, name, value):
-        # if _isattr(name), then call self setitem
         if self._isattr(name):
             return self.__setitem__(name, value)
-
-        # otherwise call parent's setattr
         return super().__setattr__(name, value)
 
     def __dir__(self):
-        # considering the special get/set behavior, the __dir__()
-        # method must also return self item whose name complies
-        # with the self _isattr() boolean function.
+        """considering the special get/set behavior, __dir__() method
+        shall also return self item whose name matches self._isattr().
+        """
         return super().__dir__() + [i for i in self.keys() if self._isattr(i)]
 
-    def _isattr(self, name):
+    def _isattr(self, name): # pylint: disable=unused-argument,no-self-use
         """Determine whether a called attribute name may be
         considered as an item call. By default, it returns False
         anyway, disabling that feature.
-
         """
         return False
 
@@ -105,11 +101,9 @@ class MetaDict(dict):
         return self.__call__()
 
     def __call__(self, pattern=""):
-        """Nicely display self dict's items as a formatted
-        multiline string array.
-        The optionnal argument `pattern` can be used to limit
-        item display to keys whose name starts with it's value.
-
+        """Display self dict's items as a formatted multiline string array.
+        The optionnal argument `pattern` is an optional prefix to only
+        display matching items.
         """
         # get matching vars list
         sing_title = self.title
@@ -122,18 +116,13 @@ class MetaDict(dict):
             msg = "No {} matching «{}»"
             raise ValueError(msg.format(sing_title, pattern))
 
-        # process formatted string
         tpl = ("    {:%s}  {}\n") % max(8, len(max(keys, key=len)))
-
         buffer = self.title + "\n" + ("=" * len(self.title)) + "\n\n"
-
         buffer += tpl.format("Variable", "Value")
         buffer += tpl.format("--------", "-----")
-
-        for id, key in enumerate(sorted(keys)):
-            buffer += colorize(["%Reset", "%Reset"][id % 2],
+        for idx, key in enumerate(sorted(keys)):
+            buffer += colorize(["%Reset", "%Reset"][idx % 2],
                                tpl.format(key, self[key]))
-
         return "\n" + buffer + colorize("%Reset")
 
     def update(self, new):
@@ -142,9 +131,41 @@ class MetaDict(dict):
         __setitem__() method. This is problematic for phpsploit
         session main objects.
         """
-        # let parent handle exception if not a dict
-        if not isinstance(new, dict):
-            return super().update(new)
-        # replace each self item using standard setitem method
-        for key, value in new.items():
-            self[key] = value
+        if isinstance(new, dict):
+            for key, value in new.items():
+                self[key] = value
+        else:
+            super().update(new)
+
+
+class VarContainer(MetaDict):
+    """VarContainer() object
+
+    This class unherits Metadict, and just implements a way to delete
+    items by settings them to a set of magic values (item_deleters)
+
+    >>> obj = VarContainer()
+    >>> obj['KEY'] = "foobar"
+    >>> # in this objects, the two following lines do exactly the same thing:
+    >>> del obj['KEY']
+    >>> obj['KEY'] = "None"
+    """
+    item_deleters = ["", "NONE"]
+
+    def __setitem__(self, name, value):
+        """Unlike parent class MetaDict, setting an item/attribute
+        with a None value, an empy string, or the "none" string
+        removes the item instead of setting it to the wanted value.
+
+        This behavior eases core implementation of environment,
+        aliases, and any phpsploit var container designed for
+        interactive use.
+        """
+        # delete item if its value is empty or None:
+        if isinstance(value, (str, type(None))) and \
+                str(value).upper() in self.item_deleters:
+            # don't try to delete unexisting item
+            if name not in self.keys():
+                return None
+            return self.__delitem__(name)
+        return super().__setitem__(name, value)

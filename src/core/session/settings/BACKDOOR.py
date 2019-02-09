@@ -15,11 +15,11 @@ NOTE: %%PASSKEY%% is a magic string that is replaced by PASSKEY
 
 * Only edit BACKDOOR if you really understand what you're doing
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.linebuf.RandLineBuffer
+type = linebuf.RandLineBuffer
 
 
 def setter(value):

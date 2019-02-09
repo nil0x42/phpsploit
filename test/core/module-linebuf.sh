@@ -18,10 +18,8 @@ IN="$IN"
 OUT="$OUT"
 if [ -f "\$IN" ]; then
     cat "\$IN" > "\$1"
-    rm "\$IN"
+    rm -f "\$IN"
 fi
-echo "\$1"
-cat "\$1"
 cat "\$1" > "\$OUT"
 EOF
 chmod +x $TMPFILE-EDITOR
@@ -66,32 +64,19 @@ function show_val_SAVEPATH () {
 ### test SAVEPATH with valid directory
 mkdir "$TMPFILE-valid-dir"
 echo "$TMPFILE-valid-dir" > $IN
-# shoud not fail
 phpsploit_pipe set SAVEPATH + > $TMPFILE || FAIL
-cat $TMPFILE
 # buffer should contain the new value
-show_val_SAVEPATH > $TMPFILE && assert_contains $TMPFILE $TMPFILE-valid-dir
-
-phpsploit_pipe set EDITOR
-phpsploit_pipe set SAVEPATH
-cat $OUT
-
 phpsploit_pipe set SAVEPATH + > $TMPFILE || FAIL
-cat $TMPFILE
-
-phpsploit_pipe set EDITOR
-phpsploit_pipe set SAVEPATH
-cat $OUT
-
 assert_contains $OUT $TMPFILE-valid-dir
+show_val_SAVEPATH > $TMPFILE && assert_contains $TMPFILE $TMPFILE-valid-dir
 
 ### test SAVEPATH with INVALID directory (old value should remain)
 cat > $IN << EOF
 $TMPFILE-invalid-dir
 EOF
 phpsploit_pipe set SAVEPATH + > $TMPFILE && FAIL
-phpsploit_pipe set SAVEPATH + > $TMPFILE || FAIL
 # buffer should STILL contain old value
+phpsploit_pipe set SAVEPATH + > $TMPFILE || FAIL
 assert_contains $OUT $TMPFILE-valid-dir
 show_val_SAVEPATH > $TMPFILE && assert_contains $TMPFILE $TMPFILE-valid-dir
 

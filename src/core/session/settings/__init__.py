@@ -4,14 +4,15 @@ import re
 import importlib
 
 import core
-import objects
+import metadict
+import linebuf
 
 from ui.color import colorize
 
 DEFAULT_HTTP_USER_AGENT = "file://" + core.BASEDIR + "data/user_agents.lst"
 
 
-class Settings(objects.VarContainer):
+class Settings(metadict.VarContainer):
     """Configuration Settings
 
     Instanciate a dict() like object that stores PhpSploit
@@ -32,6 +33,7 @@ class Settings(objects.VarContainer):
     picked from valid lines.
 
     """
+    # pylint: disable=invalid-name
     def __init__(self):
         """Declare default settings values"""
         super().__init__()
@@ -71,7 +73,7 @@ class Settings(objects.VarContainer):
 
     def __setitem__(self, name, value):
         # if the set value is a *LineBuffer instance, just do it!
-        if isinstance(value, objects.linebuf.AbstractLineBuffer):
+        if isinstance(value, linebuf.AbstractLineBuffer):
             return super().__setitem__(name, value)
 
         name = name.replace('-', '_').upper()
@@ -83,7 +85,7 @@ class Settings(objects.VarContainer):
         # ensure the setting name is allowed
         if name[5:] and name[:5] == "HTTP_":
             # HTTP_* settings have a RandLineBuffer metatype
-            metatype = objects.linebuf.RandLineBuffer
+            metatype = linebuf.RandLineBuffer
             # setter = self._set_HTTP_header
             setter = str
             info = self._get_HTTP_header_info(name[5:])
