@@ -68,11 +68,10 @@ class AbstractSessionLoader:
     def _load_file(self, session_path):
         """default file loader
         """
-        file = open(session_path, 'rb')
-        dump = pickle.load(file,
-                           encoding=encoding.default_encoding,
-                           errors=encoding.default_errors)
-        return dump
+        with open(session_path, 'rb') as file:
+            return pickle.load(file,
+                               encoding=encoding.default_encoding,
+                               errors=encoding.default_errors)
 
 
 class Loader_V1_x(AbstractSessionLoader):

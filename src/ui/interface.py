@@ -621,10 +621,11 @@ class Shell(shnake.Shell):
             source_file = argv[2]
         else:
             return self.interpret("help source")
+
         source_file = utils.path.truepath(source_file)
-        data = open(source_file, 'r').read()
-        ret = self.interpret(data, fatal_errors=abort_on_error)
-        return ret
+        with open(source_file, 'r') as file:
+            data = file.read()
+        return self.interpret(data, fatal_errors=abort_on_error)
 
     ################
     # COMMAND: set #

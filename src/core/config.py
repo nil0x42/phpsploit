@@ -72,12 +72,16 @@ class UserDir:
         # put default config if not exists
         config = utils.path.truepath(self.path, "config")
         if not os.path.isfile(config):
-            default_config = open(BASEDIR + "data/config/config").read()
-            open(config, "w").write(default_config)
+            with open(BASEDIR + "data/config/config") as file:
+                default_config = file.read()
+            with open(config, 'w') as file:
+                file.write(default_config)
 
         # overwrite ./README
-        readme = open(BASEDIR + "data/config/README").read()
-        open(utils.path.truepath(self.path, "README"), "w").write(readme)
+        with open(BASEDIR + "data/config/README") as file:
+            readme = file.read()
+        with open(utils.path.truepath(self.path, "README"), "w") as file:
+            file.write(readme)
 
         # mkdirs
         dirs = ["plugins"]
