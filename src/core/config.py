@@ -2,37 +2,35 @@
 
 Browse, initialize and load PhpSploit framework user
 configuration directory and elements.
-
 """
-
 import os
 import errno
 
 import utils.path
-from . import BASEDIR
 from datatypes import Path
+from . import BASEDIR
 
 
-class UserDir:
-
+class UserDir: # pylint: disable=too-few-public-methods
+    """PhpSploit Configuration Directory
+    """
     path = None
     choices = ["~/.config/phpsploit", "~/.phpsploit"]
 
     def __init__(self):
-        """Return the PhpSploit user directory.
-        The following try order is used:
-            0 - $PHPSPLOIT_CONFIG_DIR/ (only if env var exists)
-            1 - $XDG_CONFIG_HOME/phpsploit/ (only if env var exists)
-            2 - ~/.config/phpsploit/
-            3 - ~/.phpsploit/
+        """Get phpsploit configuration directory,
+        by checking, in this order of preference:
+          - $PHPSPLOIT_CONFIG_DIR/ (only if env var exists)
+          - $XDG_CONFIG_HOME/phpsploit/ (only if env var exists)
+          - ~/.config/phpsploit/
+          - ~/.phpsploit/
 
-        If no one exists, an mkdir is tried for each one in the
-        same order than the previous. Mkdir is not recursive,
-        meaning that parent must already exist.
+        If non of the above exist, directory creation is attempted
+        with the same order of preference. Directory creation is not
+        recursive, to parent directory must exist.
 
-        If no USERDIR can be determined, a ValueError concerning
-        last possible choice (~/.phpsploit/) is raised.
-
+        If USERDIR cannot be determined, a ValueError mentioning
+        last tried choice (~/.phpsploit/) is raised.
         """
         if os.environ.get("XDG_CONFIG_HOME"):
             self.choices.insert(0, "$XDG_CONFIG_HOME/phpsploit")
@@ -40,28 +38,27 @@ class UserDir:
         if os.environ.get("PHPSPLOIT_CONFIG_DIR"):
             self.choices.insert(0, "$PHPSPLOIT_CONFIG_DIR/")
 
-        # normalize choices paths
         self.choices = [utils.path.truepath(c) for c in self.choices]
 
-        # set self.path if user directory already exist
+        # try to find existing USERDIR
         for choice in self.choices:
             try:
                 self.path = Path(choice, mode="drw")()
                 break
-            except:
+            except ValueError:
                 pass
 
-        # try to create it otherwise, raise err if fails
+        # try to create new valid USERDIR
         if self.path is None:
             for choice in self.choices:
                 try:
                     os.mkdir(choice)
-                except:
+                except OSError:
                     pass
                 try:
                     self.path = Path(choice, mode="drw")
                     break
-                except Exception as e:
+                except ValueError as e:
                     if choice == self.choices[-1]:
                         raise e
 
@@ -69,7 +66,8 @@ class UserDir:
 
     def fill(self):
         """Add user configuration dir's default content."""
-        # put default config if not exists
+
+        # create default $USERDIR/config if it doesn't exist
         config = utils.path.truepath(self.path, "config")
         if not os.path.isfile(config):
             with open(BASEDIR + "data/config/config") as file:
@@ -77,19 +75,19 @@ class UserDir:
             with open(config, 'w') as file:
                 file.write(default_config)
 
-        # overwrite ./README
+        # always override $USERDIR/README
         with open(BASEDIR + "data/config/README") as file:
             readme = file.read()
         with open(utils.path.truepath(self.path, "README"), "w") as file:
             file.write(readme)
 
-        # mkdirs
+        # create $USERDIR/plugins/ it doesn;t exist
         dirs = ["plugins"]
         for elem in dirs:
             elem = utils.path.truepath(self.path, elem)
             try:
                 os.mkdir(elem)
-            except (OSError, IOError) as e:
+            except OSError as e:
                 if e.errno != errno.EEXIST or not os.path.isdir(elem):
                     raise e
 
