@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPTDIR="$(readlink -f `dirname $0`)"
-BASEDIR="$(git -C \"$SCRIPTDIR\" rev-parse --show-toplevel)"
+BASEDIR="$(git -C "$SCRIPTDIR" rev-parse --show-toplevel)"
 
 # add ./src & ./deps/*/ to PYTHONPATH
 src="$BASEDIR/src"
