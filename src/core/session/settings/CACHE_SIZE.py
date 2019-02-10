@@ -13,10 +13,10 @@ number of command lines to store in session file.
 import linebuf
 import datatypes
 
-type = linebuf.MultiLineBuffer
+linebuf_type = linebuf.MultiLineBuffer
 
 
-def setter(value):
+def validator(value):
     return datatypes.ByteSize(value)
 
 

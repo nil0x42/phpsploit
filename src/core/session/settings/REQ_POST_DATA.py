@@ -17,13 +17,12 @@ cannot work without it, if you don't need it, or don't know what
 you're doing, you should ignore this setting until you need it.
 """
 import linebuf
-import datatypes
 
 
-type = linebuf.MultiLineBuffer
+linebuf_type = linebuf.MultiLineBuffer
 
 
-def setter(value):
+def validator(value):
     return str(value)
 
 

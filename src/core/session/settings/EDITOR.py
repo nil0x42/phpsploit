@@ -10,15 +10,14 @@ Set attacker's prefered text editor.
 > edit /var/www/html/index.php
 """
 import os
-import sys
 import linebuf
 import datatypes
 
 
-type = linebuf.MultiLineBuffer
+linebuf_type = linebuf.MultiLineBuffer
 
 
-def setter(value):
+def validator(value):
     return datatypes.ShellCmd(value)
 
 

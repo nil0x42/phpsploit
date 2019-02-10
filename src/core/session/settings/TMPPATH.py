@@ -10,10 +10,10 @@ import linebuf
 import datatypes
 
 
-type = linebuf.MultiLineBuffer
+linebuf_type = linebuf.MultiLineBuffer
 
 
-def setter(value):
+def validator(value):
     return datatypes.Path(value, mode="drw")
 
 
