@@ -4,3 +4,4 @@ exclude_paths:
   - 'test/**'
   - 'utils/**'
   - 'data/**'
+  - 'man/**'

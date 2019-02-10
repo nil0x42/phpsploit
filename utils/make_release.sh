@@ -2,8 +2,8 @@
 
 # Run this script to create a new release of phpsploit
 
-SCRIPTDIR="$(realpath `dirname $0`)"
-cd `git rev-parse --show-toplevel`
+SCRIPTDIR="$(readlink -f `dirname $0`)"
+cd "$(git rev-parse --show-toplevel)"
 
 # colors
 RED='\033[0;31m'
@@ -25,7 +25,7 @@ fi
 
 
 # check current branch is master
-cur_branch="`git rev-parse --abbrev-ref HEAD`"
+cur_branch="$(git rev-parse --abbrev-ref HEAD)"
 if [ "$cur_branch" != "master" ]; then
     >&2 echo -e "\n${RED}[-] Please checkout on master branch:${NC}"
     >&2 echo -e "    ${GREEN}git checkout master${NC}"
@@ -81,7 +81,7 @@ require_clean_work_tree () {
     fi
 }
 require_clean_work_tree
-if [ -n "`git status --porcelain`" ]; then
+if [ -n "$(git status --porcelain)" ]; then
     >&2 echo -e "\n${RED}[-] Please commit or stash untracked files${NC}"
     >&2 echo -e "    ${GREEN}git status${NC}"
     exit 1
@@ -89,8 +89,8 @@ fi
 
 
 # check nothing to pull
-local_head="`git rev-parse HEAD`"
-remote_head="`git ls-remote origin master | cut -f1`"
+local_head="$(git rev-parse HEAD)"
+remote_head="$(git ls-remote origin master | cut -f1)"
 if [ "$local_head" != "$remote_head" ]; then
     >&2 echo -e "\n${RED}[-] Local branch != remote, please pull or push:${NC}"
     >&2 echo -e "    ${GREEN}git pull; git push${NC}"
