@@ -42,6 +42,15 @@ if ! which "$gh_changelog_gen" >/dev/null; then
     exit 1
 fi
 
+# check existence of `remark` tool
+# needed to generate CHANGELOG.md
+remark="remark"
+if ! which "$remark" >/dev/null; then
+    >&2 echo -e "\n${RED}[-] Please install '$remark':${NC}"
+    >&2 echo -e "    ${GREEN}sudo npm install -g remark-cli remark-preset-lint-recommended${NC}"
+    exit 1
+fi
+
 
 # check existence of `txt2tags` tool
 # needed to run ./man/update-man.sh
@@ -115,6 +124,7 @@ git add ./phpsploit
 
 # generate CHANGELOG.md
 github_changelog_generator --future-release ${TAG}
+remark CHANGELOG.md -o
 git add ./CHANGELOG.md
 
 # update man page
