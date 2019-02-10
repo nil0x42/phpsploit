@@ -19,10 +19,10 @@ import linebuf
 import datatypes
 
 
-type = linebuf.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
 
-def setter(value):
+def validator(value):
     if value.find("%%PASSKEY%%") < 0:
         raise ValueError("shall contain %%PASSKEY%% string")
     return datatypes.PhpCode(value)

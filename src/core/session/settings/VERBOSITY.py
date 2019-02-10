@@ -5,10 +5,10 @@ import linebuf
 import datatypes
 
 
-type = linebuf.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
 
-def setter(value):
+def validator(value):
     return datatypes.Boolean(value)
 
 

@@ -18,10 +18,10 @@ import linebuf
 import datatypes
 
 
-type = linebuf.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
 
-def setter(value):
+def validator(value):
     value = datatypes.ByteSize(value)
     if value < 1:
         raise ValueError("must be a positive bytes number")

@@ -28,10 +28,10 @@ import re
 import linebuf
 
 
-type = linebuf.MultiLineBuffer
+linebuf_type = linebuf.MultiLineBuffer
 
 
-def setter(value):
+def validator(value):
     value = str(value)
     reserved_headers = ['host', 'accept-encoding', 'connection',
                         'user-agent', 'content-type', 'content-length']

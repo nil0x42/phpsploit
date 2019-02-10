@@ -1,3 +1,5 @@
+"""Phpsploit Configuration Settings"""
+
 import os
 import sys
 import re
@@ -12,6 +14,7 @@ from ui.color import colorize
 DEFAULT_HTTP_USER_AGENT = "file://" + core.BASEDIR + "data/user_agents.lst"
 
 
+# pylint: disable=too-many-instance-attributes
 class Settings(metadict.VarContainer):
     """Configuration Settings
 
@@ -77,25 +80,22 @@ class Settings(metadict.VarContainer):
             return super().__setitem__(name, value)
 
         name = name.replace('-', '_').upper()
-
-        # ensure the setting name has good syntax
         if not self._isattr(name):
             raise KeyError("illegal name: '{}'".format(name))
 
-        # ensure the setting name is allowed
         if name[5:] and name[:5] == "HTTP_":
-            # HTTP_* settings have a RandLineBuffer metatype
-            metatype = linebuf.RandLineBuffer
-            # setter = self._set_HTTP_header
-            setter = str
+            # HTTP_* settings have a RandLineBuffer linebuf_type
+            linebuf_type = linebuf.RandLineBuffer
+            # validator = self._set_HTTP_header
+            validator = str
             info = self._get_HTTP_header_info(name[5:])
             # allow removal of custom HTTP_ settings, except for user agent.
             if name != "HTTP_USER_AGENT" and \
                     str(value).upper() in ["", "NONE", "%%DEFAULT%%"]:
                 return super().__setitem__(name, value)
         elif name in self._settings.keys():
-            metatype = getattr(self._settings[name], "type")
-            setter = getattr(self._settings[name], "setter")
+            linebuf_type = getattr(self._settings[name], "linebuf_type")
+            validator = getattr(self._settings[name], "validator")
             default = getattr(self._settings[name], "default_value")
             info = getattr(self._settings[name], "__doc__")
         else:
@@ -107,18 +107,18 @@ class Settings(metadict.VarContainer):
             if value == "%%DEFAULT%%":
                 value = DEFAULT_HTTP_USER_AGENT
             try:
-                value = metatype(value, setter)
+                value = linebuf_type(value, validator)
             except ValueError:
                 alt_file = value[7:]
                 alt_buff = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
-                value = metatype((alt_file, alt_buff), setter)
+                value = linebuf_type((alt_file, alt_buff), validator)
         else:
             if value == "%%DEFAULT%%":
                 value = default()
-            value = metatype(value, setter)
+            value = linebuf_type(value, validator)
 
         # add docstring attribute to setting
-        value.docstring = self.format_docstring(name, metatype, info)
+        value.docstring = self.format_docstring(name, linebuf_type, info)
         # use grandparent class (bypass parent's None feature)
         dict.__setitem__(self, name, value)
 
@@ -154,7 +154,7 @@ class Settings(metadict.VarContainer):
         return result
 
     @staticmethod
-    def format_docstring(name, metatype, desc):
+    def format_docstring(name, linebuf_type, desc):
         """formet help docstring per settings
         """
         indent = lambda buf: buf.strip().replace("\n", "\n    ")
@@ -167,7 +167,7 @@ class Settings(metadict.VarContainer):
                "    {objtype!r}\n"
                "\n"
                "    {typedesc}")
-        typedesc = metatype.desc.format(var=colorize("%Lined", name))
+        typedesc = linebuf_type.desc.format(var=colorize("%Lined", name))
         return doc.format(description=indent(desc),
-                          objtype=metatype,
+                          objtype=linebuf_type,
                           typedesc=typedesc.strip())

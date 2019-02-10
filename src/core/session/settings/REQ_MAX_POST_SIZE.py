@@ -23,9 +23,9 @@ import linebuf
 import datatypes
 
 
-type = linebuf.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
-def setter(value):
+def validator(value):
     value = datatypes.ByteSize(value)
     if 250 > value:
         raise ValueError("can't be less than 250 bytes")

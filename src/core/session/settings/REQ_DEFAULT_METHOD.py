@@ -39,10 +39,10 @@ to send HTTP requests
 import linebuf
 
 
-type = linebuf.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
 
-def setter(value):
+def validator(value):
     value = value.upper()
     if value not in ["GET", "POST"]:
         raise ValueError("available methods: GET/POST")

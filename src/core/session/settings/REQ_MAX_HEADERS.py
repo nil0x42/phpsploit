@@ -21,10 +21,10 @@ http://httpd.apache.org/docs/2.2/mod/core.html#LimitRequestFieldSize
 import linebuf
 
 
-type = linebuf.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
 
-def setter(value):
+def validator(value):
     if 10 <= int(value) <= 680:
         return int(value)
     raise ValueError("must be an integer from 10 to 680")

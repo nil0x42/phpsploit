@@ -12,10 +12,10 @@ import linebuf
 import datatypes
 
 
-type = linebuf.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
 
-def setter(value):
+def validator(value):
     if str(value).lower() in ["", "none"]:
         return default_value()
     else:
