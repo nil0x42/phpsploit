@@ -177,16 +177,16 @@ class Path(str):
         containing file data is returned instead of str().
 
         """
-        if not bin_mode:
+        if bin_mode:
+            with open(self, 'rb') as file:
+                return file.read()
+        else:
             try:
                 lines = self.readlines()
-                data = os.linesep.join(lines)
-                return data
+                return os.linesep.join(lines)
             except UnicodeDecodeError:
                 bytestring = self.read(bin_mode=True)
                 return encoding.decode(bytestring)
-        elif bin_mode:
-            return open(self, 'rb').read()
 
     def write(self, data, bin_mode=False):
         """Write `data` to the file path.
@@ -211,7 +211,8 @@ class Path(str):
 
                 lines = data.splitlines()
                 data = os.linesep.join(lines)
-                open(self, 'w').write(data)
+                with open(self, 'w') as file:
+                    file.write(data)
                 return
             except UnicodeDecodeError:
                 bin_mode = True
@@ -223,7 +224,8 @@ class Path(str):
             # otherwise, try to convert to bytes()
             elif not isinstance(data, bytes):
                 data = bytes(data)
-            open(self, 'wb').write(data)
+            with open(self, 'wb') as file:
+                file.write(data)
             return
 
     def readlines(self):
@@ -232,7 +234,8 @@ class Path(str):
         NOTE: The lines are returned without newline char(s).
 
         """
-        return open(self, 'r').read().splitlines()
+        with open(self, 'r') as file:
+            return file.read().splitlines()
 
     def phpcode(self):
         """Get minified php code from file.

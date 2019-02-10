@@ -103,7 +103,8 @@ class AbstractLineBuffer(ABC):
         elif value[7:] and value[:7].lower() == "file://":
             self.file = utils.path.truepath(value[7:])
             try:
-                self.buffer = open(self.file, 'r').read()
+                with open(self.file, 'r') as file:
+                    self.buffer = file.read()
             except OSError:
                 raise ValueError("not a readable file: «%s»" % self.file)
         # if value is just a string
@@ -184,7 +185,8 @@ class AbstractLineBuffer(ABC):
         """
         if name == "buffer" and self.file:
             try:
-                buffer = open(self.file, 'r').read()
+                with open(self.file, 'r') as file:
+                    buffer = file.read()
                 if self._buffer_is_valid(buffer):
                     self.buffer = buffer
             except OSError:
