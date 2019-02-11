@@ -220,11 +220,12 @@ rm -f $IN-2
 # BACKDOOR repr should say '4 choices':
 phpsploit_pipe set BACKDOOR > $TMPFILE || FAIL
 assert_contains $TMPFILE '<RandLine@.* (4 choices)>$'
-# try to show_val 20 times, and make sure all 4 choices where picked as *usable-value
-> $TMPFILE
-for i in {1..20}; do
-    show_val_BACKDOOR | grep '^<?php' >> $TMPFILE
+# try to show_val 50 times, and make sure all 4 choices where picked as *usable-value
+buf=""
+for i in {1..50}; do
+    buf="$buf exploit --get-backdoor;"
 done
+phpsploit_pipe "$buf" | grep '^<?php' > $TMPFILE
 assert_contains $TMPFILE << EOF
 choice1
 choice2
