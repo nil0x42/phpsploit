@@ -1,5 +1,6 @@
-"""Run a python console at phpsploit runtime
+"""Run a python console at runtime from Phpsploit
 """
+__all__ = ["Console"]
 
 import traceback
 # alias exit() to prevent I/O fd closure bug on Console() interpreter
@@ -7,7 +8,6 @@ import traceback
 from sys import exit
 
 from ui.color import colorize
-from decorators.isolate_io_context import isolate_io_context
 from decorators.isolate_readline_context import isolate_readline_context
 
 

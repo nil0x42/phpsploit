@@ -1,4 +1,5 @@
-"""Provide access to attributes of triggering plugin"""
+"""Provide access to attributes of currently running plugin"""
+__all__ = ["plugin"]
 
 import re
 from core import plugins

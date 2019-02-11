@@ -1,5 +1,8 @@
-import re # usd by colorize(), decolorize()
-import difflib # used by diff()
+"""ANSI Terminal colors handler"""
+__all__ = ["colorize", "decolorize", "diff"]
+
+import re
+import difflib
 
 ANSI = {"reset":  "\x1b[0m",    # reset everything
         "bold":   "\x1b[1m",    # bold/bright style

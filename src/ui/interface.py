@@ -1,11 +1,10 @@
-"""PhpSploit shell interface.
+"""PhpSploit shell interface
 
-Unheriting the shnake's Shell class, the PhpSploit shell interface
-provides interactive use of commands.
-
+Handles general behavior of Phpsploit interactive command-line interface.
 """
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-public-methods
+__all__ = ["Shell"]
 
 import os
 import traceback
@@ -83,17 +82,16 @@ class Shell(shnake.Shell):
             print("[-]          please upgrade $TARGET with new $BACKDOOR")
             print("[-]          and run `session upgrade` when done.")
             print("")
-        print("[#] %s: Running..." % debug_cmdrepr(argv))
+        print("[#] %s: Running..." % self.debug_cmdrepr(argv))
         return super().onecmd(argv)
 
     def postcmd(self, retval, argv):
         """Post command hook
 
-        - Redraw shell prompt
-
+        Redraw shell prompt
         """
         int_retval = self.return_errcode(retval)
-        print("[#] %s: Returned %d" % (debug_cmdrepr(argv), int_retval))
+        print("[#] %s: Returned %d" % (self.debug_cmdrepr(argv), int_retval))
         # redraw shell prompt after each command
         prompt_elems = ["%Lined", "phpsploit"]
         if tunnel:
@@ -1093,17 +1091,17 @@ class Shell(shnake.Shell):
             exception.args += ("«{}»".format(exception.filename),)
         return exception
 
-
-def debug_cmdrepr(argv):
-    """Returns a nice representation of given command arguments
-    """
-    cmdrepr = []
-    for arg in argv:
-        if not isinstance(arg, str):
-            continue
-        argrepr = repr(arg)
-        sep = argrepr[0], argrepr[-1]
-        argrepr = argrepr[1:-1].join(colorize("%DimCyan", "%Reset"))
-        cmdrepr.append(sep[0] + argrepr + sep[1])
-    args = " ".join(cmdrepr)
-    return colorize("%BoldCyan", "CMD(", "%Reset", args, "%BoldCyan", ")")
+    @staticmethod
+    def debug_cmdrepr(argv):
+        """Returns a nice representation of given command arguments
+        """
+        cmdrepr = []
+        for arg in argv:
+            if not isinstance(arg, str):
+                continue
+            argrepr = repr(arg)
+            sep = argrepr[0], argrepr[-1]
+            argrepr = argrepr[1:-1].join(colorize("%DimCyan", "%Reset"))
+            cmdrepr.append(sep[0] + argrepr + sep[1])
+        args = " ".join(cmdrepr)
+        return colorize("%BoldCyan", "CMD(", "%Reset", args, "%BoldCyan", ")")
