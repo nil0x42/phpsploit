@@ -59,13 +59,13 @@ def build_parser():
                    help="use alternative configuration file",
                    metavar="<FILE>")
     p.add_argument('-l', '--load',
-                   help="load the given session file",
+                   help="load session file",
                    metavar="<SESSION>")
     p.add_argument('-t', '--target',
-                   help="use the given URL as remote target",
+                   help="set remote TARGET URL",
                    metavar="<URL>")
     p.add_argument('-s', '--source',
-                   help="execute commands file (disables interactive mode)",
+                   help="run commands from file (disables interactive mode)",
                    metavar="<FILE>")
     p.add_argument('-e', '--eval',
                    help="run phpsploit command (disables interactive mode)",
@@ -76,7 +76,7 @@ def build_parser():
     return p
 
 
-def run_process(cmd):
+def run_process(cmd: list) -> str:
     """get output of given shell command"""
     child = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.DEVNULL)
     streamdata = child.communicate()[0]
@@ -85,13 +85,13 @@ def run_process(cmd):
     return streamdata.decode("utf-8").strip()
 
 
-def rand_message():
+def rand_message() -> str:
     """return a random funny message"""
     msg_list = Path(src.BASEDIR + "data/messages.lst").readlines()
     return random.choice(msg_list).strip()
 
 
-def cmdrun(iface, cmdobj, show_err=False):
+def cmdrun(iface, cmdobj, show_err=False) -> int:
     """run a phpsploit command
     handle syntax errors & return command's retcode
     """
@@ -105,7 +105,7 @@ def cmdrun(iface, cmdobj, show_err=False):
 
 
 # pylint: disable=too-many-branches
-def main():
+def main() -> int:
     """phpsploit's main function
     """
     # Make phpsploit usable as shebang for scripting
