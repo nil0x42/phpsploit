@@ -9,9 +9,6 @@
 # THIS CODE IS EXECUTED WHEN THIS SCRIPT
 # IS CALLED TO RUN A SINGLE TEST (from function execute_script())
 #####
-function FAIL () {
-    exit 1
-}
 function print_info () {
     echo -e "\033[0m\033[1;34m[*]\033[0;36m $@\033[0m"
 }
@@ -20,6 +17,10 @@ function print_good () {
 }
 function print_bad () {
     echo -e "\033[0m\033[1;31m[-]\033[0;31m $@\033[0m"
+}
+function FAIL () {
+    [ -n "$1" ] && print_bad "$1"
+    exit 1
 }
 function print_fail () {
     print_bad "\033[1;31mERROR\033[0;31m: $@"
