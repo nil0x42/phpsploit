@@ -64,6 +64,10 @@ function assert_not_contains () {
         done
     fi
 }
+# remove ANSI colors from ARGV1 file
+function decolorize () {
+    sed -ri "s/\x01?\x1B\[(([0-9]+)(;[0-9]+)*)?m\x02?//g" "$1"
+}
 function exit_script () {
     ret=$?
     [ -n "$phpsploit_pid" ] && kill $phpsploit_pid

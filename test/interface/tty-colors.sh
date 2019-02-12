@@ -37,5 +37,5 @@ ansi_colors=$(grep -v BACKDOOR $TMPFILE-2 | grep HTTP_PHPSPL01T \
 [ "$ansi_colors" -lt 9 ] && FAIL "got only $ansi_colors ansi colors"
 
 # both should be equal after removing ansi colors
-sed -ri "s/\x01?\x1B\[(([0-9]+)(;[0-9]+)*)?m\x02?//g" $TMPFILE-2
+decolorize $TMPFILE-2
 diff $TMPFILE $TMPFILE-2 || FAIL
