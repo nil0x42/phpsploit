@@ -189,4 +189,11 @@ def main() -> int:
 if __name__ == "__main__":
     sys.exit(main())
 else:
-    sys.exit('[-] PhpSploit must be run with the provided script')
+    def check_import():
+        """check whether this file is imported for a CI test"""
+        launcher = os.path.abspath(__file__)
+        test_dir = os.path.join(os.path.dirname(launcher), "test/")
+        caller = os.path.abspath(sys.argv[0])
+        if not caller.startswith(test_dir):
+            sys.exit('[-] Phpsploit must be run from launcher: ' + launcher)
+    check_import()
