@@ -147,7 +147,7 @@ cat > $TMPFILE-conf << EOF
 # valid comment
   # valid comment
 alias test_alias 'lrun true' # valid comment
-INVALID_COMMAND # this command should fail
+session load / # THIS COMMAND SHOULD FAIL
 set EDITOR test_set
 EOF
 
@@ -214,6 +214,10 @@ $PHPSPLOIT -t $TARGET -e "set" > $TMPFILE
 assert_contains $TMPFILE << EOF
  TARGET .* http://$TARGET/$
 EOF
+
+### FAIL if called with INVALID target
+test_opt --target / > /dev/null 2> $TMPFILE && FAIL
+assert_cli_error $TMPFILE
 
 ### FAIL if called without argument
 test_opt --target > /dev/null 2> $TMPFILE && FAIL
