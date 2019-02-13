@@ -7,7 +7,7 @@
 ###
 ### Early Ctrl-C interrupt (SIGINT)
 ###
-timeout -s INT 0.1 $RAW_PHPSPLOIT --help > $TMPFILE-out 2> $TMPFILE
+timeout -s INT 0.05 $RAW_PHPSPLOIT --help > $TMPFILE-out 2> $TMPFILE
 assert_contains $TMPFILE "\[-\] .* initialization interrupted$"
 rm $TMPFILE-out
 

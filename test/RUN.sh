@@ -19,12 +19,21 @@ function print_bad () {
     echo -e "\033[0m\033[1;31m[-]\033[0;31m $@\033[0m"
 }
 function FAIL () {
-    [ -n "$1" ] && print_bad "$1"
+    set +v
+    local file="${BASH_SOURCE[1]}"
+    local lineno=$BASH_LINENO
+    local line="$(sed -n ${BASH_LINENO}p "${BASH_SOURCE[1]}")"
+
+    print_bad "\033[1;31m"============================================================
+    print_bad "\033[1;31mTEST FAILED\033[0;31m"
+    print_bad "\033[1;31mFILE:\033[0;31m $file:$lineno"
+    print_bad "\033[1;31mLINE:\033[0;31m $line"
+    if [ $# -gt 0 ]; then
+        # local repr=$(grep -oP "(?<= FAIL ).+"
+        local repr="${line##* FAIL }"
+        print_bad "\033[1;31m$repr:\033[0;31m $@"
+    fi
     exit 1
-}
-function print_fail () {
-    print_bad "\033[1;31mERROR\033[0;31m: $@"
-    FAIL
 }
 function print_env () {
     [ -z "${!1}" ] && return
@@ -41,12 +50,10 @@ function faketty () {
 function assert_contains () {
     if [ -n "$2" ]; then
         local match="$2"
-        grep -q -- "$match" "$1" \
-            || print_fail "grep -q -- '$match' '$1'"
+        grep -q -- "$match" "$1" || FAIL $match / $1
     else
         while IFS= read -r match; do 
-            grep -q -- "$match" "$1" \
-                || print_fail "grep -q -- '$match' '$1'"
+            grep -q -- "$match" "$1" || FAIL $match / $1
         done
     fi
 }
@@ -55,12 +62,10 @@ function assert_contains () {
 function assert_not_contains () {
     if [ -n "$2" ]; then
         local match="$2"
-        ! grep -q -- "$match" "$1" \
-            || print_fail "! grep -q -- '$match' '$1'"
+        ! grep -q -- "$match" "$1" || FAIL $match / $1
     else
         while IFS= read -r match; do 
-            ! grep -q -- "$match" "$1" \
-                || print_fail "! grep -q -- '$match' '$1'"
+            ! grep -q -- "$match" "$1" || FAIL $match / $1
         done
     fi
 }
@@ -73,9 +78,10 @@ function exit_script () {
     [ -n "$phpsploit_pid" ] && kill $phpsploit_pid
     [ $ret -eq 0 ] && return # ignore if return value == 0
     files=$(find $TMPDIR -type f -name "`basename $TMPFILE`"'*')
-    print_bad 'Displaying $TMPFILE*:'
     for file in $files; do
-        echo -e "\n==> $file <=="
+        varname="${file/$TMPFILE/\$TMPFILE}"
+        print_bad "\033[1;31m"------------------------------------------------------------
+        print_bad "\033[1;31mcat $varname\033[0;31m ($file):"
         cat "$file"
     done
     # tail -n+1 /dev/null $files | tail -n+3
@@ -207,7 +213,7 @@ export PHPSPLOIT="$ROOTDIR/phpsploit"
 if [ -n "$COVERAGE" ]; then
     export COVERAGE_RCFILE="$ROOTDIR/.coveragerc"
     export COVERAGE_FILE="$ROOTDIR/.coverage"
-    rm -f "$COVERAGE_FILE"
+    rm -f $COVERAGE_FILE $COVERAGE_FILE.*
     export PHPSPLOIT="coverage run --rcfile=$COVERAGE_RCFILE $PHPSPLOIT"
 fi
 
