@@ -151,7 +151,7 @@ def main() -> int:
                      % opt['config'])
     elif interactive and ui.output.isatty():
         logo = Path(src.BASEDIR + "data/logo.ascii").read()
-        cmdrun(iface, "clear")
+        cmdrun(iface, "lrun clear")
         print(logo + '\n\n')
         print(colorize("%Bold", "# Stealth post-exploitation framework\n"))
         print(colorize("%DimWhite", rand_message()))
