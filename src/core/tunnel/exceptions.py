@@ -1,12 +1,11 @@
 """Phpsploit requests and tunnel exceptions
-
 """
+__all__ = ["BuildError", "RequestError", "ResponseError"]
 
 
 class TunnelException(Exception):
-    """Parent class for tunnel exception types"""
-
-    pass
+    """Parent class for tunnel exception types
+    """
 
 
 class BuildError(TunnelException):
@@ -16,10 +15,7 @@ class BuildError(TunnelException):
     something during the request crafting process fails.
 
     Used by the tunnel.handler.Request().Build() method.
-
     """
-
-    pass
 
 
 class RequestError(TunnelException):
@@ -28,11 +24,8 @@ class RequestError(TunnelException):
     This exception is raised by the tunnel handler if
     something fails while sending phpsploit requests.
 
-    Used by the tunnel.handler.Request().Send() method.
-
+    Used by the tunnel.handler.Request.Send() method.
     """
-
-    pass
 
 
 class ResponseError(TunnelException):
@@ -42,8 +35,5 @@ class ResponseError(TunnelException):
     the process of payload response extraction within
     the HTTP response fails.
 
-    Used by the tunnel.handler.Request().Read() method.
-
+    Used by the tunnel.handler.Request.Read() method.
     """
-
-    pass
