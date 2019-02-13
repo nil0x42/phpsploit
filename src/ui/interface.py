@@ -392,23 +392,6 @@ class Shell(shnake.Shell):
 
         return tunnel.open()  # it raises exception if fails
 
-    ##################
-    # COMMAND: clear #
-    @staticmethod
-    # pylint: disable=unused-argument
-    def do_clear(argv):
-        """Clear the terminal screen
-
-        SYNOPSIS:
-            clear
-
-        DESCRIPTION:
-            Clear the terminal screen. This command
-            is interesting for visibility purposes only.
-        """
-        if ui.output.isatty():
-            os.system('clear')
-
     #################
     # COMMAND: rtfm #
     @staticmethod
