@@ -8,8 +8,6 @@ __all__ = ["Shell"]
 
 import os
 import traceback
-import subprocess
-
 import shnake
 
 import core
@@ -575,18 +573,15 @@ class Shell(shnake.Shell):
         """
         if len(argv) == 1:
             self.interpret("help lrun")
-            return
+            return False
 
         cmd = " ".join(argv[1:])
-
-        if argv[1] != "exit":
-            tmpfile = Path()
-            postcmd = " ; pwd >'%s' 2>&1" % tmpfile
-            subprocess.call(cmd + postcmd, shell=True)
-            try:
-                os.chdir(tmpfile.read())
-            finally:
-                del tmpfile
+        tmpfile = Path()
+        postcmd = "\nret=$?; pwd >'%s' 2>&1; exit $ret" % tmpfile
+        ret = os.system(cmd + postcmd) >> 8
+        if os.stat(tmpfile).st_size > 0:
+            os.chdir(tmpfile.read())
+        return ret
 
     ###################
     # COMMAND: source #
