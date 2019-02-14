@@ -350,20 +350,15 @@ class Shell(shnake.Shell):
             exploit [--get-backdoor]
 
         DESCRIPTION:
-            This command send an HTTP request to the remote server
-            url (defined by the $TARGET setting).
-            If $TARGET is correctly backdoored with the
-            phpsploit backdoor, the request remotely executes
-            the session opener in order to retrieve environment
-            variables, and spawn the phpsploit remote shell.
+            Connect to remote target URL (`help set TARGET`).
+
+            If backdoor (`exploit --get-backdoor`) is correctly
+            injected in target URL, phpsploit spawns a remote shell.
 
         OPTIONS:
             --get-backdoor
-                Only display current backdoor, as it should be
-                injected on the current or future target url.
-
-            NOTE: The $TARGET setting should be a valid http(s) url,
-            previously infected with the phpsploit backdoor.
+                Display current backdoor code, as it should be
+                injected on target URL.
         """
         obj = str(session.Conf.BACKDOOR(call=False))
         obj = obj.replace("%%PASSKEY%%", session.Conf.PASSKEY().upper())
