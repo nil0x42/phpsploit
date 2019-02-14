@@ -178,7 +178,7 @@ class Stdout:
         line = colorize(*tag) + line[len(tag[1]):]
 
         # colorize «*» patterns from tagged line:
-        dye = lambda obj: colorize('%White', "« " + obj.group(1) + " »")
+        dye = lambda obj: colorize('%White', repr(obj.group(1)))
         line = re.sub('«(.+?)»', dye, line)
         dye = lambda obj: '`' + colorize('%DimWhiteBold', obj.group(1)) + '`'
         line = re.sub('`(.+?)`', dye, line)
