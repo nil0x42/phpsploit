@@ -101,14 +101,18 @@ class Path(str):
         return str.__new__(cls, path)
 
     def __init__(self, *args, mode='', filename='file.txt'):
+        """Instanciate a new Path()
+
+        Instance is considered a tmpfile (temporary file) if
+        called without arguments.
+        It means that the linked file will be automatically
+        deleted from filesystem at object deletion (self.__del__()).
+        """
         # If the datatype takes no arguments, then it is
         # a tmpfile Path() type.
         # Defining its boolean atribute self.tmpfile allows us to
         # unlink the file on object deletion throught __del__().
-        if args:
-            self.tmpfile = False
-        else:
-            self.tmpfile = True
+        self.tmpfile = not args
 
     def _raw_value(self):
         return os.path.realpath(str(self))
@@ -116,16 +120,13 @@ class Path(str):
     def __call__(self):
         return str(self)
 
-    def __str__(self):
-        return super().__str__()
-
     def __del__(self):
         # remove tmp file (if any)
         if self.tmpfile:
             os.unlink(self)
             try:
                 os.rmdir(os.path.dirname(self))
-            except:
+            except OSError:
                 pass
 
     def edit(self):
@@ -147,16 +148,16 @@ class Path(str):
         try:
             subprocess.call(args)
         except OSError:
-            print("[-] Invalid EDITOR setting (use `set EDITOR <value>`)")
+            print("[-] Invalid EDITOR (fix with `set EDITOR <value>`)")
             raise
         new = self.read(bin_mode=True)
         return new != old
 
     def browse(self):
-        """Display the file with phpsploit's BROWSER setting.
+        """Display the file through phpsploit's BROWSER
 
         NOTE: For the moment, the method always returns True,
-              therefore, it may chance in the future.
+              but it may chance in the future.
         """
         from core import session
 

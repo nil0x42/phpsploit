@@ -60,7 +60,8 @@ class AbstractSessionLoader:
         for attribute in dir(self):
             if attribute.startswith("set_"):
                 target = attribute[4:].capitalize()
-                assert target in session_keys
+                if target not in session_keys:
+                    raise ValueError("Invalid attribute: %r" % attribute)
                 function = getattr(self, attribute)
                 new_session[target] = function(old_session)
         return new_session
@@ -169,7 +170,8 @@ class Loader_V2_1_4(AbstractSessionLoader):
     def _load_file(self, session_path):
         """load file & check PSCOREVER"""
         old_session = super()._load_file(session_path)
-        assert int(old_session["PSCOREVER"]) == 2
+        if int(old_session["PSCOREVER"]) != 2:
+            raise ValueError("PSCOREVER must be 2")
         return old_session
 
     def set_conf(self, old_session):
@@ -239,5 +241,5 @@ def load(session_path):
     for old_session_load in compat_loaders:
         try:
             return old_session_load(session_path)
-        except AssertionError:
+        except BaseException:
             pass
