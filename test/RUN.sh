@@ -92,7 +92,7 @@ function phpsploit_pipe () {
     echo "$@" >&8
     echo "lrun echo $randstr" >&8 # delimiter
     head -c 1 <&9 > $buf
-    while ! grep -q $randstr $buf; do
+    while ! grep -q "$randstr.*Returned " $buf; do
         timeout 0.05 cat <&9 >> $buf
     done
     sed -i "/$randstr/d" $buf
