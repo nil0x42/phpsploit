@@ -270,13 +270,13 @@ class Shell(shnake.Shell):
             return True
 
         if argv[1] == "reload-plugins":
-            plugins.reload(verbose=True)
+            return plugins.reload(verbose=True)
 
         elif argv[1] == "python-console":
             from ui import console
             console = console.Console()
             console.banner = "Phpsploit corectl: python console interpreter"
-            console()
+            return console()
 
         elif argv[1] == "display-http-requests":
             requests = enumerate(tunnel.get_raw_requests(), 1)
@@ -934,6 +934,8 @@ class Shell(shnake.Shell):
             If called without arguments, a list of available commands,
             plugins, and aliases is displayed.
             Otherwise, detailed help of given command is shown.
+
+            * NOTE: plugins are only listed after running `exploit`
 
         EXAMPLES:
             > help

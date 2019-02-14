@@ -75,7 +75,7 @@ function decolorize () {
 }
 function exit_script () {
     ret=$?
-    [ -n "$phpsploit_pid" ] && kill $phpsploit_pid
+    [ -n "$__phpsploit_pipe_pid" ] && kill $__phpsploit_pipe_pid
     [ $ret -eq 0 ] && return # ignore if return value == 0
     files=$(find $TMPDIR -type f -name "`basename $TMPFILE`"'*')
     for file in $files; do
@@ -87,6 +87,15 @@ function exit_script () {
     # tail -n+1 /dev/null $files | tail -n+3
 }
 function phpsploit_pipe () {
+    if [ -z "$__phpsploit_pipe_pid" ]; then
+        # singleton, start piped phpsploit first time function is called
+        rm -f $TMPDIR/fifo-in $TMPDIR/fifo-out
+        mkfifo $TMPDIR/fifo-in $TMPDIR/fifo-out
+        exec 8<>$TMPDIR/fifo-in
+        exec 9<>$TMPDIR/fifo-out
+        nohup $PHPSPLOIT <&8 >&9 2>&1 &
+        __phpsploit_pipe_pid=$!
+    fi
     randstr=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13`
     buf=$TMPDIR/buffer
     echo "$@" >&8
@@ -102,18 +111,6 @@ function phpsploit_pipe () {
     [ -n "$ret" ] && return $ret
 }
 if [ -n "$PHPSPLOIT_TEST" ]; then
-    ###
-    ### run background phpsploit with FIFOs (used through phpsploit_pipe())
-    ###
-    if grep -q phpsploit_pipe $SCRIPTFILE; then
-        rm -f $TMPDIR/fifo-in $TMPDIR/fifo-out
-        mkfifo $TMPDIR/fifo-in $TMPDIR/fifo-out
-        exec 8<>$TMPDIR/fifo-in
-        exec 9<>$TMPDIR/fifo-out
-        nohup $PHPSPLOIT <&8 >&9 2>&1 &
-        phpsploit_pid=$!
-    fi
-
     trap exit_script EXIT
     print_env PWD
     print_env ROOTDIR
