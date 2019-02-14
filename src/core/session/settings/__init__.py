@@ -120,9 +120,10 @@ class Settings(metadict.VarContainer):
         # add docstring attribute to setting
         value.docstring = self.format_docstring(name, linebuf_type, info)
         # use grandparent class (bypass parent's None feature)
-        dict.__setitem__(self, name, value)
+        return dict.__setitem__(self, name, value)
 
-    def _isattr(self, name):
+    @staticmethod
+    def _isattr(name):
         return re.match("^[A-Z][A-Z0-9_]+$", name)
 
     @staticmethod
@@ -141,15 +142,16 @@ class Settings(metadict.VarContainer):
         sys.path.pop(0)
         return settings
 
-    def _set_HTTP_header(self, value):
+    @staticmethod
+    def _set_HTTP_header(value):
         return str(value)
 
-    def _get_HTTP_header_info(self, name):
+    @staticmethod
+    def _get_HTTP_header_info(name):
         hdr_name = name.replace("_", "-").title()
         result = "Define a value for %r HTTP Header field\n" % hdr_name
         if name != "USER_AGENT":
-            result += ("\nThis setting is dynamic and can be removed\n"
-                       "by assigning 'None' magic string to it:\n"
+            result += ("\nUse 'None' magic string to delete this setting:\n"
                        "> set HTTP_%s None") % name
         return result
 

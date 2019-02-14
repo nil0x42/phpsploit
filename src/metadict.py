@@ -125,17 +125,16 @@ class MetaDict(dict):
                                tpl.format(key, self[key]))
         return "\n" + buffer + colorize("%Reset")
 
-    def update(self, new):
-        """Override standard dict() update method, because it seems
-        that using the default one does not use self object's
-        __setitem__() method. This is problematic for phpsploit
-        session main objects.
+    def update(self, new_dict):
+        """Override parent (dict.update()), because it seems that
+        built-in method doesn't use self.__setitem__() internally,
+        which is problematic for phpsploit
         """
-        if isinstance(new, dict):
-            for key, value in new.items():
+        if isinstance(new_dict, dict):
+            for key, value in new_dict.items():
                 self[key] = value
         else:
-            super().update(new)
+            super().update(new_dict)
 
 
 class VarContainer(MetaDict):
@@ -153,18 +152,15 @@ class VarContainer(MetaDict):
     item_deleters = ["", "NONE"]
 
     def __setitem__(self, name, value):
-        """Unlike parent class MetaDict, setting an item/attribute
-        with a None value, an empy string, or the "none" string
-        removes the item instead of setting it to the wanted value.
+        """If `value` is None, "None" (case-insensitive) or "" (empty str),
+        the item is removed instead of being reassigned.
 
-        This behavior eases core implementation of environment,
-        aliases, and any phpsploit var container designed for
-        interactive use.
+        This behavior allows the user to easily remove settings,
+        env-vars, aliases, and any object unheriting this class,
+        by simply assiging None to them.
         """
-        # delete item if its value is empty or None:
         if isinstance(value, (str, type(None))) and \
                 str(value).upper() in self.item_deleters:
-            # don't try to delete unexisting item
             if name not in self.keys():
                 return None
             return self.__delitem__(name)

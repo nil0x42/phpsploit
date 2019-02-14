@@ -63,17 +63,18 @@ class Environment(metadict.VarContainer):
         if name not in self.defaults.keys():
             self.defaults[name] = self[name]
 
-    def _isattr(self, name):
+    @staticmethod
+    def _isattr(name):
         return re.match("^[A-Z][A-Z0-9_]+$", name)
 
-    def update(self, dic):
+    def update(self, new_dict):
         readonly = self.readonly
         self.readonly = []
-        if "__DEFAULTS__" in dic.keys():
-            self.defaults = copy.copy(dict(dic.pop("__DEFAULTS__")))
-        elif hasattr(dic, "defaults"):
-            self.defaults = copy.copy(dict(dic.defaults))
-        for key, value in dic.items():
+        if "__DEFAULTS__" in new_dict.keys():
+            self.defaults = copy.copy(dict(new_dict.pop("__DEFAULTS__")))
+        elif hasattr(new_dict, "defaults"):
+            self.defaults = copy.copy(dict(new_dict.defaults))
+        for key, value in new_dict.items():
             # do not update if the key has been set to
             # another value than the default one.
             if key in self.keys() \

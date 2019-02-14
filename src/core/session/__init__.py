@@ -57,7 +57,8 @@ class Session(metadict.MetaDict):
         self.Compat = {}
         self.File = None
 
-    def _isattr(self, name):
+    @staticmethod
+    def _isattr(name):
         """Session items are alphabetic and capitalized strings"""
         return re.match("^[A-Z][a-z]+$", name)
 
@@ -141,9 +142,9 @@ class Session(metadict.MetaDict):
             if "not a gzipped file" in str(error).lower():
                 data = compat_session.load(file)
                 if not data:
-                    raise Exception("Not a phpsploit session file")
+                    raise ValueError("Not a phpsploit session file")
             else:
-                raise error
+                raise
         # get Session() obj from raw session value
         sess = self._obj_value(data, fatal_errors=fatal_errors)
         # bind new session's File to current file
@@ -296,7 +297,7 @@ class Session(metadict.MetaDict):
                             obj[elem][key] = value
                         except Exception as error:
                             item_repr = "session.%s.%s" % (elem, key)
-                            msg_prefix = "[-] Cannot set %s" % item_repr
+                            msg_prefix = "[-] Couldn't set %s" % item_repr
                             if fatal_errors:
                                 print("%s:" % msg_prefix)
                                 raise
@@ -308,7 +309,8 @@ class Session(metadict.MetaDict):
         obj = Session()
         obj = update_obj(obj, self._raw_value(self))
         if raw is not None:
-            assert raw.keys() == obj.keys()
+            if raw.keys() != obj.keys():
+                raise ValueError("Invalid raw session")
             obj = update_obj(obj, raw, fatal_errors=False)
         return obj
 
