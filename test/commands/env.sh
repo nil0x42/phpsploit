@@ -64,7 +64,7 @@ for var in $env_vars; do
 
         # try to set another value (must fail)
         phpsploit_pipe env $var FOOBAR > $TMPFILE && FAIL
-        grep -q "« $var » variable is read-only" $TMPFILE || FAIL
+        grep -q "'$var' variable is read-only" $TMPFILE || FAIL
         [[ "`getval $var`" == "$old_val" ]] || FAIL
 
         # try to unset variable (must fail)
