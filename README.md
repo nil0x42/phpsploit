@@ -1,5 +1,5 @@
 ### PhpSploit: _Furtive post-exploitation framework_
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
 
 PhpSploit is a **remote control** framework, aiming to provide a **stealth**
 interactive shell-like connection over HTTP between client and web server.
@@ -80,8 +80,8 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-| [<img src="https://avatars1.githubusercontent.com/u/3504393?v=4" width="100px;" alt="nil0x42"/><br /><sub><b>nil0x42</b></sub>](https://exdemia.com)<br />[💻](https://github.com/nil0x42/phpsploit/commits?author=nil0x42 "Code") [🚇](#infra-nil0x42 "Infrastructure (Hosting, Build-Tools, etc)") [🔌](#plugin-nil0x42 "Plugin/utility libraries") [⚠️](https://github.com/nil0x42/phpsploit/commits?author=nil0x42 "Tests") |
-| :---: |
+| [<img src="https://avatars1.githubusercontent.com/u/3504393?v=4" width="100px;" alt="nil0x42"/><br /><sub><b>nil0x42</b></sub>](https://exdemia.com)<br />[💻](https://github.com/nil0x42/phpsploit/commits?author=nil0x42 "Code") [🚇](#infra-nil0x42 "Infrastructure (Hosting, Build-Tools, etc)") [🔌](#plugin-nil0x42 "Plugin/utility libraries") [⚠️](https://github.com/nil0x42/phpsploit/commits?author=nil0x42 "Tests") | [<img src="https://avatars1.githubusercontent.com/u/20907184?v=4" width="100px;" alt="shiney-wh"/><br /><sub><b>shiney-wh</b></sub>](https://github.com/shiney-wh)<br />[💻](https://github.com/nil0x42/phpsploit/commits?author=shiney-wh "Code") [🔌](#plugin-shiney-wh "Plugin/utility libraries") |
+| :---: | :---: |
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
