@@ -50,6 +50,16 @@
         "code",
         "maintenance"
       ]
+    },
+    {
+      "login": "paralax",
+      "name": "jose nazario",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/5619153?v=4",
+      "profile": "http://twitter.com/jnazario",
+      "contributions": [
+        "doc",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7
