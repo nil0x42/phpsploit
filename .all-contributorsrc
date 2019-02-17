@@ -60,6 +60,15 @@
         "doc",
         "bug"
       ]
+    },
+    {
+      "login": "sujit",
+      "name": "Sujit Ghosal",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/156915?v=4",
+      "profile": "http://wikisecure.net",
+      "contributions": [
+        "blog"
+      ]
     }
   ],
   "contributorsPerLine": 7
