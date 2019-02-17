@@ -1,0 +1,26 @@
+{
+  "projectName": "phpsploit",
+  "projectOwner": "nil0x42",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "nil0x42",
+      "name": "nil0x42",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/3504393?v=4",
+      "profile": "https://exdemia.com",
+      "contributions": [
+        "code",
+        "infra",
+        "plugin",
+        "test"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
