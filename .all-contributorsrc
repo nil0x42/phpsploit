@@ -30,6 +30,16 @@
         "code",
         "plugin"
       ]
+    },
+    {
+      "login": "wapiflapi",
+      "name": "Wannes Rombouts",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/1619783?v=4",
+      "profile": "http://wapiflapi.github.io",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7
