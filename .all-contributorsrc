@@ -40,6 +40,16 @@
         "code",
         "maintenance"
       ]
+    },
+    {
+      "login": "yurilaaziz",
+      "name": "Amine Ben Asker",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/6031769?v=4",
+      "profile": "http://yurilz.com",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7
