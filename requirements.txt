@@ -3,7 +3,7 @@
 ##########################
 
 # Needed to communicate between Python and PHP remote execution
-phpserialize
+phpserialize==1.3
 
 # A dependency of `shnake`. Used to parse command-line input
 pyparsing
