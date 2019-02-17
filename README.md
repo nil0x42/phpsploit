@@ -1,5 +1,4 @@
 ### PhpSploit: _Furtive post-exploitation framework_
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
 
 PhpSploit is a **remote control** framework, aiming to provide a **stealth**
 interactive shell-like connection over HTTP between client and web server.
@@ -76,7 +75,7 @@ through a tiny **polymorphic backdoor**:
 
 ## Contributors
 
-Thanks goes to these wonderful people ([emoji key](https://github.com/all-contributors/all-contributors#emoji-key)):
+Thanks goes to these people ([emoji key](https://github.com/all-contributors/all-contributors#emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
@@ -84,4 +83,4 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
 | :---: | :---: |
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+_This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!_
