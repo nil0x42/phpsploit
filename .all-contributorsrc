@@ -20,6 +20,16 @@
         "plugin",
         "test"
       ]
+    },
+    {
+      "login": "shiney-wh",
+      "name": "shiney-wh",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/20907184?v=4",
+      "profile": "https://github.com/shiney-wh",
+      "contributions": [
+        "code",
+        "plugin"
+      ]
     }
   ],
   "contributorsPerLine": 7
