@@ -11,6 +11,8 @@ compromised web server for **privilege escalation** purposes.
 [![codecov](https://codecov.io/gh/nil0x42/phpsploit/branch/master/graph/badge.svg)](https://codecov.io/gh/nil0x42/phpsploit)
 [![license](https://img.shields.io/github/license/nil0x42/phpsploit.svg)](https://github.com/nil0x42/phpsploit/blob/master/LICENSE)
 [![requirements](https://requires.io/github/nil0x42/phpsploit/requirements.svg?branch=master)](https://requires.io/github/nil0x42/phpsploit/requirements/?branch=master)
+[![pyup.io requirements](https://pyup.io/repos/github/nil0x42/phpsploit/python-3-shield.svg)](https://pyup.io/repos/github/nil0x42/phpsploit/)
+
 
 ![phpsploit demo](data/img/phpsploit-demo.png)
 
