@@ -10,6 +10,7 @@ compromised web server for **privilege escalation** purposes.
 [![lgtm alerts](https://img.shields.io/lgtm/alerts/g/nil0x42/phpsploit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/nil0x42/phpsploit/alerts/)
 [![codecov](https://codecov.io/gh/nil0x42/phpsploit/branch/master/graph/badge.svg)](https://codecov.io/gh/nil0x42/phpsploit)
 [![license](https://img.shields.io/github/license/nil0x42/phpsploit.svg)](https://github.com/nil0x42/phpsploit/blob/master/LICENSE)
+[![requirements](https://requires.io/github/nil0x42/phpsploit/requirements.svg?branch=master)](https://requires.io/github/nil0x42/phpsploit/requirements/?branch=master)
 
 ![phpsploit demo](data/img/phpsploit-demo.png)
 
