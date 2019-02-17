@@ -7,7 +7,13 @@
 ###
 ### Early Ctrl-C interrupt (SIGINT)
 ###
-timeout -s INT 0.05 $RAW_PHPSPLOIT --help > $TMPFILE-out 2> $TMPFILE
+> $TMPFILE
+# testing different timeouts because it depends on time needed
+# to load phpsploit for current platform/interpreter
+timeout -s INT 0.05 $RAW_PHPSPLOIT --help > $TMPFILE-out 2>> $TMPFILE
+timeout -s INT 0.1 $RAW_PHPSPLOIT --help > $TMPFILE-out 2>> $TMPFILE
+timeout -s INT 0.15 $RAW_PHPSPLOIT --help > $TMPFILE-out 2>> $TMPFILE
+timeout -s INT 0.2 $RAW_PHPSPLOIT --help > $TMPFILE-out 2>> $TMPFILE
 assert_contains $TMPFILE "\[-\] .* initialization interrupted$"
 rm $TMPFILE-out
 
