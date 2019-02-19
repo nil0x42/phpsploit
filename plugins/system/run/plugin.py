@@ -1,39 +1,40 @@
-"""Execute a command on the server
+"""Execute a command on remote server
 
 SYNOPSIS:
-    run "<SHELL COMMAND>"
+    run "<SHELL-COMMAND>"
 
 DESCRIPTION:
-    Most of the phpsploit plugins intend to simulate shell
-    commands over obfuscated PHP implementations.
-    Therefore, in a few remote servers, real command execution
-    is not blocked, so using them would be a plus in the
-    privilege escalation process.
+    Most phpsploit plugins intend to simulate shell commands
+    to still be able to 'work' when command execution is blocked
+    to PHP security restrictions.
 
-    NOTE: This plugin is cross-platform compatible. Therefore,
-    the additional feature below is only compatible on unix
-    based servers:
+    Therefore, a few remote servers still allow shell command
+    execution. So despite a lower stealth, being able to run
+    real shell commands is always useful to escalate privileges.
 
-    The command(s) list is wrapped through a path location
-    checker. For example, running the command:
-        `./do_something.sh`
-    will in reality send that:
-        `cd $PWD; ./do_something.sh; pwd`
+UNIX/Linux Additional Features:
+    The PWD environment variable is kept up-to-date, by wrapping
+    launched commands with a 'current path checker'.
 
-    This feature allows user to run scripts from current $PWD
-    without writing absolute path each time, which is harassing.
-    It also updates $PWD after command execution is the final
-    `pwd` command says our location has changed.
+    If you do `run ./batch.sh`, the plugin wraps and runs:
+    > cd $PWD; ./batch.sh; pwd
+
+    So relative paths are correctly reached by commands, and
+    PWD environment variable is updated according to remote $PWD.
 
 WARNING:
     Considering phpsploit's input parser, commands which
     contain quotes, semicolons, and other chars that could be
     interpreted by the framework MUST be quoted to be
-    interpreted as a single argument. For example:
-      > run echo 'foo bar' > /tmp/foobar; cat /etc/passwd
-    In this case, quotes and semicolons will be interpreted by
-    the framwework, so the correct syntax is:
-      > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
+    interpreted as a single argument.
+
+    * Bad command:
+    # Here, phpsploit parser detects multiple commands:
+    > run echo 'foo bar' > /tmp/foobar; cat /etc/passwd
+
+    * Good command:
+    # Here, the whole string is correctly passed to plugin
+    > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
 
 EXAMPLES:
     > run ipconfig /all

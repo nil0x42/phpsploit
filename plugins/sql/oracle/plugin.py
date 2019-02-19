@@ -1,4 +1,4 @@
-"""A client for Oracle PL/SQL databases
+r"""A client for Oracle PL/SQL databases
 
 SYNOPSIS:
     oracle connect <USER> <PASSWORD> "<CONNSTR>"
@@ -32,9 +32,9 @@ EXAMPLES:
       - Connect without defining <CHARSET>
     > oracle connect SYS s3cr3t "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=sales-server)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=sales.us.example.com)))" WE8ISO8859P1
       - Connect with defined <CHARSET>
-    > oracle "SELECT owner, table_name FROM all_tables\\\\G"
+    > oracle "SELECT owner, table_name FROM all_tables\\G"
       - Run SQL command
-    > oracle "SELECT owner, table_name FROM all_tables\\\\G"
+    > oracle "SELECT owner, table_name FROM all_tables\\G"
       - Same as above, using tabular format (mysql client like)
 
 ENVIRONMENT:
@@ -48,7 +48,6 @@ AUTHOR:
 import sys
 import time
 import re
-import pprint
 
 from api import plugin
 from api import server
@@ -71,7 +70,7 @@ def load_credentials(creds):
         result['CHARSET'] = parsed[3]
     except:
         try:
-            regexp = "(.+?)@(.+?):(\d+)/([^*]+)(?:\*(.+))?"
+            regexp = r"(.+?)@(.+?):(\d+)/([^*]+)(?:\*(.+))?"
             parsed = re.findall(regexp, creds)[0]
             assert len(parsed) == 5
             result['USER'] = parsed[0]

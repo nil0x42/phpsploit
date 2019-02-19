@@ -1,10 +1,11 @@
-"""display file status
+"""Display file status
 
 SYNOPSIS:
     stat [-L] <FILE>
 
 OPTIONS:
-    -L  follow symbolic links
+    -L
+        follow symbolic links
 
 DESCRIPTION:
     Get remote file status informations

@@ -41,7 +41,6 @@ PhpSploit dedicated datatypes obey the following conventions:
     initializer.
     >>> Interval( Interval("1-10")._raw_value() ) # it must be valid
 
-
 """
 
 from .ByteSize import ByteSize

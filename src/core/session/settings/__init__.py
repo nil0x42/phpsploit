@@ -1,15 +1,21 @@
+"""Phpsploit Configuration Settings"""
+
 import os
 import sys
 import re
 import importlib
 
 import core
-import objects
+import metadict
+import linebuf
 
-DEFAULT_HTTP_USER_AGENT = "file://"+core.basedir+"data/user_agents.lst"
+from ui.color import colorize
+
+DEFAULT_HTTP_USER_AGENT = "file://" + core.BASEDIR + "data/user_agents.lst"
 
 
-class Settings(objects.VarContainer):
+# pylint: disable=too-many-instance-attributes
+class Settings(metadict.VarContainer):
     """Configuration Settings
 
     Instanciate a dict() like object that stores PhpSploit
@@ -30,6 +36,7 @@ class Settings(objects.VarContainer):
     picked from valid lines.
 
     """
+    # pylint: disable=invalid-name
     def __init__(self):
         """Declare default settings values"""
         super().__init__()
@@ -68,30 +75,27 @@ class Settings(objects.VarContainer):
         self.PAYLOAD_PREFIX = "%%DEFAULT%%"
 
     def __setitem__(self, name, value):
-        # if the set value is a MultiLineBuffer instance, just do it!
-        if isinstance(value, objects.buffers.MultiLineBuffer):
+        # if the set value is a *LineBuffer instance, just do it!
+        if isinstance(value, linebuf.AbstractLineBuffer):
             return super().__setitem__(name, value)
 
         name = name.replace('-', '_').upper()
-
-        # ensure the setting name has good syntax
         if not self._isattr(name):
             raise KeyError("illegal name: '{}'".format(name))
 
-        # ensure the setting name is allowed
         if name[5:] and name[:5] == "HTTP_":
-            # HTTP_* settings have a RandLineBuffer metatype
-            metatype = objects.buffers.RandLineBuffer
-            # setter = self._set_HTTP_header
-            setter = lambda x: str(x)
+            # HTTP_* settings have a RandLineBuffer linebuf_type
+            linebuf_type = linebuf.RandLineBuffer
+            # validator = self._set_HTTP_header
+            validator = str
             info = self._get_HTTP_header_info(name[5:])
             # allow removal of custom HTTP_ settings, except for user agent.
             if name != "HTTP_USER_AGENT" and \
                     str(value).upper() in ["", "NONE", "%%DEFAULT%%"]:
                 return super().__setitem__(name, value)
         elif name in self._settings.keys():
-            metatype = getattr(self._settings[name], "type")
-            setter = getattr(self._settings[name], "setter")
+            linebuf_type = getattr(self._settings[name], "linebuf_type")
+            validator = getattr(self._settings[name], "validator")
             default = getattr(self._settings[name], "default_value")
             info = getattr(self._settings[name], "__doc__")
         else:
@@ -103,30 +107,32 @@ class Settings(objects.VarContainer):
             if value == "%%DEFAULT%%":
                 value = DEFAULT_HTTP_USER_AGENT
             try:
-                value = metatype(value, setter)
+                value = linebuf_type(value, validator)
             except ValueError:
                 alt_file = value[7:]
                 alt_buff = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
-                value = metatype((alt_file, alt_buff), setter)
+                value = linebuf_type((alt_file, alt_buff), validator)
         else:
             if value == "%%DEFAULT%%":
                 value = default()
-            value = metatype(value, setter)
+            value = linebuf_type(value, validator)
 
         # add docstring attribute to setting
-        value.docstring = self.format_docstring(name, metatype, info)
+        value.docstring = self.format_docstring(name, linebuf_type, info)
         # use grandparent class (bypass parent's None feature)
-        dict.__setitem__(self, name, value)
+        return dict.__setitem__(self, name, value)
 
-    def _isattr(self, name):
+    @staticmethod
+    def _isattr(name):
         return re.match("^[A-Z][A-Z0-9_]+$", name)
 
-    def _load_settings(self):
+    @staticmethod
+    def _load_settings():
         settings = {}
         dirname = os.path.dirname(__file__)
         sys.path.insert(0, dirname)
         for file in os.listdir(dirname):
-            if not re.match("^[A-Z][A-Z0-9_]+\.py$", file):
+            if not re.match(r"^[A-Z][A-Z0-9_]+\.py$", file):
                 continue
             name = file[:-3]
             # help(type(importlib.import_module(name)))
@@ -136,25 +142,34 @@ class Settings(objects.VarContainer):
         sys.path.pop(0)
         return settings
 
-    def _set_HTTP_header(self, value):
+    @staticmethod
+    def _set_HTTP_header(value):
         return str(value)
 
-    def _get_HTTP_header_info(self, name):
-        result = ("Defines the value of '%s'\n"
-                  "http header for any sent request.\n") % name
+    @staticmethod
+    def _get_HTTP_header_info(name):
+        hdr_name = name.replace("_", "-").title()
+        result = "Define a value for %r HTTP Header field\n" % hdr_name
         if name != "USER_AGENT":
-            result += ("\n"
-                       "This setting is dynamic and can be removed\n"
-                       "with the `set HTTP_%s None` command.")
-        result = result.replace("%s", name)
+            result += ("\nUse 'None' magic string to delete this setting:\n"
+                       "> set HTTP_%s None") % name
         return result
 
-    def format_docstring(self, name, metatype, info):
-        info = info.strip()
-        doc = "\nDESCRIPTION:\n"
-        doc += "\n".join(["    " + ln for ln in info.splitlines()])
-        doc += ("\n"
-                "\n"
-                "TYPE:\n"
-                "    %r\n") % metatype
-        return doc
+    @staticmethod
+    def format_docstring(name, linebuf_type, desc):
+        """formet help docstring per settings
+        """
+        indent = lambda buf: buf.strip().replace("\n", "\n    ")
+
+        doc = ("\n"
+               "DESCRIPTION:\n"
+               "    {description}\n"
+               "\n"
+               "BUFFER TYPE:\n"
+               "    {objtype!r}\n"
+               "\n"
+               "    {typedesc}")
+        typedesc = linebuf_type.desc.format(var=colorize("%Lined", name))
+        return doc.format(description=indent(desc),
+                          objtype=linebuf_type,
+                          typedesc=typedesc.strip())

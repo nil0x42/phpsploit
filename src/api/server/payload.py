@@ -1,10 +1,9 @@
-import objects
+import metadict
 from core import session, tunnel, plugins
 from datatypes import Path
 
 
-class Payload(objects.MetaDict):
-
+class Payload(metadict.MetaDict):
     # the phpsploit env vars to auto add
     # to $PHPSPLOIT array on php side
     _unherited_env_vars = ["PATH_SEP"]
@@ -21,10 +20,10 @@ class Payload(objects.MetaDict):
         self.payload = Path(plugin_path, filename, mode='fr').phpcode()
 
     def send(self, **kwargs):
-        vars = dict(self)
+        var_list = dict(self)
         for key, value in kwargs.items():
-            vars[key] = value
-        php_vars = self._php_vars_template % tunnel.payload.py2php(vars)
+            var_list[key] = value
+        php_vars = self._php_vars_template % tunnel.payload.py2php(var_list)
 
         result = tunnel.send(php_vars + self.payload)
         if result.response_error:
@@ -34,5 +33,3 @@ class Payload(objects.MetaDict):
 
 class PayloadError(Exception):
     """Exception raised when a send payload returned an __ERROR__ obj"""
-
-    pass

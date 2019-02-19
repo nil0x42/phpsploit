@@ -1,24 +1,22 @@
-"""Print a file content to standard output
+r"""Print a file content on standard output
 
 SYNOPSIS:
-    cat <REMOTE FILE>
+    cat <REMOTE-FILE>
 
 DESCRIPTION:
-    This command prints the given file content on the standard
-    output.
+    Print REMOTE-FILE content on standard output.
 
-    NOTE: Unlike the GNU's 'cat' command, this plugin only takes
-    one single file as argument, and have no support for multi
-    file concatenation to standard output.
+LIMITATIONS:
+    Unlike the standard GNU's 'cat' tool, multiple files cat
+    is not supported.
 
 EXAMPLES:
     > cat ../includes/connect.inc.php
       - Display the connect.inc.php's content.
-    > cat "C:\\Users\\granny\\Desktop\\bank account.TXT"
+    > cat "C:\Users\granny\Desktop\bank account.TXT"
       - Don't be evil with grannies!
-        NOTE: since gannies use spaces in file names, the path
-        string must be quoted to be considered as a single
-        argument.
+      - As gannies use spaces in file names, the path
+        must be quoted to be parsed as a single argument.
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>

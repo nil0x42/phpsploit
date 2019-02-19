@@ -1,3 +1,6 @@
+"""Handle communication between python client and PHP backdoor"""
+__all__ = ["py2php", "php2py", "Build", "Encode"]
+
 import codecs
 import base64
 
@@ -10,7 +13,7 @@ from datatypes import Path
 from .exceptions import BuildError
 
 
-def phpserialize_recursive_dict_to_list(python_var):
+def _phpserialize_recursive_dict2list(python_var):
     """Get real python list() objetcs from php objects.
     * As php makes no difference between lists and
     dictionnaries, we should call this function which
@@ -21,11 +24,12 @@ def phpserialize_recursive_dict_to_list(python_var):
         if list(python_var.keys()) == list(range(len(python_var))):
             python_var = [python_var[x] for x in python_var]
     if isinstance(python_var, dict):
-        for x in python_var:
-            python_var[x] = phpserialize_recursive_dict_to_list(python_var[x])
+        for key, val in python_var.items():
+            python_var[key] = _phpserialize_recursive_dict2list(val)
     if isinstance(python_var, list):
-        for x in range(len(python_var)):
-            python_var[x] = phpserialize_recursive_dict_to_list(python_var[x])
+        #for x in range(len(python_var)):
+        for x, _ in enumerate(python_var):
+            python_var[x] = _phpserialize_recursive_dict2list(python_var[x])
     return python_var
 
 
@@ -49,66 +53,52 @@ def php2py(raw_php_var):
                                     errors=encoding.default_errors,
                                     object_hook=phpserialize.phpobject,
                                     decode_strings=True)
-    python_var = phpserialize_recursive_dict_to_list(python_var)
+    python_var = _phpserialize_recursive_dict2list(python_var)
     return python_var
 
 
 class Encode:
-    """Take a php code string, and convert it into
-    an encoded payload, for easily mergind it into
-    an existing php payload.
-    This class also provides payload size minification
-    by using gzip compression.
+    """Take a php code string, and convert it into an encoded payload,
+    to ease merging within an existing php payload.
+
+    Payload is also minified with gzip compression (in 'auto' mode).
 
     USAGE
     =====
     Encodings:
     ----------
     * base64:
-        The payload it base64 encoded, an wrapped into
-        the php `base64_decode()` function.
-
+        Encode payload with base64, an wrap it with php `base64_decode()`
     * gzip + base64:
-        The payload is compressed with zlib, then the
-        compressed payload is base64 encoded.
+        Encode payload with zlib, and the encode it with base64.
 
     Modes:
     ------
     * default:
-        base64 encode only;
-
+        base64 encode only.
     * auto:
-        base64 encode, and compress with zgip only
-        if resulting payload is really smaller than
-        without compression.
-
+        base64 encode, and only compress if it reduces payload size.
     * compress:
         base64 encode, and force usage of compression.
 
     ATTRIBUTES
     ==========
     * decoder (str)
-        payload decoder for self.data payload.
-        example: 'base64_decode(%s)'
+        php decoding string for current payload
+        >>> Encode(payload, "base64").decoder
+        'base64_decode(%s)'
 
     * data (str):
-        encoded payload string, without it's decoder
-        it always contains a simple base64 stream.
+        encoded payload, without it's decoder, in the form of a base64 string
 
     * rawlength (int):
-        same as `len(data)`.
+        same as `len(data)`
 
     * length (int):
-        amout of bytes the payload will take when
-        copied into an HTTP request.
+        amout of bytes payload will take after being copied to an http request
 
     * compressed (bool):
-        True if encoder has been compressed.
-
-    METHODS
-    =======
-    * php_loader() (str)
-        Returns current payload string, wrapped with decoder.
+        True if encoder has been compressed
     """
 
     def __init__(self, code, mode='default'):
@@ -120,37 +110,30 @@ class Encode:
         self.data = b''
         self.decoder = 'base64_decode("%s")'
         if mode in ['compress', 'auto']:
-            gzPayload = codecs.encode(code, "zlib")
-            gzPayload = base64.b64encode(gzPayload)
-            # gzPayload = codecs.encode(gzPayload, "base64")
-            gzDecoder = 'gzuncompress(base64_decode("%s"))'
+            gz_payload = codecs.encode(code, "zlib")
+            gz_payload = base64.b64encode(gz_payload)
+            gz_decoder = 'gzuncompress(base64_decode("%s"))'
             if mode == 'compress':
                 self.compressed = True
-                self.data = gzPayload
-                self.decoder = gzDecoder
+                self.data = gz_payload
+                self.decoder = gz_decoder
         if mode != 'compress':
-            # self.data = codecs.encode(code, "base64")
             self.data = base64.b64encode(code)
         if mode == 'auto':
-            if len(gzPayload) < len(self.data):
-                self.data = gzPayload
-                self.decoder = gzDecoder
+            if len(gz_payload) < len(self.data):
+                self.data = gz_payload
+                self.decoder = gz_decoder
                 self.compressed = True
         self.data = self.data.decode()
         self.rawlength = len(self.data)
-        self.length = self.get_real_transport_length(self.data)
+        self.length = self._get_real_transport_length(self.data)
 
-    def php_loader(self):
-        """Returns the php_loader for encoded phpcode string.
-        """
-        return self.decoder % self.data
+    @staticmethod
+    def _get_real_transport_length(payload):
+        """get real length payload takes once used in HTTP requests.
 
-    def get_real_transport_length(self, payload):
-        """Get real length the given data payload takes
-        while transported via HTTP with urlencoding.
-        Indeed, base64 payloads contain 3 types of chars which
-        are urlencoded, as urlencoding makes the encoded char 3
-        times larger, we should add it to length.
+        Indeed, base64 strings contain 3 chars '/+=' that are urlencoded,
+        and then take 3 bytes each in an HTTP request.
         """
         length = len(payload)
         length += payload.count('/') * 2
@@ -158,9 +141,14 @@ class Encode:
         length += payload.count('=') * 2
         return length
 
+    def php_loader(self):
+        """Returns payload string, wrapped with it's php decoder
+        """
+        return self.decoder % self.data
+
 
 class Build:
-    """Generate final payload, as it can be injected into http requests.
+    """Generate final payload, ready to be injected into http requests.
 
     The returned string includes `parser`, the separation tags allowing
     tunnel handler to retrieve output returned from payload after
@@ -169,15 +157,15 @@ class Build:
     The payload is also encapsulated through phpsploit standard
     encapsulator (./data/tunnel/encapsulator.php).
     """
-    encapsulator = Path(core.basedir, 'data/tunnel/encapsulator.php').phpcode()
+    encapsulator = Path(core.BASEDIR, 'data/tunnel/encapsulator.php').phpcode()
 
     def __init__(self, php_payload, parser):
 
         self.loaded_phplibs = list()
 
         php_payload = self.encapsulate(php_payload, parser)
-        php_payload = self.loadphplibs(php_payload)
-        php_payload = self.shorten(php_payload)
+        php_payload = self._load_php_libs(php_payload)
+        php_payload = self._php_minify(php_payload)
 
         encoded_payload = Encode(php_payload.encode(), 'noauto')
 
@@ -185,20 +173,10 @@ class Build:
         self.length = encoded_payload.length
         self.decoder = encoded_payload.decoder
 
-    def _get_raw_payload_prefix(self):
-        """return $PAYLOAD_PREFIX without php tags, in raw format
-        """
-        tmpfile = Path()
-        tmpfile.write(session.Conf.PAYLOAD_PREFIX())
-        payload_prefix = tmpfile.phpcode()
-        del tmpfile
-        return payload_prefix
-
     def encapsulate(self, payload, parser):
-        """Wrap the given payload with `parser` tags, so the payloads
-        prints those tags into the page at remote php runtime, allowing
-        the tunnel handler to grab payload response from returned
-        web page.
+        """Wrap `payload` with `parser` tags, so the payloads prints
+        those tags into the page at remote php runtime, allowing tunnel
+        handler to extract result from HTTP response body.
         """
         # template encapsulation
         code = self.encapsulator.replace('%%PAYLOAD%%', payload)
@@ -207,18 +185,28 @@ class Build:
         code = code.rstrip(';') + ';'
         # parser encapsulation
         if parser:
-            initCode, stopCode = ['echo "%s";' % x for x in parser.split('%s')]
-            code = initCode+code+stopCode
+            header, footer = ['echo "%s";' % x for x in parser.split('%s')]
+            code = header + code + footer
         return code
 
-    def loadphplibs(self, code):
+    @staticmethod
+    def _get_raw_payload_prefix():
+        """return $PAYLOAD_PREFIX setting, without php tags, in raw format
+        """
+        tmpfile = Path()
+        tmpfile.write(session.Conf.PAYLOAD_PREFIX())
+        payload_prefix = tmpfile.phpcode()
+        del tmpfile
+        return payload_prefix
+
+    def _load_php_libs(self, code):
         """Replace `!import(<FOO>)` special syntax with real
         local library files.
         """
         result = ''
         for line in code.splitlines():
-            compLine = line.replace(' ', '')
-            if not compLine.startswith('!import('):
+            comp_line = line.replace(' ', '')
+            if not comp_line.startswith('!import('):
                 result += line + '\n'
             else:
                 libname = line[(line.find('(') + 1):line.find(')')]
@@ -227,15 +215,16 @@ class Build:
                 if libname not in self.loaded_phplibs:
                     try:
                         file_path = 'api/php-functions/%s.php' % libname
-                        lib = Path(core.coredir, file_path).phpcode()
+                        lib = Path(core.COREDIR, file_path).phpcode()
                     except ValueError:
                         raise BuildError('Php lib not found: ' + libname)
-                    result += self.loadphplibs(lib) + '\n'
+                    result += self._load_php_libs(lib) + '\n'
                     self.loaded_phplibs.append(libname)
         return result
 
-    def shorten(self, code):
-        """Trivial code minifier for payload size optimization.
+    @staticmethod
+    def _php_minify(code):
+        """Basic PHP minifier, to optimize final payload size
         """
         lines = []
         for line in code.splitlines():

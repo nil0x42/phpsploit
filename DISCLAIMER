@@ -9,14 +9,10 @@ access on remote servers unlawfully.
 The PhpSploit framework is first and foremost a proof of concept, designed to
 raise awareness on modern remote control technologies over the http protocol.
 
-Considering its remote control features, such as PASSKEY, which provides
-a kind of authentication method, and the built-in plugins, which simulates the
-most used unix shell commands, the PhpSploit framework will be the best
-alternative to simulate a remote ssh access, even on shared hosts that don't
-provide real ssh access, and/or keep blocking php remote command execution
-functions, such as passthru().
-That's why the framework has many legitim uses, and can not be considered as
-disrespectful of the laws (God Bless America !).
+It provides authenticated access feature (through $PASSKEY modifications),
+allowing legitimate users and authorized penetration testers to do their job
+without breaking human laws, or putting someone else's infrastructure at risk.
 
-You must NEVER inject a PhpSploit backdoor in a remote php installation
-without strict consent of it's legitimate owner.
+As i know, you are a good guy, so you shouldn't inject a PhpSploit backdoor
+in a remote server without strict consent of it's legitimate owner, or he
+might never detect it due to it's stealth.

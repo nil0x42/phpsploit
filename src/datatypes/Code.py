@@ -3,25 +3,24 @@ try:
     import pygments.formatters
     import pygments.lexers
     import ui.output
+    USE_PYGMENTS = True
 except ImportError:
-    use_pygments = False
-else:
-    use_pygments = True
+    USE_PYGMENTS = False
 
 
 def Code(language):
 
     class ColoredCode(str):
-        """Piece of %s code. (extends str)
-        Takes a string representing a portion of %s code.
+        """Piece of source code. (extends str)
+        Takes a string representing a portion of source code.
 
         When printed or when self.__str__() is called the code will be
         formated using pygments if possible. self._code_value() is used
         to retrieve the code to be formated, its default implementation
         is to use self.__call__().
-        """ % (language, language)
+        """
 
-        if use_pygments:
+        if USE_PYGMENTS:
             lexer = pygments.lexers.get_lexer_by_name(language)
             if ui.output.colors() >= 256:
                 formatter = pygments.formatters.Terminal256Formatter
@@ -40,11 +39,10 @@ def Code(language):
 
         def __str__(self):
             string = self._code_value()
-            if use_pygments:
-                return pygments.highlight(string,
-                                          self.lexer,
-                                          self.formatter).strip()
-            else:
+            if not USE_PYGMENTS:
                 return string
+            return pygments.highlight(string,
+                                      self.lexer,
+                                      self.formatter).strip()
 
     return ColoredCode

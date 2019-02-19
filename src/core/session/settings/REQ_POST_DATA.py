@@ -1,19 +1,28 @@
 """
-The string defined here will be appended
-to POST data when REQ_DEFAULT_METHOD is POST.
+Custom string to append to POST data.
 
-E.g:
-    set REQ_DEFAULT_METHOD "POST"
-    set REQ_POST_DATA "var1=value1&var2=value2"
+Some TARGET URLs may require specific variables to be set
+in POST data (http request message body)
+
+This setting only affects HTTP POST Requests, so you should
+set REQ_DEFAULT_METHOD to "POST" for it to take effect.
+
+* EXAMPLE:
+# if TARGET url needs alternative POST vars to work properly:
+> set REQ_POST_DATA "user=admin&pass=w34kp4ss"
+
+* NOTE:
+This setting is useful only to specific cases where TARGET URL
+cannot work without it, if you don't need it, or don't know what
+you're doing, you should ignore this setting until you need it.
 """
-import objects
-import datatypes
+import linebuf
 
 
-type = objects.buffers.MultiLineBuffer
+linebuf_type = linebuf.MultiLineBuffer
 
 
-def setter(value):
+def validator(value):
     return str(value)
 
 

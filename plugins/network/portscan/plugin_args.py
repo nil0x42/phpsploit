@@ -18,7 +18,7 @@ def parse(args):
     parser.add_argument('-p', '--port',
                         metavar="<PORT>", default='20-10000')
     parser.add_argument('-t', '--timeout', type=float,
-                        metavar="<SECONDES>", default=0.2)
+                        metavar="<TIMEOUT>", default=0.2)
     parser.add_argument('address')
     options = vars(parser.parse_args(args))
     options['port'] = parse_port(options['port'])

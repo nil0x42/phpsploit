@@ -1,19 +1,18 @@
 """Remove a file
 
 SYNOPSIS:
-    rm <REMOTE FILE>
+    rm <REMOTE-FILE>
 
 DESCRIPTION:
-    Remove the given REMOTE FILE from remote server, or print
-    concerned errors in case of insufficient permissions or
-    bad file path.
+    Remove REMOTE FILE from server.
 
-    NOTE: Unlike the GNU's 'rm' coreutils command, this plugin
-    only supports a single file as argument.
+LIMITATIONS:
+    Unlike the standard GNU's 'rm' tool, recursive
+    and multiple file removal are not available.
 
 EXAMPLES:
     > rm pdfs/r57.php
-      - Remove the ./pdfs/r75.php file from remote server
+      - Remove "./pdfs/r75.php" file from remote server
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>

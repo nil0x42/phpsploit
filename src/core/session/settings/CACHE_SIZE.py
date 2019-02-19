@@ -1,25 +1,22 @@
 """
-This core configuration setting limits the
-session's maximum size.
+Set the maximum phpsploit session file size.
 
-While using the phpsploit framework, some usage
-informations are stored, such as commands history.
-Changing this limit ensures that the session, if
-saved whith the 1session save` command will not
-exceed the given size.
+While using the phpsploit framework, some usage informations
+are stored, such as commands history.
+Changing this limit ensures that the session, if saved whith
+`session save` command will not exceed a certain size.
 
-USE CASES:
-  * The `history` feature takes this setting into
-    account for limiting the number of saved
-    command lines.
+* USE CASES:
+phpsploit's history uses this value to determine the maximum
+number of command lines to store in session file.
 """
-import objects
+import linebuf
 import datatypes
 
-type = objects.buffers.MultiLineBuffer
+linebuf_type = linebuf.MultiLineBuffer
 
 
-def setter(value):
+def validator(value):
     return datatypes.ByteSize(value)
 
 

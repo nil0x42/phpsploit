@@ -1,20 +1,17 @@
+"""Provide access to attributes of currently running plugin"""
+__all__ = ["plugin"]
+
 import re
 from core import plugins
 
 
 class Plugin:
-    """Triggering plugin attributes.
+    """Get access to currently running plugin attributes.
 
-    Get attributes of the currently running plugin.
-
-    This object is generally imported like this:
+    Usage:
     >>> from api import plugin
 
-    The following attributes descriptions include some
-    examples, based on an imaginative plugin located at
-    '/home/user/phpsploit/plugins/parent_dir/foobar/' path.
-
-    ATTRIBUTES:
+    Attributes:
 
     * name (type: str)
         # Plugin name.
@@ -22,7 +19,7 @@ class Plugin:
         'foobar'
 
     * help (type: str)
-        # Plugin's docstring (detailed help).
+        # Plugin docstring (detailed help).
         >>> print(plugin.help)
         [*] foobar: An imaginary phpsploit plugin
         DESCRIPTION:

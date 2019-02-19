@@ -1,24 +1,26 @@
 """TCP port scanner
 
 SYNOPSIS:
-    portscan <address> [-p <PORT>] [-t <TIMEOUT>]
-      -p  single or range of port(s) to scan
-          * single : -p port
-          * range  : -p min-max
-      -t  socket timeout
+    portscan <HOST> [-p <PORT>] [-t <TIMEOUT>]
+
+OPTIONS:
+    -p <PORT>
+        single or range of port(s) to scan
+        (defaults to 20-10000)
+    -t <TIMEOUT>
+        socket timeout (in seconds)
+        (defaults to 0.2)
 
 DESCRIPTION:
-    Scan a single port or range of ports.
-
-    NOTE: 
+    Scan a single port or range of ports on HOST
 
 EXAMPLES:
     > portscan 192.168.1.10
-      - find open port from 20 to 10000
+      - scan default ports
     > portscan 192.168.1.10 -p 50
-      - find open port 50
+      - find if port 50 is open
     > portscan 192.168.1.10 -p 50-100
-      - find open port from 50 to 100
+      - find if ports 50 to 100 are open
     > portscan 192.168.1.10 -t 0.5
       - scan with 0.5 second timeout per socket
 
@@ -28,7 +30,6 @@ AUTHOR:
 
 import sys
 import os
-import time
 import json
 
 from api import plugin
@@ -66,7 +67,7 @@ if len(errors) > max(20, len(result) / 2):
     main_err_count = errors.count(main_err)
     if main_err_count == len(result):
         print("All %d scanned ports failed with error %d: %s\n"
-                % (main_err_count, main_err[0], main_err[1]))
+              % (main_err_count, main_err[0], main_err[1]))
         sys.exit(0)
     print("Not shown: %d (%s)\n" % (main_err_count, main_err[1]))
 

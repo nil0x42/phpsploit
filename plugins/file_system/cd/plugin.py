@@ -1,22 +1,24 @@
-"""Change directory
+r"""Change directory
 
 SYNOPSIS:
-    cd <DIRECTORY>
+    cd [<DIRECTORY>]
 
 DESCRIPTION:
     Change current working directory of phpsploit target.
+
     - This plugin checks if the given path is remotely
     reachable, then changes $PWD environment variable if
     no errors were found.
-    - If run without argument, $HOME is used as location.
+    - If run without argument, $HOME env var is used as
+    new current working directory.
 
 EXAMPLES:
     > cd ..
       - Go to the directory below
-    > cd "C:\\Program Files\\"
-      - Go to Program Files directory
+    > cd "C:\Program Files\"
+      - Go to "Program Files" directory
     > cd ~
-      - Move the the user's base directory
+      - Move the the user's HOME directory
 
 ENVIRONMENT:
     * PWD
@@ -28,7 +30,7 @@ WARNING:
     to set it to an invalid location, without the checks done by
     this plugin.
     - Therefore, in a few use cases, manual edition of the $PWD
-    variable is the inly choice.
+    variable is the only option.
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>

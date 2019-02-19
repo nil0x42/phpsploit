@@ -1,6 +1,6 @@
+"""Proxy tunnel for use through urllib http tunnel. (extends str)
+"""
 import re
-import http
-import urllib
 from urllib.request import build_opener, ProxyHandler
 
 import socks
@@ -23,7 +23,7 @@ class Proxy(str):
 
     """
 
-    _match_regexp = "^(?:(socks[45]|https?)://)?([\w.-]{3,63})(?::(\d+))$"
+    _match_regexp = r"^(?:(socks[45]|https?)://)?([\w.-]{3,63})(?::(\d+))$"
 
     def __new__(cls, proxy=None):
         if str(proxy).lower() == 'none':
@@ -44,6 +44,7 @@ class Proxy(str):
 
         return str.__new__(cls, proxy)
 
+    # pylint: disable=super-init-not-called
     def __init__(self, _=None):
         """Build self._urllib_opener"""
 
@@ -59,13 +60,13 @@ class Proxy(str):
 
         if self.scheme == "socks4":
             socks4_handler = SocksiPyHandler(socks.PROXY_TYPE_SOCKS4,
-                    self.host,
-                    int(self.port))
+                                             self.host,
+                                             int(self.port))
             self._urllib_opener = build_opener(socks4_handler)
         elif self.scheme == "socks5":
             socks5_handler = SocksiPyHandler(socks.PROXY_TYPE_SOCKS5,
-                    self.host,
-                    int(self.port))
+                                             self.host,
+                                             int(self.port))
             self._urllib_opener = build_opener(socks5_handler)
         else:
             proxy_handler = ProxyHandler({'http': proxy, 'https': proxy})

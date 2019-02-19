@@ -1,14 +1,17 @@
+"""Easily ask for user choice from terminal"""
+__all__ = ["Expect"]
+
 import os
 import sys
 import signal
 
+from decorators.isolate_readline_context import isolate_readline_context
+
 from ..color import colorize
 from ..output import isatty
 
-from decorators.isolate_readline_context import isolate_readline_context
 
-
-class Expect:
+class Expect: # pylint: disable=too-few-public-methods
     """Expect some user input, and provide response related to the
     instance configuration variables.
 
@@ -119,7 +122,7 @@ class Expect:
             default = expect[not self.expect]
 
         # handle multi choice (expect=list)
-        elif isinstance(expect, list) and len(expect):
+        elif isinstance(expect, list) and expect:
             default = expect[0]
 
         # handle single choice (expect=str):
@@ -214,7 +217,7 @@ class Expect:
                 # if boolean was expected, return True in the case
                 # response is the same as expected. False otherwise
                 if isinstance(self.expect, bool):
-                    r = True if response == "y" else False
-                    return True if r == self.expect else False
+                    resp = response == "y"
+                    return resp == self.expect
                 # just return response otherwise
                 return response

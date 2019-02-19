@@ -5,27 +5,28 @@ development API.
 
 CONTENTS:
 
-* plugin (type: Plugin() object)
-    Contains current plugin attributes.
+* plugin (type: api.plugin.Plugin())
+    Access running plugin attributes
 
 * environ (type: dict)
-    Get enviromnent variables of current phpsploit session.
+    Access phpsploit session's Environment Variables
 
-* server (type: module)
-    This module includes target server related operations.
-    It actually contains the following submodules:
-        - path: For common operations on server pathnames.
-        - payload: The phpsploit payload requests manager.
+* server (type: package)
+    Provides target server related operations.
+    Modules:
+      - path: Remote server pathname operations.
+      - payload: Run a PHP payload on remote server.
 """
+__all__ = ["plugin", "environ", "server"]
 
-
-# Import api.server package
-from . import server
+from core import session
 
 # Define api.plugin (current plugin attributes)
 from .plugin import plugin
 
+# Import api.server package
+from . import server
+
 # Define api.environ dictionary (environment variables)
-from core import session
 environ = session.Env
 del session

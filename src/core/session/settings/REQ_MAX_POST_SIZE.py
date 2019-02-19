@@ -1,22 +1,31 @@
 """
-This setting defines maximum size of
-the post data per http request to the
-target server.
+Set max size of POST data allowed in an HTTP request.
 
-Most http servers allow up to 4MB for
-post data, therefore, if the server
-administrator have configured it to a lower
-limit, execution of requests can fail and
-lead to an http error 500 or something else.
+This setting is needed to tell phpsploit to generate HTTP
+requests that are acceptable for the target server.
+
+* EXAMPLE:
+Most http servers allow up to 4MiB per request message body.
+Therefore, if the server is configured to only allow up
+to 300KiB, phpsploit could fail to execute payloads
+unless you change value of REQ_MAX_HEADERS to 300 KiB:
+> set REQ_MAX_HEADERS 300KiB
+
+* NOTE:
+If you encounter http error 500 or if payload execution fails,
+you may need to lower the default limit of this setting.
+
+* REFERENCES:
+http://httpd.apache.org/docs/2.2/mod/core.html#LimitRequestBody
+https://secure.php.net/manual/en/ini.core.php#ini.post-max-size
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.buffers.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
-
-def setter(value):
+def validator(value):
     value = datatypes.ByteSize(value)
     if 250 > value:
         raise ValueError("can't be less than 250 bytes")

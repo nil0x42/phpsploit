@@ -1,5 +1,5 @@
-from re import split as regex_split
-from random import uniform as random
+import re
+import random
 from ui.color import colorize
 
 
@@ -20,41 +20,39 @@ class Interval(tuple):
     4.2
     >>> print(val)
     1.5 <= x <= 5 (random interval)
-
     """
     def __new__(cls, value):
         rawval = str(value)
-        if type(value) in (int, float, str):
-            value = str(value).replace(',','.')
-            value = regex_split('[^0-9.]', value)
+        if isinstance(value, (int, float, str)):
+            value = str(value).replace(',', '.')
+            value = re.split('[^0-9.]', value)
 
         value = [str(e) for e in value if e]
         if len(value) == 1:
             value = [value[0], value[0]]
 
+        if len(value) != 2:
+            raise ValueError("Invalid format: %s" % rawval)
+
         try:
-            assert len(value) == 2
-            value = tuple(sorted([float(e) for e in value]))
-        except:
-            raise ValueError('«%s» must be an int/float interval'
-                             ' representation' %rawval)
-
+            value[0] = float(value[0])
+            value[1] = float(value[1])
+        except ValueError:
+            raise ValueError("Invalid float pair: %s" % rawval)
+        value = tuple(sorted(value))
         return tuple.__new__(cls, value)
-
 
     def _raw_value(self):
         return tuple(self)
 
-
     def __call__(self):
-        return random(self[0], self[1])
-
+        return random.uniform(self[0], self[1])
 
     def __str__(self):
         low, big = [str(x).rstrip('0').rstrip('.') for x in self]
         main = colorize('%Bold', '%s', '%Basic')
 
-        if low is big:
+        if low == big:
             text = main %low
             comment = '(fixed interval)'
         else:

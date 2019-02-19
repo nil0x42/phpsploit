@@ -11,18 +11,18 @@ the current directory (./lib/), making all self contained elements
 directly importable from python.
 
 """
-# load phpsploit dependencies before anything else
-import deps
-
 import os
 import sys
 
+# load phpsploit dependencies before anything else
+import deps
+
 from . import utils
 
-basedir = utils.path.truepath(sys.path[0]) + os.sep
-coredir = os.path.join(basedir, __name__) + os.sep
+BASEDIR = utils.path.truepath(sys.path[0]) + os.sep
+COREDIR = os.path.join(BASEDIR, __name__) + os.sep
 
 # use current directory as main python path
-sys.path[0] = coredir
+sys.path[0] = COREDIR
 
 del deps, sys, os  # clean package's content

@@ -1,4 +1,4 @@
-"""Time functions
+"""Time related functions
 
 Author: nil0x42
 """
@@ -36,8 +36,8 @@ def get_smart_date(value):
     """
     human_fmt = "YYYY[-mm[-dd[ HH[:MM[:SS]]]]]"
     python_fmt = "%Y-%m-%d %H:%M:%S"
-    regex = ("^(\d{4})(?:-(\d{2})(?:-(\d{2})(?: (\d"
-            "{2})(?::(\d{2})(?::(\d{2}))?)?)?)?)?$")
+    regex = (r"^(\d{4})(?:-(\d{2})(?:-(\d{2})(?: (\d"
+             r"{2})(?::(\d{2})(?::(\d{2}))?)?)?)?)?$")
     limits = (None, (1, 12), (1, 28), (0, 23), (0, 59), (0, 59))
     try:
         items = list(re.findall(regex, value)[0])
@@ -51,8 +51,8 @@ def get_smart_date(value):
     result = "%s-%s-%s %s:%s:%s" % tuple(items)
     try:
         datetime.datetime.strptime(result, python_fmt)
-    except ValueError as e:
-        if python_fmt in str(e):
-            e = "format must be %s" % human_fmt
-        raise ValueError("%r: %s" % (value, e))
+    except ValueError as err:
+        if python_fmt in str(err):
+            err = "format must be %s" % human_fmt
+        raise ValueError("%r: %s" % (value, err))
     return result

@@ -1,26 +1,23 @@
 """
-The user's prefered text editor.
+Set attacker's prefered text editor.
 
-USE CASES:
-  * The `set <SETTING> +` command allows user
-    to dynamically edit the full buffer of a
-    configuration setting. It then uses the
-    EDITOR setting to open the buffer as if
-    it was a file.
-  * The `edit` plugin provides manual edition
-    of a remote file through your local text
-    editor.
+* USE CASES:
+
+# open TARGET setting content with EDITOR:
+> set TARGET +
+
+# use `edit` plugin to edit a remote file locally with EDITOR:
+> edit /var/www/html/index.php
 """
 import os
-import sys
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.buffers.MultiLineBuffer
+linebuf_type = linebuf.MultiLineBuffer
 
 
-def setter(value):
+def validator(value):
     return datatypes.ShellCmd(value)
 
 

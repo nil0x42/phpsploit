@@ -8,22 +8,21 @@ that extends execution scope.
 
 The code will be executed before ANY payload execution.
 
-NOTE: If you do not understand what you're doing,
-      keep this setting with default value.
+* Only edit PAYLOAD_PREFIX if you really understand what you're doing
 """
 import core
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.buffers.MultiLineBuffer
+linebuf_type = linebuf.MultiLineBuffer
 
 
-def setter(value):
+def validator(value):
     return datatypes.PhpCode(value)
 
 
 def default_value():
     file_relpath = "data/tunnel/payload_prefix.php"
-    file = datatypes.Path(core.basedir, file_relpath)
+    file = datatypes.Path(core.BASEDIR, file_relpath)
     return file.read()

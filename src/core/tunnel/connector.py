@@ -1,3 +1,7 @@
+"""Open a new connection to remote TARGET
+"""
+__all__ = ["Request"]
+
 import core
 from datatypes import Path
 
@@ -5,18 +9,23 @@ from . import handler
 
 
 class Request:
+    """Handle virtual `tunnel` between attacker and remote TARGET.
+    """
 
     def __init__(self):
-        pass
+        self.socket = None
+        self.environ = {}
 
     def open(self):
+        """open a new tunnel connection to TARGET
+        """
         # instanciate and configure payload handler.
         socket = handler.new_request()
         socket.is_first_payload = True
         socket.errmsg_request = "Could not connect to TARGET"
         socket.errmsg_response = "TARGET does not seem to be backdoored"
         # send the `connector.php` payload through created tunnel (socket).
-        payload = Path(core.basedir, 'data/tunnel/connector.php').phpcode()
+        payload = Path(core.BASEDIR, 'data/tunnel/connector.php').phpcode()
         socket.open(payload)
         # build phpsploit session's environment variables from
         # connector.php's returned array.
@@ -28,14 +37,14 @@ class Request:
     def close(self):
         """close the virtual link, actually, just return the
         link closed's string
-
         """
         print('[*] Connection to %s closed.' % self.socket.hostname)
         return True
 
-    def _get_vars(self, raw_response):
-        """Retrieve and format connector's variables"""
-
+    @staticmethod
+    def _get_vars(raw_response):
+        """Retrieve and format connector's variables
+        """
         result = list()
         for name, value in raw_response.items():
             value = str(value).strip()
@@ -46,7 +55,6 @@ class Request:
         """collect the server related vars, usefull for further
         plugins usage and framework management.
         written at self.CNF['SRV'] on the interface's core.
-
         """
         # return first argument which is not empty
         def choose(options, default=''):

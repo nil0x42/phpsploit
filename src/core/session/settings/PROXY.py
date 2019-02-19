@@ -1,23 +1,30 @@
 """
-The proxy to use for request encapsulation.
+Use a proxy to connect to the target
 
-You can set a proxy in order to encapsulate
-the whole phpsploit requests for furtivity
-or network analysis purposes.
+You can set a proxy in order to encapsulate the whole phpsploit
+requests for furtivity or network analysis purposes.
 
 This setting supports HTTP, HTTPS, SOCKS4
-and SOCKS5 proxy types.
+and SOCKS5 proxy schemes.
 
 PROXY SYNTAX: <SCHEME>://<ADDRESS>:<PORT>
+
+* EXAMPLES:
+
+# To unset PROXY, set it's value to 'None' magic string:
+> set PROXY None
+
+# To set a socks5 proxy to connect through Tor:
+> set PROXY socks5://127.0.0.1:9050
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.buffers.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
 
-def setter(value):
+def validator(value):
     return datatypes.Proxy(value)
 
 

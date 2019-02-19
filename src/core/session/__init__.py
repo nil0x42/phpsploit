@@ -14,7 +14,6 @@ A session instance contains the following objects:
     * File  -> The default file that binds to session
     * Cache -> Remote server response cache
     * Hist  -> Readline history
-
 """
 import os
 import re
@@ -22,30 +21,29 @@ import gzip
 import pickle
 import difflib
 
+import metadict
+import utils.path
 import ui.input
-import objects
 from ui.color import colorize, decolorize
 from core import encoding
-import utils.path
 
 from . import settings
 from . import environment
 from . import history
-
 from . import compat_session
 
 SESSION_FILENAME = "phpsploit.session"
 
 
-class Session(objects.MetaDict):
+class Session(metadict.MetaDict):
     """Phpsploit Session
-
     """
+
+    # pylint: disable=invalid-name
     def __init__(self):
         """Instanciate the phpsploit session, it handles configuration
         settings, environment variables, command aliases, http response
         cache and readline history (if readline is available).
-
         """
         # process parent class init
         super().__init__()
@@ -53,17 +51,20 @@ class Session(objects.MetaDict):
         # session objects declaration
         self.Conf = settings.Settings()
         self.Env = {}
-        self.Alias = objects.VarContainer(title="Command Aliases")
-        self.Cache = objects.VarContainer(title="HTTP Response Cache")
+        self.Alias = metadict.VarContainer(title="Command Aliases")
+        self.Cache = metadict.VarContainer(title="HTTP Response Cache")
         self.Hist = history.History()
         self.Compat = {}
         self.File = None
 
-    def _isattr(self, name):
+    @staticmethod
+    def _isattr(name):
         """Session items are alphabetic and capitalized strings"""
         return re.match("^[A-Z][a-z]+$", name)
 
-    def _history_update(self, array=[]):
+    def _history_update(self, array=None):
+        if array is None:
+            array = []
         try:
             import readline
             # add array elements to readline history
@@ -90,8 +91,10 @@ class Session(objects.MetaDict):
         value = super().__getitem__(name)
         if name == "File":
             if value is None:
+                # pylint: disable=not-callable
                 value = self.Conf.SAVEPATH() + SESSION_FILENAME
             elif not os.path.isdir(value) and os.sep not in value:
+                # pylint: disable=not-callable
                 value = self.Conf.SAVEPATH() + value
         return value
 
@@ -104,19 +107,16 @@ class Session(objects.MetaDict):
         super().__setitem__(name, value)
 
     def __str__(self):
-        """Gives a nice string representation of current session"""
+        """Get a nice string representation of current session
+        """
         title = "PhpSploit session dump ({})".format(self.File)
         # deco = "\n" + colorize("%Blue", "=" * len(title)) + "\n"
         deco = "\n" + colorize("%Blue", "=" * 68) + "\n"
         data = deco + title + deco
         ordered_keys = ["Conf", "Env", "Alias"]
         for name in ordered_keys:
-            obj = self[name]
-            if isinstance(obj, objects.MetaDict):
-                try:
-                    data += str(obj) + "\n"
-                except:
-                    pass
+            if self[name]:
+                data += str(self[name]) + "\n"
         return data
 
     def __call__(self, file=None, fatal_errors=True):
@@ -141,17 +141,22 @@ class Session(objects.MetaDict):
         except OSError as error:
             if "not a gzipped file" in str(error).lower():
                 data = compat_session.load(file)
+                if not data:
+                    raise ValueError("Not a phpsploit session file")
             else:
-                raise error
+                raise
         # get Session() obj from raw session value
-        session = self._obj_value(data, fatal_errors=fatal_errors)
+        sess = self._obj_value(data, fatal_errors=fatal_errors)
         # bind new session's File to current file
-        session.File = file
-        return session
+        sess.File = file
+        return sess
 
     def load(self, file=None, fatal_errors=True):
-        return (self(file, fatal_errors=fatal_errors))
+        """get a new Session() loaded from `file`
+        """
+        return self(file, fatal_errors=fatal_errors)
 
+    # pylint: disable=arguments-differ
     def update(self, obj=None, update_history=False):
         """Update current session with `obj`.
         The given argument can be a dictionnary instance, in which case
@@ -171,13 +176,14 @@ class Session(objects.MetaDict):
             obj = self.load(file)
         # if obj is not a dict instance, fallback to parent method
         elif not isinstance(obj, dict):
-            return super().update(obj)
+            super().update(obj)
+            return
 
         for key, value in obj.items():
             if key == "Compat":
                 self[key] = value
             elif isinstance(self[key], dict):
-                    self[key].update(value)
+                self[key].update(value)
             elif key == "Hist":
                 if update_history and file is not None:
                     self._history_update(value)
@@ -185,7 +191,8 @@ class Session(objects.MetaDict):
                 self[key] = value
 
     def deepcopy(self, target=None):
-        """create a deep copy of current session
+        """Create a deep copy of current session
+        All contained objects are recursively guaranted to be duplicated
         """
         if target is None:
             target = self
@@ -226,27 +233,52 @@ class Session(objects.MetaDict):
 
         return diff != orig
 
-    def _raw_value(self, obj):
-        # get raw value (dict) which represents
-        # the given Session() instance.
-        # returned value only contains python built-in objetcs.
+    def _raw_value(self, sess=None):
+        """Get a 'built-in types only' representation of `sess`
+        Session() object.
+
+        This @staticmethod is guaranted to return only python built-in
+        types, and is therefore useful to dump Session() in a stable state.
+
+        To restore a raw value, use _obj_value() method.
+
+        >>> from core import session
+        >>> type(session)
+        <class 'core.session.Session'>
+        >>> raw = session._raw_value(session)
+        >>> type(raw)
+        <class 'dict'>
+        """
+        if sess is None:
+            sess = self
         rawdump = {}
-        for object in obj.keys():
-            rawdump[object] = {}
-            rawvar = (tuple if object == "Conf" else str)
-            if isinstance(obj[object], dict):
-                for var, value in obj[object].items():
-                    rawdump[object][var] = rawvar(value)
-                if object == "Env":
+        for obj in sess.keys():
+            rawdump[obj] = {}
+            rawvar = (tuple if obj == "Conf" else str)
+            if isinstance(sess[obj], dict):
+                for var, value in sess[obj].items():
+                    rawdump[obj][var] = rawvar(value)
+                if obj == "Env":
                     # HACK: store env defaults as __DEFAULTS__
-                    rawdump["Env"]["__DEFAULTS__"] = obj["Env"].defaults
-            elif object == "Hist":
-                rawdump[object] = list(obj[object])
+                    rawdump["Env"]["__DEFAULTS__"] = sess["Env"].defaults
+            elif obj == "Hist":
+                rawdump["Hist"] = list(sess["Hist"])
             else:
-                rawdump[object] = rawvar(obj[object])
+                rawdump[obj] = rawvar(sess[obj])
         return rawdump
 
     def _obj_value(self, raw=None, fatal_errors=True):
+        """Restore Session() from its 'built-in types only' representation.
+        Used to get back Session() from data returned by _raw_value() method
+
+        >>> from core import session
+        >>> raw = session._raw_value(session)
+        >>> type(raw)
+        <class 'dict'>
+        >>> restored = session._obj_value(raw)
+        >>> type(restored)
+        <class 'core.session.Session'>
+        """
         def update_obj(obj, new, fatal_errors=True):
             elems = list(obj.keys())
             if "Conf" in elems:
@@ -265,7 +297,7 @@ class Session(objects.MetaDict):
                             obj[elem][key] = value
                         except Exception as error:
                             item_repr = "session.%s.%s" % (elem, key)
-                            msg_prefix = "[-] Cannot set %s" % item_repr
+                            msg_prefix = "[-] Couldn't set %s" % item_repr
                             if fatal_errors:
                                 print("%s:" % msg_prefix)
                                 raise
@@ -277,7 +309,8 @@ class Session(objects.MetaDict):
         obj = Session()
         obj = update_obj(obj, self._raw_value(self))
         if raw is not None:
-            assert raw.keys() == obj.keys()
+            if raw.keys() != obj.keys():
+                raise ValueError("Invalid raw session")
             obj = update_obj(obj, raw, fatal_errors=False)
         return obj
 

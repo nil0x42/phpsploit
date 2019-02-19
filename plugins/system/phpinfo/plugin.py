@@ -4,12 +4,12 @@ SYNOPSIS:
     phpinfo [--browser]
 
 OPTIONS:
-    --browser  Display target's phpinfo() in web browser instead
-               of generating a tabular text format.
+    --browser
+        Display raw phpinfo()'s HTML output in web browser
 
 DESCRIPTION:
-    Dump the remote server's phpinfo() data in tabular
-    text format.
+    Display the remote server's phpinfo() data in tabular
+    text, formatted for the terminal.
 
 AUTHOR:
     nil0x42 <http://goo.gl/kb2wf>

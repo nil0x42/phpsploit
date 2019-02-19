@@ -18,6 +18,7 @@ alias save      "session save"
 alias infect    "exploit"
 alias lcd       "lrun cd"
 alias lpwd      "lrun pwd"
+alias clear     "lrun clear"
 alias fileinfo  "stat"
 alias backdoor  "exploit --get-backdoor"
 

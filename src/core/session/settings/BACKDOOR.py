@@ -1,25 +1,28 @@
 """
-This settings allows overriding default template
-of the backdoor to inject in target URL in
-order to improve stealth and polymorphism.
+This setting allows overriding default backdoor template.
+It is used to generate the backdoor to be injected in TARGET url.
 
-Global behavior of the php backdoor sould remain
-the same in order to work properly.
-It must evaluate the HTTP_%%PASSKEY%% header,
-which is generated with the name of the
-$PASSKEY setting.
+This setting can be changed to improve stealth. Using a different
+template than the default one is a good was to bypass static
+Antivirus/IDS signatures.
 
-NOTE: If you do not understand what you're doing,
-      please do not change this setting.
+Make sure that the global behavior remains the same.
+Indeed, BACKDOOR must evaluate the content of 'HTTP_%%PASSKEY%%'
+header to work properly.
+
+NOTE: %%PASSKEY%% is a magic string that is replaced by PASSKEY
+      value at runtime.
+
+* Only edit BACKDOOR if you really understand what you're doing
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.buffers.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
 
-def setter(value):
+def validator(value):
     if value.find("%%PASSKEY%%") < 0:
         raise ValueError("shall contain %%PASSKEY%% string")
     return datatypes.PhpCode(value)

@@ -10,6 +10,7 @@ from ui.color import colorize
 from .exceptions import BadPlugin
 
 
+# pylint: disable=too-few-public-methods
 class Plugin:
     """Phpsploit plugin class
 
@@ -30,12 +31,14 @@ class Plugin:
             path = path[:-1]
         self.path = path
         self.name = os.path.basename(path)
+        self.argv = [] # redefined at runtime on run()
 
         try:
             Path(path, mode='drx')()
         except ValueError as e:
             print("[#] Couldn't load plugin: «%s»" % self.path)
             print("[#]     Plugin directory error: %s" % e)
+            print("[#] ")
             raise BadPlugin
 
         category = os.path.basename(os.path.dirname(path))
@@ -57,15 +60,20 @@ class Plugin:
         try:
             code = compile(script, "", "exec")
         except BaseException as e:
-            e = traceback.format_exception(type(e), e, e.__traceback__)
             print("[#] Couldn't compile plugin: «%s»" % self.path)
-            print("[#] " + "\n[#] ".join("".join(e).splitlines()))
+            e = traceback.format_exception(type(e), e, e.__traceback__)
+            for line in "".join(e).splitlines():
+                print(colorize("[#] ", "%Red", line))
+            # print("[#] " + "\n[#] ".join("".join(e).splitlines()))
             print("[#] ")
             raise BadPlugin
         if "__doc__" in code.co_names:
             self.help = code.co_consts[0]
 
     def run(self, argv):
+        """run current plugin
+        """
+        self.argv = argv
         from api import server
         try:
             ExecPlugin(self)
@@ -94,10 +102,12 @@ class Plugin:
             msg = "Python runtime error (exception occured)"
             print("[-] %s: %s:" % (self.name, msg))
             raise err
+        return 0
 
 
 class ExecPlugin:
-
+    """Execute a Phpsploit Plugin
+    """
     filename = "plugin"
     _instance_id = 0
 
@@ -111,14 +121,15 @@ class ExecPlugin:
 
     @classmethod
     def is_first_instance(cls):
-        if cls._instance_id == 0:
-            result = True
-        else:
-            result = False
+        """check whether current instance is the first loaded one
+        """
+        result = not cls._instance_id
         cls._instance_id += 1
         return result
 
     def exec_module(self, path):
+        """execute plugin as an `importlib` module
+        """
         loader = importlib.machinery.SourceFileLoader(self.filename, path)
         module = importlib.import_module(self.filename)
 

@@ -1,22 +1,25 @@
 """Client for ldap
 
 SYNOPSIS:
-    ldap
+    ldap connect <HOST> [<LOGIN> <PASSWORD>]
+    ldap list <DN>
+    ldap search <DN> <FILTER>
+    ldap set [<KEY> <VAL>]
 
 DESCRIPTION:
-    > ldap connect <host> <login> <password>
+    > ldap connect <HOST> [<LOGIN> <PASSWORD>]
         Connect to service
-    > ldap list <dn>
+    > ldap list <DN>
         List node
-    > ldap search <dn> <filter>
+    > ldap search <DN> <FILTER>
         Find node based on filter
     > ldap set
         List env var
-    > ldap set <key> <val>
+    > ldap set <KEY> <VAL>
         Set env var
 EXAMPLES:
     > ldap connect 10.0.0.100
-      - Connect anonymously
+      - Connect anonymously to 10.0.0.100
     > ldap connect 10.0.0.100 "cn=admin,dc=example,dc=org" admin
       - Connect to 10.0.0.100 as "admin" with password "admin"
     > ldap list "dc=example,dc=org"
@@ -35,6 +38,7 @@ from api import server
 from api import environ
 import objects
 from ui.color import colorize
+
 
 def print_node(node):
     if 'dn' in node:

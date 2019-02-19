@@ -22,8 +22,8 @@ colored to bright red.
 
 NOTE: Ansi escape codes (terminal colors) are automatically removed
 when writting to the backlog.
-
 """
+__all__ = ["Stdout"]
 
 import sys
 import os
@@ -41,7 +41,7 @@ class Stdout:
     back logging.
 
     The 'backlog' argument is defaultly set to False, it can be
-    enabled at initialisation if set to True, or enabled later
+    enabled at initialization if set to True, or enabled later
     setting the instance's backlog attribute to an empty string.
 
     NOTE: See module's help for more informations.
@@ -71,16 +71,17 @@ class Stdout:
         """Restore the original sys.stdout on Wrapper deletion"""
         self._backlog.close()
         # dirty hack when used before argparse on main file...
-        try:
-            sys.stdout = self._orig_outfile
-        except:
-            pass
+        sys.stdout = self._orig_outfile
+        # try:
+        #     sys.stdout = self._orig_outfile
+        # except:
+        #     pass
 
     def __getattr__(self, obj):
         """Fallback to original stdout objects for undefined methods"""
         return getattr(self._orig_outfile, obj)
 
-    def _writeLn(self, line):
+    def _write_line(self, line):
         """Process individual line morphing, and write it"""
         # Process per platform newline transformation
         if line.endswith('\r\n'):
@@ -101,7 +102,7 @@ class Stdout:
             if line == os.linesep:
                 return
 
-        line = process_tags(line)  # handle tagged lines coloration
+        line = self.process_tags(line)  # handle tagged lines coloration
 
         # Write line to stdout, and it's decolorized version on backlog
         # if standard output is not a tty, decolorize anything.
@@ -118,7 +119,7 @@ class Stdout:
     def write(self, string):
         """Write the given string to stdout"""
         for line in string.splitlines(1):
-            self._writeLn(line)
+            self._write_line(line)
 
     @property
     def backlog(self):
@@ -126,8 +127,7 @@ class Stdout:
         if self._has_backlog:
             self._backlog.seek(0)
             return self._backlog.read()
-        else:
-            raise AttributeError()
+        raise AttributeError()
 
     @backlog.setter
     def backlog(self, value):
@@ -136,9 +136,9 @@ class Stdout:
         If a non empty string is given, backlog takes it as new value
         """
         del self.backlog
-        if not (value is False or value is None):
+        if value is not False and value is not None:
             self._has_backlog = True
-        if type(value) == str:
+        if value.__class__ == str:
             self._backlog.write(decolorize(value))
 
     @backlog.deleter
@@ -148,36 +148,39 @@ class Stdout:
         self._backlog.seek(0)
         self._has_backlog = False
 
+    @staticmethod
+    def process_tags(line):
+        """Process tagged line transformations, such as auto colorization
+        and pattern rules.
 
-def process_tags(line):
-    """Process tagged line transformations, such as auto colorization
-    and pattern rules.
+        >>> process_tags("[*] FOO: «bar»\\n")
+        '\\x1b[1m\\x1b[34m[*]\\x1b[0m FOO: \\x1b[37m«bar»\\x1b[0m\\n'
+        """
+        tag_list = [('%BoldBlue', '[*] '),   # INFO
+                    ('%BoldRed', '[!] '),    # ERROR
+                    ('%BoldPink', '[?] '),   # QUESTION
+                    ('%BoldYellow', '[-] '), # WARNING
+                    ('%BoldBlack', '[#] ')]  # DEBUG
 
-    >>> process_tags("[*] FOO: «bar»\\n")
-    '\\x1b[1m\\x1b[34m[*]\\x1b[0m FOO: \\x1b[37m«bar»\\x1b[0m\\n'
-    """
-    TAGS = [('%BoldBlue',   '[*] '),  # INFO
-            ('%BoldRed',    '[!] '),  # ERROR
-            ('%BoldPink',   '[?] '),  # QUESTION
-            ('%BoldYellow', '[-] '),  # WARNING
-            ('%BoldBlack',  '[#] ')]  # DEBUG
+        # if not tagged, return the line as it is
+        tag = None # make pylint happy
+        for index, tag in enumerate(tag_list):
+            if line.startswith(tag[1]):
+                break
+            if index == len(tag_list) - 1:
+                return line
 
-    # return the line as it is if untagged
-    for index, tag in enumerate(TAGS):
-        if line.startswith(tag[1]):
-            break
-        if index == (len(TAGS) - 1):
-            return line
+        # remove dulpicate tags >>> "[!] [!] Foo" -> "[!] Foo"
+        while line[len(tag[1]):][0:len(tag[1])] == tag[1]:
+            line = line[len(tag[1]):]
 
-    # remove dulpicate tags >>> "[!] [!] Foo" -> "[!] Foo"
-    while line[len(tag[1]):][0:len(tag[1])] == tag[1]:
-        line = line[len(tag[1]):]
+        # format line's tag with requested color style
+        line = colorize(*tag) + line[len(tag[1]):]
 
-    # format line's tag with requested color style
-    line = colorize(*tag) + line[len(tag[1]):]
+        # colorize «*» patterns from tagged line:
+        dye = lambda obj: colorize('%White', repr(obj.group(1)))
+        line = re.sub('«(.+?)»', dye, line)
+        dye = lambda obj: '`' + colorize('%DimWhiteBold', obj.group(1)) + '`'
+        line = re.sub('`(.+?)`', dye, line)
 
-    # colorize «*» patterns from tagged line:
-    dye = lambda obj: colorize('%White', "« " + obj.group(1) + " »")
-    line = re.sub('«(.+?)»', dye, line)
-
-    return line
+        return line

@@ -1,16 +1,14 @@
 """
-Bollean variable.
-
-Increases verbosity if is True.
+Enable or Disable phpsploit framework verbosity.
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.buffers.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
 
-def setter(value):
+def validator(value):
     return datatypes.Boolean(value)
 
 

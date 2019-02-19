@@ -1,23 +1,23 @@
+"""Phpsploit Environment Variables"""
+
 import re
 import copy
 
-import objects
+import metadict
 import utils
 
 
-class Environment(objects.VarContainer):
+class Environment(metadict.VarContainer):
     """Environment Variables
 
     Instanciate a dict() like object that stores PhpSploit
     environment variables.
 
     Unlike settings, env vars object works exactly the same way than
-    its parent (MetaDict), excepting the fact that some
-    items (env vars) are tagged as read-only.
-    This behavior only aplies if the concerned variable already
-    exists.
-    In order to set a tagged variable's value, it must not
-    exist already.
+    its parent (MarContainer), except that some items (env vars)
+    are tagged as read-only.
+    * This behavior only aplies if the concerned variable already exists.
+    * To set a tagged variable's value, it must not exist.
 
     Example:
     >>> Env = Environment()
@@ -25,18 +25,22 @@ class Environment(objects.VarContainer):
     >>> Env.HOST = "bar"
     AttributeError: «HOST» variable is read-only
     >>> Env.HOST
-    'foo'
+    foo
     >>> del Env.HOST
     >>> Env.HOST = "bar"
     >>> Env.HOST
-    'bar'
-
+    bar
     """
     readonly = ["ADDR", "CLIENT_ADDR", "HOST", "HTTP_SOFTWARE",
                 "PATH_SEP", "PHP_VERSION", "WEB_ROOT"]
     item_deleters = ["NONE"]
 
-    def __init__(self, value={}, readonly=[]):
+    def __init__(self, value=None, readonly=None):
+        if value is None:
+            value = {}
+        if readonly is None:
+            readonly = []
+
         self.readonly += readonly
         self.defaults = {}
         super().__init__(value)
@@ -44,7 +48,7 @@ class Environment(objects.VarContainer):
 
     def __setitem__(self, name, value):
         # ensure the env var name has good syntax
-        if name in ["", "__DEFAULTS__"] or not utils.ascii.isgraph(name):
+        if name in ["", "__DEFAULTS__"] or not utils.string.isgraph(name):
             raise KeyError("illegal name: '{}'".format(name))
         if name in self.readonly and name in self.keys():
             raise AttributeError("«{}» variable is read-only".format(name))
@@ -59,17 +63,18 @@ class Environment(objects.VarContainer):
         if name not in self.defaults.keys():
             self.defaults[name] = self[name]
 
-    def _isattr(self, name):
+    @staticmethod
+    def _isattr(name):
         return re.match("^[A-Z][A-Z0-9_]+$", name)
 
-    def update(self, dic):
+    def update(self, new_dict):
         readonly = self.readonly
         self.readonly = []
-        if "__DEFAULTS__" in dic.keys():
-            self.defaults = copy.copy(dict(dic.pop("__DEFAULTS__")))
-        elif hasattr(dic, "defaults"):
-            self.defaults = copy.copy(dict(dic.defaults))
-        for key, value in dic.items():
+        if "__DEFAULTS__" in new_dict.keys():
+            self.defaults = copy.copy(dict(new_dict.pop("__DEFAULTS__")))
+        elif hasattr(new_dict, "defaults"):
+            self.defaults = copy.copy(dict(new_dict.defaults))
+        for key, value in new_dict.items():
             # do not update if the key has been set to
             # another value than the default one.
             if key in self.keys() \

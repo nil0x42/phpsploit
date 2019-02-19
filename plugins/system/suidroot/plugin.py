@@ -5,29 +5,35 @@ SYNOPSIS:
     suidroot "<COMMAND>"
 
 DESCRIPTION:
-    This plugin provides a simple way to install a setuid(2)
-    backdoor, and use it for persistent privilege escalation
-    through phpsploit.
+    Provide a simple way to install persistent setuid(2)
+    backdoor from previously obtained root access.
 
-    NOTES:
-    - This plugin only performs root access persistance
-    from a previously obtained access.
-    - Only works on unix like systems with command execution
-    available.
-    - In order to work properly, unprivileged user must
-    have execution access to <SUIDROOT_BACKDOOR> file
-    - In order to work properly, unprivileged user must have
-    write permissions on <SUIDROOT_PIPE> file
+    SUIDROOT_BACKDOOR file should be carefully chosen to not
+    look suspicious. Our goal is to make it as undetectable
+    as we can. I recommend searching for legitimate setuid()
+    files already installed on the system, and using a
+    similar file path as SUIDROOT_BACKDOOR.
+    # sources: http://lmgtfy.com/?q=find+suid+files+linux
+
+LIMITATIONS:
+    - Only works on Linux/UNIX.
+    - RCE must be available (`run` plugin must work).
+    - Current (unprivileged) user must have execution
+    rights on SUIDROOT_BACKDOOR file.
 
 WARNING:
-    Considering the PhpSploit's input parser, commands which
+    Considering phpsploit's input parser, commands which
     contain quotes, semicolons, and other chars that could be
     interpreted by the framework MUST be quoted to be
-    interpreted as a single argument. For example:
-      > run echo 'foo bar' > /tmp/foobar; cat /etc/passwd
-    In this case, quotes and semicolons will be interpreted by
-    the framework, so the correct syntax is:
-      > run "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
+    interpreted as a single argument.
+
+    * Bad command:
+    # Here, phpsploit parser detects multiple commands:
+    > suidroot echo 'foo bar' > /tmp/foobar; cat /etc/passwd
+
+    * Good command:
+    # Here, the whole string is correctly passed to plugin
+    > suidroot "echo 'foo bar' > /tmp/foobar; cat /etc/passwd"
 
 EXAMPLES:
     > suidroot --create /tmp/backdoor

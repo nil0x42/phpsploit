@@ -1,23 +1,27 @@
 """
-This setting adjusts from what payload size
-the zlib compression feature is disabled.
+Control over which payload size the zlib compression feature
+will be disabled.
 
-The framework requests engine looks for the best
-way to spread the payload with a minimum of http
-requests when payloads are large.
-Therefore, the compression feature is exponentially
-cpu greedy, so it is a good practice to set
-the limit according to the cpu capacity of your
-machine.
+The phpsploit request engine does'its best to compress and fit
+the payload within as little HTTP Requests as possible.
+
+Therefore, zlib compression becomes exponentially CPU greedy
+as payload size gows up, and it might be extremelly slow to
+process very large requests.
+
+The REQ_ZLIB_TRY_LIMIT defines a value over which the payload
+is no more processed by zlib compression. Payloads over this
+value will then be encoded without zlib compression, making them
+bigger, but also a lot faster to generate.
 """
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.buffers.RandLineBuffer
+linebuf_type = linebuf.RandLineBuffer
 
 
-def setter(value):
+def validator(value):
     value = datatypes.ByteSize(value)
     if value < 1:
         raise ValueError("must be a positive bytes number")

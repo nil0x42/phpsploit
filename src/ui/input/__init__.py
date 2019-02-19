@@ -1,19 +1,16 @@
-"""PhpSploit input related classes.
+"""PhpSploit User Input (STDIN) Handler
 
-Provides classes related to user input.
-
-SUMMARY:
-
-* Expect()
-    Ask a question which expects some user input, with timer feature.
-
-* isatty(): (bool)
-    is current input a tty ?
-
+This package provides UI features relaed to Standard Input
 """
+__all__ = ["Expect", "isatty"]
 
 import sys
-
 from .expect import Expect
 
-isatty = sys.stdin.isatty
+
+def isatty() -> bool:
+    """Return whether input is an 'interactive' stream.
+
+    Return False if it can't be determined.
+    """
+    return sys.__stdin__.isatty()

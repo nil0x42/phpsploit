@@ -1,31 +1,29 @@
-"""Copy a file between two remote paths
+r"""Copy a file between two remote paths
 
 SYNOPSIS:
     cp [-f] <REMOTE-FILE> <REMOTE-DESTINATION>
 
 OPTIONS:
-    -f      Overwrite destination without confirmation if it
-            already exists.
+    -f
+        overwrite REMOTE-DESTINATION without user confirmation.
 
 DESCRIPTION:
-    A basic GNU's 'cp' tool simulation, which acts copying the
-    file given as first argument, to the location defined by
-    second argument.
-    The file to copy must be at least readable, and the
-    destination can be a file path, or a directory path.
-    - In the case the destination is a directory, the file will
-    be copied into it, keeping it's original file name.
-    - Unless the '-f' option has been set, the copy process
-    aborts if the destination file already exists, and asks for
-    an confirmation to overwrite the file.
+    Copy a remote file to another remote destination.
+    - REMOTE-FILE must be readable.
+    - REMOTE-DESTINATION must be a writable file or directory.
+    - If REMOTE-DESTINATION is a directory, REMOTE-FILE will
+    be copied into it, preserving original file name.
+    - Unless '-f' option has been provided, user confirmation is
+    needed to overwrite REMOTE-DESTINATION (if it already exists).
 
-    NOTE: Unlike the standard GNU's 'cp' tool, this plugin can
-    not copy more than one file at the time.
+LIMITATIONS:
+    Unlike the standard GNU's 'cp' tool, recursive directory
+    and multiple file copy are not available.
 
 EXAMPLES:
     > cp -f exploit.php ../images/archive/IMG0043.PHP
       - Copy an exploit to a stealth location, force copy.
-    > cp \\Bach\\LOG\\ex191213.zip C:\\intepub\\wwwroot\\x.zip
+    > cp \Bach\LOG\ex191213.zip C:\intepub\wwwroot\x.zip
       - Copy this interesting file to a web accessible path.
 
 AUTHOR:

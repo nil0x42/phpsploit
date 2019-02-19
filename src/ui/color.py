@@ -1,12 +1,15 @@
-import re # usd by colorize(), decolorize()
-import difflib # used by diff()
+"""ANSI Terminal colors handler"""
+__all__ = ["colorize", "decolorize", "diff"]
+
+import re
+import difflib
 
 ANSI = {"reset":  "\x1b[0m",    # reset everything
         "bold":   "\x1b[1m",    # bold/bright style
-        "dim":    "\x1b[2;3m",  # dim||italic style
-        "lined":  "\x1b[4m",    # underlined
+        "dim":    "\x1b[2;3m",  # dim or italic style
+        "lined":  "\x1b[4m",    # underline
         "blink":  "\x1b[5m",    # blinking style
-        "invert": "\x1b[7m",    # invert forgound/backgroun
+        "invert": "\x1b[7m",    # invert foreground/backgroung
         "basic":  "\x1b[22m",   # set normal style
         # COLOR CODES
         "black":  "\x1b[30m",   # black color
@@ -102,13 +105,14 @@ def decolorize(string):
     Example:
     >>> decolorize('string \\x1b[2m\\x1b[32mcolor !\\x1b[0m')
     'string color !'
-
     """
-    regex = "\x01?\x1b\[((?:\d|;)*)([a-zA-Z])\x02?"
+    regex = "\x01?\x1b\\[((?:\\d|;)*)([a-zA-Z])\x02?"
     return re.sub(regex, "", str(string))
 
 
 def diff(old, new, display=True):
+    """Nice colored diff implementation
+    """
     if not isinstance(old, list):
         old = decolorize(str(old)).splitlines()
     if not isinstance(new, list):

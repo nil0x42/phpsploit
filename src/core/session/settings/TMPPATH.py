@@ -1,20 +1,19 @@
 """
-Default directory to use for writing
-temporary files on attacker machine.
+Default phpsploit temporary directory.
 
-Used as base path for files being edited
-with `edit` plugin.
+* USE CASES:
+Used as base path for files edited with `edit` plugin.
 """
 import tempfile
 
-import objects
+import linebuf
 import datatypes
 
 
-type = objects.buffers.MultiLineBuffer
+linebuf_type = linebuf.MultiLineBuffer
 
 
-def setter(value):
+def validator(value):
     return datatypes.Path(value, mode="drw")
 
 

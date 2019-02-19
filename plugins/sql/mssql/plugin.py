@@ -1,4 +1,4 @@
-"""A client for Microsoft SQL Server
+r"""A client for Microsoft SQL Server
 
 SYNOPSIS:
     mssql connect <USERNAME>@<HOSTNAME> [-p <PASSWORD>]
@@ -39,7 +39,7 @@ EXAMPLES:
       - Use the "master" database as default one
     > mssql SELECT * FROM sysusers
       - Print the whole "sysusers" table from "master"
-    > mssql "SELECT * FROM sysusers\\\\G"
+    > mssql "SELECT * FROM sysusers\\G"
       - Same as above, using tabular format (mysql client like)
 
 ENVIRONMENT:

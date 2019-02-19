@@ -1,4 +1,4 @@
-"""A generic command interpreter with multicommand support.
+r"""A generic command interpreter with multicommand support.
 
 The cmdshell library has been initially developped to correctly handle
 PhpSploit framework's shell interfaces. That being said, it was built
@@ -37,7 +37,7 @@ Command execution:
 Prompt feature:
   * Included an input() wrapper (classe's raw_input() method) that
     makes use of regular expressions to automatically enclose
-    enventual prompt's ANSI color codes with '\\01%s\\02', fixing
+    enventual prompt's ANSI color codes with '\01%s\02', fixing
     readline's prompt length missinterpretation on colored ones.
   * Since multiline commands are supported, a new variable:
     prompt_ps2 can be used to change PS2 prompt prefix.
@@ -101,31 +101,32 @@ class Shell(cmd.Cmd):
     error = "*** Error raised: %s"
 
     def __init__(self, completekey='tab', stdin=None, stdout=None):
+        self.old_completer = None
+        self.completion_matches = None
         super().__init__(completekey=completekey, stdin=stdin, stdout=stdout)
 
     def raw_input(self, prompt):
-        """An input() wrapper that fixes readline ansi colored prompt
+        r"""An input() wrapper that fixes readline ansi colored prompt
         length missinterpretation by wrapping terminal ansi codes as
-        "ANSI" = "\\x01ANSI\\x02".
+        "ANSI" = "\x01ANSI\x02".
 
         """
-        if not self.stdout.isatty():
+        if not self.stdout.isatty() or not self.stdin.isatty():
             return input()
 
         # if not readline, return prompt as it is
         try:
             __import__("readline")
-        except:
+        except ImportError:
             return input(prompt)
 
         # else, fix readline length missinterpretation
-        pattern = "\x01?(\x1b\[((?:\d|;)*)([a-zA-Z]))\x02?"
+        pattern = "\x01?(\x1b\\[((?:\\d|;)*)([a-zA-Z]))\x02?"
         return input(re.sub(pattern, "\x01\\1\x02", prompt))
 
-    def lex(self, string, line=1):
-        """The self.lex() method returns a list of commands, each
-        of them is a list of argv.
-
+    @staticmethod
+    def lex(string, line=1):
+        """return a list of argv lists from `string`
         """
         command_list = shnake_lex(string, line)
         result = []
@@ -166,15 +167,15 @@ class Shell(cmd.Cmd):
                 except EOFError:
                     self.stdout.write("\n")
                     line = "exit"
-                except BaseException as e:
+                except BaseException as err:
                     # nothing to interpret on exception
-                    self.onexception(e)
+                    self.onexception(err)
                     continue
                 try:
                     self.interpret(line, interactive=True)
                 # system exit is the correct way to leave loop
-                except SystemExit as e:
-                    return e.code
+                except SystemExit as err:
+                    return err.code
 
         # restore readline completer (if used)
         finally:
@@ -190,7 +191,7 @@ class Shell(cmd.Cmd):
                   postcmd=None, interactive=False, fatal_errors=False):
         """Interpret `commands` as a list of commands.
         `commands` can be a multi command raw string or a preformated
-        commands list. If str, is is automatically parsed.
+        commands list. If str, it is automatically parsed.
 
         precmd, onecmd and postcmd funcs can be overwritten from arguments.
         If None, they default to their respective class methods.
@@ -229,14 +230,14 @@ class Shell(cmd.Cmd):
                         return errcode
             # on exit, let return_errcode() handle error message if any,
             # then raise SystemExit with the proper return code number.
-            except SystemExit as e:
-                raise SystemExit(self.return_errcode(e.code))
+            except SystemExit as err:
+                raise SystemExit(self.return_errcode(err.code))
         return self.return_errcode(retval)
 
     def postcmd(self, retval, argv):
         """Hook method executed just after a command dispatch is finished.
-
         """
+        argv = argv
         return retval
 
     def parseline(self, string, interactive=True):
@@ -270,8 +271,8 @@ class Shell(cmd.Cmd):
                         raise err
                     except SyntaxWarning as err:
                         pass
-        except BaseException as e:
-            self.onexception(e)
+        except BaseException as err:
+            self.onexception(err)
             return []
 
     def onecmd(self, argv):
@@ -290,16 +291,15 @@ class Shell(cmd.Cmd):
 
         # get command function
         try:
-            cmdrun = getattr(self, 'do_'+argv[0])
+            cmdrun = getattr(self, "do_" + argv[0])
         except AttributeError:
             cmdrun = self.default
 
         # execute it, and handle error representation if fails:
         try:
             return cmdrun(argv)
-        except BaseException as e:
-            retval = self.onexception(e)
-            return retval
+        except BaseException as err:
+            return self.onexception(err)
 
     def onexception(self, exception):
         """Hook method executed when a python exception is raised
@@ -358,8 +358,7 @@ class Shell(cmd.Cmd):
     def emptyline(self):
         """Called when an empty line is entered in response to the prompt.
 
-        By default, it does nothing (unless the 'cmd' lib behavior)
-
+        By default, it does nothing (unlike 'cmd' parent lib's behavior)
         """
         return
 
@@ -368,11 +367,10 @@ class Shell(cmd.Cmd):
 
         If this method is not overridden, it prints an error message and
         returns.
-
         """
-        cmdRepr = "${!r}".format(argv[0])
-        cmd = argv[0] if argv[0] == cmdRepr[2:-1] else cmdRepr
-        self.stdout.write((self.nocmd + '\n') % cmd)
+        arg0_repr = "${!r}".format(argv[0])
+        arg0 = argv[0] if argv[0] == arg0_repr[2:-1] else arg0_repr
+        self.stdout.write((self.nocmd + '\n') % arg0)
         # standard return code on bash at `command not found` error.
         return 127
 
@@ -408,9 +406,9 @@ class Shell(cmd.Cmd):
                 compfunc = self.completenames
             self.completion_matches = compfunc(text, line, begidx, endidx)
         try:
-            return self.completion_matches[state]+' '
+            return self.completion_matches[state] + ' '
         except IndexError:
-            return
+            return None
 
     def get_names(self, obj=None, filter=''):
         """Pull in 'obj' base class attributes (defaults to self).
@@ -432,7 +430,8 @@ class Shell(cmd.Cmd):
         super().do_help(argv[1])
 
     def do_exit(self, argv):
-        'Leave the shell interface'
+        """Leave the shell interface"""
+        argv = argv
         self.stdout.write("*** Command shell left with 'exit'\n")
         sys.exit()
 
@@ -440,14 +439,12 @@ class Shell(cmd.Cmd):
         """On SystemExit exceptions (aka sys.exit() call), simply
         raise the same exception, sending a leaving query to the
         cmdloop() class.
-
         """
         raise exception
 
     def except_KeyboardInterrupt(self, exception):
         """It writes a newline, then returns its own value to keep
         onexception()'s error printing.
-
         """
         self.stdout.write('\n')
         return exception
