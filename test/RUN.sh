@@ -75,7 +75,19 @@ function decolorize () {
 }
 function exit_script () {
     ret=$?
-    [ -n "$__phpsploit_pipe_pid" ] && kill $__phpsploit_pipe_pid
+    if [ -n "$__phpsploit_pipe_pid" ]; then
+        # cannot just kill phpsploit pipe, or coveragepy will not write report
+        echo -e "\nexit --force\nexit --force\nexit --force" >&8
+        for ((n=0;n<20;n++)); do
+            sleep 0.2
+            ps -ef | grep -v grep | grep -q " $__phpsploit_pipe_pid " || break
+        done
+        errmsg="phpsploit_pipe process $__phpsploit_pipe_pid didn't quit normally: missing coverage report"
+        ps -ef | grep -v grep | grep " $__phpsploit_pipe_pid " && FAIL $errmsg
+        if [ -n "$COVERAGE" ]; then
+            [ -f $ROOTDIR/.coverage.*.$__phpsploit_pipe_pid.* ] || FAIL $errmsg
+        fi
+    fi
     [ $ret -eq 0 ] && return # ignore if return value == 0
     files=$(find $TMPDIR -type f -name "`basename $TMPFILE`"'*')
     for file in $files; do
@@ -93,7 +105,7 @@ function phpsploit_pipe () {
         mkfifo $TMPDIR/fifo-in $TMPDIR/fifo-out
         exec 8<>$TMPDIR/fifo-in
         exec 9<>$TMPDIR/fifo-out
-        nohup $PHPSPLOIT <&8 >&9 2>&1 &
+        $PHPSPLOIT <&8 >&9 2>&1 &
         __phpsploit_pipe_pid=$!
     fi
     randstr=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13`
