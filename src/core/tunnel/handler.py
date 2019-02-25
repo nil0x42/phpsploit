@@ -35,7 +35,12 @@ class _CustomHTTPConnection(http.client.HTTPConnection):
     """
     def send(self, data):
         global _RAW_REQUESTS_LIST
-        _RAW_REQUESTS_LIST.append(data)
+        # fixes: https://github.com/nil0x42/phpsploit/issues/65
+        if data.startswith(b"GET /") or data.startswith(b"POST /"):
+            _RAW_REQUESTS_LIST.append(data)
+        else:
+            _RAW_REQUESTS_LIST[-1] += data
+
         super().send(data)
 http.client.__HTTPConnection__ = http.client.HTTPConnection
 http.client.HTTPConnection = _CustomHTTPConnection
@@ -44,7 +49,11 @@ http.client.HTTPConnection = _CustomHTTPConnection
 # class _CustomHTTPSConnection(http.client.HTTPSConnection):
 #     def send(self, s):
 #         global global_raw_request
-#         _RAW_REQUESTS_LIST.append(s)
+#         # fixes: https://github.com/nil0x42/phpsploit/issues/65
+#         if data.startswith("GET ") or data.startswith("POST "):
+#             _RAW_REQUESTS_LIST.append(data)
+#         else:
+#             _RAW_REQUESTS_LIST[-1] += data
 #         super().send(s)
 # http.client.__HTTPSConnection__ = http.client.HTTPSConnection
 # http.client.HTTPSConnection = _CustomHTTPSConnection
@@ -660,7 +669,7 @@ class Request:
             return output
 
         # prepare user query for default method
-        query = "[*] %s %s request%s will be sent, you also can " \
+        query = "%s %s request%s will be sent, you also can " \
                 % (len(request[self.default_method]),
                    choice(self.default_method),
                    ['', 's'][len(request[self.default_method]) > 1])
@@ -674,7 +683,7 @@ class Request:
                         ['', 's'][len(request[self.other_method()]) > 1])
         # or report that the other method has been disabled
         else:
-            print('[-] %s method disabled:' % self.other_method +
+            print('[-] %s method disabled:' % self.other_method() +
                   ' The REQ_* settings are too restrictive')
 
         query += end + ': '  # add the Abort choice
