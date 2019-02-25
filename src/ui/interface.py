@@ -952,6 +952,8 @@ class Shell(shnake.Shell):
             doc = ""
             if cmd in plugins:
                 doc = plugins[cmd].help
+                if doc.strip():
+                    doc += "\nPLUGIN LOCATION:\n    " + plugins[cmd].path
             elif hasattr(self, "do_" + cmd):
                 doc = getattr(self, "do_" + cmd).__doc__
             return doc.strip().splitlines()
