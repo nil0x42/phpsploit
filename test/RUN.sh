@@ -98,7 +98,7 @@ function phpsploit_pipe () {
     fi
     randstr=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13`
     buf=$TMPDIR/buffer
-    echo "$@" >&8
+    echo -e "$@" >&8
     echo "lrun echo $randstr" >&8 # delimiter
     head -c 1 <&9 > $buf
     while ! grep -q "$randstr.*Returned " $buf; do
@@ -201,6 +201,7 @@ export PHPSPLOIT_CONFIG_DIR="$TMPDIR/phpsploit-config"
 mkdir "$PHPSPLOIT_CONFIG_DIR"
 cat "$ROOTDIR/data/config/config" > "$PHPSPLOIT_CONFIG_DIR/config"
 echo "set VERBOSITY True" >> "$PHPSPLOIT_CONFIG_DIR/config"
+echo "set REQ_INTERVAL 0" >> "$PHPSPLOIT_CONFIG_DIR/config" # make multireq faster
 echo "alias true 'lrun true'" >> "$PHPSPLOIT_CONFIG_DIR/config"
 
 # PHPSPLOIT = call phpsploit abspath (uses PHPSPLOIT_CONFIG_DIR)

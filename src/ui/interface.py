@@ -272,24 +272,28 @@ class Shell(shnake.Shell):
         if argv[1] == "reload-plugins":
             return plugins.reload(verbose=True)
 
-        elif argv[1] == "python-console":
+        if argv[1] == "python-console":
             from ui import console
             console = console.Console()
             console.banner = "Phpsploit corectl: python console interpreter"
             return console()
 
-        elif argv[1] == "display-http-requests":
-            requests = enumerate(tunnel.get_raw_requests(), 1)
+        if argv[1] == "display-http-requests":
+            requests = tunnel.get_raw_requests()
             if not requests:
-                print("[-] No HTTP(s) requests were sent up to now")
-                return
-            for num, request in requests:
+                print("[-] From now, phpsploit didn't "
+                      "sent any HTTP(s) request")
+                return False
+            print("[*] Listing last payload's HTTP(s) requests:\n")
+            for num, request in enumerate(requests, 1):
                 print("#" * 78)
                 print("### REQUEST %d" % num)
                 print("#" * 78)
                 print(encoding.decode(request))
-        else:
-            self.interpret("help corectl")
+            return True
+
+        self.interpret("help corectl")
+        return False
 
     ####################
     # COMMAND: history #
