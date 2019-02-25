@@ -35,13 +35,20 @@ done
 ###
 ### help <PLUGIN>
 ###
-plugins=`find $ROOTDIR/plugins/*/* -maxdepth 0 -exec basename {} ';' | grep -v '\.'`
-for plugin in $plugins; do
+plugin_paths=`find $ROOTDIR/plugins/*/* -maxdepth 0`
+for path in $plugin_paths; do
+    plugin=$(basename "$path")
     phpsploit_pipe help $plugin > $TMPFILE || FAIL
 
-    grep -q "^\[\*\] $plugin: " $TMPFILE || FAIL
-    grep -q "^SYNOPSIS:" $TMPFILE || FAIL
-    grep -q "^DESCRIPTION:" $TMPFILE || FAIL
+    assert_contains $TMPFILE << EOF
+^\[\*\] $plugin: 
+^SYNOPSIS:$
+^DESCRIPTION:$
+^PLUGIN LOCATION:$
+EOF
+    
+    plug_loc=$(grep -A1 'PLUGIN LOCATION' $TMPFILE | tail -n1 | xargs)
+    [[ "$path" == "$plug_loc" ]] || FAIL $path / $plug_loc
 
     echo "[OK] help $plugin"
 done
