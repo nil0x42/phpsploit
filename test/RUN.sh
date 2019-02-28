@@ -122,6 +122,10 @@ function phpsploit_pipe () {
     ret=`tail -n1 $buf | grep '^\[\#.*eturned [0-9]\+' | awk '{print $NF}'`
     [ -n "$ret" ] && return $ret
 }
+# remove debug lines from input (phpsploit lines starting with '[#'
+function nodebug () {
+    grep -v '^\[\#'
+}
 if [ -n "$PHPSPLOIT_TEST" ]; then
     trap exit_script EXIT
     print_env PWD

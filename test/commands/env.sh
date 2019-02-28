@@ -88,9 +88,36 @@ done
 
 
 ###
-### MISC
+### CHECK VALID VAR NAMES
+###   (create new custom env vars)
 ###
 
-# env FOO BAR (create new custom env var)
 phpsploit_pipe env FOO BAR > $TMPFILE || FAIL
 [[ "`getval FOO`" == "BAR" ]] || FAIL
+
+phpsploit_pipe env this@ISvalid myval > $TMPFILE || FAIL
+[[ "`getval this@ISvalid`" == "myval" ]] || FAIL
+
+###
+### CHECK INVALID VAR NAMES
+###
+
+# keep track of previously existing env vars
+phpsploit_pipe env > $TMPFILE-ref || FAIL
+
+# empty string fails
+phpsploit_pipe 'env "" BLA' > $TMPFILE && FAIL
+assert_contains $TMPFILE "\[\!\] Key Error: illegal name: '' doesn't match \[A-Za-z0-9@_-\]+"
+# string with spaces fails
+phpsploit_pipe 'env "has space" BLA' > $TMPFILE && FAIL
+assert_contains $TMPFILE "\[\!\] Key Error: illegal name: 'has space' doesn't match \[A-Za-z0-9@_-\]+"
+# ',' (badchar) fails
+phpsploit_pipe 'env ,bad BLA' > $TMPFILE && FAIL
+assert_contains $TMPFILE "\[\!\] Key Error: illegal name: ',bad' doesn't match \[A-Za-z0-9@_-\]+"
+# special name used to save default values in sessions, should fail
+phpsploit_pipe 'env __DEFAULTS__ BLA' > $TMPFILE && FAIL
+assert_contains $TMPFILE "\[\!\] Key Error: illegal name: '__DEFAULTS__'"
+
+# ensure env output hasn't changed (because no vars were created)
+phpsploit_pipe env > $TMPFILE || FAIL
+diff $TMPFILE-ref $TMPFILE

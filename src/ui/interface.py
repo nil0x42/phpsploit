@@ -19,7 +19,7 @@ from ui.color import colorize
 import ui.input
 import utils.path
 
-READLINE_COMPLETER_DELIMS = ' \t\n`~!@#$%^&*()=+[{]}\\|;:\'",<>?'
+READLINE_COMPLETER_DELIMS = ' \t\n`~!#$%^&*()=+[{]}\\|;:\'",<>?'
 
 
 class Shell(shnake.Shell):
