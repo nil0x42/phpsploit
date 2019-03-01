@@ -1,6 +1,43 @@
 #!/usr/bin/env bash
 
 ###
+### Check help warning for existing command that has been aliased
+### issue #60:  `alias` can override existing command
+### XXX: PUTTING THIS ON TOP OF TEST FILE BECAUSE SHOULD WORK EVEN IF NOT CONNECTED
+###
+
+# initialize phpsploit_pipe
+phpsploit_pipe true > /dev/null || FAIL
+
+### test for core command
+phpsploit_pipe help source > $TMPFILE-ref || FAIL
+assert_not_contains $TMPFILE "'source' has been aliased"
+# now make an `alias` named source:
+phpsploit_pipe alias source FOO > $TMPFILE || FAIL
+phpsploit_pipe help source > $TMPFILE || FAIL
+assert_contains $TMPFILE "'source' has been aliased"
+diff $TMPFILE-ref <(grep -v 'has been aliased' $TMPFILE) || FAIL
+# remove alias and check that warning is not more present:
+phpsploit_pipe alias source None > $TMPFILE || FAIL
+phpsploit_pipe help source > $TMPFILE || FAIL
+diff $TMPFILE $TMPFILE-ref || FAIL
+
+### test for plugin (should work even if not connected with `exploit`)
+phpsploit_pipe help ls > $TMPFILE-ref || FAIL
+assert_not_contains $TMPFILE "'ls' has been aliased"
+# now make an `alias` named ls:
+phpsploit_pipe alias ls FOO > $TMPFILE || FAIL
+phpsploit_pipe help ls > $TMPFILE || FAIL
+assert_contains $TMPFILE "'ls' has been aliased"
+diff $TMPFILE-ref <(grep -v 'has been aliased' $TMPFILE) || FAIL
+# remove alias and check that warning is not more present:
+phpsploit_pipe alias ls None > $TMPFILE || FAIL
+phpsploit_pipe help ls > $TMPFILE || FAIL
+diff $TMPFILE $TMPFILE-ref || FAIL
+
+
+
+###
 ### help
 ###
 $PHPSPLOIT -e 'exploit; help' > $TMPFILE || FAIL
@@ -111,3 +148,5 @@ grep -q '^\[\*\] corectl: ' $TMPFILE || FAIL
 # check output
 phpsploit_pipe help FOO BAR > $TMPFILE && FAIL
 grep -q '^\[\-\] No help for: FOO' $TMPFILE || FAIL
+
+

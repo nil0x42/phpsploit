@@ -1,8 +1,10 @@
 """Advanced dict-like classes for processing phpsploit
 complex session objects.
 """
+__all__ = ["MetaDict", "VarContainer"]
 
 from ui.color import colorize
+from utils.regex import WORD_TOKEN
 
 
 class MetaDict(dict):
@@ -158,10 +160,15 @@ class VarContainer(MetaDict):
         This behavior allows the user to easily remove settings,
         env-vars, aliases, and any object unheriting this class,
         by simply assiging None to them.
+
+        It also raises a KeyError if value is not a valid WORD_TOKEN
         """
         if isinstance(value, (str, type(None))) and \
                 str(value).upper() in self.item_deleters:
             if name not in self.keys():
                 return None
             return self.__delitem__(name)
+        if not WORD_TOKEN.fullmatch(name):
+            raise KeyError("illegal name: %r doesn't match %s"
+                           % (name, WORD_TOKEN.pattern))
         return super().__setitem__(name, value)

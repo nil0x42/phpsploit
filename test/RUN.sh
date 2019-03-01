@@ -111,7 +111,7 @@ function phpsploit_pipe () {
     randstr=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13`
     buf=$TMPDIR/buffer
     echo -e "$@" >&8
-    echo "lrun echo $randstr" >&8 # delimiter
+    echo "@lrun echo $randstr" >&8 # delimiter
     head -c 1 <&9 > $buf
     while ! grep -q "$randstr.*Returned " $buf; do
         timeout 0.05 cat <&9 >> $buf
@@ -125,6 +125,10 @@ function phpsploit_pipe () {
 # remove debug lines from input (phpsploit lines starting with '[#'
 function nodebug () {
     grep -v '^\[\#'
+}
+# count lines (after removing empty & debug lines)
+function count_lines () {
+    cat $1 | nodebug | grep -v '^$' | wc -l
 }
 if [ -n "$PHPSPLOIT_TEST" ]; then
     trap exit_script EXIT
@@ -219,6 +223,7 @@ cat "$ROOTDIR/data/config/config" > "$PHPSPLOIT_CONFIG_DIR/config"
 echo "set VERBOSITY True" >> "$PHPSPLOIT_CONFIG_DIR/config"
 echo "set REQ_INTERVAL 0" >> "$PHPSPLOIT_CONFIG_DIR/config" # make multireq faster
 echo "alias true 'lrun true'" >> "$PHPSPLOIT_CONFIG_DIR/config"
+echo "alias @lrun lrun" >> "$PHPSPLOIT_CONFIG_DIR/config"
 
 # PHPSPLOIT = call phpsploit abspath (uses PHPSPLOIT_CONFIG_DIR)
 export RAW_PHPSPLOIT="$ROOTDIR/phpsploit"

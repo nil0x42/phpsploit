@@ -35,11 +35,11 @@ EOF
 phpsploit_pipe set REQ_DEFAULT_METHOD POST > $TMPFILE || FAIL
 phpsploit_pipe set REQ_MAX_POST_SIZE 2k > $TMPFILE || FAIL
 
-phpsploit_pipe "ls\nP" > $TMPFILE # add P to confirm multireq by POST
-num_reqs=$(grep 'will be' $TMPFILE | sed -E 's/.* ([0-9]+) .* will be .*/\1/')
+phpsploit_pipe "ls\nP" > $TMPFILE-x # add P to confirm multireq by POST
+num_reqs=$(grep 'will be' $TMPFILE-x | sed -E 's/.* ([0-9]+) .* will be .*/\1/')
 
 phpsploit_pipe corectl display-http-requests > $TMPFILE || FAIL
-[ "$(grep -c REQUEST $TMPFILE)" -eq "$num_reqs" ] || FAIL
+[ "$(grep -c REQUEST $TMPFILE)" -eq "$num_reqs" ] || FAIL $num_reqs
 assert_contains $TMPFILE << EOF
 ^\[\*\] Listing last payload's HTTP(s) requests:$
 ^### REQUEST 1$
