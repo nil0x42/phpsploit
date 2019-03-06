@@ -55,7 +55,7 @@ function is_interactive () {
     local script=$TMPFILE-is_interactive.sh
     echo -e "#!/bin/bash\n$@" > $script
     chmod +x $script
-    script -qefc "timeout 4 $script" /dev/null > $TMPFILE-is_interactive 2>&1
+    script -qefc "timeout 6 $script" /dev/null > $TMPFILE-is_interactive 2>&1
     local ret="$?"
     #rm $script
     [ "$ret" -eq 124 ] && return 0 || return 1
