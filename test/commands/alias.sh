@@ -46,8 +46,8 @@ phpsploit_pipe alias > $TMPFILE
 sed -e '1,/---/d' -e '/^$/,$d' $TMPFILE | grep -vq '^    l' || FAIL
 
 # check that alias is equal to it's original command
-phpsploit_pipe alias "'@foo'" lrun ls > $TMPFILE || FAIL
-phpsploit_pipe @foo -ah / > $TMPFILE-alias || FAIL
+phpsploit_pipe alias "'@foo.bar'" lrun ls > $TMPFILE || FAIL
+phpsploit_pipe @foo.bar -ah / > $TMPFILE-alias || FAIL
 phpsploit_pipe lrun ls -ah / > $TMPFILE || FAIL
 diff $TMPFILE-alias $TMPFILE || FAIL
 
@@ -59,7 +59,7 @@ diff $TMPFILE-cmd-override $TMPFILE || FAIL
 
 # but the alias referencing `lrun` still uses real command
 # because phpsploit nested aliases do not exist in phpsploit:
-phpsploit_pipe @foo -ah / > $TMPFILE || FAIL
+phpsploit_pipe @foo.bar -ah / > $TMPFILE || FAIL
 diff $TMPFILE-alias $TMPFILE || FAIL
 
 # thanks to non-nesting, you can alias ls to 'ls /'
@@ -89,13 +89,13 @@ phpsploit_pipe alias > $TMPFILE-ref || FAIL
 # issue #101: crash: IndexError: list index out of range
 # empty string fails
 phpsploit_pipe 'alias "" BLA' > $TMPFILE && FAIL
-assert_contains $TMPFILE "\[\!\] Key Error: illegal name: '' doesn't match \[A-Za-z0-9@_-\]+"
+assert_contains $TMPFILE "\[\!\] Key Error: illegal name: '' doesn't match \[A-Za-z0-9@_\.-\]+"
 # string with spaces fails
 phpsploit_pipe 'alias "has space" BLA' > $TMPFILE && FAIL
-assert_contains $TMPFILE "\[\!\] Key Error: illegal name: 'has space' doesn't match \[A-Za-z0-9@_-\]+"
+assert_contains $TMPFILE "\[\!\] Key Error: illegal name: 'has space' doesn't match \[A-Za-z0-9@_\.-\]+"
 # ',' (badchar) fails
 phpsploit_pipe 'alias ,bad BLA' > $TMPFILE && FAIL
-assert_contains $TMPFILE "\[\!\] Key Error: illegal name: ',bad' doesn't match \[A-Za-z0-9@_-\]+"
+assert_contains $TMPFILE "\[\!\] Key Error: illegal name: ',bad' doesn't match \[A-Za-z0-9@_\.-\]+"
 
 # ensure alias output hasn't changed (because no vars were created)
 phpsploit_pipe alias > $TMPFILE || FAIL
