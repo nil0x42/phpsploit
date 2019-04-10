@@ -1,16 +1,26 @@
-## Platform
+## Quick Start
+
+```sh
+git clone https://github.com/nil0x42/phpsploit
+cd phpsploit/
+pip3 install -r requirements.txt
+./phpsploit -ie 'help help'
+```
+
+
+### Platform
 
 Compatible with GNU/Linux (and maybe Mac OS/X)
 > _Tested on debian, kali, archlinux, and fedora_
 
 
-## Python Version
+### Python Version
 
 Compatible with python >= 3.4
 > _(Mostly tested with python 3.5)_
 
 
-## Dependencies _(included in ./deps from now)_
+### Dependencies _(included in ./deps from now)_
 
 *   **phpserialize**  
     `import phpserialize`  
@@ -29,7 +39,7 @@ Compatible with python >= 3.4
     Needed by the PROXY setting to support socks4/5 proxy types
 
 
-## Optional dependencies
+### Optional dependencies
 
 *   **pygments**  
     `import pygments`  
