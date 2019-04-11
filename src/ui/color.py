@@ -90,7 +90,7 @@ def colorize(*args):
     if len(result) < 2:
         return ''.join(result)
 
-    # if only colors where requested, return a tuple of them
+    # if only colors were requested, return a tuple of them
     if not strings:
         return tuple(result)
 

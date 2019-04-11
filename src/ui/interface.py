@@ -253,7 +253,7 @@ class Shell(shnake.Shell):
         display-http-requests
             Display HTTP(s) request(s) for debugging
 
-            Shows all HTTP(s) request(s) that where sent in the last
+            Shows all HTTP(s) request(s) that were sent in the last
             remote command execution.
 
             NOTE: http requests are NOT saved in session files
