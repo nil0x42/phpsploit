@@ -47,8 +47,8 @@ sed -e '1,/---/d' -e '/^$/,$d' $TMPFILE | grep -vq '^    l' || FAIL
 
 # check that alias is equal to it's original command
 phpsploit_pipe alias "'@foo.bar'" lrun ls > $TMPFILE || FAIL
-phpsploit_pipe @foo.bar -ah / > $TMPFILE-alias || FAIL
-phpsploit_pipe lrun ls -ah / > $TMPFILE || FAIL
+phpsploit_pipe @foo.bar --color=always -1 / > $TMPFILE-alias || FAIL
+phpsploit_pipe lrun ls --color=always -1 / > $TMPFILE || FAIL
 diff $TMPFILE-alias $TMPFILE || FAIL
 
 # commands & plugins can be overridden by aliases
@@ -59,7 +59,7 @@ diff $TMPFILE-cmd-override $TMPFILE || FAIL
 
 # but the alias referencing `lrun` still uses real command
 # because phpsploit nested aliases do not exist in phpsploit:
-phpsploit_pipe @foo.bar -ah / > $TMPFILE || FAIL
+phpsploit_pipe @foo.bar --color=always -1 / > $TMPFILE || FAIL
 diff $TMPFILE-alias $TMPFILE || FAIL
 
 # thanks to non-nesting, you can alias ls to 'ls /'
