@@ -64,7 +64,7 @@ diff $TMPFILE-alias $TMPFILE || FAIL
 
 # thanks to non-nesting, you can alias ls to 'ls /'
 # without circular calling issue:
-phpsploit_pipe alias ls ls / > $TMPFILE || FAIL
+phpsploit_pipe alias ls ls /etc > $TMPFILE || FAIL
 phpsploit_pipe exploit > $TMPFILE || FAIL
 phpsploit_pipe ls > $TMPFILE-alias || FAIL
 # remove that alias, and `ls` becomes `ls` again !
@@ -75,7 +75,7 @@ phpsploit_pipe ls > $TMPFILE || FAIL
 diff $TMFILE-alias $TMPFILE > $TMPFILE-err && FAIL
 rm $TMPFILE-err
 # but calling `ls / gives same output as previous call to `ls` alias:
-phpsploit_pipe ls / > $TMPFILE
+phpsploit_pipe ls /etc > $TMPFILE
 diff $TMPFILE-alias $TMPFILE || FAIL
 
 
