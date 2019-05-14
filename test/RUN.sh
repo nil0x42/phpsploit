@@ -52,7 +52,7 @@ function assert_contains () {
         local match="$2"
         grep -q -- "$match" "$1" || FAIL $match / $1
     else
-        while IFS= read -r match; do 
+        while IFS= read -r match; do
             grep -q -- "$match" "$1" || FAIL $match / $1
         done
     fi
@@ -64,7 +64,7 @@ function assert_not_contains () {
         local match="$2"
         ! grep -q -- "$match" "$1" || FAIL $match / $1
     else
-        while IFS= read -r match; do 
+        while IFS= read -r match; do
             ! grep -q -- "$match" "$1" || FAIL $match / $1
         done
     fi
@@ -108,7 +108,7 @@ function phpsploit_pipe () {
         $PHPSPLOIT <&8 >&9 2>&1 &
         __phpsploit_pipe_pid=$!
     fi
-    randstr=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13`
+    randstr=`cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 13`
     buf=$TMPDIR/buffer
     echo -e "$@" >&8
     echo "@lrun echo $randstr" >&8 # delimiter
