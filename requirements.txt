@@ -16,7 +16,7 @@ PySocks==1.7.0
 ##########################
 
 # Enable php code syntax coloration
-pygments==2.4.1
+pygments==2.4.2
 
 # # Enhanced python console for use with `corectl python-console`
 # bpython
