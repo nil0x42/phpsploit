@@ -1,12 +1,15 @@
 <?php
 
+!import(mysqli_compat)
+
 // Establish connection
 $host = $PHPSPLOIT["HOST"];
 $user = $PHPSPLOIT["USER"];
 $pass = $PHPSPLOIT["PASS"];
-$conn = @mysql_connect($host, $user, $pass);
+
+$conn = @mysqli_connect($host, $user, $pass);
 if (!$conn)
-    return error("ERROR: %s: %s", @mysql_errno(), @mysql_error());
+    return error("ERROR: %s: %s", @mysqli_connect_errno(), @mysqli_connect_error());
 
 //@mysql_close($connect);
 // NOTE:
