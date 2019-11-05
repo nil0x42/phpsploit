@@ -19,7 +19,7 @@ from ui.color import colorize
 import ui.input
 import utils.path
 
-READLINE_COMPLETER_DELIMS = ' \t\n`~!@#$%^&*()=+[{]}\\|;:\'",<>?'
+READLINE_COMPLETER_DELIMS = ' \t\n`~!#$%^&*()=+[{]}\\|;:\'",<>?'
 
 
 class Shell(shnake.Shell):
@@ -253,7 +253,7 @@ class Shell(shnake.Shell):
         display-http-requests
             Display HTTP(s) request(s) for debugging
 
-            Shows all HTTP(s) request(s) that where sent in the last
+            Shows all HTTP(s) request(s) that were sent in the last
             remote command execution.
 
             NOTE: http requests are NOT saved in session files
@@ -272,24 +272,28 @@ class Shell(shnake.Shell):
         if argv[1] == "reload-plugins":
             return plugins.reload(verbose=True)
 
-        elif argv[1] == "python-console":
+        if argv[1] == "python-console":
             from ui import console
             console = console.Console()
             console.banner = "Phpsploit corectl: python console interpreter"
             return console()
 
-        elif argv[1] == "display-http-requests":
-            requests = enumerate(tunnel.get_raw_requests(), 1)
+        if argv[1] == "display-http-requests":
+            requests = tunnel.get_raw_requests()
             if not requests:
-                print("[-] No HTTP(s) requests were sent up to now")
-                return
-            for num, request in requests:
+                print("[-] From now, phpsploit didn't "
+                      "sent any HTTP(s) request")
+                return False
+            print("[*] Listing last payload's HTTP(s) requests:\n")
+            for num, request in enumerate(requests, 1):
                 print("#" * 78)
                 print("### REQUEST %d" % num)
                 print("#" * 78)
                 print(encoding.decode(request))
-        else:
-            self.interpret("help corectl")
+            return True
+
+        self.interpret("help corectl")
+        return False
 
     ####################
     # COMMAND: history #
@@ -792,8 +796,7 @@ class Shell(shnake.Shell):
                 result.append(key)
         return result
 
-    @staticmethod
-    def do_alias(argv):
+    def do_alias(self, argv):
         """Define command aliases
 
         SYNOPSIS:
@@ -831,7 +834,22 @@ class Shell(shnake.Shell):
             print(session.Alias((argv+[""])[1]))
         else:
             # `alias <NAME> <VALUE>`
+            existed = argv[1] in session.Alias
             session.Alias[argv[1]] = " ".join(argv[2:])
+            exists = argv[1] in session.Alias
+            if existed and not exists:
+                print("[*] `%s` alias correctly deleted." % argv[1])
+            elif existed and exists:
+                print("[-] `%s` alias correctly overridden." % argv[1])
+            elif exists:
+                if argv[1] in self.get_names(self, "do_"):
+                    print("[-] Warning: %r command overridden"
+                          " (run `alias %s None` to unset alias)"
+                          % (argv[1], argv[1]))
+                elif argv[1] in plugins.keys():
+                    print("[-] Warning: %r plugin overridden"
+                          " (run `alias %s None` to unset alias)"
+                          % (argv[1], argv[1]))
 
 
     ##################
@@ -950,10 +968,12 @@ class Shell(shnake.Shell):
         def get_doc(cmd):
             """get lines from `cmd` docstring"""
             doc = ""
-            if cmd in plugins:
-                doc = plugins[cmd].help
-            elif hasattr(self, "do_" + cmd):
+            if hasattr(self, "do_" + cmd):
                 doc = getattr(self, "do_" + cmd).__doc__
+            elif cmd in plugins:
+                doc = plugins[cmd].help
+                if doc.strip():
+                    doc += "\nPLUGIN LOCATION:\n    " + plugins[cmd].path
             return doc.strip().splitlines()
 
         def get_description(doc_lines):
@@ -988,6 +1008,7 @@ class Shell(shnake.Shell):
                     line = colorize("%Green", line)
                 result += line + "\n"
             print(result)
+            return True
 
         # help set <VAR>
         if len(argv) >= 3 and argv[1] == "set":
@@ -1009,10 +1030,17 @@ class Shell(shnake.Shell):
                 # call help_COMMAND() or fallback to COMMAND's docstring
                 help_method = getattr(self, "help_" + argv[1], None)
                 if callable(help_method):
-                    return getattr(self, 'help_' + argv[1])()
-                return doc_help(doc)
+                    getattr(self, 'help_' + argv[1])()
+                else:
+                    if not doc_help(doc):
+                        return False
+                if argv[1] in session.Alias:
+                    print("[-] Warning: %r has been aliased "
+                          "(run `alias %s` for + infos)"
+                          % (argv[1], argv[1]))
+                return True
             # fallback to alias display
-            if argv[1] in session.Alias:
+            elif argv[1] in session.Alias:
                 return self.interpret("alias %s" % argv[1])
             print(self.nohelp % argv[1])
             return False

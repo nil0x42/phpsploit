@@ -3,5 +3,5 @@
 
 # path related utils
 from . import path
-from . import string
+from . import regex
 from . import time

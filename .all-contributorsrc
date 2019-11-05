@@ -69,6 +69,33 @@
       "contributions": [
         "blog"
       ]
+    },
+    {
+      "login": "sohelzerdoumi",
+      "name": "Zerdoumi",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/3418725?v=4",
+      "profile": "https://github.com/sohelzerdoumi",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "tristandostaler",
+      "name": "tristandostaler",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/5489330?v=4",
+      "profile": "https://github.com/tristandostaler",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "rohantarai",
+      "name": "Rohan Tarai",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/16543074?v=4",
+      "profile": "https://github.com/rohantarai",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

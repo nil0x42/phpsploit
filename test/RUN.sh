@@ -52,7 +52,7 @@ function assert_contains () {
         local match="$2"
         grep -q -- "$match" "$1" || FAIL $match / $1
     else
-        while IFS= read -r match; do 
+        while IFS= read -r match; do
             grep -q -- "$match" "$1" || FAIL $match / $1
         done
     fi
@@ -64,7 +64,7 @@ function assert_not_contains () {
         local match="$2"
         ! grep -q -- "$match" "$1" || FAIL $match / $1
     else
-        while IFS= read -r match; do 
+        while IFS= read -r match; do
             ! grep -q -- "$match" "$1" || FAIL $match / $1
         done
     fi
@@ -75,7 +75,19 @@ function decolorize () {
 }
 function exit_script () {
     ret=$?
-    [ -n "$__phpsploit_pipe_pid" ] && kill $__phpsploit_pipe_pid
+    if [ -n "$__phpsploit_pipe_pid" ]; then
+        # cannot just kill phpsploit pipe, or coveragepy will not write report
+        echo -e "\nexit --force\nexit --force\nexit --force" >&8
+        for ((n=0;n<20;n++)); do
+            sleep 0.2
+            ps -ef | grep -v grep | grep -q " $__phpsploit_pipe_pid " || break
+        done
+        errmsg="phpsploit_pipe process $__phpsploit_pipe_pid didn't quit normally: missing coverage report"
+        ps -ef | grep -v grep | grep " $__phpsploit_pipe_pid " && FAIL $errmsg
+        if [ -n "$COVERAGE" ]; then
+            [ -f $ROOTDIR/.coverage.*.$__phpsploit_pipe_pid.* ] || FAIL $errmsg
+        fi
+    fi
     [ $ret -eq 0 ] && return # ignore if return value == 0
     files=$(find $TMPDIR -type f -name "`basename $TMPFILE`"'*')
     for file in $files; do
@@ -93,13 +105,13 @@ function phpsploit_pipe () {
         mkfifo $TMPDIR/fifo-in $TMPDIR/fifo-out
         exec 8<>$TMPDIR/fifo-in
         exec 9<>$TMPDIR/fifo-out
-        nohup $PHPSPLOIT <&8 >&9 2>&1 &
+        $PHPSPLOIT <&8 >&9 2>&1 &
         __phpsploit_pipe_pid=$!
     fi
-    randstr=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13`
+    randstr=`cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 13`
     buf=$TMPDIR/buffer
-    echo "$@" >&8
-    echo "lrun echo $randstr" >&8 # delimiter
+    echo -e "$@" >&8
+    echo "@lrun echo $randstr" >&8 # delimiter
     head -c 1 <&9 > $buf
     while ! grep -q "$randstr.*Returned " $buf; do
         timeout 0.05 cat <&9 >> $buf
@@ -109,6 +121,14 @@ function phpsploit_pipe () {
     # try to get retval from last cmd (needs VERBOSITY True)
     ret=`tail -n1 $buf | grep '^\[\#.*eturned [0-9]\+' | awk '{print $NF}'`
     [ -n "$ret" ] && return $ret
+}
+# remove debug lines from input (phpsploit lines starting with '[#'
+function nodebug () {
+    grep -v '^\[\#'
+}
+# count lines (after removing empty & debug lines)
+function count_lines () {
+    cat $1 | nodebug | grep -v '^$' | wc -l
 }
 if [ -n "$PHPSPLOIT_TEST" ]; then
     trap exit_script EXIT
@@ -201,7 +221,9 @@ export PHPSPLOIT_CONFIG_DIR="$TMPDIR/phpsploit-config"
 mkdir "$PHPSPLOIT_CONFIG_DIR"
 cat "$ROOTDIR/data/config/config" > "$PHPSPLOIT_CONFIG_DIR/config"
 echo "set VERBOSITY True" >> "$PHPSPLOIT_CONFIG_DIR/config"
+echo "set REQ_INTERVAL 0" >> "$PHPSPLOIT_CONFIG_DIR/config" # make multireq faster
 echo "alias true 'lrun true'" >> "$PHPSPLOIT_CONFIG_DIR/config"
+echo "alias @lrun lrun" >> "$PHPSPLOIT_CONFIG_DIR/config"
 
 # PHPSPLOIT = call phpsploit abspath (uses PHPSPLOIT_CONFIG_DIR)
 export RAW_PHPSPLOIT="$ROOTDIR/phpsploit"

@@ -1,48 +1,50 @@
 <?php
 
+!import(mysqli_compat)
+
 // Establish connection
 $host = $PHPSPLOIT["HOST"];
 $user = $PHPSPLOIT["USER"];
 $pass = $PHPSPLOIT["PASS"];
-$conn = @mysql_connect($host, $user, $pass);
+$conn = @mysqli_connect($host, $user, $pass);
 if (!$conn)
-    return error("ERROR: %s: %s", @mysql_errno(), @mysql_error());
+    return error("ERROR: %s: %s", @mysqli_connect_errno(), @mysqli_connect_error());
 
 
 // Select database (if any)
 if (isset($PHPSPLOIT["BASE"]))
 {
-    $select = @mysql_select_db($PHPSPLOIT['BASE'], $conn);
+    $select = @mysqli_select_db($conn, $PHPSPLOIT['BASE']);
     if (!$select)
-        return error("ERROR: %s: %s", @mysql_errno(), @mysql_error());
+        return error("ERROR: %s: %s", @mysqli_errno($conn), @mysqli_error($conn));
 }
 
 
 // Send query
-$query = mysql_query($PHPSPLOIT['QUERY'], $conn);
+$query = mysqli_query($conn, $PHPSPLOIT['QUERY']);
 if (!$query)
-    return error("ERROR: %s: %s", @mysql_errno(), @mysql_error());
+    return error("ERROR: %s: %s", @mysqli_errno($conn), @mysqli_error($conn));
 
 
 // Query type: GET (information gathering)
-$rows = @mysql_num_rows($query);
+$rows = @mysqli_num_rows($query);
 if (is_int($rows))
 {
     $result = array();
-    $obj = mysql_fetch_array($query, MYSQL_ASSOC);
+    $obj = mysqli_fetch_array($query, MYSQLI_ASSOC);
     $result[] = array_keys($obj);
     $result[] = array_values($obj);
-    while ($line = mysql_fetch_array($query, MYSQL_ASSOC))
+    while ($line = mysqli_fetch_array($query, MYSQLI_ASSOC))
         $result[] = array_values($line);
     return array('GET', $rows, $result);
 }
 
 
 // Query type: SET (write into the database)
-$rows = @mysql_affected_rows();
+$rows = @mysqli_affected_rows($conn);
 if (is_int($rows))
     return array('SET', $rows);
 
-return error("ERROR: %s: %s", @mysql_errno(), @mysql_error());
+return error("ERROR: %s: %s", @mysqli_errno($conn), @mysqli_error($conn));
 
 ?>
