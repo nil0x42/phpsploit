@@ -69,6 +69,11 @@ function assert_not_contains () {
         done
     fi
 }
+# FAIL if ARGV1 file has some output other than debug '[#]' lines
+function assert_no_output () {
+    [ -f "$1" ] || FAIL "file does not exist" / $1
+    grep -qv '\[\#\]' $1 && FAIL "file has some output" / $1
+}
 # remove ANSI colors from ARGV1 file
 function decolorize () {
     sed -ri "s/\x01?\x1B\[(([0-9]+)(;[0-9]+)*)?m\x02?//g" "$1"
