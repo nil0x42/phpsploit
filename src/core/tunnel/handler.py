@@ -38,8 +38,10 @@ class _CustomHTTPConnection(http.client.HTTPConnection):
         # fixes: https://github.com/nil0x42/phpsploit/issues/65
         if data.startswith(b"GET /") or data.startswith(b"POST /"):
             _RAW_REQUESTS_LIST.append(data)
-        else:
+        elif _RAW_REQUESTS_LIST:
             _RAW_REQUESTS_LIST[-1] += data
+        else:
+            _RAW_REQUESTS_LIST.append(data)
 
         super().send(data)
 http.client.__HTTPConnection__ = http.client.HTTPConnection
@@ -57,6 +59,13 @@ http.client.HTTPConnection = _CustomHTTPConnection
 #         super().send(s)
 # http.client.__HTTPSConnection__ = http.client.HTTPSConnection
 # http.client.HTTPSConnection = _CustomHTTPSConnection
+
+# fixes https://github.com/nil0x42/phpsploit/issues/135
+# but i don't know how ... :(
+class _CustomHTTPHandler(urllib.request.HTTPHandler):
+    pass
+urllib.request.__HTTPHandler__ = urllib.request.HTTPHandler
+urllib.request.HTTPHandler = _CustomHTTPHandler
 
 
 def _load_template(filepath):
