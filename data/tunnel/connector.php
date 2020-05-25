@@ -1,6 +1,5 @@
 <?
 
-!import(execute);
 !import(dirAccess);
 
 
@@ -38,10 +37,6 @@ $R = $_SERVER;
 
 $R['PHP_OS'] = PHP_OS;
 $R['PHP_VERSION'] = PHP_VERSION;
-$R['WHOAMI'] = @execute('whoami');
-
-$tmp = @execute('echo $HOME');
-$R['HOME'] = ($tmp != '$HOME' && $tmp) ? $tmp : '';
 
 // Determine WEB_ROOT environment variable
 $R['WEB_ROOT'] = $R['DOCUMENT_ROOT'];
