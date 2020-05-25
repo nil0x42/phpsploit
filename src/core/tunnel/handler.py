@@ -216,7 +216,7 @@ class Request:
         match = re.findall(self.unparser, response)
         if match:
             return match[0]
-        return None
+        return response
 
     def load_multipart(self):
         """enable the multi-request payload capability.
