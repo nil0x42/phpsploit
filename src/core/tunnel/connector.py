@@ -82,14 +82,14 @@ class Request:
 
         env["HTTP_SOFTWARE"] = choose(['SERVER_SOFTWARE'], 'unknow software')
 
-        env["USER"] = (choose(['WHOAMI', 'USERNAME', 'USER']) or
+        env["USER"] = (choose(['USERNAME', 'USER']) or
                        choose(['USERPROFILE'], 'unknow').split('\\')[-1])
 
         env["PHP_VERSION"] = choose(['PHP_VERSION'], '?')
 
         env['WEB_ROOT'] = choose(['WEB_ROOT'])
 
-        env["HOME"] = choose(["HOME"], env["WEB_ROOT"])
+        env["HOME"] = choose(env["WEB_ROOT"])
         if not env['HOME']:
             path = choose(['SCRIPT_FILENAME', 'PATH_TRANSLATED'])
             sep = '\\'
