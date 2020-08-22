@@ -96,7 +96,17 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "jonaslejon",
+      "name": "Jonas Lejon",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/190150?v=4",
+      "profile": "https://triop.se",
+      "contributions": [
+        "blog"
+      ]
     }
   ],
-  "contributorsPerLine": 7
+  "contributorsPerLine": 7,
+  "skipCi": true
 }
