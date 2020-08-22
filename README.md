@@ -1,9 +1,5 @@
 ### PhpSploit: _Furtive post-exploitation framework_
-
-PhpSploit is a **remote control** framework, aiming to provide a **stealth**
-interactive shell-like connection over HTTP between client and web server.
-It is a post-exploitation tool capable to maintain access to a
-compromised web server for **privilege escalation** purposes.
+Full-featured **C2 framework** which silently persists on webserver as an **evil PHP oneliner**
 
 [![twitter follow](https://img.shields.io/twitter/follow/nil0x42?label=Follow%20nil0x42%20%21&style=social)](https://twitter.com/intent/follow?screen_name=nil0x42)<br>
 
@@ -44,7 +40,7 @@ pip3 install -r requirements.txt
 
 #### Features
 
--   **Efficient**: More than 20 plugins to automate post-exploitation tasks
+-   **Efficient**: More than 20 plugins to automate privilege-escalation tasks
     -   Run commands and browse filesystem, bypassing PHP security restrictions
     -   Upload/Download files between client and target
     -   Edit remote files through local text editor
@@ -59,9 +55,9 @@ pip3 install -r requirements.txt
     -   http/https/socks4/socks5 **Proxy support**
 
 -   **Convenient**: A robust interface with many crucial features
-    -   Detailed help for any command or option (type `help`)
-    -   _Cross-platform_ on both the client and the server.
-    -   Powerful interface with completion and multi-command support
+    -   Detailed help for any option (`help` command)
+    -   _Cross-platform_ on both client and server.
+    -   CLI supports auto-completion & multi-command
     -   Session saving/loading feature & persistent history
     -   Multi-request support for large payloads (such as uploads)
     -   Provides a powerful, highly configurable settings engine
@@ -79,7 +75,7 @@ pip3 install -r requirements.txt
 #### Supported platforms (as target):
 
 -   GNU/Linux
--   BSD Like
+-   BSD-like
 -   Mac OS X
 -   Windows NT
 
