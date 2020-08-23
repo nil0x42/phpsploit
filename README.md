@@ -1,5 +1,5 @@
 ### PhpSploit: _Furtive post-exploitation framework_
-Full-featured **C2 framework** which silently persists on webserver as an **evil PHP oneliner**
+Full-featured **C2 framework** which silently persists on webserver via **evil PHP oneliner**
 
 [![twitter follow](https://img.shields.io/twitter/follow/nil0x42?label=Follow%20nil0x42%20%21&style=social)](https://twitter.com/intent/follow?screen_name=nil0x42)<br>
 
