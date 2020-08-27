@@ -1,19 +1,57 @@
-### PhpSploit: _Furtive post-exploitation framework_
-Full-featured **C2 framework** which silently persists on webserver via **evil PHP oneliner**
+<p align="center">
+  <a href="https://github.com/nil0x42/phpsploit" alt="master">
+    <img src="data/img/logo.png" alt="Master">
+  </a>
+</p>
 
-[![twitter follow](https://img.shields.io/twitter/follow/nil0x42?label=Follow%20nil0x42%20%21&style=social)](https://twitter.com/intent/follow?screen_name=nil0x42)<br>
+<p align="center">
+    Full-featured C2 framework which silently persists on webserver via <b>polymorphic PHP oneliner</b>
+</p>
+<br>
 
-[![travis build](https://travis-ci.org/nil0x42/phpsploit.svg?branch=master)](https://travis-ci.org/nil0x42/phpsploit)
-[![license](https://img.shields.io/github/license/nil0x42/phpsploit.svg)](https://github.com/nil0x42/phpsploit/blob/master/LICENSE)
-[![requires.io requirements](https://requires.io/github/nil0x42/phpsploit/requirements.svg?branch=master)](https://requires.io/github/nil0x42/phpsploit/requirements/?branch=master)<br>
-[![codacy code quality](https://api.codacy.com/project/badge/Grade/b998fe23c25f40a78c6c35c722bb9fa0)](https://app.codacy.com/app/nil0x42/phpsploit?utm_source=github.com&utm_medium=referral&utm_content=nil0x42/phpsploit&utm_campaign=Badge_Grade_Dashboard)
-[![lgtm alerts](https://img.shields.io/lgtm/alerts/g/nil0x42/phpsploit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/nil0x42/phpsploit/alerts/)
-[![codecov coverage](https://codecov.io/gh/nil0x42/phpsploit/branch/master/graph/badge.svg)](https://codecov.io/gh/nil0x42/phpsploit)
-[![codeclimate maintainability](https://api.codeclimate.com/v1/badges/6986200c1729b4a70a40/maintainability)](https://codeclimate.com/github/nil0x42/phpsploit/maintainability)
+<p align="center">
+  <a href="https://travis-ci.org/nil0x42/phpsploit">
+    <img src="https://travis-ci.org/nil0x42/phpsploit.svg?branch=master" alt="travis build">
+  </a>
+  <a href="https://requires.io/github/nil0x42/phpsploit/requirements/?branch=master">
+    <img src="https://requires.io/github/nil0x42/phpsploit/requirements.svg?branch=master" alt="requires.io requirements">
+  </a>
+  <a href="https://app.codacy.com/app/nil0x42/phpsploit?utm_source=github.com&utm_medium=referral&utm_content=nil0x42/phpsploit&utm_campaign=Badge_Grade_Dashboard">
+    <img src="https://api.codacy.com/project/badge/Grade/b998fe23c25f40a78c6c35c722bb9fa0" alt="codacy code quality">
+  </a>
+  <a href="https://lgtm.com/projects/g/nil0x42/phpsploit/alerts/">
+    <img src="https://img.shields.io/lgtm/alerts/g/nil0x42/phpsploit.svg?logo=lgtm&logoWidth=18" alt="lgtm alerts">
+  </a>
+  <a href="https://codecov.io/gh/nil0x42/phpsploit">
+    <img src="https://codecov.io/gh/nil0x42/phpsploit/branch/master/graph/badge.svg" alt="codecov coverage">
+  </a>
+  <a href="https://codeclimate.com/github/nil0x42/phpsploit/maintainability">
+    <img src="https://api.codeclimate.com/v1/badges/6986200c1729b4a70a40/maintainability" alt="codeclimate maintainability">
+  </a>
+</p>
 
-![phpsploit demo](data/img/phpsploit-demo.png)
+<p align="center">
+  <a href="https://twitter.com/intent/follow?screen_name=nil0x42" target="_blank">
+    <img src="https://img.shields.io/twitter/follow/nil0x42.svg?logo=twitter">
+  </a>
+</p>
+
+<div align="center">
+  <sub>
+    Created by
+    <a href="https://twitter.com/nil0x42">nil0x42</a> and
+    <a href="https://github.com/nil0x42/phpsploit#contributors">contributors</a>
+  </sub>
+</div>
+
+<br>
 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+<p align="center">
+  <img src="data/img/demo.png">
+</p>
+
 
 #### Overview
 
