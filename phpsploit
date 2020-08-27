@@ -152,9 +152,8 @@ def main() -> int:
     elif interactive and ui.output.isatty():
         logo = Path(src.BASEDIR + "data/logo.ascii").read()
         cmdrun(iface, "lrun clear")
-        print(logo + '\n\n')
-        print(colorize("%Bold", "# Stealth post-exploitation framework\n"))
-        print(colorize("%DimWhite", rand_quote()))
+        print(logo)
+        print(colorize("%DimBold", "# Stealth & persistent C2 framework via ", "%White", "evil PHP oneliner"))
         cmdrun(iface, "help")
 
     iface.init()
