@@ -85,9 +85,9 @@ def run_process(cmd: list) -> str:
     return streamdata.decode("utf-8").strip()
 
 
-def rand_message() -> str:
-    """return a random funny message"""
-    msg_list = Path(src.BASEDIR + "data/messages.lst").readlines()
+def rand_quote() -> str:
+    """return a random funny quote"""
+    msg_list = Path(src.BASEDIR + "data/quotes.lst").readlines()
     return random.choice(msg_list).strip()
 
 
@@ -154,7 +154,7 @@ def main() -> int:
         cmdrun(iface, "lrun clear")
         print(logo + '\n\n')
         print(colorize("%Bold", "# Stealth post-exploitation framework\n"))
-        print(colorize("%DimWhite", rand_message()))
+        print(colorize("%DimWhite", rand_quote()))
         cmdrun(iface, "help")
 
     iface.init()
@@ -181,7 +181,7 @@ def main() -> int:
     if interactive or not ui.input.isatty():
         iface.cmdloop()
         if ui.output.isatty():
-            print(colorize("%DimWhite", '\n' + rand_message() + '\n'))
+            print(colorize("%DimWhite", '\n' + rand_quote() + '\n'))
 
     return retval
 
