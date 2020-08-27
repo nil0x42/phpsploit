@@ -18,11 +18,11 @@ assert_contains $TMPFILE "\[-\] .* initialization interrupted$"
 rm $TMPFILE-out
 
 ###
-### Check Random Message presence in interactive/TTY mode
+### Check random quote presence in interactive/TTY mode
 ###
 faketty $PHPSPLOIT -ie exit > $TMPFILE
 decolorize $TMPFILE
-common=$(comm -12 <(sort $TMPFILE) <(sort $ROOTDIR/data/messages.lst) | wc -l)
+common=$(comm -12 <(sort $TMPFILE) <(sort $ROOTDIR/data/quotes.lst) | wc -l)
 [ "$common" -eq 1 ] || FAIL
 
 ###
