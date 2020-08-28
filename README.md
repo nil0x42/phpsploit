@@ -4,9 +4,12 @@
   </a>
 </p>
 
-<p align="center">
-    Full-featured C2 framework which silently persists on webserver via <b>polymorphic PHP oneliner</b>
-</p>
+<h3 align="center">
+    Full-featured C2 framework which silently persists on <br>webserver via polymorphic PHP oneliner
+    <a href="https://twitter.com/intent/tweet?text=PhpSploit%2C%20Full-featured%20C2%20framework%20which%20silently%20persists%20on%20webserver%20via%20polymorphic%20PHP%20oneliner%20-%20by%20@nil0x42&url=https://github.com/nil0x42/phpsploit">
+      <img src="https://img.shields.io/twitter/url?label=tweet%20it%20%21&logo=twitter&style=social&url=http%3A%2F%2F0" alt="tweet it">
+    </a>
+</h3>
 <br>
 
 <p align="center">
