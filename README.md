@@ -34,6 +34,9 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/sbilly/awesome-security">
+    <img src="https://awesome.re/mentioned-badge.svg">
+  </a>
   <a href="https://twitter.com/intent/follow?screen_name=nil0x42" target="_blank">
     <img src="https://img.shields.io/twitter/follow/nil0x42.svg?logo=twitter">
   </a>
