@@ -14,7 +14,7 @@ import sys
 import os
 
 
-VERSION = "3.0"
+VERSION = "3.1"
 
 # check operating system
 if sys.platform.lower().startswith('win'):
