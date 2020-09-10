@@ -16,9 +16,15 @@ import os
 
 VERSION = "3.0"
 
+# check operating system
 if sys.platform.lower().startswith('win'):
     sys.exit('[-] If you use Windows, you should be '
              'a TARGET rather than an attacker ...')
+
+# check python version
+ver = sys.version_info
+if ver[0] < 3 or (ver[0] == 3 and ver[1] < 5):
+    sys.exit('[-] PhpSploit needs python >= 3.5 to run')
 
 try:
     import src  # spread phpsploit sources
