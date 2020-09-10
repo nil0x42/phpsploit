@@ -8,7 +8,7 @@ cd "$(git rev-parse --show-toplevel)"
 # colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-BOLD='\033[1m' 
+BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 
@@ -112,7 +112,7 @@ fi
 
 VER=$1
 TAG="v${VER}"
-MSG="Release version ${VER}"
+MSG="${VER} release"
 
 # set verbose/err
 set -ve
@@ -135,7 +135,7 @@ git add ./man/
 git commit -m "$MSG"
 
 # add release tag to created commit
-git tag -a v3.0 -m "Version 3.0"
+git tag -a $TAG -m "$MSG"
 
 # unset verbose/err
 set +ve
