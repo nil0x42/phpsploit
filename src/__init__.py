@@ -25,4 +25,8 @@ COREDIR = os.path.join(BASEDIR, __name__) + os.sep
 # use current directory as main python path
 sys.path[0] = COREDIR
 
+# add src/core/shnake-0.5/ to python path
+shnake_path = os.path.join(COREDIR, "shnake-0.5") + os.sep
+sys.path.insert(0, shnake_path)
+
 del deps, sys, os  # clean package's content
