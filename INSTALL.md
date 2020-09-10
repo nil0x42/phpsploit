@@ -26,10 +26,6 @@ Compatible with python >= 3.5
     `import phpserialize`
     Needed to communicate between Python and PHP remote execution
 
-*   **shnake**
-    `import shnake`
-    The base library for phpsploit command-line interface
-
 *   **pyparsing**
     `import pyparsing`
     A dependency of `shnake`. Used to parse command-line input

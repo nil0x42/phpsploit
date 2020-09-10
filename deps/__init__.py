@@ -18,7 +18,8 @@ DEPENDENCIES = [('phpserialize',           'phpserialize-1.3'),
                 ('socks',                  'PySocks-1.4.2-74-g10fb5b2'),
                 ('sockshandler',           'PySocks-1.4.2-74-g10fb5b2'),
                 ('pyparsing',              'pyparsing-2.1.1'),
-                ('shnake',                 'shnake-0.5')]
+                # ('shnake',                 'shnake-0.5')
+                ]
 
 def dependency_error(module):
     sys.exit('Missing PhpSploit dependency: "%s"' % module)
