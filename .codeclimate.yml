@@ -9,15 +9,15 @@
 plugins:
   pep8:
     enabled: true
-  radon: 
+  radon:
     enabled: true
   sonar-python:
     enabled: true
 
 exclude_patterns:
-  - 'deps/'
   - 'plugins/'
   - 'test/'
   - 'utils/'
   - 'data/'
   - 'man/'
+  - 'src/shnake-0.5/'

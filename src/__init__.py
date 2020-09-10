@@ -5,17 +5,13 @@ the phpsploit script launcher (./phpsploit).
 It also can be imported from phpsploit root directory through a
 python interpreter for debugging purposes.
 
-It loads the phpsploit core, spreading required dependencies
-(./deps directory) then overwriting sys.path's first element to
+It loads the phpsploit core & overwrites sys.path's first element to
 the current directory (./lib/), making all self contained elements
 directly importable from python.
 
 """
 import os
 import sys
-
-# load phpsploit dependencies before anything else
-import deps
 
 from . import utils
 
@@ -29,4 +25,4 @@ sys.path[0] = COREDIR
 shnake_path = os.path.join(COREDIR, "shnake-0.5") + os.sep
 sys.path.insert(0, shnake_path)
 
-del deps, sys, os  # clean package's content
+del sys, os, shnake_path  # clean package's content
