@@ -26,6 +26,25 @@ ver = sys.version_info
 if ver[0] < 3 or (ver[0] == 3 and ver[1] < 5):
     sys.exit('[-] PhpSploit needs python >= 3.5 to run')
 
+# check dependencies
+from importlib.util import find_spec
+missing_deps = []
+deps_list = {
+        "phpserialize": ("phpserialize",),
+        "pyparsing":    ("pyparsing",),
+        "PySocks":      ("socks", "sockshandler"),
+        }
+for name, deps in deps_list.items():
+    for dep in deps:
+        if find_spec(dep) is None:
+            missing_deps.append(name)
+            break
+if missing_deps:
+    for name in missing_deps:
+        print("[-] Missing dependency: %r" % name, file=sys.stderr)
+    sys.exit("[?] Install dependencies with: "
+             "`pip3 install -r requirements.txt`")
+
 try:
     import src  # spread phpsploit sources
 
