@@ -82,7 +82,7 @@ def build_parser():
     return p
 
 
-def run_process(cmd: list) -> str:
+def run_process(cmd):
     """get output of given shell command"""
     child = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.DEVNULL)
     streamdata = child.communicate()[0]
@@ -91,13 +91,13 @@ def run_process(cmd: list) -> str:
     return streamdata.decode("utf-8").strip()
 
 
-def rand_quote() -> str:
+def rand_quote():
     """return a random funny quote"""
     msg_list = Path(src.BASEDIR + "data/quotes.lst").readlines()
     return random.choice(msg_list).strip()
 
 
-def cmdrun(iface, cmdobj, show_err=False) -> int:
+def cmdrun(iface, cmdobj, show_err=False):
     """run a phpsploit command
     handle syntax errors & return command's retcode
     """
@@ -111,7 +111,7 @@ def cmdrun(iface, cmdobj, show_err=False) -> int:
 
 
 # pylint: disable=too-many-branches
-def main() -> int:
+def main():
     """phpsploit's main function
     """
     # Make phpsploit usable as shebang for scripting
