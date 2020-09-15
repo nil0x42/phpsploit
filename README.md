@@ -34,7 +34,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/sbilly/awesome-security">
+  <a href="https://github.com/vitalysim/Awesome-Hacking-Resources/blob/master/tools.md">
     <img src="https://awesome.re/mentioned-badge.svg">
   </a>
   <a href="https://twitter.com/intent/follow?screen_name=nil0x42" target="_blank">
