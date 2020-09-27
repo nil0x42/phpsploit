@@ -7,29 +7,29 @@
 <h3 align="center">
     Full-featured C2 framework which silently persists on <br>webserver via polymorphic PHP oneliner
     <a href="https://twitter.com/intent/tweet?text=PhpSploit%2C%20Full-featured%20C2%20framework%20which%20silently%20persists%20on%20webserver%20via%20polymorphic%20PHP%20oneliner%20-%20by%20@nil0x42&url=https://github.com/nil0x42/phpsploit">
-      <img src="https://img.shields.io/twitter/url?label=tweet%20it%20%21&logo=twitter&style=social&url=http%3A%2F%2F0" alt="tweet it">
+      <img src="https://img.shields.io/twitter/url?label=tweet&logo=twitter&style=social&url=http%3A%2F%2F0" alt="tweet">
     </a>
 </h3>
 <br>
 
 <p align="center">
-  <a href="https://travis-ci.org/nil0x42/phpsploit">
-    <img src="https://travis-ci.org/nil0x42/phpsploit.svg?branch=master" alt="travis build">
+  <a href="https://travis-ci.com/nil0x42/phpsploit">
+    <img src="https://img.shields.io/travis/com/nil0x42/phpsploit?branch=master&logo=travis" alt="travis build">
   </a>
   <a href="https://requires.io/github/nil0x42/phpsploit/requirements/?branch=master">
-    <img src="https://requires.io/github/nil0x42/phpsploit/requirements.svg?branch=master" alt="requires.io requirements">
+    <img src="https://img.shields.io/requires/github/nil0x42/phpsploit?color=blue" alt="requires.io requirements">
   </a>
   <a href="https://app.codacy.com/app/nil0x42/phpsploit?utm_source=github.com&utm_medium=referral&utm_content=nil0x42/phpsploit&utm_campaign=Badge_Grade_Dashboard">
-    <img src="https://api.codacy.com/project/badge/Grade/b998fe23c25f40a78c6c35c722bb9fa0" alt="codacy code quality">
+    <img src="https://img.shields.io/codacy/grade/b998fe23c25f40a78c6c35c722bb9fa0?logo=codacy&logoColor=green" alt="codacy code quality">
   </a>
   <a href="https://lgtm.com/projects/g/nil0x42/phpsploit/alerts/">
-    <img src="https://img.shields.io/lgtm/alerts/g/nil0x42/phpsploit.svg?logo=lgtm&logoWidth=18" alt="lgtm alerts">
+    <img src="https://img.shields.io/lgtm/alerts/github/nil0x42/phpsploit?logo=lgtm&logoColor=yellow" alt="lgtm alerts">
   </a>
   <a href="https://codecov.io/gh/nil0x42/phpsploit">
-    <img src="https://codecov.io/gh/nil0x42/phpsploit/branch/master/graph/badge.svg" alt="codecov coverage">
+    <img src="https://img.shields.io/codecov/c/github/nil0x42/phpsploit?color=orange&label=coverage&logo=codecov" alt="codecov coverage">
   </a>
   <a href="https://codeclimate.com/github/nil0x42/phpsploit/maintainability">
-    <img src="https://api.codeclimate.com/v1/badges/6986200c1729b4a70a40/maintainability" alt="codeclimate maintainability">
+    <img src="https://img.shields.io/codeclimate/maintainability/nil0x42/phpsploit?color=blueviolet&logo=code-climate&logoColor=blueviolet" alt="codeclimate maintainability">
   </a>
 </p>
 
