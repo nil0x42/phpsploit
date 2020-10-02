@@ -15,7 +15,7 @@ class Proxy(str):
     Takes None or a proxy in the form <SCHEME>://<HOST>:<PORT>, where scheme
     can be http or https.
     The Proxy datatype returns an urllib opener that includes current
-    proxy, or empty opener is the proxy is None.
+    proxy, or empty opener if the proxy is None.
 
     Example:
     >>> print(Proxy('127.0.0.1:8080'))

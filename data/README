@@ -19,7 +19,7 @@
     It contains the introduction message, written right below the ascii logo.
 
 
-./messages.lst
+./quotes.lst
 ==============
     This useless file contains a list of quotes, randomly picked-up and
     printed on framework start/end, just for fun!

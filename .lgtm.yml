@@ -8,7 +8,7 @@ path_classifiers:
     - man
     - doc
   library:
-    - deps
+    - src/shnake-0.5
 
 extraction:
   python:
@@ -17,4 +17,4 @@ extraction:
       version: 3
     index:
       exclude:
-        - deps
+        - src/shnake-0.5

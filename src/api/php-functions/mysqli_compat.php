@@ -49,7 +49,7 @@ if (!function_exists("mysqli_connect")) {
     }
 
     function mysqli_affected_rows($conn) {
-        return mysql_affected_rows($conn)
+        return mysql_affected_rows($conn);
     }
 
 }

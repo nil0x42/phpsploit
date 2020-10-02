@@ -1,10 +1,8 @@
 Repository:
-  * Update shnake dependency (fixes issue #35)
+  * n/a
 
 Documentation:
   * Simplify the manpage to summarize only commands and how to get started
-  * When all this is done, the 'rtfm' core command can be removed
-  * Add autocompletion for `help set <SETTING>` commands
 
 Core:
   * Add a way to get return code of previous command (like bash's '$?')
@@ -22,7 +20,7 @@ Settings:
   * n/a
 
 Commands:
-  * Implement HTTP response display in `corectl display-http-requests` command
+  * Implement HTTPs response display in `corectl display-http-requests` command
 
 Plugins:
   * Write a "plugins/network/scan/plugin.py" small ip scanner, to be able to

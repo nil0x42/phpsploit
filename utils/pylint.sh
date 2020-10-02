@@ -3,10 +3,9 @@
 SCRIPTDIR="$(readlink -f `dirname $0`)"
 BASEDIR="$(git -C "$SCRIPTDIR" rev-parse --show-toplevel)"
 
-# add ./src & ./deps/*/ to PYTHONPATH
+# add ./src to PYTHONPATH
 src="$BASEDIR/src"
-deps=$(find "$BASEDIR/deps" -mindepth 1 -maxdepth 1 '!' -name '__*' | paste -sd:)
-PYTHONPATH=":${src}:${deps}:${PYTHONPATH}"
+PYTHONPATH=":${src}:${PYTHONPATH}"
 
 pre_args="--good-names=e,x,i,p,m --disable=no-member,not-callable"
 if [ -z "$1" ]; then

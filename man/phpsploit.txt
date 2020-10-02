@@ -92,13 +92,13 @@ USAGE
 INTERFACE
        The phpsploit framework includes two shell interfaces.
 
-              ·  The MAIN SHELL is the first shell interface, spawned when the
+              •  The MAIN SHELL is the first shell interface, spawned when the
                  framework starts. It is used to prepare  a  target  exploita‐
                  tion.  Through  it,  you can locally adjust the SETTINGS with
                  the "set" command, and use the "infect" command  to  get  the
                  micro-backdoor that needs to be injected on the target.
 
-              ·  The  REMOTE  SHELL  interface starts when a target server was
+              •  The  REMOTE  SHELL  interface starts when a target server was
                  exploited. Its is used to interract with the backdoored URL.
 
        TO GET HELP on a phpsploit  command,  you  can  use  "help  <command>",
@@ -110,13 +110,13 @@ INTERFACE
        line if available.  They are divided into groups when shown  whith  the
        "help" command:
 
-              ·  The  CORE  COMMANDS  contains  all commands available through
-                 every interface.
+              •  The CORE COMMANDS contains all commands available through ev‐
+                 ery interface.
 
-              ·  The Shell Commands contains the commands specific to the cur‐
+              •  The Shell Commands contains the commands specific to the cur‐
                  rent interface.
 
-              ·  In  the  remote  shell,  plugin commands are grouped by cate‐
+              •  In  the  remote  shell,  plugin commands are grouped by cate‐
                  gories.
 
        Core Commands:
@@ -140,9 +140,9 @@ INTERFACE
        set    View and edit phpsploit settings
 
 MAIN SHELL
-       When entering phpsploit, the main shell is spawned,  it  helps  you  to
-       locally  edit  your  settings  (set  command), get the working backdoor
-       (infect command), and then start the remote shell (exploit command).
+       When entering phpsploit, the main shell is spawned, it helps you to lo‐
+       cally  edit  your settings (set command), get the working backdoor (in‐
+       fect command), and then start the remote shell (exploit command).
 
        Shell Commands:
 
@@ -150,9 +150,9 @@ MAIN SHELL
               Drop a shell from target server
 
 REMOTE SHELL
-       When you run the exploit command,  you  enter  the  remote  shell,  and
-       directly  interracts  with  the  remotely backdoored server through the
-       phpsploit plugins.  Typing help will show the available commands.  Core
+       When you run the exploit command, you enter the remote shell,  and  di‐
+       rectly  interracts with the remotely backdoored server through the php‐
+       sploit plugins.  Typing help will show the  available  commands.   Core
        Commands are all the phpsploit remote shell built-in commands.
 
        Shell Commands:
@@ -227,16 +227,16 @@ SETTINGS
 
        PROXY  With  this  setting, you can specify an HTTP Proxy, matching the
               pattern address:port, to send phpsploit's requests  through  it.
-              Be  carrefull,  a  non-working  PROXY  will  make  the  requests
-              unreachable. To disable the proxy, set it's value to None.
+              Be  carrefull,  a  non-working  PROXY will make the requests un‐
+              reachable. To disable the proxy, set it's value to None.
 
               Default value: None
 
        SAVEPATH
               Here you can specify the default directory that will be used  to
               save phpsploit sessions, when no arguments are specified for the
-              save command. It  uses  your  system's  temporary  directory  as
-              default value.
+              save command. It uses your system's temporary directory  as  de‐
+              fault value.
 
        TMPPATH
               This  setting  is a bit different than the SAVEPATH one, because
@@ -255,8 +255,8 @@ SETTINGS
               send by the phpsploit framework, a dynamic HTTP HEADER  will  be
               sent on eaceh request, the header's name is the PASSKEY setting,
               and the value is the  REQ_HEADER_PAYLOAD value, for more  infor‐
-              mations  about  how  phpsploit  builds requests, please read the
-              REQUEST BUILDING section.
+              mations about how phpsploit builds requests, please read the RE‐
+              QUEST BUILDING section.
 
               Default value: eval(base64_decode(%%BASE64%%))
 
@@ -383,76 +383,76 @@ REQUEST BUILDING
 
        1 - BACKDOOR
 
-              ·  First, the BACKDOOR setting defines the  main  backdoor  tem‐
+              •  First, the BACKDOOR setting defines the  main  backdoor  tem‐
                  plate,  him,  and  only HIM needs to be written in the TARGET
                  remote URL.
 
-              ·  To understand the principle, it is necessary to know that the
+              •  To understand the principle, it is necessary to know that the
                  PHP  language automatically adds all the request headers into
                  the $_SERVER global array, prefixing each header name by  the
                  "HTTP_" string.
 
-              ·  Assuming that, the BACKDOOR just works like a forwarder, exe‐
+              •  Assuming that, the BACKDOOR just works like a forwarder, exe‐
                  cuting the $_SERVER['HTTP_%%PASSKEY%%'] remote  variable  who
                  contains the REQ_HEADER_PAYLOAD.
 
        2 - REQ_HEADER_PAYLOAD
 
-              ·  The  REQ_HEADER_PAYLOAD  also  known as Header Forwarder is a
+              •  The  REQ_HEADER_PAYLOAD  also  known as Header Forwarder is a
                  header that is sent on each http request, the PASSKEY setting
                  is  used  as name, and the REQ_HEADER_PAYLOAD is he's value's
                  template.
 
-              ·  This header acts like a payload forwarder, permitting  execu‐
+              •  This header acts like a payload forwarder, permitting  execu‐
                  tion  of  the BASE64 PAYLOAD, by executing BASE64 encoded php
                  code.
 
        3 - BASE64 PAYLOAD
 
-              ·  The BASE64  PAYOLOAD  is  automatically  generated  for  each
-                 request, he is the last step for real payload execution. They
+              •  The BASE64 PAYOLOAD is automatically generated for  each  re‐
+                 quest,  he  is the last step for real payload execution. They
                  undencoded  values  can  be  found  in  the  ./framework/php‐
                  files/forwarders/ phpsploit directory.
 
-              ·  For    POST    request,    this    payload    executes    the
+              •  For    POST    request,    this    payload    executes    the
                  $POST['%%PASSKEY%%'] php variable, who is used as  REAL  PAY‐
                  LOAD when usgin this http method.
 
-              ·  For  GET  requests, it acts concatenating the list of dynamic
+              •  For  GET  requests, it acts concatenating the list of dynamic
                  phpsploit headers alphabetically reordrered, each  containing
                  the splitted REAL PAYLOAD.
 
        4 - REAL PAYLOAD
 
-              ·  The  REAL  PAYLOAD  contains a large amout of zlib compressed
+              •  The  REAL  PAYLOAD  contains a large amout of zlib compressed
                  then base64 encoded php code, who is dynamically generated by
                  the phppsloit framework's optimization functions.
 
-              ·  Unencoded  (defaultly  done by the BASE64 PAYLOAD), he is the
+              •  Unencoded  (defaultly  done by the BASE64 PAYLOAD), he is the
                  BASE PAYLOAD passed through ENCAPSULATION.
 
        5 - BASE PAYLOAD
 
-              ·  The base payload, can be a plugin's payload (contained in the
+              •  The base payload, can be a plugin's payload (contained in the
                  ./framework/commands/<gategory>/<plugin>/payload.php   file),
                  or the default phpsploit remote session opener that is called
                  when  running  the exploit command (available in the ./frame‐
                  work/phpfiles/server_link/open.php file).
 
-              ·  Base payloads are php 4.1.1 compatible (because a lot of  web
+              •  Base payloads are php 4.1.1 compatible (because a lot of  web
                  servers already use an old version of php).
 
-              ·  The  !import(<function>)  lines  allows  php base payloads to
-                 import phpsploit dedicated functions contained in the./frame‐
+              •  The !import(<function>) lines allows php base payloads to im‐
+                 port phpsploit dedicated functions contained  in  the./frame‐
                  work/phplibs/ directory. Usefull to limit redundancy.
 
        6 - ENCAPSULATION
 
-              ·  To  manage  return  codes  and phpsploit tunneling, each BASE
+              •  To  manage  return  codes  and phpsploit tunneling, each BASE
                  PAYLOAD is encapsulated with the  ./framework/phpfiles/encap‐
                  sulator.php's php code.
 
-              ·  It  also  manages response compression with ZLIB, to speed-up
+              •  It  also  manages response compression with ZLIB, to speed-up
                  server's responses.
 
 FILES
