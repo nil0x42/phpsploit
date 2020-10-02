@@ -1,6 +1,5 @@
 import argparse
 import sys
-from api import plugin
 import ui.output
 
 
@@ -32,7 +31,7 @@ def parse_port(input):
 
     try:
         data = [int(x) for x in data]
-    except:
+    except ValueError:
         sys.exit("Illegal port specifications")
 
     if min(data) < 0 or max(data) > 65535:
