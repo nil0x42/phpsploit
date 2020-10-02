@@ -3,7 +3,6 @@ import sys
 from api import plugin
 from api import server
 
-from ui.color import colorize
 import plugin_args
 
 if len(plugin.argv) < 2:
