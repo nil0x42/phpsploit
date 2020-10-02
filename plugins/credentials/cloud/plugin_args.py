@@ -1,6 +1,4 @@
 import argparse
-import sys
-from api import plugin
 import ui.output
 
 
