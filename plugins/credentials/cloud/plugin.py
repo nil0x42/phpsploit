@@ -18,10 +18,6 @@ AUTHOR:
 """
 
 import itertools
-import os
-import sys
-import time
-import json
 
 from api import plugin
 from api import server
