@@ -34,7 +34,7 @@ diff $TMPFILE-ref <(grep -v 'has been aliased' $TMPFILE) || FAIL
 phpsploit_pipe alias ls None > $TMPFILE || FAIL
 phpsploit_pipe help ls > $TMPFILE || FAIL
 diff $TMPFILE $TMPFILE-ref || FAIL
-
+rm $TMPFILE*
 
 
 ###
@@ -50,6 +50,7 @@ phpsploit_pipe help > $TMPFILE || FAIL
 grep -q "^Core Commands" $TMPFILE || FAIL
 grep -q "^Command Aliases" $TMPFILE || FAIL
 grep -q "^System Plugins" $TMPFILE && FAIL
+rm $TMPFILE*
 
 
 ###
@@ -67,6 +68,7 @@ for cmd in $core_cmds; do
 
     echo "[OK] help $cmd"
 done
+rm $TMPFILE*
 
 
 ###
@@ -83,7 +85,7 @@ for path in $plugin_paths; do
 ^DESCRIPTION:$
 ^PLUGIN LOCATION:$
 EOF
-    
+
     plug_loc=$(grep -A1 'PLUGIN LOCATION' $TMPFILE | tail -n1 | xargs)
     [[ "$path" == "$plug_loc" ]] || FAIL $path / $plug_loc
 
