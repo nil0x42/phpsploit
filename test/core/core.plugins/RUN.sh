@@ -1,12 +1,15 @@
 #!/bin/bash
 
+n_plugs=`find $ROOTDIR/plugins/*/* -maxdepth 0 | wc -l`
+n_plugs_plus2=$(( $n_plugs + 2 ))
+
 ###
 ### Test `core.plugins` package (plugin loader / launcher)
 ###
 
 # before bugged plugins, check that all plugins are correctly loaded
 $PHPSPLOIT -e exit > $TMPFILE
-assert_contains $TMPFILE " 23 plugins correctly loaded$"
+assert_contains $TMPFILE " $n_plugs plugins correctly loaded$"
 assert_not_contains $TMPFILE "error.* encountered while loading plugins"
 # reload-plugins should be ok, because there is no error
 $PHPSPLOIT -e 'corectl reload-plugins' > /dev/null || FAIL
@@ -26,7 +29,7 @@ sed -i "/VERBOSITY/d" $TMPFILE-conf/config
 
 $PHPSPLOIT -e exit > $TMPFILE
 assert_contains $TMPFILE << EOF
- 25 plugins correctly loaded$
+ $n_plugs_plus2 plugins correctly loaded$
 ^\[\#\] 5 errors encountered while loading plugins .*corectl reload-plugins
 EOF
 [ "$(wc -l < $TMPFILE)" -eq 2 ] || FAIL
@@ -80,7 +83,7 @@ grep -A1 "^\[#\] Couldn't load plugin: '.*/plugins/valid_category-name/plugin-py
 grep -q  "^\[#\]     File error on plugin.py: " $TMPFILE-out || FAIL
 
 assert_contains $TMPFILE << EOF
- 25 plugins correctly loaded$
+ $n_plugs_plus2 plugins correctly loaded$
 ^\[\#\] 5 errors encountered while loading plugins
 EOF
 assert_not_contains $TMPFILE "corectl reload-plugins"
