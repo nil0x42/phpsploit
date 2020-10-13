@@ -12,7 +12,6 @@ A session instance contains the following objects:
     * Env   -> Tunnel related environment variables
     * Alias -> User's command aliases
     * File  -> The default file that binds to session
-    * Cache -> Remote server response cache
     * Hist  -> Readline history
 """
 import os
@@ -41,9 +40,9 @@ class Session(metadict.MetaDict):
 
     # pylint: disable=invalid-name
     def __init__(self):
-        """Instanciate the phpsploit session, it handles configuration
-        settings, environment variables, command aliases, http response
-        cache and readline history (if readline is available).
+        """Instanciate the phpsploit session.
+        It handles settings, environment variables, aliases
+        and readline history (if readline is available).
         """
         # process parent class init
         super().__init__()
@@ -52,7 +51,6 @@ class Session(metadict.MetaDict):
         self.Conf = settings.Settings()
         self.Env = {}
         self.Alias = metadict.VarContainer(title="Command Aliases")
-        self.Cache = metadict.VarContainer(title="HTTP Response Cache")
         self.Hist = history.History()
         self.Compat = {}
         self.File = None

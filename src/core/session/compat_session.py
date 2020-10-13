@@ -42,7 +42,6 @@ class AbstractSessionLoader:
     _template = {"Conf": {},
                  "Env": {},
                  "Alias": {},
-                 "Cache": {},
                  "Hist": {},
                  "Compat": {},
                  "File": None
