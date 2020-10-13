@@ -60,10 +60,9 @@ class Tunnel:
             session.Env.update(socket.environ)
             self.socket = socket
             self.hostname = socket.socket.hostname
-            print("[*] Shell obtained by PHP (%s -> %s:%s)\n"
+            print("[*] Shell obtained by PHP (%s -> %s)\n"
                   % (session.Env.CLIENT_ADDR,
-                     session.Env.ADDR,
-                     session.Env.PORT))
+                     session.Env.ADDR))
             print("Connected to %s server (%s)"
                   % (session.Env.PLATFORM.capitalize(),
                      session.Env.HOST))

@@ -148,7 +148,6 @@ class Loader_V1_x(AbstractSessionLoader):
         result["PATH_SEP"] = old_session["SERVER"]["separator"]
         result["HTTP_SOFTWARE"] = old_session["SERVER"]["soft"]
         result["USER"] = old_session["SERVER"]["user"]
-        result["PORT"] = old_session["SERVER"]["port"]
         result["CLIENT_ADDR"] = old_session["SERVER"]["client_addr"]
 
         # $PLATFORM
@@ -214,7 +213,6 @@ class Loader_V2_1_4(AbstractSessionLoader):
         result["HTTP_SOFTWARE"] = old_session["SRV"]["soft"]
         result["USER"] = old_session["SRV"]["user"]
         result["WEB_ROOT"] = old_session["SRV"]["webroot"]
-        result["PORT"] = old_session["SRV"]["port"]
         result["CLIENT_ADDR"] = old_session["SRV"]["client_addr"]
 
         # $PLATFORM

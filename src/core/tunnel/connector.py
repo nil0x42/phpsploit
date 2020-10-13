@@ -74,8 +74,6 @@ class Request:
         env['HOST'] = choose(['SERVER_NAME', 'HTTP_HOST'],
                              self.socket.hostname)
 
-        env['PORT'] = choose(['SERVER_PORT'], self.socket.port)
-
         env['ADDR'] = choose(['SERVER_ADDR', 'LOCAL_ADDR'], env['HOST'])
         if ":" in env['ADDR']:  # enclose with brackets if ipv6
             env["ADDR"] = "[%s]" % env["ADDR"]
