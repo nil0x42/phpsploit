@@ -1,5 +1,26 @@
 # Change Log
 
+## [v3.2](https://github.com/nil0x42/phpsploit/tree/v3.2) (2020-10-16)
+
+[Full Changelog](https://github.com/nil0x42/phpsploit/compare/v3.1...v3.2)
+
+**Implemented enhancements:**
+
+-   integrate `bannergrab`, `cloudcredgrab` & `proclist` plugins by @paralax [#151](https://github.com/nil0x42/phpsploit/issues/151)
+-   unused session attribute: `session.Cache` [#102](https://github.com/nil0x42/phpsploit/issues/102)
+-   session.Env.PORT is useless [#71](https://github.com/nil0x42/phpsploit/issues/71)
+
+**Merged pull requests:**
+
+-   Wip [#156](https://github.com/nil0x42/phpsploit/pull/156) ([nil0x42](https://github.com/nil0x42))
+-   Wip [#155](https://github.com/nil0x42/phpsploit/pull/155) ([nil0x42](https://github.com/nil0x42))
+-   Wip [#153](https://github.com/nil0x42/phpsploit/pull/153) ([nil0x42](https://github.com/nil0x42))
+-   add three new plugins - proclist, cloud creds, and banner grabs [#152](https://github.com/nil0x42/phpsploit/pull/152) ([paralax](https://github.com/paralax))
+-   Wip [#150](https://github.com/nil0x42/phpsploit/pull/150) ([nil0x42](https://github.com/nil0x42))
+-   Create Dependabot config file [#149](https://github.com/nil0x42/phpsploit/pull/149) ([dependabot-preview\[bot\]](https://github.com/apps/dependabot-preview))
+-   \[requires.io] dependency update on master branch [#148](https://github.com/nil0x42/phpsploit/pull/148) ([nil0x42](https://github.com/nil0x42))
+-   \[requires.io] dependency update on master branch [#147](https://github.com/nil0x42/phpsploit/pull/147) ([nil0x42](https://github.com/nil0x42))
+
 ## [v3.1](https://github.com/nil0x42/phpsploit/tree/v3.1) (2020-09-10)
 
 [Full Changelog](https://github.com/nil0x42/phpsploit/compare/v3.0...v3.1)
