@@ -34,7 +34,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/carpedm20/awesome-hacking#tools-2">
+  <a href="https://github.com/enaqx/awesome-pentest">
     <img src="https://awesome.re/mentioned-badge.svg">
   </a>
   <a href="https://twitter.com/intent/follow?screen_name=nil0x42" target="_blank">
