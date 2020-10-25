@@ -125,7 +125,19 @@ pip3 install -r requirements.txt
 
 ## Contributors
 
-Thanks goes to these wonderful people ([emoji key](https://github.com/all-contributors/all-contributors#emoji-key)):
+:trophy: **Hall-of-fame**
+
+[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/0)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/0)
+[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/1)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/1)
+[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/2)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/2)
+[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/3)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/3)
+[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/4)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/4)
+[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/5)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/5)
+[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/6)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/6)
+[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/7)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/7)
+<details>
+<summary><b>All contributors</b></summary>
+Thanks goes to these wonderful people:
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -150,3 +162,5 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome
+
+</details>
