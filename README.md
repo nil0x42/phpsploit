@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://travis-ci.com/nil0x42/phpsploit">
-    <img src="https://img.shields.io/travis/com/nil0x42/phpsploit?branch=master&logo=travis" alt="travis build">
+    <img src="https://img.shields.io/travis/com/nil0x42/phpsploit?branch=master&logo=travis&color=blue" alt="travis build">
   </a>
   <a href="https://requires.io/github/nil0x42/phpsploit/requirements/?branch=master">
     <img src="https://requires.io/github/nil0x42/phpsploit/requirements.svg?branch=master" alt="requires.io requirements">
