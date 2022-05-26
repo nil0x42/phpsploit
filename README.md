@@ -19,8 +19,8 @@
   <a href="https://requires.io/github/nil0x42/phpsploit/requirements/?branch=master">
     <img src="https://requires.io/github/nil0x42/phpsploit/requirements.svg?branch=master" alt="requires.io requirements">
   </a>
-  <a href="https://app.codacy.com/app/nil0x42/phpsploit?utm_source=github.com&utm_medium=referral&utm_content=nil0x42/phpsploit&utm_campaign=Badge_Grade_Dashboard">
-    <img src="https://img.shields.io/codacy/grade/b998fe23c25f40a78c6c35c722bb9fa0?logo=codacy&logoColor=green" alt="codacy code quality">
+  <a href="https://app.codacy.com/gh/nil0x42/phpsploit/dashboard">
+    <img src="https://img.shields.io/codacy/grade/f8514058aec04ad98727c79701bc042a?logo=codacy&logoColor=green" alt="codacy code quality">
   </a>
   <a href="https://lgtm.com/projects/g/nil0x42/phpsploit/alerts/">
     <img src="https://img.shields.io/lgtm/alerts/github/nil0x42/phpsploit?logo=lgtm&logoColor=yellow" alt="lgtm alerts">
