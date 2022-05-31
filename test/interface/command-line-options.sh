@@ -75,7 +75,6 @@ EOF
 
 test_opt --help > $TMPFILE || FAIL
 assert_contains $TMPFILE << EOF
-optional arguments:
   -h, --help
   -v, --version
   -c <FILE>, --config <FILE>
