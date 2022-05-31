@@ -20,11 +20,11 @@ EOF
 cmd="$PHPSPLOIT -s $TMPFILE-src"
 
 # raw output SHOULD NOT have ansi colors
-$cmd > $TMPFILE || FAIL
+$cmd | rm_trailing_newlines | grep -v ' plugins correctly loaded' > $TMPFILE || FAIL
 grep -Pq '\033\[' $TMPFILE && FAIL
 
 # tty output SHOULD have ansi colors
-faketty $cmd > $TMPFILE-2
+faketty $cmd | rm_trailing_newlines | grep -v ' plugins correctly loaded' > $TMPFILE-2
 grep -Pq '\033\[' $TMPFILE-2 || FAIL
 
 # assert file contains at least 500 ansi colors

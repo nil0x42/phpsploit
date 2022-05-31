@@ -721,11 +721,13 @@ class Request:
         # loop for user input choice:
         chosen = ''
         while not chosen:
-            try:
-                chosen = ui.input.Expect(None)(query).upper()
-            except:
-                print('')
-                raise BuildError('Request construction aborted')
+            chosen = ui.input.Expect(None)(query).upper()
+            # try:
+            #     chosen = ui.input.Expect(None)(query).upper()
+            # except:
+            #     print('')
+            #     raise BuildError('Request construction aborted')
+
             # if no choice consider 1st choice
             if not chosen.strip():
                 chosen = self.choices[0]

@@ -13,8 +13,8 @@
 <br>
 
 <p align="center">
-  <a href="https://travis-ci.com/nil0x42/phpsploit">
-    <img src="https://img.shields.io/travis/com/nil0x42/phpsploit?branch=master&logo=travis&color=blue" alt="travis build">
+  <a href="https://github.com/nil0x42/phpsploit/actions?query=branch%3Amaster">
+    <img src="https://img.shields.io/github/workflow/status/nil0x42/phpsploit/Unit%20Tests/wip?logo=githubactions" alt="github workflows">
   </a>
   <a href="https://requires.io/github/nil0x42/phpsploit/requirements/?branch=master">
     <img src="https://requires.io/github/nil0x42/phpsploit/requirements.svg?branch=master" alt="requires.io requirements">
@@ -125,18 +125,9 @@ pip3 install -r requirements.txt
 
 ## Contributors
 
-:trophy: **Hall-of-fame**
-
-[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/0)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/0)
-[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/1)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/1)
-[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/2)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/2)
-[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/3)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/3)
-[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/4)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/4)
-[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/5)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/5)
-[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/6)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/6)
-[![](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/images/7)](https://sourcerer.io/fame/nil0x42/nil0x42/phpsploit/links/7)
-<details>
-<summary><b>All contributors</b></summary>
+<!-- [![](https://contrib.rocks/image?repo=nil0x42/phpsploit)](https://github.com/nil0x42/phpsploit/graphs/contributors) -->
+<!-- <details> -->
+<!-- <summary><b>:trophy: All contributors</b></summary> -->
 Thanks goes to these wonderful people:
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -163,4 +154,4 @@ Thanks goes to these wonderful people:
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome
 
-</details>
+<!-- </details> -->

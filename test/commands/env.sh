@@ -57,19 +57,19 @@ ro_env=" ADDR CLIENT_ADDR HOST HTTP_SOFTWARE PATH_SEP PHP_VERSION WEB_ROOT "
 for var in $env_vars; do
     phpsploit_pipe env $var > $TMPFILE || FAIL
     old_val="`getval $var`"
-    [ -z "$old_val" ] && FAIL
+    [ -z "$old_val" ] && FAIL $var
 
     # if var is readonly
     if [[ "$ro_env" == *" $var "* ]]; then
 
         # try to set another value (must fail)
-        phpsploit_pipe env $var FOOBAR > $TMPFILE && FAIL
-        grep -q "'$var' variable is read-only" $TMPFILE || FAIL
-        [[ "`getval $var`" == "$old_val" ]] || FAIL
+        phpsploit_pipe env $var FOOBAR > $TMPFILE && FAIL $var
+        grep -q "'$var' variable is read-only" $TMPFILE || FAIL $var
+        [[ "`getval $var`" == "$old_val" ]] || FAIL $var
 
         # try to unset variable (must fail)
-        phpsploit_pipe "env $var none" > $TMPFILE && FAIL
-        [[ "`getval $var`" == "$old_val" ]] || FAIL
+        phpsploit_pipe "env $var none" > $TMPFILE && FAIL $var
+        [[ "`getval $var`" == "$old_val" ]] || FAIL $var
 
     # else
     else

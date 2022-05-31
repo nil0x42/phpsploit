@@ -1,0 +1,70 @@
+name: Unit Tests
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    strategy:
+      fail-fast: true # quit as soon as a job fails
+      matrix:
+        os: [ ubuntu-22.04, ubuntu-18.04 ] # macos-latest # TODO
+        python-version: [ "3.7", "3.10", "3.11.0-beta.3", "pypy-3.7", "pypy-3.9" ]
+        # exclude:
+        #   - os: macos-latest
+        #     python-version: 12
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - if: startsWith(matrix.os, 'macOS')
+        name: "MacOS: Install coreutils (provides GNU core utils)"
+        run: brew install coreutils
+
+      # fix setupterm() error with pypy:
+      #   _minimal_curses.error: setupterm(None, 5) failed (err=-1): could not find termininfo database
+      - if: startsWith(matrix.python-version, 'pypy')
+        name: "pypy: Set env TERM=linux"
+        run: |
+          echo "TERM=linux" >> $GITHUB_ENV
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install coverage (for codecov)
+        run: pip3 install coverage
+
+      - name: Install PhpSploit requirements.txt
+        run: pip3 install -r requirements.txt
+
+      - name: Run phpsploit unit tests
+        run: stdbuf -oL -eL ./test/RUN.sh 2>&1
+        env:
+          PHPSPLOIT_TESTS_FAIL_FAST: True # stop on first test error
+          COVERAGE: True # for codecov
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          # flags: unittests
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)

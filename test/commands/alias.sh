@@ -5,6 +5,10 @@
 ### XXX: PUTTING THIS ON TOP OF TEST FILE BECAUSE SHOULD WORK EVEN IF NOT CONNECTED
 ###
 
+# dummy command, so next one don't contain useless
+# phpsploit initialization lines
+phpsploit_pipe anything > $TMPFILE && FAIL
+
 # deleting an existing alias:
 # issue #59: `alias <VAR> None` misses verbosity
 phpsploit_pipe alias FOO BAR > $TMPFILE || FAIL

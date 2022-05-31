@@ -178,6 +178,8 @@ class Shell(shnake.Shell):
         else:
             self.interpret("help exit")
             return False
+        if not self.stdout.isatty() and not self.stdin.isatty():
+            force_exit = True
 
         if self.bind_command:
             self.bind_command = None
