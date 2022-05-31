@@ -30,4 +30,4 @@ def validator(value):
 
 
 def default_value():
-    return "eval(base64_decode(%%BASE64%%))"
+    return "eval(base64_decode('%%BASE64%%'))"
