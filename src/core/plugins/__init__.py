@@ -38,10 +38,10 @@ class Plugins(metadict.MetaDict):
         super().__init__()
 
     @readonly_settings("VERBOSITY")
-    def reload(self, verbose=False):
+    def reload(self, verbose=None):
         """Reload the plugins list"""
-        if verbose:
-            session.Conf.VERBOSITY = True
+        if verbose is not None:
+            session.Conf.VERBOSITY = verbose
         self.clear()
         self.errors = 0
         categories = self._load_categories()

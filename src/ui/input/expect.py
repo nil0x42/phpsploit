@@ -188,7 +188,7 @@ class Expect: # pylint: disable=too-few-public-methods
                 print()
                 # if skip interrupt, just reloop, otherwise, raise
                 if type(e) in (EOFError, KeyboardInterrupt):
-                    if self.skip_interrupt:
+                    if self.skip_interrupt and isatty():
                         continue
                     else:
                         raise e

@@ -3,12 +3,19 @@
 n_plugs=`find $ROOTDIR/plugins/*/* -maxdepth 0 | wc -l`
 n_plugs_plus2=$(( $n_plugs + 2 ))
 
+# string 'plugins correctly loaded' is only expected if stdin.isatty():
+echo exit | $PHPSPLOIT > $TMPFILE
+assert_not_contains $TMPFILE " $n_plugs plugins correctly loaded$"
+assert_not_contains $TMPFILE "error.* encountered while loading plugins"
+
 ###
 ### Test `core.plugins` package (plugin loader / launcher)
+### using faketty to get plugin load output
 ###
 
 # before bugged plugins, check that all plugins are correctly loaded
-$PHPSPLOIT -e exit > $TMPFILE
+faketty $PHPSPLOIT -e exit > $TMPFILE
+decolorize $TMPFILE
 assert_contains $TMPFILE " $n_plugs plugins correctly loaded$"
 assert_not_contains $TMPFILE "error.* encountered while loading plugins"
 # reload-plugins should be ok, because there is no error
@@ -18,6 +25,7 @@ $PHPSPLOIT -e 'corectl reload-plugins' > /dev/null || FAIL
 
 ###
 ### Custom Setup (voluntary bugged USERDIR plugins)
+### using faketty to get plugin load output
 ###
 cp -r "$PHPSPLOIT_CONFIG_DIR" "$TMPFILE-conf"
 export PHPSPLOIT_CONFIG_DIR="$TMPFILE-conf"
@@ -27,7 +35,8 @@ chmod 333 $TMPFILE-conf/plugins/valid_category-name/plugin-py_not-readable/plugi
 sed -i "/VERBOSITY/d" $TMPFILE-conf/config
 
 
-$PHPSPLOIT -e exit > $TMPFILE
+faketty $PHPSPLOIT -e exit > $TMPFILE
+decolorize $TMPFILE
 assert_contains $TMPFILE << EOF
  $n_plugs_plus2 plugins correctly loaded$
 ^\[\#\] 5 errors encountered while loading plugins .*corectl reload-plugins
