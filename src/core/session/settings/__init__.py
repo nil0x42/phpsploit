@@ -63,7 +63,7 @@ class Settings(metadict.VarContainer):
 
         # HTTP Requests settings
         self.REQ_DEFAULT_METHOD = "GET"
-        self.REQ_HEADER_PAYLOAD = "eval(base64_decode(%%BASE64%%))"
+        self.REQ_HEADER_PAYLOAD = "eval(base64_decode('%%BASE64%%'))"
         self.REQ_INTERVAL = "1-10"
         self.REQ_MAX_HEADERS = 100
         self.REQ_MAX_HEADER_SIZE = "4 KiB"
