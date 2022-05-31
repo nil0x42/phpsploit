@@ -150,7 +150,7 @@ class Encode:
 class Build:
     """Generate final payload, ready to be injected into http requests.
 
-    The returned string includes `parser`, the separation tags allowing
+    The returned string includes `delim`, the separation tags allowing
     tunnel handler to retrieve output returned from payload after
     remote http request execution.
 
@@ -159,11 +159,11 @@ class Build:
     """
     encapsulator = Path(core.BASEDIR, 'data/tunnel/encapsulator.php').phpcode()
 
-    def __init__(self, php_payload, parser):
+    def __init__(self, php_payload, delim):
 
         self.loaded_phplibs = list()
 
-        php_payload = self.encapsulate(php_payload, parser)
+        php_payload = self.encapsulate(php_payload, delim)
         php_payload = self._load_php_libs(php_payload)
         php_payload = self._php_minify(php_payload)
 
@@ -173,8 +173,8 @@ class Build:
         self.length = encoded_payload.length
         self.decoder = encoded_payload.decoder
 
-    def encapsulate(self, payload, parser):
-        """Wrap `payload` with `parser` tags, so the payloads prints
+    def encapsulate(self, payload, delim):
+        """Wrap `payload` with `delim` tags, so the payloads prints
         those tags into the page at remote php runtime, allowing tunnel
         handler to extract result from HTTP response body.
         """
@@ -183,10 +183,10 @@ class Build:
         payload_prefix = self._get_raw_payload_prefix()
         code = code.replace("%%PAYLOAD_PREFIX%%", payload_prefix)
         code = code.rstrip(';') + ';'
-        # parser encapsulation
-        if parser:
-            header, footer = ['echo "%s";' % x for x in parser.split('%s')]
-            code = header + code + footer
+        # delim encapsulation
+        if delim:
+            echo_delim = 'echo "%s";' % delim
+            code = echo_delim + code + echo_delim
         return code
 
     @staticmethod
