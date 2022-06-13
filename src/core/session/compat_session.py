@@ -74,93 +74,6 @@ class AbstractSessionLoader:
                                errors=encoding.default_errors)
 
 
-class Loader_V1_x(AbstractSessionLoader):
-    """Load session file from phpsploit <= v1.x
-    """
-    def set_conf(self, old_session):
-        """Conf object setter"""
-        result = old_session["SETTINGS"]
-
-        # $EDITOR
-        rename_key(result, "TEXTEDITOR", "EDITOR")
-
-        # $HTTP_USER_AGENT
-        rename_key(result, "USERAGENT", "HTTP_USER_AGENT")
-        if result["HTTP_USER_AGENT"] == "%%RAND_UA%%":
-            result["HTTP_USER_AGENT"] = "%%DEFAULT%%"
-
-        # $PASSKEY
-        remove_key(result, "POSTVAR")
-        # rename_key(result, "POSTVAR", "PASSKEY")
-        # if "%%HASHKEY%%" in result["PASSKEY"]:
-        #     value = result["PASSKEY"]
-        #     result["PASSKEY"] = value.replace("%%HASHKEY%%",
-        #                                       old_session["ENV_HASH"])
-
-        # $BACKDOOR
-        remove_key(result, "BACKDOOR")
-        # if "%%POSTVAR%%" in result["BACKDOOR"]:
-        #     value = result["BACKDOOR"]
-        #     if "'%%POSTVAR%%'" in value or '"%%POSTVAR%%"' in value:
-        #         value = value.replace("%%POSTVAR%%", "%%PASSKEY%%")
-        #     else:
-        #         value = value.replace("%%POSTVAR%%", "'%%PASSKEY%%'")
-        #     result["BACKDOOR"] = value
-
-        # $TARGET
-        if "OPENER" in old_session.keys():
-            if "URL" in old_session["OPENER"].keys():
-                result["TARGET"] = old_session["OPENER"]["URL"]
-
-        return result
-
-    def set_compat(self, old_session):
-        """Compat object setter"""
-        result = {}
-        # Compat $id
-        result["id"] = "v1"
-
-        # Compat $passkey
-        passkey = old_session["SETTINGS"]["POSTVAR"]
-        if "%%HASHKEY%%" in passkey:
-            result["passkey"] = passkey.replace("%%HASHKEY%%",
-                                                old_session["ENV_HASH"])
-        else:
-            result["passkey"] = passkey
-
-        return result
-
-    def set_env(self, old_session):
-        """Env object setter"""
-        result = old_session["ENV"]
-
-        rename_key(result, "CWD", "PWD")
-        rename_key(result, "WRITE_TMPDIR", "WRITEABLE_TMPDIR")
-        rename_key(result, "WRITE_WEBDIR", "WRITEABLE_WEBDIR")
-
-        remove_key(result, "TEXTEDITOR")
-
-        # Add some environment variables from old "SERVER" object.
-        result["ADDR"] = old_session["SERVER"]["addr"]
-        result["HOME"] = old_session["SERVER"]["home"]
-        result["HOST"] = old_session["SERVER"]["host"]
-        result["PHP_VERSION"] = old_session["SERVER"]["phpver"]
-        result["PATH_SEP"] = old_session["SERVER"]["separator"]
-        result["HTTP_SOFTWARE"] = old_session["SERVER"]["soft"]
-        result["USER"] = old_session["SERVER"]["user"]
-        result["CLIENT_ADDR"] = old_session["SERVER"]["client_addr"]
-
-        # $PLATFORM
-        result["PLATFORM"] = old_session["SERVER"]["os"].split()[0].lower()
-        if result["PLATFORM"] in ["unknow", "unknown", ""]:
-            if result["PATH_SEP"] == "\\":
-                result["PLATFORM"] = "windows"
-            else:
-                result["PLATFORM"] = "unix"
-
-        return result
-
-
 class Loader_V2_1_4(AbstractSessionLoader):
     """Load session file from phpsploit <= 2.1.4
 
@@ -233,7 +146,7 @@ def load(session_path):
     The list `compat_loaders` must be sorted starting
     with most recent loader
     """
-    compat_loaders = [Loader_V2_1_4(), Loader_V1_x()]
+    compat_loaders = [Loader_V2_1_4()]
 
     for old_session_load in compat_loaders:
         try:
