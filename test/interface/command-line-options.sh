@@ -308,6 +308,9 @@ assert_contains $TMPFILE << EOF
 ^Command Aliases$
 EOF
 
+faketty $PHPSPLOIT --interactive -e exit > $TMPFILE || FAIL
+
 ### FAIL if called with argument
 test_opt --interactive INVALID 2> $TMPFILE && FAIL
 assert_cli_error $TMPFILE
+

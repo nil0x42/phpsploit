@@ -11,7 +11,7 @@ import datetime
 def get_smart_date(value):
     """Return a date string usable by php strtotime()
 
-    >>> get_smart_dable("2016-04-15 23:04:12")
+    >>> get_smart_date("2016-04-15 23:04:12")
     '2016-04-15 23:04:12'
 
     >>> # error handling with ValueError() messages

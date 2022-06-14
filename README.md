@@ -29,7 +29,7 @@
     <img src="https://img.shields.io/codecov/c/github/nil0x42/phpsploit?color=orange&label=coverage&logo=codecov" alt="codecov coverage">
   </a>
   <a href="https://codeclimate.com/github/nil0x42/phpsploit/maintainability">
-    <img src="https://img.shields.io/codeclimate/maintainability/nil0x42/phpsploit?color=blueviolet&logo=code-climate&logoColor=blueviolet" alt="codeclimate maintainability">
+    <img src="https://api.codeclimate.com/v1/badges/6986200c1729b4a70a40/maintainability" alt="codeclimate maintainability">
   </a>
 </p>
 
