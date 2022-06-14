@@ -38,7 +38,7 @@ function payload()
 
 // handle payload result and output it's gzipped content.
 $result = payload();
-if (@array_keys($result) !== array('__ERROR__'))
+if (! is_array($result) || array_keys($result) !== array('__ERROR__'))
     $result = array('__RESULT__' => $result);
 echo gzcompress(serialize($result));
 
