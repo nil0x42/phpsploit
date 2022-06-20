@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/nil0x42/phpsploit/actions?query=branch%3Amaster">
-    <img src="https://img.shields.io/github/workflow/status/nil0x42/phpsploit/Unit%20Tests/wip?logo=githubactions" alt="github workflows">
+    <img src="https://img.shields.io/github/workflow/status/nil0x42/phpsploit/Unit%20Tests/master?logo=githubactions" alt="github workflows">
   </a>
   <a href="https://requires.io/github/nil0x42/phpsploit/requirements/?branch=master">
     <img src="https://requires.io/github/nil0x42/phpsploit/requirements.svg?branch=master" alt="requires.io requirements">
