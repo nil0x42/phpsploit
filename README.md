@@ -37,6 +37,12 @@
   <a href="https://github.com/enaqx/awesome-pentest">
     <img src="https://awesome.re/mentioned-badge.svg">
   </a>
+  <a href="https://www.kali.org/tools/phpsploit/">
+    <img src="https://img.shields.io/static/v1?label=Kali%20Linux&message=packaged&color=red&logo=kalilinux&logoColor=ff0">
+  </a>
+  <a href="https://www.blackarch.org/webapp.html">
+    <img src="https://img.shields.io/static/v1?label=BlackArch&message=packaged&color=red&logo=archlinux&logoColor=006">
+  </a>
   <a href="https://twitter.com/intent/follow?screen_name=nil0x42" target="_blank">
     <img src="https://img.shields.io/twitter/follow/nil0x42.svg?logo=twitter">
   </a>
