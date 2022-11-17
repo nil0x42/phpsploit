@@ -311,7 +311,7 @@ class Request:
         elif '"' in hdr_payload or \
              "'" in hdr_payload:
             err = ("[*] contains quotes, and some http servers & firewalls"
-                   "escape them in request headers.")
+                   " escape them in request headers.")
 
         self.payload_forwarder_error = err
         return {self.passkey: forwarder}
