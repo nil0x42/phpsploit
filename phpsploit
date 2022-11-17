@@ -28,16 +28,17 @@ if ver[0] < 3 or (ver[0] == 3 and ver[1] < 5):
 
 # check dependencies
 from importlib.util import find_spec
-missing_deps = []
+missing_deps = set()
 deps_list = {
         "phpserialize": ("phpserialize",),
         "pyparsing":    ("pyparsing",),
-        "PySocks":      ("socks", "sockshandler"),
+        "PySocks":      ("socks", "sockshandler",),
+        "ExtProxy":     ("extproxy",),
         }
 for name, deps in deps_list.items():
     for dep in deps:
         if find_spec(dep) is None:
-            missing_deps.append(name)
+            missing_deps.add(name)
             break
 if missing_deps:
     for name in missing_deps:
