@@ -16,8 +16,8 @@
   <a href="https://github.com/nil0x42/phpsploit/actions?query=branch%3Amaster">
     <img src="https://img.shields.io/github/workflow/status/nil0x42/phpsploit/Unit%20Tests/master?logo=githubactions" alt="github workflows">
   </a>
-  <a href="https://requires.io/github/nil0x42/phpsploit/requirements/?branch=master">
-    <img src="https://requires.io/github/nil0x42/phpsploit/requirements.svg?branch=master" alt="requires.io requirements">
+  <a href="https://github.com/nil0x42/phpsploit/network/dependencies#requirements.txt">
+    <img src="https://badgen.net/github/dependabot/nil0x42/phpsploit" alt="Dependabot status">
   </a>
   <a href="https://app.codacy.com/gh/nil0x42/phpsploit/dashboard">
     <img src="https://img.shields.io/codacy/grade/f8514058aec04ad98727c79701bc042a?logo=codacy&logoColor=green" alt="codacy code quality">
