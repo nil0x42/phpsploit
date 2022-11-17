@@ -4,8 +4,8 @@ Use a proxy to connect to the target
 You can set a proxy in order to encapsulate the whole phpsploit
 requests for furtivity or network analysis purposes.
 
-This setting supports HTTP, HTTPS, SOCKS4
-and SOCKS5 proxy schemes.
+This setting supports HTTP, HTTPS, SOCKS4, SOCKS4A, SOCKS5
+and SOCKS5H proxy schemes.
 
 PROXY SYNTAX: <SCHEME>://<ADDRESS>:<PORT>
 

@@ -2,9 +2,7 @@
 """
 import re
 from urllib.request import build_opener, ProxyHandler
-
-import socks
-from sockshandler import SocksiPyHandler
+import extproxy
 
 from ui.color import colorize
 
@@ -23,7 +21,8 @@ class Proxy(str):
 
     """
 
-    _match_regexp = r"^(?:(socks[45]|https?)://)?([\w.-]{3,63})(?::(\d+))$"
+    _match_regexp = \
+            r"^(?:(socks(?:4a?|5h?)|https?)://)?([\w.-]{3,63})(?::(\d+))$"
 
     def __new__(cls, proxy=None):
         if str(proxy).lower() == 'none':
@@ -32,8 +31,7 @@ class Proxy(str):
         try:
             components = list(re.match(cls._match_regexp, proxy).groups())
         except:
-            synopsis = "[http(s)|socks<4|5>]://<HOST>:<PORT>"
-            raise ValueError('Invalid format (must be «%s»)' % synopsis)
+            raise ValueError('Invalid proxy format (run `help set PROXY`)')
 
         defaults = ['http', '', '']
         for index, elem in enumerate(components):
@@ -54,23 +52,8 @@ class Proxy(str):
             self._urllib_opener = build_opener()
             return
 
-        components = list(re.match(self._match_regexp, proxy).groups())
-        self.scheme, self.host, self.port = components
-        self.components = components
-
-        if self.scheme == "socks4":
-            socks4_handler = SocksiPyHandler(socks.PROXY_TYPE_SOCKS4,
-                                             self.host,
-                                             int(self.port))
-            self._urllib_opener = build_opener(socks4_handler)
-        elif self.scheme == "socks5":
-            socks5_handler = SocksiPyHandler(socks.PROXY_TYPE_SOCKS5,
-                                             self.host,
-                                             int(self.port))
-            self._urllib_opener = build_opener(socks5_handler)
-        else:
-            proxy_handler = ProxyHandler({'http': proxy, 'https': proxy})
-            self._urllib_opener = build_opener(proxy_handler)
+        proxy_handler = ProxyHandler({'http': proxy, 'https': proxy})
+        self._urllib_opener = build_opener(proxy_handler)
 
     def _raw_value(self):
         return super().__str__()
