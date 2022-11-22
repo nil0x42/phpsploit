@@ -52,6 +52,10 @@ class Proxy(str):
             self._urllib_opener = build_opener()
             return
 
+        components = list(re.match(self._match_regexp, proxy).groups())
+        self.scheme, self.host, self.port = components
+        self.components = components
+
         proxy_handler = ProxyHandler({'http': proxy, 'https': proxy})
         self._urllib_opener = build_opener(proxy_handler)
 
