@@ -18,7 +18,7 @@ ExtProxy==1.0.2
 ##########################
 
 # Enable php code syntax coloration
-pygments==2.13.0
+pygments==2.14.0
 
 # # Enhanced python console for use with `corectl python-console`
 # bpython
