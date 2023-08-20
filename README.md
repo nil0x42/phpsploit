@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/nil0x42/phpsploit/actions/workflows/unit-tests.yml?query=branch%3Amaster">
-    <img src="https://img.shields.io/github/workflow/status/nil0x42/phpsploit/Unit%20Tests/master?label=tests&logo=githubactions" alt="Unit Tests workflow">
+    <img src="https://img.shields.io/github/actions/workflow/status/nil0x42/phpsploit/unit-tests.yml?label=tests&logo=githubactions" alt="Unit Tests workflow">
   </a>
   <a href="https://github.com/nil0x42/phpsploit/network/dependencies#requirements.txt">
     <img src="https://img.shields.io/badge/dependabot-ok-aaf?logo=dependabot&logoColor=aaf" alt="Dependabot status">
@@ -23,7 +23,7 @@
     <img src="https://img.shields.io/codacy/grade/f8514058aec04ad98727c79701bc042a?logo=codacy&logoColor=green" alt="codacy code quality">
   </a>
   <a href="https://github.com/nil0x42/phpsploit/actions/workflows/codeql-analysis.yml?query=branch%3Amaster">
-    <img src="https://img.shields.io/github/workflow/status/nil0x42/phpsploit/CodeQL/master?label=codeql&logo=lgtm&logoColor=ff0&color=af8" alt="CodeQL workflow">
+    <img src="https://img.shields.io/github/actions/workflow/status/nil0x42/phpsploit/codeql-analysis.yml?label=codeql&logo=lgtm&logoColor=ff0&color=af8" alt="CodeQL workflow">
   </a>
   <a href="https://codecov.io/gh/nil0x42/phpsploit">
     <img src="https://img.shields.io/codecov/c/github/nil0x42/phpsploit?color=orange&label=coverage&logo=codecov" alt="codecov coverage">
