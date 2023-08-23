@@ -12,7 +12,7 @@ pyparsing==3.1.0
 PySocks==1.7.1
 # Needed since sockshandler.py (from Pysocks) maintenance has been stopped:
 #  https://github.com/Anorov/PySocks/issues/134#issuecomment-1310323763
-ExtProxy==1.0.2
+ExtProxy==1.0.3
 
 ### optional dependencies
 ##########################
