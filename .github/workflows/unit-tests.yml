@@ -19,7 +19,7 @@ jobs:
       fail-fast: true # quit as soon as a job fails
       matrix:
         os: [ ubuntu-22.04, ubuntu-20.04 ] # macos-latest # TODO
-        python-version: [ "3.7", "3.11", "3.12.0-beta.4", "pypy-3.7", "pypy-3.9" ]
+        python-version: [ "3.7", "3.11", "3.12-dev", "pypy-3.7", "pypy-3.10" ]
         # exclude:
         #   - os: macos-latest
         #     python-version: 12
@@ -31,7 +31,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - if: startsWith(matrix.os, 'macOS')
         name: "MacOS: Install coreutils (provides GNU core utils)"
@@ -45,7 +45,7 @@ jobs:
           echo "TERM=linux" >> $GITHUB_ENV
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -62,9 +62,10 @@ jobs:
           COVERAGE: True # for codecov
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4
         with:
           # flags: unittests
           env_vars: OS,PYTHON
+          files: ./coverage.xml
           fail_ci_if_error: true # optional (default = false)
           verbose: true # optional (default = false)
