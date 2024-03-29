@@ -67,5 +67,6 @@ jobs:
           # flags: unittests
           env_vars: OS,PYTHON
           files: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }} # required
           fail_ci_if_error: true # optional (default = false)
           verbose: true # optional (default = false)
