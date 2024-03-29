@@ -20,3 +20,6 @@ ehthumbs.db
 .coverage.*
 # coverage.py: ignore html report
 /htmlcov/
+
+# pipenv files
+/Pipfile*
