@@ -6,19 +6,19 @@
 phpserialize==1.3
 
 # A dependency of `shnake`. Used to parse command-line input
-pyparsing==3.1.0
+pyparsing==3.1.2
 
 # Needed by the PROXY setting to support socks4/5 proxy types
 PySocks==1.7.1
 # Needed since sockshandler.py (from Pysocks) maintenance has been stopped:
 #  https://github.com/Anorov/PySocks/issues/134#issuecomment-1310323763
-ExtProxy==1.0.2
+ExtProxy==1.0.3
 
 ### optional dependencies
 ##########################
 
 # Enable php code syntax coloration
-pygments==2.15.1
+pygments==2.17.2
 
 # # Enhanced python console for use with `corectl python-console`
 # bpython
